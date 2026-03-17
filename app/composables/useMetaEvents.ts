@@ -18,6 +18,9 @@ export interface OrderData {
   email?:     string
   sku?:       string        // 'ck-brief' | 'ck-boxer'
   value?:     number
+  district?:  string
+  ward?:      string
+  street?:    string
 }
 
 const SKU_PRICES: Record<string, number> = {
@@ -105,10 +108,32 @@ export function useMetaEvents() {
         firstName: order.firstName,
         lastName:  order.lastName,
         city:      order.city,
+        state:     order.city,
+        country:   'vn',
+        district:  order.district,
+        ward:      order.ward,
+        street:    order.street,
       },
       custom,
       id,
     )
+  }
+
+  /**
+   * AddToCart — fires when user clicks the "Order This" button on a product card.
+   */
+  function trackAddToCart(sku: string, value?: number) {
+    const id = genEventId()
+    const v = value ?? SKU_PRICES[sku] ?? 89
+    const custom = {
+      content_ids:  [sku],
+      content_name: sku === 'ck-brief' ? 'CK Brief' : 'CK Boxer',
+      content_type: 'product',
+      value:        v,
+      currency:     'MYR',
+    }
+    pixel('track', 'AddToCart', { ...custom, eventID: id })
+    capi('AddToCart', getFbCookies(), custom, id)
   }
 
   /**
@@ -174,6 +199,7 @@ export function useMetaEvents() {
 
   return {
     trackViewContent,
+    trackAddToCart,
     trackPurchase,
     trackInitiateCheckout,
     trackLead,

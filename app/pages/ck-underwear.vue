@@ -27,6 +27,7 @@
           <span class="btn-arrow">→</span>
         </button>
       </div>
+      <div class="hero-overlay" aria-hidden="true"></div>
       <div class="hero-bg-text parallax-bg" aria-hidden="true">CK</div>
     </section>
 
@@ -45,8 +46,36 @@
       <span>{{ t("ck.strip.stock") }}</span>
     </div>
 
+    <!-- SECTION NAV -->
+    <nav class="section-nav" ref="sectionNavRef">
+      <button
+        class="snav-link"
+        :class="{ active: activeSection === 'products' }"
+        @click="scrollToSection('products')"
+      >
+        BRIEF & BOXER
+      </button>
+      <button
+        class="snav-link"
+        :class="{ active: activeSection === 'access' }"
+        @click="scrollToSection('access')"
+      >
+        EARLY ACCESS
+      </button>
+      <button
+        class="snav-link"
+        :class="{ active: activeSection === 'order' }"
+        @click="scrollToSection('order')"
+      >
+        ORDER NOW
+      </button>
+      <button class="snav-cta" @click="scrollToSection('order')">
+        {{ t("ck.hero.cta") }}
+      </button>
+    </nav>
+
     <!-- PRODUCT SECTION -->
-    <section class="products" ref="productsRef">
+    <section class="products" id="products" ref="productsRef">
       <div class="products-inner">
         <p class="label reveal">{{ t("ck.products.label") }}</p>
         <h2 class="products-title reveal">{{ t("ck.products.title") }}</h2>
@@ -54,40 +83,27 @@
         <div class="product-grid">
           <!-- CK BRIEF CARD -->
           <div class="product-card reveal">
-            <div class="product-img brief-gallery">
+            <div class="product-img">
               <NuxtImg
-                :src="`/products/Brief/${briefImages[briefImg - 1]}.png`"
+                :src="`/products/Brief/${briefColor}.png`"
                 :width="600"
                 :height="750"
                 format="webp"
                 quality="85"
                 fit="cover"
-                :alt="`CK Brief ${briefImages[briefImg - 1]}`"
+                :alt="`CK Brief ${briefColor}`"
                 loading="lazy"
                 class="product-img-el"
               />
-              <button
-                class="gallery-arrow gallery-prev"
-                @click="briefImgPrev"
-                aria-label="Previous image"
-              >
-                ‹
-              </button>
-              <button
-                class="gallery-arrow gallery-next"
-                @click="briefImgNext"
-                aria-label="Next image"
-              >
-                ›
-              </button>
-              <div class="gallery-dots">
+              <div class="boxer-swatches">
                 <button
-                  v-for="n in 3"
-                  :key="n"
-                  class="gallery-dot"
-                  :class="{ active: briefImg === n }"
-                  @click="briefImg = n"
-                  :aria-label="`Image ${n}`"
+                  v-for="col in boxerColors"
+                  :key="col.value"
+                  class="boxer-swatch"
+                  :class="{ active: briefColor === col.value }"
+                  :style="{ background: col.bg }"
+                  :aria-label="col.value"
+                  @click="briefColor = col.value"
                 ></button>
               </div>
             </div>
@@ -661,7 +677,7 @@ useHead({
   title: computed(() =>
     locale.value === "vi"
       ? "driip- | CK Boxer & Brief — First Drop SS26"
-      : "driip- | CK Boxer & Brief — First Drop SS26",
+      : "driip- | CK Boxer & Brief — First Drop SS26"
   ),
   htmlAttrs: { lang: locale.value },
   meta: [
@@ -742,11 +758,13 @@ const colorToImage: Record<string, string> = {
 
 // ─── State ───────────────────────────────────────────────────────
 const boxerColor = ref<string>("Black");
-const briefImg = ref<number>(1);
+const briefColor = ref<string>("Black");
 const codeCopied = ref<boolean>(false);
 const accessState = ref<FormState>("idle");
 const orderState = ref<FormState>("idle");
 const productsRef = ref<HTMLElement | null>(null);
+const sectionNavRef = ref<HTMLElement | null>(null);
+const activeSection = ref<string | null>(null);
 const viewContentFired = ref<boolean>(false);
 
 // Size guide modal state
@@ -785,11 +803,11 @@ const order = reactive<{
 
 // ─── Computed ────────────────────────────────────────────────────
 const selectedProvince = computed(
-  () => vietnamProvinces.find((p) => p.name === order.province) ?? null,
+  () => vietnamProvinces.find((p) => p.name === order.province) ?? null
 );
 
 const orderPreviewColor = computed<string>(
-  () => colorToImage[order.color] ?? "Black",
+  () => colorToImage[order.color] ?? "Black"
 );
 
 const orderPrice = computed<number>(() => {
@@ -799,11 +817,11 @@ const orderPrice = computed<number>(() => {
 });
 
 const skuLabel = computed<string>(
-  () => skuOptions.find((s) => s.value === order.sku)?.label ?? "",
+  () => skuOptions.find((s) => s.value === order.sku)?.label ?? ""
 );
 
 const colorLabel = computed<string>(
-  () => colorOptions.value.find((c) => c.value === order.color)?.label ?? "",
+  () => colorOptions.value.find((c) => c.value === order.color)?.label ?? ""
 );
 
 const orderValidationMsg = computed<string>(() => {
@@ -824,6 +842,7 @@ const boxerSpecs = computed<string[]>(() => [
 // ─── Meta events ─────────────────────────────────────────────────
 const {
   trackViewContent,
+  trackAddToCart,
   trackPurchase,
   trackInitiateCheckout,
   trackLead,
@@ -837,6 +856,7 @@ onMounted(() => {
   setupParallax();
   setupRevealObserver();
   setupViewContentObserver();
+  setupSectionNav();
 });
 
 // ─── Setup functions ─────────────────────────────────────────────
@@ -854,7 +874,7 @@ function setupRevealObserver(): void {
       entries.forEach((e) => {
         if (e.isIntersecting) e.target.classList.add("is-visible");
       }),
-    { threshold: 0.12 },
+    { threshold: 0.12 }
   );
   document
     .querySelectorAll(".reveal, .product-card")
@@ -872,10 +892,31 @@ function setupViewContentObserver(): void {
         observer.disconnect();
       }
     },
-    { threshold: 0.25 },
+    { threshold: 0.25 }
   );
   observer.observe(productsRef.value);
   onUnmounted(() => observer.disconnect());
+}
+
+function setupSectionNav(): void {
+  const ids = ["products", "access", "order"];
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) activeSection.value = e.target.id;
+      });
+    },
+    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
+  );
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+  onUnmounted(() => observer.disconnect());
+}
+
+function scrollToSection(id: string): void {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
 // ─── Language actions ────────────────────────────────────────────
@@ -890,7 +931,7 @@ function onHeroCTA(): void {
 }
 
 function prefillOrder(sku: string): void {
-  trackViewContent(sku);
+  trackAddToCart(sku);
   order.sku = sku;
   document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
 }
@@ -972,7 +1013,11 @@ async function submitOrder(): Promise<void> {
       firstName: order.firstName,
       lastName: order.lastName,
       phone: order.phone,
+      email: access.email,
       city: order.province,
+      district: order.district,
+      ward: order.ward,
+      street: order.street,
       sku: order.sku,
       value: orderPrice.value,
     });
@@ -1024,13 +1069,85 @@ async function submitOrder(): Promise<void> {
   padding: 4px 10px;
   background: transparent;
   cursor: pointer;
-  transition:
-    color 0.2s,
-    border-color 0.2s;
+  transition: color 0.2s, border-color 0.2s;
 }
 .lang-switch:hover {
   color: var(--white);
   border-color: var(--white);
+}
+
+/* ─── SECTION NAV ──────────────────────────────────────────────── */
+.section-nav {
+  position: sticky;
+  top: 64px;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  height: 46px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.section-nav::-webkit-scrollbar {
+  display: none;
+}
+.snav-link {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.35);
+  background: transparent;
+  border: none;
+  padding: 0 14px;
+  height: 100%;
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.2s;
+}
+.snav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: var(--white);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.snav-link:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+.snav-link.active {
+  color: var(--white);
+}
+.snav-link.active::after {
+  transform: scaleX(1);
+}
+.snav-cta {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.snav-cta:hover {
+  background: var(--off-white);
 }
 
 /* ─── HERO ─────────────────────────────────────────────────────── */
@@ -1120,9 +1237,7 @@ async function submitOrder(): Promise<void> {
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition:
-    background 0.2s,
-    gap 0.2s;
+  transition: background 0.2s, gap 0.2s;
 }
 .btn-primary:hover {
   background: var(--off-white);
@@ -1140,11 +1255,24 @@ async function submitOrder(): Promise<void> {
   transform: translateY(calc(-50% + var(--scroll-y, 0) * 0.35px));
   font-family: var(--font-display);
   font-size: clamp(180px, 44vw, 580px);
-  color: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.05);
   letter-spacing: -0.05em;
   pointer-events: none;
   user-select: none;
   line-height: 1;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    160deg,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
 }
 
 /* ─── PROMO STRIP ──────────────────────────────────────────────── */
@@ -1196,9 +1324,7 @@ async function submitOrder(): Promise<void> {
   background: var(--grey-900);
   opacity: 0;
   transform: translateY(32px);
-  transition:
-    opacity 0.75s ease,
-    transform 0.75s ease;
+  transition: opacity 0.75s ease, transform 0.75s ease;
   overflow: hidden;
 }
 .product-card.is-visible {
@@ -1248,9 +1374,7 @@ async function submitOrder(): Promise<void> {
   font-size: 22px;
   cursor: pointer;
   opacity: 0;
-  transition:
-    opacity 0.2s,
-    background 0.2s;
+  transition: opacity 0.2s, background 0.2s;
 }
 .brief-gallery:hover .gallery-arrow {
   opacity: 1;
@@ -1281,9 +1405,7 @@ async function submitOrder(): Promise<void> {
   background: rgba(255, 255, 255, 0.35);
   border: none;
   cursor: pointer;
-  transition:
-    background 0.2s,
-    transform 0.2s;
+  transition: background 0.2s, transform 0.2s;
 }
 .gallery-dot.active {
   background: var(--white);
@@ -1305,9 +1427,7 @@ async function submitOrder(): Promise<void> {
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  transition:
-    border-color 0.2s,
-    transform 0.15s;
+  transition: border-color 0.2s, transform 0.15s;
 }
 .boxer-swatch.active {
   border-color: var(--white);
@@ -1399,9 +1519,7 @@ async function submitOrder(): Promise<void> {
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition:
-    border-color 0.2s,
-    background 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 }
 .btn-order-now:hover {
   border-color: var(--white);
@@ -1510,9 +1628,7 @@ async function submitOrder(): Promise<void> {
   letter-spacing: 0.2em;
   cursor: pointer;
   color: var(--black);
-  transition:
-    background 0.15s,
-    color 0.15s;
+  transition: background 0.15s, color 0.15s;
   min-width: 90px;
 }
 .copy-btn:hover,
@@ -1736,9 +1852,7 @@ async function submitOrder(): Promise<void> {
   background: transparent;
   border: 1px solid var(--grey-700);
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    background 0.15s;
+  transition: border-color 0.15s, background 0.15s;
   text-align: left;
 }
 .select-tile:hover {
@@ -1783,10 +1897,7 @@ async function submitOrder(): Promise<void> {
   letter-spacing: 0.1em;
   color: var(--grey-400);
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    color 0.15s,
-    background 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 .select-pill:hover {
   border-color: var(--grey-400);
@@ -1901,9 +2012,7 @@ async function submitOrder(): Promise<void> {
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition:
-    background 0.2s,
-    opacity 0.2s;
+  transition: background 0.2s, opacity 0.2s;
 }
 .btn-submit:hover:not(:disabled),
 .btn-order-submit:hover:not(:disabled) {
@@ -2047,9 +2156,7 @@ async function submitOrder(): Promise<void> {
 .reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition:
-    opacity 0.75s ease,
-    transform 0.75s ease;
+  transition: opacity 0.75s ease, transform 0.75s ease;
 }
 .reveal.is-visible {
   opacity: 1;
