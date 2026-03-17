@@ -109,6 +109,7 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     firstName: "",
     lastName: "",
     phone: "",
+    email: "",
     province: "",
     fullAddress: "",
     boxes: 1,
@@ -154,14 +155,20 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     () => colorToImage[order.value.color] ?? "Black"
   );
 
-  const compareTotal = computed<number>(() => getCompareTotal(order.value.boxes));
+  const compareTotal = computed<number>(() =>
+    getCompareTotal(order.value.boxes)
+  );
   const tierTotal = computed<number>(() => getTierTotal(order.value.boxes));
-  const tierUnitPrice = computed<number>(() => getTierUnitPrice(order.value.boxes));
+  const tierUnitPrice = computed<number>(() =>
+    getTierUnitPrice(order.value.boxes)
+  );
   const extraDiscountAmount = computed<number>(() =>
     getExtraPromoDiscountAmount(order.value.boxes)
   );
   const orderPrice = computed<number>(() => getFinalTotal(order.value.boxes));
-  const finalUnitPrice = computed<number>(() => getFinalUnitPrice(order.value.boxes));
+  const finalUnitPrice = computed<number>(() =>
+    getFinalUnitPrice(order.value.boxes)
+  );
 
   const formattedCompareTotal = computed<string>(() =>
     formatVndCurrency(compareTotal.value)
@@ -216,8 +223,8 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     const maxLength = phone.startsWith("+")
       ? 12
       : phone.startsWith("0")
-        ? 11
-        : 12;
+      ? 11
+      : 12;
 
     if (digits.length > maxLength) {
       return locale.value === "vi"
@@ -266,8 +273,8 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     const maxLength = sanitized.startsWith("+")
       ? 12
       : sanitized.startsWith("0")
-        ? 11
-        : 12;
+      ? 11
+      : 12;
     const trimmedDigits = digits.slice(0, maxLength);
 
     order.value.phone = sanitized.startsWith("+")
@@ -334,7 +341,7 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
           firstName: order.value.firstName,
           lastName: order.value.lastName,
           phone: order.value.phone,
-          email: access.value.email,
+          email: order.value.email, // using order's email instead of access's
           province: order.value.province,
           fullAddress: order.value.fullAddress,
           boxes: order.value.boxes,
@@ -353,7 +360,7 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
         firstName: order.value.firstName,
         lastName: order.value.lastName,
         phone: order.value.phone,
-        email: access.value.email,
+        email: order.value.email, // using order's email
         city: order.value.province,
         street: order.value.fullAddress,
         sku: order.value.sku,

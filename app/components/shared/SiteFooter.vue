@@ -1,7 +1,7 @@
 <template>
   <footer class="footer">
     <div class="footer-inner">
-      <span class="footer-logo">driip<span class="dash">-</span></span>
+      <NuxtImg src="/logo.png" alt="driip" class="footer-logo-img" width="80" />
       <div class="footer-links">
         <a
           href="https://www.facebook.com/profile.php?id=61586812299701"
@@ -35,10 +35,15 @@ const { t } = useI18n();
   gap: 20px;
   text-align: center;
 }
-.footer-logo {
-  font-family: var(--font-display);
-  font-size: 28px;
-  letter-spacing: 0.1em;
+.footer-logo-img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.footer-logo-img:hover {
+  opacity: 1;
 }
 .footer-links {
   display: flex;

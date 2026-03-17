@@ -58,6 +58,17 @@
             </div>
             <div class="form-row single">
               <div class="form-field">
+                <label>EMAIL (TÙY CHỌN)</label>
+                <input
+                  v-model="order.email"
+                  type="email"
+                  placeholder="name@example.com"
+                  autocomplete="email"
+                />
+              </div>
+            </div>
+            <div class="form-row single">
+              <div class="form-field">
                 <label>{{ t("ck.order.province") }}</label>
                 <select v-model="order.province" required>
                   <option value="" disabled>

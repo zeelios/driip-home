@@ -1,56 +1,56 @@
 <template>
-  <div>
-    <section class="hero">
-      <div class="hero-inner parallax-content">
-        <p class="hero-pre">{{ t("ck.hero.pre") }}</p>
-        <h1 class="hero-title">
-          <span class="line-1">THE</span>
-          <span class="line-2">BOXER</span>
-          <span class="line-3">& BRIEF<span class="dash-end">—</span></span>
-        </h1>
-        <p class="hero-sub">{{ t("ck.hero.sub") }}</p>
-        <button class="btn-primary" @click="$emit('hero-cta')">
-          {{ t("ck.hero.cta") }}
-          <span class="btn-arrow">→</span>
-        </button>
-      </div>
-      <div class="hero-overlay" aria-hidden="true"></div>
-      <div class="hero-bg-text parallax-bg" aria-hidden="true">CK</div>
-    </section>
-
-    <div class="promo-strip">
-      <span>{{ t("ck.strip.shipping") }}</span>
-      <span class="dot">·</span>
-      <span>{{ t("ck.strip.offer") }}</span>
-      <span class="dot">·</span>
-      <span>{{ t("ck.strip.stock") }}</span>
-      <span class="dot">·</span>
-      <span>{{ t("ck.strip.shipping") }}</span>
-      <span class="dot">·</span>
-      <span>{{ t("ck.strip.offer") }}</span>
-      <span class="dot">·</span>
-      <span>{{ t("ck.strip.stock") }}</span>
+  <section class="hero">
+    <div class="hero-inner parallax-content">
+      <p class="hero-pre">{{ t("ck.hero.pre") }}</p>
+      <h1 class="hero-title">
+        <span class="line-1">THE</span>
+        <span class="line-2">BOXER</span>
+        <span class="line-3">& BRIEF<span class="dash-end">—</span></span>
+      </h1>
+      <p class="hero-sub">{{ t("ck.hero.sub") }}</p>
+      <button class="btn-primary" @click="$emit('hero-cta')">
+        {{ t("ck.hero.cta") }}
+        <span class="btn-arrow">→</span>
+      </button>
     </div>
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="hero-bg-text parallax-bg" aria-hidden="true">CK</div>
+  </section>
 
-    <nav class="section-nav">
-      <NuxtLinkLocale to="/" class="snav-logo">driip<span class="dash">-</span></NuxtLinkLocale>
-      <div class="snav-links">
-        <button
-          v-for="link in navLinks"
-          :key="link.id"
-          class="snav-link"
-          :class="{ active: activeSection === link.id }"
-          @click="$emit('scroll-to', link.id)"
-        >
-          {{ link.label }}
-        </button>
-      </div>
-      <div class="snav-right">
-        <button class="lang-switch" @click="switchLang">{{ t("nav.langSwitch") }}</button>
-        <button class="snav-cta" @click="$emit('scroll-to', 'order')">{{ t("ck.hero.cta") }}</button>
-      </div>
-    </nav>
+  <div class="promo-strip">
+    <span>{{ t("ck.strip.shipping") }}</span>
+    <span class="dot">·</span>
+    <span>{{ t("ck.strip.offer") }}</span>
+    <span class="dot">·</span>
+    <span>{{ t("ck.strip.stock") }}</span>
+    <span class="dot">·</span>
+    <span>{{ t("ck.strip.shipping") }}</span>
+    <span class="dot">·</span>
+    <span>{{ t("ck.strip.offer") }}</span>
+    <span class="dot">·</span>
+    <span>{{ t("ck.strip.stock") }}</span>
   </div>
+
+  <nav class="section-nav">
+    <NuxtLinkLocale to="/" class="snav-logo-link">
+      <NuxtImg src="/logo.png" alt="driip" class="snav-logo-img" width="56" />
+    </NuxtLinkLocale>
+    <div class="snav-links">
+      <button
+        v-for="link in navLinks"
+        :key="link.id"
+        class="snav-link"
+        :class="{ active: activeSection === link.id }"
+        @click="$emit('scroll-to', link.id)"
+      >
+        {{ link.label }}
+      </button>
+    </div>
+    <div class="snav-right">
+      <button class="lang-switch" @click="switchLang">{{ t("nav.langSwitch") }}</button>
+      <button class="snav-cta" @click="$emit('scroll-to', 'order')">{{ t("ck.hero.cta") }}</button>
+    </div>
+  </nav>
 </template>
 
 <script setup lang="ts">
@@ -202,14 +202,22 @@ const { switchLang } = ckStore;
   height: 52px;
   gap: 0;
 }
-.snav-logo {
-  font-family: var(--font-display);
-  font-size: 20px;
-  letter-spacing: 0.1em;
-  color: var(--white);
-  text-decoration: none;
+.snav-logo-link {
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
-  margin-right: 4px;
+  margin-right: 16px;
+  text-decoration: none;
+}
+.snav-logo-img {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+.snav-logo-link:hover .snav-logo-img {
+  opacity: 1;
 }
 /* Links: hidden on mobile, shown at md+ */
 .snav-links {

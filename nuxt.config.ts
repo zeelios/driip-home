@@ -90,12 +90,12 @@ export default defineNuxtConfig({
 
   // ── Runtime config ────────────────────────────────────────────────
   runtimeConfig: {
-    // Server-only — populated from NUXT_GOOGLE_CLIENT_EMAIL, etc.
-    googleClientEmail: "",
-    googlePrivateKey: "",
-    googleSheetId: "",
-    metaCAPIAccessToken: "",
-    metaTestEventCode: "",
+    // Server-only — explicitly map from process.env since they lack NUXT_ prefix
+    googleClientEmail: process.env.GOOGLE_CLIENT_EMAIL || "",
+    googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY || "",
+    googleSheetId: process.env.GOOGLE_SHEET_ID || "",
+    metaCAPIAccessToken: process.env.META_CAPI_ACCESS_TOKEN || "",
+    metaTestEventCode: process.env.META_TEST_EVENT_CODE || "",
     // Public — populated from NUXT_PUBLIC_META_PIXEL_ID
     public: {
       metaPixelId: "",
