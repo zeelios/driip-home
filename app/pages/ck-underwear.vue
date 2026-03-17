@@ -1,17 +1,5 @@
 <template>
   <div class="page">
-    <!-- NAV -->
-    <nav class="nav">
-      <NuxtLinkLocale to="/" class="nav-logo"
-        >driip<span class="dash">-</span></NuxtLinkLocale
-      >
-      <div class="nav-right">
-        <button class="lang-switch" @click="switchLang">
-          {{ t("nav.langSwitch") }}
-        </button>
-      </div>
-    </nav>
-
     <!-- HERO -->
     <section class="hero">
       <div class="hero-inner parallax-content">
@@ -48,30 +36,40 @@
 
     <!-- SECTION NAV -->
     <nav class="section-nav" ref="sectionNavRef">
-      <button
-        class="snav-link"
-        :class="{ active: activeSection === 'products' }"
-        @click="scrollToSection('products')"
+      <NuxtLinkLocale to="/" class="snav-logo"
+        >driip<span class="dash">-</span></NuxtLinkLocale
       >
-        BRIEF & BOXER
-      </button>
-      <button
-        class="snav-link"
-        :class="{ active: activeSection === 'access' }"
-        @click="scrollToSection('access')"
-      >
-        EARLY ACCESS
-      </button>
-      <button
-        class="snav-link"
-        :class="{ active: activeSection === 'order' }"
-        @click="scrollToSection('order')"
-      >
-        ORDER NOW
-      </button>
-      <button class="snav-cta" @click="scrollToSection('order')">
-        {{ t("ck.hero.cta") }}
-      </button>
+      <div class="snav-links">
+        <button
+          class="snav-link"
+          :class="{ active: activeSection === 'products' }"
+          @click="scrollToSection('products')"
+        >
+          BRIEF & BOXER
+        </button>
+        <button
+          class="snav-link"
+          :class="{ active: activeSection === 'access' }"
+          @click="scrollToSection('access')"
+        >
+          EARLY ACCESS
+        </button>
+        <button
+          class="snav-link"
+          :class="{ active: activeSection === 'order' }"
+          @click="scrollToSection('order')"
+        >
+          ORDER NOW
+        </button>
+      </div>
+      <div class="snav-right">
+        <button class="lang-switch" @click="switchLang">
+          {{ t("nav.langSwitch") }}
+        </button>
+        <button class="snav-cta" @click="scrollToSection('order')">
+          {{ t("ck.hero.cta") }}
+        </button>
+      </div>
     </nav>
 
     <!-- PRODUCT SECTION -->
@@ -647,30 +645,48 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from "pinia";
 import { vietnamProvinces } from "~/data/vietnam-addresses";
 import { useMetaEvents } from "~/composables/useMetaEvents";
+import { useCkUnderwearStore } from "~/stores/ck-underwear";
 
-const { t, tm, locale, setLocale } = useI18n();
-
-// ─── Types ───────────────────────────────────────────────────────
-interface SkuOption {
-  value: string;
-  label: string;
-  price: number;
-}
-
-interface ColorOption {
-  value: string;
-  label: string;
-  swatches: string[];
-}
-
-interface BoxerColor {
-  value: string;
-  bg: string;
-}
-
-type FormState = "idle" | "loading" | "success" | "error";
+const { t, locale } = useI18n();
+const { setupScrollDepth } = useMetaEvents();
+const ckStore = useCkUnderwearStore();
+const {
+  access,
+  accessState,
+  activeSection,
+  boxerColor,
+  boxerColors,
+  boxerSpecs,
+  briefColor,
+  briefSpecs,
+  codeCopied,
+  colorLabel,
+  colorOptions,
+  couponCode,
+  order,
+  orderPreviewColor,
+  orderPrice,
+  orderState,
+  orderValidationMsg,
+  selectedProvince,
+  sizeGuideOpen,
+  sizes,
+  skuLabel,
+  skuOptions,
+} = storeToRefs(ckStore);
+const {
+  copyCode,
+  onProvinceChange,
+  setActiveSection,
+  submitAccess,
+  submitOrder,
+  switchLang,
+  trackHeroCTA,
+  trackProductsViewed,
+} = ckStore;
 
 // ─── Head ────────────────────────────────────────────────────────
 useHead({
@@ -696,159 +712,9 @@ useHead({
   ],
 });
 
-// ─── Product data ────────────────────────────────────────────────
-const boxerColors: BoxerColor[] = [
-  { value: "Black", bg: "#111" },
-  { value: "Gray", bg: "#888" },
-  { value: "White", bg: "#f0f0f0" },
-];
-
-const skuOptions: SkuOption[] = [
-  { value: "ck-brief", label: "CK BRIEF", price: 79 },
-  { value: "ck-boxer", label: "CK BOXER", price: 95 },
-];
-
-const sizes: string[] = ["S", "M", "L", "XL", "2XL"];
-
-const briefImages: string[] = ["Black", "Gray", "White"];
-const productSpecs = {
-  vi: {
-    brief: ["Viền lưng thấp", "Vải cotton modal", "Dây lưng chữ ký CK"],
-    boxer: ["Ống chân dài", "Không xê dịch", "Túi định hình giải phẫu"],
-  },
-  en: {
-    brief: [
-      "Low-rise silhouette",
-      "Modal-cotton blend",
-      "Signature CK waistband",
-    ],
-    boxer: ["Extended leg coverage", "Anti-ride-up hem", "Contoured support"],
-  },
-} as const;
-
-const colorOptions = computed<ColorOption[]>(() => [
-  {
-    value: "3x-black",
-    label: t("ck.order.colors.black"),
-    swatches: ["#111", "#111", "#111"],
-  },
-  {
-    value: "3x-white",
-    label: t("ck.order.colors.white"),
-    swatches: ["#f0f0f0", "#f0f0f0", "#f0f0f0"],
-  },
-  {
-    value: "3x-grey",
-    label: t("ck.order.colors.grey"),
-    swatches: ["#888", "#888", "#888"],
-  },
-  {
-    value: "mix",
-    label: t("ck.order.colors.mix"),
-    swatches: ["#111", "#888", "#f0f0f0"],
-  },
-]);
-
-const colorToImage: Record<string, string> = {
-  "3x-black": "Black",
-  "3x-white": "White",
-  "3x-grey": "Gray",
-  mix: "Black",
-};
-
 // ─── State ───────────────────────────────────────────────────────
-const boxerColor = ref<string>("Black");
-const briefColor = ref<string>("Black");
-const codeCopied = ref<boolean>(false);
-const accessState = ref<FormState>("idle");
-const orderState = ref<FormState>("idle");
 const productsRef = ref<HTMLElement | null>(null);
 const sectionNavRef = ref<HTMLElement | null>(null);
-const activeSection = ref<string | null>(null);
-const viewContentFired = ref<boolean>(false);
-
-// Size guide modal state
-const sizeGuideOpen = ref<boolean>(false);
-
-// Form state
-const access = reactive<{ name: string; email: string; phone: string }>({
-  name: "",
-  email: "",
-  phone: "",
-});
-
-const order = reactive<{
-  firstName: string;
-  lastName: string;
-  phone: string;
-  province: string;
-  district: string;
-  ward: string;
-  street: string;
-  sku: string;
-  size: string;
-  color: string;
-}>({
-  firstName: "",
-  lastName: "",
-  phone: "",
-  province: "",
-  district: "",
-  ward: "",
-  street: "",
-  sku: "",
-  size: "",
-  color: "",
-});
-
-// ─── Computed ────────────────────────────────────────────────────
-const selectedProvince = computed(
-  () => vietnamProvinces.find((p) => p.name === order.province) ?? null
-);
-
-const orderPreviewColor = computed<string>(
-  () => colorToImage[order.color] ?? "Black"
-);
-
-const orderPrice = computed<number>(() => {
-  const base =
-    order.sku === "ck-brief" ? 79 : order.sku === "ck-boxer" ? 95 : 89;
-  return Math.round(base * 0.8);
-});
-
-const skuLabel = computed<string>(
-  () => skuOptions.find((s) => s.value === order.sku)?.label ?? ""
-);
-
-const colorLabel = computed<string>(
-  () => colorOptions.value.find((c) => c.value === order.color)?.label ?? ""
-);
-
-const orderValidationMsg = computed<string>(() => {
-  if (!order.sku) return t("ck.order.validate.sku");
-  if (!order.size) return t("ck.order.validate.size");
-  if (!order.color) return t("ck.order.validate.color");
-  return "";
-});
-
-const briefSpecs = computed<string[]>(() => [
-  ...productSpecs[locale.value === "vi" ? "vi" : "en"].brief,
-]);
-
-const boxerSpecs = computed<string[]>(() => [
-  ...productSpecs[locale.value === "vi" ? "vi" : "en"].boxer,
-]);
-
-// ─── Meta events ─────────────────────────────────────────────────
-const {
-  trackViewContent,
-  trackAddToCart,
-  trackPurchase,
-  trackInitiateCheckout,
-  trackLead,
-  trackSubscribe,
-  setupScrollDepth,
-} = useMetaEvents();
 
 // ─── Lifecycle ───────────────────────────────────────────────────
 onMounted(() => {
@@ -886,9 +752,8 @@ function setupViewContentObserver(): void {
   if (!productsRef.value) return;
   const observer = new IntersectionObserver(
     ([entry]) => {
-      if (entry?.isIntersecting && !viewContentFired.value) {
-        viewContentFired.value = true;
-        trackViewContent();
+      if (entry?.isIntersecting) {
+        trackProductsViewed();
         observer.disconnect();
       }
     },
@@ -903,7 +768,7 @@ function setupSectionNav(): void {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {
-        if (e.isIntersecting) activeSection.value = e.target.id;
+        if (e.isIntersecting) setActiveSection(e.target.id);
       });
     },
     { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
@@ -919,146 +784,60 @@ function scrollToSection(id: string): void {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
-// ─── Language actions ────────────────────────────────────────────
-function switchLang(): void {
-  setLocale(locale.value === "vi" ? "en" : "vi");
-}
-
 // ─── Navigation actions ──────────────────────────────────────────
 function onHeroCTA(): void {
-  trackInitiateCheckout();
+  trackHeroCTA();
   document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
 }
 
 function prefillOrder(sku: string): void {
-  trackAddToCart(sku);
-  order.sku = sku;
+  ckStore.prefillOrder(sku);
   document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
-}
-
-// ─── Form actions ────────────────────────────────────────────────
-function onProvinceChange(): void {
-  order.district = "";
-}
-
-// ─── Image carousel actions ──────────────────────────────────────
-function briefImgPrev(): void {
-  briefImg.value =
-    briefImg.value === 1 ? briefImages.length : briefImg.value - 1;
-}
-
-function briefImgNext(): void {
-  briefImg.value =
-    briefImg.value === briefImages.length ? 1 : briefImg.value + 1;
-}
-
-// ─── Clipboard actions ───────────────────────────────────────────
-async function copyCode(): Promise<void> {
-  await navigator.clipboard.writeText("DRIIP20");
-  codeCopied.value = true;
-  setTimeout(() => {
-    codeCopied.value = false;
-  }, 2000);
-}
-
-// ─── API submissions ─────────────────────────────────────────────
-async function submitAccess(): Promise<void> {
-  accessState.value = "loading";
-  try {
-    await $fetch("/api/subscribe", {
-      method: "POST",
-      body: {
-        name: access.name,
-        email: access.email,
-        phone: access.phone,
-        coupon: "DRIIP20",
-        timestamp: new Date().toISOString(),
-      },
-    });
-    trackLead(access.email, access.phone);
-    trackSubscribe(access.email, access.phone);
-    accessState.value = "success";
-  } catch {
-    accessState.value = "error";
-    setTimeout(() => {
-      accessState.value = "idle";
-    }, 3000);
-  }
-}
-
-async function submitOrder(): Promise<void> {
-  if (orderValidationMsg.value) return;
-
-  orderState.value = "loading";
-  try {
-    await $fetch("/api/order", {
-      method: "POST",
-      body: {
-        firstName: order.firstName,
-        lastName: order.lastName,
-        phone: order.phone,
-        province: order.province,
-        district: order.district,
-        ward: order.ward,
-        street: order.street,
-        sku: order.sku,
-        size: order.size,
-        color: order.color,
-        coupon: "DRIIP20",
-        timestamp: new Date().toISOString(),
-      },
-    });
-
-    trackPurchase({
-      firstName: order.firstName,
-      lastName: order.lastName,
-      phone: order.phone,
-      email: access.email,
-      city: order.province,
-      district: order.district,
-      ward: order.ward,
-      street: order.street,
-      sku: order.sku,
-      value: orderPrice.value,
-    });
-
-    orderState.value = "success";
-  } catch {
-    orderState.value = "error";
-    setTimeout(() => {
-      orderState.value = "idle";
-    }, 3000);
-  }
 }
 </script>
 
 <style scoped>
-/* ─── NAV ──────────────────────────────────────────────────────── */
-.nav {
-  position: fixed;
+/* ─── SECTION NAV ──────────────────────────────────────────────── */
+.section-nav {
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 24px;
+  height: 58px;
 }
-.nav-logo {
+.snav-logo {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 22px;
   letter-spacing: 0.1em;
   color: var(--white);
   text-decoration: none;
+  flex-shrink: 0;
+  margin-right: 8px;
 }
-.nav-right {
+.snav-links {
   display: flex;
   align-items: center;
-  gap: 16px;
+  height: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+}
+.snav-links::-webkit-scrollbar {
+  display: none;
+}
+.snav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 .lang-switch {
   font-size: 10px;
@@ -1074,26 +853,6 @@ async function submitOrder(): Promise<void> {
 .lang-switch:hover {
   color: var(--white);
   border-color: var(--white);
-}
-
-/* ─── SECTION NAV ──────────────────────────────────────────────── */
-.section-nav {
-  position: sticky;
-  top: 64px;
-  z-index: 90;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  height: 46px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.section-nav::-webkit-scrollbar {
-  display: none;
 }
 .snav-link {
   font-family: var(--font-body);
@@ -1158,7 +917,7 @@ async function submitOrder(): Promise<void> {
   align-items: center;
   background: var(--black);
   overflow: hidden;
-  padding: 100px 24px 60px;
+  padding: 60px 24px 60px;
 }
 
 .parallax-content {
@@ -2211,11 +1970,11 @@ async function submitOrder(): Promise<void> {
 
 /* ─── DESKTOP 1024px ───────────────────────────────────────────── */
 @media (min-width: 1024px) {
-  .nav {
-    padding: 24px 64px;
+  .section-nav {
+    padding: 0 64px;
   }
   .hero {
-    padding: 120px 64px 80px;
+    padding: 80px 64px 80px;
   }
   .products {
     padding: 100px 64px;

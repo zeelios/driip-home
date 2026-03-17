@@ -1,11 +1,11 @@
-import { google } from 'googleapis'
+import { appendGoogleSheetRow } from '../utils/google-sheets'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   const {
-    firstName, lastName, phone,
-    province, district, ward, street,   // Vietnam address fields
+    firstName, lastName, phone, email,
+    province, district, ward, street,
     sku, size, color, coupon, timestamp,
   } = body
 
@@ -13,44 +13,25 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'All required fields must be filled' })
   }
 
-  // Compose a single address string for the sheet
   const fullAddress = [street, ward, district, province].filter(Boolean).join(', ')
 
-  const config = useRuntimeConfig()
-
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: config.googleClientEmail as string,
-      private_key:  (config.googlePrivateKey as string).replace(/\\n/g, '\n'),
-    },
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  })
-
-  const sheets = google.sheets({ version: 'v4', auth })
-
-  await sheets.spreadsheets.values.append({
-    spreadsheetId:    config.googleSheetId as string,
-    range:            'Orders!A:L',
-    valueInputOption: 'USER_ENTERED',
-    requestBody: {
-      values: [[
-        timestamp ?? new Date().toISOString(),
-        firstName,
-        lastName,
-        phone,
-        province,
-        district ?? '',
-        ward    ?? '',
-        street,
-        fullAddress,
-        sku,
-        size,
-        color,
-        coupon ?? 'DRIIP20',
-        'order_form',
-      ]],
-    },
-  })
+  await appendGoogleSheetRow('Orders!A:O', [
+    timestamp ?? new Date().toISOString(),
+    firstName,
+    lastName,
+    phone,
+    email ?? '',
+    province,
+    district ?? '',
+    ward ?? '',
+    street,
+    fullAddress,
+    sku,
+    size,
+    color,
+    coupon ?? 'DRIIP20',
+    'order_form',
+  ])
 
   return { ok: true }
 })
