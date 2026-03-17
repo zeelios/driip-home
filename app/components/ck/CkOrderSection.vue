@@ -50,7 +50,7 @@
                   autocomplete="tel"
                   @input="
                     normalizePhoneInput(
-                      ($event.target as HTMLInputElement).value,
+                      ($event.target as HTMLInputElement).value
                     )
                   "
                 />
@@ -117,7 +117,7 @@
                 >
                   <span class="tile-name">{{ sku.label }}</span>
                   <span class="tile-price"
-                    >{{ sku.value === "ck-boxer" ? "CK BOXER" : "CK BRIEF" }} ·
+                    >{{ sku.value === "ck-boxer" ? "cK Boxer" : "cK Brief" }} ·
                     {{ t("ck.products.from") }}
                     {{ formatVndCurrency(sku.price) }}</span
                   >
@@ -448,9 +448,7 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   background: transparent;
   border: 1px solid var(--grey-700);
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    background 0.15s;
+  transition: border-color 0.15s, background 0.15s;
   text-align: left;
 }
 .select-tile.active {
@@ -481,11 +479,9 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.15em;
-  padding: 14px 16px;   /* 44px+ touch target */
+  padding: 14px 16px; /* 44px+ touch target */
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    color 0.15s;
+  transition: border-color 0.15s, color 0.15s;
   margin-bottom: 20px;
 }
 .size-guide-trigger:hover {
@@ -498,10 +494,10 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   gap: 8px;
 }
 .select-pill {
-  flex: 1;              /* stretch to fill row on mobile */
+  flex: 1; /* stretch to fill row on mobile */
   min-width: 52px;
   max-width: 80px;
-  height: 52px;         /* 52px touch target */
+  height: 52px; /* 52px touch target */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -513,10 +509,7 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   letter-spacing: 0.1em;
   color: var(--grey-400);
   cursor: pointer;
-  transition:
-    border-color 0.15s,
-    color 0.15s,
-    background 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 .select-pill.active {
   border-color: var(--white);
@@ -593,9 +586,7 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition:
-    background 0.2s,
-    opacity 0.2s;
+  transition: background 0.2s, opacity 0.2s;
 }
 .btn-order-submit:disabled {
   opacity: 0.5;
@@ -657,9 +648,7 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
 .reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition:
-    opacity 0.75s ease,
-    transform 0.75s ease;
+  transition: opacity 0.75s ease, transform 0.75s ease;
 }
 .reveal.is-visible {
   opacity: 1;
