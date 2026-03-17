@@ -1,12 +1,31 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import { vietnamProvinces } from "~/data/vietnam-addresses";
 import { useMetaEvents, type OrderData } from "~/composables/useMetaEvents";
+import {
+  BOX_TIERS,
+  EXTRA_PROMO_RATE,
+  formatVnd,
+  formatVndCurrency,
+  getCompareTotal,
+  getExtraPromoDiscountAmount,
+  getFinalTotal,
+  getFinalUnitPrice,
+  getTierTotal,
+  getTierUnitPrice,
+} from "~/composables/usePricing";
 
 export interface SkuOption {
   value: string;
   label: string;
   price: number;
+}
+
+export interface BoxOption {
+  boxes: number;
+  total: number;
+  unitPrice: number;
+  finalTotal: number;
+  finalUnitPrice: number;
 }
 
 export interface ColorOption {
@@ -29,8 +48,8 @@ const boxerColors: BoxerColor[] = [
 ];
 
 const skuOptions: SkuOption[] = [
-  { value: "ck-brief", label: "CK BRIEF", price: 79 },
-  { value: "ck-boxer", label: "CK BOXER", price: 95 },
+  { value: "ck-brief", label: "Brief", price: getTierTotal(1) },
+  { value: "ck-boxer", label: "Boxer", price: getTierTotal(1) },
 ];
 
 const sizes: string[] = ["S", "M", "L", "XL", "2XL"];
@@ -46,11 +65,7 @@ const productSpecs = {
       "Modal-cotton blend",
       "Signature CK waistband",
     ],
-    boxer: [
-      "Extended leg coverage",
-      "Anti-ride-up hem",
-      "Contoured support",
-    ],
+    boxer: ["Extended leg coverage", "Anti-ride-up hem", "Contoured support"],
   },
 } as const;
 
@@ -95,16 +110,21 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     lastName: "",
     phone: "",
     province: "",
-    district: "",
-    ward: "",
-    street: "",
+    fullAddress: "",
+    boxes: 1,
     sku: "",
     size: "",
     color: "",
   });
 
-  const selectedProvince = computed(
-    () => vietnamProvinces.find((p) => p.name === order.value.province) ?? null
+  const boxOptions = computed<BoxOption[]>(() =>
+    BOX_TIERS.map((tier) => ({
+      boxes: tier.boxes,
+      total: tier.total,
+      unitPrice: getTierUnitPrice(tier.boxes),
+      finalTotal: getFinalTotal(tier.boxes),
+      finalUnitPrice: getFinalUnitPrice(tier.boxes),
+    }))
   );
 
   const colorOptions = computed<ColorOption[]>(() => [
@@ -134,15 +154,37 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     () => colorToImage[order.value.color] ?? "Black"
   );
 
-  const orderPrice = computed<number>(() => {
-    const base =
-      order.value.sku === "ck-brief"
-        ? 79
-        : order.value.sku === "ck-boxer"
-          ? 95
-          : 89;
-    return Math.round(base * 0.8);
-  });
+  const compareTotal = computed<number>(() => getCompareTotal(order.value.boxes));
+  const tierTotal = computed<number>(() => getTierTotal(order.value.boxes));
+  const tierUnitPrice = computed<number>(() => getTierUnitPrice(order.value.boxes));
+  const extraDiscountAmount = computed<number>(() =>
+    getExtraPromoDiscountAmount(order.value.boxes)
+  );
+  const orderPrice = computed<number>(() => getFinalTotal(order.value.boxes));
+  const finalUnitPrice = computed<number>(() => getFinalUnitPrice(order.value.boxes));
+
+  const formattedCompareTotal = computed<string>(() =>
+    formatVndCurrency(compareTotal.value)
+  );
+  const formattedTierTotal = computed<string>(() =>
+    formatVndCurrency(tierTotal.value)
+  );
+  const formattedTierUnitPrice = computed<string>(() =>
+    formatVndCurrency(tierUnitPrice.value)
+  );
+  const formattedExtraDiscountAmount = computed<string>(() =>
+    formatVndCurrency(extraDiscountAmount.value)
+  );
+  const formattedOrderPrice = computed<string>(() =>
+    formatVndCurrency(orderPrice.value)
+  );
+  const formattedFinalUnitPrice = computed<string>(() =>
+    formatVndCurrency(finalUnitPrice.value)
+  );
+  const formattedSkuPrice = computed<Record<string, string>>(() => ({
+    "ck-brief": formatVndCurrency(getTierTotal(1)),
+    "ck-boxer": formatVndCurrency(getTierTotal(1)),
+  }));
 
   const skuLabel = computed<string>(
     () => skuOptions.find((sku) => sku.value === order.value.sku)?.label ?? ""
@@ -154,7 +196,40 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
         ?.label ?? ""
   );
 
+  const phoneValidationMsg = computed<string>(() => {
+    const phone = order.value.phone.trim();
+    if (!phone) return "";
+
+    if (!/^\+?\d+$/.test(phone)) {
+      return locale.value === "vi"
+        ? "Số điện thoại chỉ được chứa số và dấu + ở đầu."
+        : "Phone number can only contain digits and an optional leading +.";
+    }
+
+    if (phone.includes("+") && !phone.startsWith("+")) {
+      return locale.value === "vi"
+        ? "Dấu + chỉ được đặt ở đầu số điện thoại."
+        : "The + sign is only allowed at the beginning of the phone number.";
+    }
+
+    const digits = phone.startsWith("+") ? phone.slice(1) : phone;
+    const maxLength = phone.startsWith("+")
+      ? 12
+      : phone.startsWith("0")
+        ? 11
+        : 12;
+
+    if (digits.length > maxLength) {
+      return locale.value === "vi"
+        ? `Số điện thoại tối đa ${maxLength} chữ số.`
+        : `Phone number can be at most ${maxLength} digits.`;
+    }
+
+    return "";
+  });
+
   const orderValidationMsg = computed<string>(() => {
+    if (phoneValidationMsg.value) return phoneValidationMsg.value;
     if (!order.value.sku) return t("ck.order.validate.sku");
     if (!order.value.size) return t("ck.order.validate.size");
     if (!order.value.color) return t("ck.order.validate.color");
@@ -177,12 +252,31 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     activeSection.value = section;
   }
 
-  function onProvinceChange(): void {
-    order.value.district = "";
+  function onProvinceChange(): void {}
+
+  function normalizePhoneInput(input: string): void {
+    let sanitized = input.replace(/[^\d+]/g, "");
+    if (sanitized.includes("+")) {
+      sanitized = sanitized.startsWith("+")
+        ? `+${sanitized.slice(1).replace(/\+/g, "")}`
+        : sanitized.replace(/\+/g, "");
+    }
+
+    const digits = sanitized.startsWith("+") ? sanitized.slice(1) : sanitized;
+    const maxLength = sanitized.startsWith("+")
+      ? 12
+      : sanitized.startsWith("0")
+        ? 11
+        : 12;
+    const trimmedDigits = digits.slice(0, maxLength);
+
+    order.value.phone = sanitized.startsWith("+")
+      ? `+${trimmedDigits}`
+      : trimmedDigits;
   }
 
   function prefillOrder(sku: string): void {
-    trackAddToCart(sku);
+    trackAddToCart(sku, orderPrice.value);
     order.value.sku = sku;
   }
 
@@ -218,8 +312,8 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
           timestamp: new Date().toISOString(),
         },
       });
-      trackLead(access.value.email, access.value.phone);
-      trackSubscribe(access.value.email, access.value.phone);
+      trackLead(access.value.email, access.value.phone, access.value.name);
+      trackSubscribe(access.value.email, access.value.phone, access.value.name);
       accessState.value = "success";
     } catch {
       accessState.value = "error";
@@ -242,9 +336,11 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
           phone: order.value.phone,
           email: access.value.email,
           province: order.value.province,
-          district: order.value.district,
-          ward: order.value.ward,
-          street: order.value.street,
+          fullAddress: order.value.fullAddress,
+          boxes: order.value.boxes,
+          compareTotal: compareTotal.value,
+          tierTotal: tierTotal.value,
+          finalTotal: orderPrice.value,
           sku: order.value.sku,
           size: order.value.size,
           color: order.value.color,
@@ -259,9 +355,7 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
         phone: order.value.phone,
         email: access.value.email,
         city: order.value.province,
-        district: order.value.district,
-        ward: order.value.ward,
-        street: order.value.street,
+        street: order.value.fullAddress,
         sku: order.value.sku,
         value: orderPrice.value,
       };
@@ -283,20 +377,35 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     boxerColor,
     boxerColors,
     boxerSpecs,
+    boxOptions,
     briefColor,
     briefSpecs,
     codeCopied,
     colorLabel,
     colorOptions,
+    compareTotal,
     couponCode,
+    extraDiscountAmount,
+    extraPromoRate: EXTRA_PROMO_RATE,
+    finalUnitPrice,
+    formatVnd,
+    formatVndCurrency,
+    formattedCompareTotal,
+    formattedExtraDiscountAmount,
+    formattedFinalUnitPrice,
+    formattedOrderPrice,
+    formattedSkuPrice,
+    formattedTierTotal,
+    formattedTierUnitPrice,
+    normalizePhoneInput,
     onProvinceChange,
     order,
     orderPreviewColor,
     orderPrice,
     orderState,
+    phoneValidationMsg,
     orderValidationMsg,
     prefillOrder,
-    selectedProvince,
     setActiveSection,
     sizeGuideOpen,
     sizes,
@@ -305,6 +414,8 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     submitAccess,
     submitOrder,
     switchLang,
+    tierTotal,
+    tierUnitPrice,
     trackHeroCTA,
     trackProductsViewed,
     viewContentFired,
