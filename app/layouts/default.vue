@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <slot />
-    <TrackingDebugPanel />
+    <SharedTrackingDebugPanel />
   </div>
 </template>
 
