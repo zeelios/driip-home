@@ -445,6 +445,108 @@
                 </div>
               </div>
 
+              <!-- Size guide trigger -->
+              <button
+                class="size-guide-trigger"
+                type="button"
+                @click="sizeGuideOpen = true"
+              >
+                {{ t("ck.sizechart.modalButton") }}
+              </button>
+
+              <!-- Size Guide Modal -->
+              <Teleport to="body">
+                <div
+                  v-if="sizeGuideOpen"
+                  class="size-modal-overlay"
+                  @click.self="sizeGuideOpen = false"
+                >
+                  <div class="size-modal-card">
+                    <button
+                      class="modal-close"
+                      type="button"
+                      @click="sizeGuideOpen = false"
+                    >
+                      ×
+                    </button>
+
+                    <div class="size-modal-header">
+                      <p class="label light">{{ t("ck.sizechart.label") }}</p>
+                      <h3>{{ t("ck.sizechart.note") }}</h3>
+                    </div>
+
+                    <!-- BMI Calculator -->
+                    <div class="bmi-calculator">
+                      <p class="bmi-title">Find Your Perfect Size</p>
+                      <div class="bmi-inputs">
+                        <div class="bmi-field">
+                          <label>Weight (kg)</label>
+                          <input
+                            type="number"
+                            min="30"
+                            max="200"
+                            v-model.number="bmiWeight"
+                            placeholder="e.g. 72"
+                          />
+                        </div>
+                        <div class="bmi-field">
+                          <label>Height (cm)</label>
+                          <input
+                            type="number"
+                            min="100"
+                            max="250"
+                            v-model.number="bmiHeight"
+                            placeholder="e.g. 175"
+                          />
+                        </div>
+                      </div>
+                      <div v-if="calculatedBMI" class="bmi-result">
+                        <p class="bmi-value">
+                          BMI: {{ calculatedBMI.toFixed(1) }}
+                        </p>
+                        <p class="bmi-suggestion">
+                          Recommended size:
+                          <strong>{{ bmiSuggestedSize }}</strong>
+                        </p>
+                        <button
+                          class="btn-apply-size"
+                          type="button"
+                          @click="applyBmiSize"
+                        >
+                          Select {{ bmiSuggestedSize }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Size Chart Table -->
+                    <div class="size-table-wrapper">
+                      <div class="size-table-header">
+                        <span>Size</span>
+                        <span>Hip (cm)</span>
+                        <span>Weight (kg)</span>
+                      </div>
+                      <div
+                        class="size-row"
+                        v-for="item in sizeChart"
+                        :key="item.label"
+                        :class="{
+                          highlighted: bmiSuggestedSize === item.label,
+                        }"
+                        @click="selectSizeFromChart(item.label)"
+                      >
+                        <span class="size-label">{{ item.label }}</span>
+                        <span class="size-hip">{{ item.hip }}</span>
+                        <span class="size-weight">{{ item.weightRange }}</span>
+                      </div>
+                    </div>
+
+                    <p class="size-footnote">
+                      {{ t("ck.sizechart.measurement") }}
+                    </p>
+                  </div>
+                </div>
+              </Teleport>
+
               <!-- Size pills -->
               <div class="select-group">
                 <label class="select-group-label">{{
@@ -588,6 +690,46 @@
       </div>
     </section>
 
+    <div
+      v-if="sizeModalOpen"
+      class="size-modal-overlay"
+      @click.self="sizeModalOpen = false"
+    >
+      <div class="size-modal-card">
+        <button
+          class="modal-close"
+          type="button"
+          @click="sizeModalOpen = false"
+        >
+          ×
+        </button>
+        <h3>Size Navigator</h3>
+        <p>Enter your weight (kg) — the chart auto-selects the best match.</p>
+        <div class="modal-input-group">
+          <label>Weight (kg)</label>
+          <input
+            type="number"
+            min="30"
+            max="150"
+            v-model.number="weightInput"
+            placeholder="e.g. 72"
+          />
+        </div>
+        <div class="modal-suggestion" v-if="suggestedSize">
+          Suggested size: <strong>{{ suggestedSize }}</strong>
+          <p class="modal-suggestion-note">{{ suggestedWeightRange }}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-primary" type="button" @click="applySuggestedSize">
+            Pick suggested
+          </button>
+          <button class="btn-link" type="button" @click="sizeModalOpen = false">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="footer">
       <div class="footer-inner">
@@ -607,12 +749,41 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { vietnamProvinces } from "~/data/vietnam-addresses";
 import { useMetaEvents } from "~/composables/useMetaEvents";
 
 const { t, locale, setLocale } = useI18n();
 
+// ─── Types ───────────────────────────────────────────────────────
+interface SizeChartItem {
+  label: string;
+  hip: string;
+  weightRange: string;
+  minWeight: number;
+  maxWeight: number;
+}
+
+interface SkuOption {
+  value: string;
+  label: string;
+  price: number;
+}
+
+interface ColorOption {
+  value: string;
+  label: string;
+  swatches: string[];
+}
+
+interface BoxerColor {
+  value: string;
+  bg: string;
+}
+
+type FormState = "idle" | "loading" | "success" | "error";
+
+// ─── Head ────────────────────────────────────────────────────────
 useHead({
   title: computed(() =>
     locale.value === "vi"
@@ -637,21 +808,60 @@ useHead({
 });
 
 // ─── Product data ────────────────────────────────────────────────
-const boxerColors = [
+const boxerColors: BoxerColor[] = [
   { value: "Black", bg: "#111" },
   { value: "Gray", bg: "#888" },
   { value: "White", bg: "#f0f0f0" },
 ];
 
-const skuOptions = [
+const skuOptions: SkuOption[] = [
   { value: "ck-brief", label: "CK BRIEF", price: 79 },
   { value: "ck-boxer", label: "CK BOXER", price: 95 },
 ];
 
-const sizes = ["S", "M", "L", "XL", "2XL"];
-const briefImages = ["Black", "Gray", "White"];
+const sizes: string[] = ["S", "M", "L", "XL", "2XL"];
 
-const colorOptions = computed(() => [
+const sizeChart: SizeChartItem[] = [
+  {
+    label: "S",
+    hip: "Hông 86–92 cm",
+    weightRange: "58–66 kg",
+    minWeight: 58,
+    maxWeight: 66,
+  },
+  {
+    label: "M",
+    hip: "Hông 93–98 cm",
+    weightRange: "67–74 kg",
+    minWeight: 67,
+    maxWeight: 74,
+  },
+  {
+    label: "L",
+    hip: "Hông 99–104 cm",
+    weightRange: "75–84 kg",
+    minWeight: 75,
+    maxWeight: 84,
+  },
+  {
+    label: "XL",
+    hip: "Hông 105–110 cm",
+    weightRange: "85–93 kg",
+    minWeight: 85,
+    maxWeight: 93,
+  },
+  {
+    label: "2XL",
+    hip: "Hông 111–116 cm",
+    weightRange: "94–102 kg",
+    minWeight: 94,
+    maxWeight: 102,
+  },
+];
+
+const briefImages: string[] = ["Black", "Gray", "White"];
+
+const colorOptions = computed<ColorOption[]>(() => [
   {
     value: "3x-black",
     label: t("ck.order.colors.black"),
@@ -674,8 +884,7 @@ const colorOptions = computed(() => [
   },
 ]);
 
-// Color → image mapping for order preview
-const colorToImage = {
+const colorToImage: Record<string, string> = {
   "3x-black": "Black",
   "3x-white": "White",
   "3x-grey": "Gray",
@@ -683,18 +892,42 @@ const colorToImage = {
 };
 
 // ─── State ───────────────────────────────────────────────────────
-const boxerColor = ref("Black");
-const briefImg = ref(1);
+const boxerColor = ref<string>("Black");
+const briefImg = ref<number>(1);
+const codeCopied = ref<boolean>(false);
+const accessState = ref<FormState>("idle");
+const orderState = ref<FormState>("idle");
+const productsRef = ref<HTMLElement | null>(null);
+const viewContentFired = ref<boolean>(false);
 
-const codeCopied = ref(false);
-const accessState = ref("idle"); // idle | loading | success | error
-const orderState = ref("idle"); // idle | loading | success | error
-const productsRef = ref(null);
-const viewContentFired = ref(false);
+// Size modal state
+const sizeModalOpen = ref<boolean>(false);
+const weightInput = ref<number>(72);
 
-const access = reactive({ name: "", email: "", phone: "" });
+// Size guide modal state
+const sizeGuideOpen = ref<boolean>(false);
+const bmiWeight = ref<number | null>(null);
+const bmiHeight = ref<number | null>(null);
 
-const order = reactive({
+// Form state
+const access = reactive<{ name: string; email: string; phone: string }>({
+  name: "",
+  email: "",
+  phone: "",
+});
+
+const order = reactive<{
+  firstName: string;
+  lastName: string;
+  phone: string;
+  province: string;
+  district: string;
+  ward: string;
+  street: string;
+  sku: string;
+  size: string;
+  color: string;
+}>({
   firstName: "",
   lastName: "",
   phone: "",
@@ -712,27 +945,61 @@ const selectedProvince = computed(
   () => vietnamProvinces.find((p) => p.name === order.province) ?? null
 );
 
-const orderPreviewColor = computed(() => colorToImage[order.color] ?? "Black");
+const orderPreviewColor = computed<string>(
+  () => colorToImage[order.color] ?? "Black"
+);
 
-const orderPrice = computed(() => {
+const orderPrice = computed<number>(() => {
   const base =
     order.sku === "ck-brief" ? 79 : order.sku === "ck-boxer" ? 95 : 89;
   return Math.round(base * 0.8);
 });
 
-const skuLabel = computed(
+const skuLabel = computed<string>(
   () => skuOptions.find((s) => s.value === order.sku)?.label ?? ""
 );
 
-const colorLabel = computed(
+const colorLabel = computed<string>(
   () => colorOptions.value.find((c) => c.value === order.color)?.label ?? ""
 );
 
-const orderValidationMsg = computed(() => {
+const orderValidationMsg = computed<string>(() => {
   if (!order.sku) return t("ck.order.validate.sku");
   if (!order.size) return t("ck.order.validate.size");
   if (!order.color) return t("ck.order.validate.color");
   return "";
+});
+
+// Size suggestion computed
+const suggestedSize = computed<string | null>(() => {
+  const weight = weightInput.value;
+  const match = sizeChart.find(
+    (item) => weight >= item.minWeight && weight <= item.maxWeight
+  );
+  return match?.label ?? null;
+});
+
+const suggestedWeightRange = computed<string>(() => {
+  const match = sizeChart.find((item) => item.label === suggestedSize.value);
+  return match ? match.weightRange : "";
+});
+
+// BMI computed
+const calculatedBMI = computed<number | null>(() => {
+  if (bmiWeight.value && bmiHeight.value && bmiHeight.value > 0) {
+    const heightInMeters = bmiHeight.value / 100;
+    return bmiWeight.value / (heightInMeters * heightInMeters);
+  }
+  return null;
+});
+
+const bmiSuggestedSize = computed<string | null>(() => {
+  if (!calculatedBMI.value || !bmiWeight.value) return null;
+  const weight = bmiWeight.value;
+  if (weight < 55) return "S";
+  if (weight < 70) return "M";
+  if (weight < 85) return "L";
+  return "XL";
 });
 
 // ─── Meta events ─────────────────────────────────────────────────
@@ -753,17 +1020,16 @@ onMounted(() => {
   setupViewContentObserver();
 });
 
-// ─── Parallax ────────────────────────────────────────────────────
-function setupParallax() {
+// ─── Setup functions ─────────────────────────────────────────────
+function setupParallax(): void {
   const root = document.documentElement;
-  const onScroll = () =>
+  const onScroll = (): void =>
     root.style.setProperty("--scroll-y", window.scrollY.toString());
   window.addEventListener("scroll", onScroll, { passive: true });
   onUnmounted(() => window.removeEventListener("scroll", onScroll));
 }
 
-// ─── Scroll reveal ───────────────────────────────────────────────
-function setupRevealObserver() {
+function setupRevealObserver(): void {
   const observer = new IntersectionObserver(
     (entries) =>
       entries.forEach((e) => {
@@ -777,8 +1043,7 @@ function setupRevealObserver() {
   onUnmounted(() => observer.disconnect());
 }
 
-// ─── ViewContent when product section hits viewport ──────────────
-function setupViewContentObserver() {
+function setupViewContentObserver(): void {
   if (!productsRef.value) return;
   const observer = new IntersectionObserver(
     ([entry]) => {
@@ -794,37 +1059,62 @@ function setupViewContentObserver() {
   onUnmounted(() => observer.disconnect());
 }
 
-// ─── Actions ─────────────────────────────────────────────────────
-function switchLang() {
+// ─── Language actions ────────────────────────────────────────────
+function switchLang(): void {
   setLocale(locale.value === "vi" ? "en" : "vi");
 }
 
-function onHeroCTA() {
+// ─── Navigation actions ──────────────────────────────────────────
+function onHeroCTA(): void {
   trackInitiateCheckout();
   document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
 }
 
-function prefillOrder(sku) {
+function prefillOrder(sku: string): void {
   trackViewContent(sku);
   order.sku = sku;
   document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
 }
 
-function onProvinceChange() {
+// ─── Form actions ────────────────────────────────────────────────
+function onProvinceChange(): void {
   order.district = "";
 }
 
-function briefImgPrev() {
+// ─── Size selection actions ──────────────────────────────────────
+function applySuggestedSize(): void {
+  const suggestion = suggestedSize.value;
+  if (suggestion) {
+    order.size = suggestion;
+    sizeModalOpen.value = false;
+  }
+}
+
+function applyBmiSize(): void {
+  if (bmiSuggestedSize.value) {
+    order.size = bmiSuggestedSize.value;
+    sizeGuideOpen.value = false;
+  }
+}
+
+function selectSizeFromChart(size: string): void {
+  order.size = size;
+  sizeGuideOpen.value = false;
+}
+
+// ─── Image carousel actions ──────────────────────────────────────
+function briefImgPrev(): void {
   briefImg.value =
     briefImg.value === 1 ? briefImages.length : briefImg.value - 1;
 }
 
-function briefImgNext() {
+function briefImgNext(): void {
   briefImg.value =
     briefImg.value === briefImages.length ? 1 : briefImg.value + 1;
 }
 
-async function copyCode() {
+// ─── Clipboard actions ───────────────────────────────────────────
+async function copyCode(): Promise<void> {
   await navigator.clipboard.writeText("DRIIP20");
   codeCopied.value = true;
   setTimeout(() => {
@@ -832,7 +1122,8 @@ async function copyCode() {
   }, 2000);
 }
 
-async function submitAccess() {
+// ─── API submissions ─────────────────────────────────────────────
+async function submitAccess(): Promise<void> {
   accessState.value = "loading";
   try {
     await $fetch("/api/subscribe", {
@@ -856,7 +1147,7 @@ async function submitAccess() {
   }
 }
 
-async function submitOrder() {
+async function submitOrder(): Promise<void> {
   if (orderValidationMsg.value) return;
 
   orderState.value = "loading";

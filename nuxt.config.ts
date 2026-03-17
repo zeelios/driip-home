@@ -47,7 +47,28 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: "vi" },
       meta: [
         { name: "theme-color", content: "#000000" },
+        { name: "author", content: "Zeelios" },
+        { name: "robots", content: "index, follow" },
         { property: "og:type", content: "website" },
+        { property: "og:site_name", content: "driip-" },
+        { property: "og:title", content: "driip- | CK Boxer & Brief" },
+        {
+          property: "og:description",
+          content:
+            "driip- SS26 drop. Limited CK Boxer & Brief packs with 20% off early access.",
+        },
+        { property: "og:locale", content: "vi_VN" },
+        {
+          property: "og:image",
+          content: "https://driip.com/products/Brief/Black.png",
+        },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:creator", content: "@zeelios" },
+        {
+          name: "description",
+          content:
+            "driip- SS26 drop — premium essentials, early access notification, and Calvin Klein tech. Zeelios.",
+        },
       ],
       link: [
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -60,6 +81,9 @@ export default defineNuxtConfig({
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap",
         },
+        { rel: "preload", as: "image", href: "/products/Brief/Black.png" },
+        { rel: "preload", as: "image", href: "/products/Brief/Gray.png" },
+        { rel: "canonical", href: "https://driip.com/" },
       ],
     },
   },

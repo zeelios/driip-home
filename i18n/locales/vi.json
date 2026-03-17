@@ -128,6 +128,12 @@
       "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}."
     }
   },
+  "sizechart": {
+    "label": "BẢNG SIZE",
+    "note": "Dựa theo vòng hông và cân nặng của bạn",
+    "measurement": "Cách đo: đo vòng hông quanh chỗ rộng nhất của mông, giữ thước ngang.",
+    "modalButton": "Tìm size theo cân nặng"
+  },
   "footer": {
     "copyright": "© 2026 DRIIP. BẢO LƯU MỌI QUYỀN.",
     "facebook": "FACEBOOK"
