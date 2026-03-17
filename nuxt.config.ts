@@ -27,13 +27,13 @@ export default defineNuxtConfig({
 
   // ── @nuxtjs/i18n ─────────────────────────────────────────────────
   i18n: {
+    vueI18n: "./i18n.config.ts",
     locales: [
-      { code: "vi", language: "vi-VN", name: "Tiếng Việt", file: "vi.json" },
-      { code: "en", language: "en-US", name: "English", file: "en.json" },
+      { code: "vi", language: "vi-VN", name: "Tiếng Việt" },
+      { code: "en", language: "en-US", name: "English" },
     ],
     defaultLocale: "vi",
     strategy: "prefix_except_default",
-    langDir: "i18n/locales/",
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: "driip_locale",
@@ -58,7 +58,7 @@ export default defineNuxtConfig({
         },
         {
           rel: "stylesheet",
-          href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap",
+          href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap",
         },
       ],
     },

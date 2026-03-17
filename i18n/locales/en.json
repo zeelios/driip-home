@@ -76,7 +76,7 @@
       "name": "FULL NAME",
       "namePlaceholder": "Your name",
       "email": "EMAIL ADDRESS",
-      "emailPlaceholder": "your{'@'}email.com",
+      "emailPlaceholder": "your email com",
       "phone": "PHONE",
       "phonePlaceholder": "+84 9XX XXX XXX",
       "optional": "(OPTIONAL)",
