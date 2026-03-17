@@ -53,7 +53,7 @@
 
         <div class="product-grid">
           <!-- CK BRIEF CARD -->
-          <div class="product-card reveal" style="transition-delay: 0ms">
+          <div class="product-card reveal">
             <div class="product-img brief-gallery">
               <NuxtImg
                 :src="`/products/Brief/${briefImages[briefImg - 1]}.png`"
@@ -92,19 +92,22 @@
               </div>
             </div>
             <div class="product-card-body">
-              <div class="product-card-top">
+              <div class="product-card-header">
                 <p class="product-name">CK BRIEF</p>
-                <span class="product-badge"
-                  >{{ t("ck.products.from") }} RM 79</span
+                <span class="product-price"
+                  >{{ t("ck.products.from") }} VND 79</span
                 >
               </div>
-              <div class="product-divider"></div>
               <p class="product-desc">{{ t("ck.products.brief.desc") }}</p>
-              <ul class="product-specs">
-                <li v-for="spec in t('ck.products.brief.specs')" :key="spec">
+              <div class="product-specs-inline">
+                <span
+                  v-for="(spec, index) in briefSpecs"
+                  :key="`brief-${index}`"
+                  class="spec-tag"
+                >
                   {{ spec }}
-                </li>
-              </ul>
+                </span>
+              </div>
               <button class="btn-order-now" @click="prefillOrder('ck-brief')">
                 {{ t("ck.products.orderThis") }}
               </button>
@@ -112,7 +115,7 @@
           </div>
 
           <!-- CK BOXER CARD -->
-          <div class="product-card reveal" style="transition-delay: 140ms">
+          <div class="product-card reveal">
             <div class="product-img">
               <NuxtImg
                 :src="`/products/Boxer/${boxerColor}.png`"
@@ -138,19 +141,22 @@
               </div>
             </div>
             <div class="product-card-body">
-              <div class="product-card-top">
+              <div class="product-card-header">
                 <p class="product-name">CK BOXER</p>
-                <span class="product-badge"
+                <span class="product-price"
                   >{{ t("ck.products.from") }} RM 95</span
                 >
               </div>
-              <div class="product-divider"></div>
               <p class="product-desc">{{ t("ck.products.boxer.desc") }}</p>
-              <ul class="product-specs">
-                <li v-for="spec in t('ck.products.boxer.specs')" :key="spec">
+              <div class="product-specs-inline">
+                <span
+                  v-for="(spec, index) in boxerSpecs"
+                  :key="`boxer-${index}`"
+                  class="spec-tag"
+                >
                   {{ spec }}
-                </li>
-              </ul>
+                </span>
+              </div>
               <button class="btn-order-now" @click="prefillOrder('ck-boxer')">
                 {{ t("ck.products.orderThis") }}
               </button>
@@ -172,7 +178,7 @@
     </div>
 
     <!-- OFFER SECTION -->
-    <section class="offer">
+    <!-- <section class="offer">
       <div class="offer-inner">
         <div class="offer-left reveal">
           <p class="label">{{ t("ck.offer.label") }}</p>
@@ -194,7 +200,7 @@
           <p class="coupon-note">{{ t("ck.offer.validity") }}</p>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- MANIFESTO -->
     <section class="manifesto">
@@ -454,98 +460,13 @@
                 {{ t("ck.sizechart.modalButton") }}
               </button>
 
-              <!-- Size Guide Modal -->
-              <Teleport to="body">
-                <div
-                  v-if="sizeGuideOpen"
-                  class="size-modal-overlay"
-                  @click.self="sizeGuideOpen = false"
-                >
-                  <div class="size-modal-card">
-                    <button
-                      class="modal-close"
-                      type="button"
-                      @click="sizeGuideOpen = false"
-                    >
-                      ×
-                    </button>
-
-                    <div class="size-modal-header">
-                      <p class="label light">{{ t("ck.sizechart.label") }}</p>
-                      <h3>{{ t("ck.sizechart.note") }}</h3>
-                    </div>
-
-                    <!-- BMI Calculator -->
-                    <div class="bmi-calculator">
-                      <p class="bmi-title">Find Your Perfect Size</p>
-                      <div class="bmi-inputs">
-                        <div class="bmi-field">
-                          <label>Weight (kg)</label>
-                          <input
-                            type="number"
-                            min="30"
-                            max="200"
-                            v-model.number="bmiWeight"
-                            placeholder="e.g. 72"
-                          />
-                        </div>
-                        <div class="bmi-field">
-                          <label>Height (cm)</label>
-                          <input
-                            type="number"
-                            min="100"
-                            max="250"
-                            v-model.number="bmiHeight"
-                            placeholder="e.g. 175"
-                          />
-                        </div>
-                      </div>
-                      <div v-if="calculatedBMI" class="bmi-result">
-                        <p class="bmi-value">
-                          BMI: {{ calculatedBMI.toFixed(1) }}
-                        </p>
-                        <p class="bmi-suggestion">
-                          Recommended size:
-                          <strong>{{ bmiSuggestedSize }}</strong>
-                        </p>
-                        <button
-                          class="btn-apply-size"
-                          type="button"
-                          @click="applyBmiSize"
-                        >
-                          Select {{ bmiSuggestedSize }}
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- Size Chart Table -->
-                    <div class="size-table-wrapper">
-                      <div class="size-table-header">
-                        <span>Size</span>
-                        <span>Hip (cm)</span>
-                        <span>Weight (kg)</span>
-                      </div>
-                      <div
-                        class="size-row"
-                        v-for="item in sizeChart"
-                        :key="item.label"
-                        :class="{
-                          highlighted: bmiSuggestedSize === item.label,
-                        }"
-                        @click="selectSizeFromChart(item.label)"
-                      >
-                        <span class="size-label">{{ item.label }}</span>
-                        <span class="size-hip">{{ item.hip }}</span>
-                        <span class="size-weight">{{ item.weightRange }}</span>
-                      </div>
-                    </div>
-
-                    <p class="size-footnote">
-                      {{ t("ck.sizechart.measurement") }}
-                    </p>
-                  </div>
-                </div>
-              </Teleport>
+              <!-- Size Guide Component -->
+              <SizeGuide
+                :open="sizeGuideOpen"
+                :selected-size="order.size"
+                @update:open="sizeGuideOpen = $event"
+                @select="order.size = $event"
+              />
 
               <!-- Size pills -->
               <div class="select-group">
@@ -690,46 +611,6 @@
       </div>
     </section>
 
-    <div
-      v-if="sizeModalOpen"
-      class="size-modal-overlay"
-      @click.self="sizeModalOpen = false"
-    >
-      <div class="size-modal-card">
-        <button
-          class="modal-close"
-          type="button"
-          @click="sizeModalOpen = false"
-        >
-          ×
-        </button>
-        <h3>Size Navigator</h3>
-        <p>Enter your weight (kg) — the chart auto-selects the best match.</p>
-        <div class="modal-input-group">
-          <label>Weight (kg)</label>
-          <input
-            type="number"
-            min="30"
-            max="150"
-            v-model.number="weightInput"
-            placeholder="e.g. 72"
-          />
-        </div>
-        <div class="modal-suggestion" v-if="suggestedSize">
-          Suggested size: <strong>{{ suggestedSize }}</strong>
-          <p class="modal-suggestion-note">{{ suggestedWeightRange }}</p>
-        </div>
-        <div class="modal-actions">
-          <button class="btn-primary" type="button" @click="applySuggestedSize">
-            Pick suggested
-          </button>
-          <button class="btn-link" type="button" @click="sizeModalOpen = false">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- FOOTER -->
     <footer class="footer">
       <div class="footer-inner">
@@ -753,17 +634,9 @@
 import { vietnamProvinces } from "~/data/vietnam-addresses";
 import { useMetaEvents } from "~/composables/useMetaEvents";
 
-const { t, locale, setLocale } = useI18n();
+const { t, tm, locale, setLocale } = useI18n();
 
 // ─── Types ───────────────────────────────────────────────────────
-interface SizeChartItem {
-  label: string;
-  hip: string;
-  weightRange: string;
-  minWeight: number;
-  maxWeight: number;
-}
-
 interface SkuOption {
   value: string;
   label: string;
@@ -788,7 +661,7 @@ useHead({
   title: computed(() =>
     locale.value === "vi"
       ? "driip- | CK Boxer & Brief — First Drop SS26"
-      : "driip- | CK Boxer & Brief — First Drop SS26"
+      : "driip- | CK Boxer & Brief — First Drop SS26",
   ),
   htmlAttrs: { lang: locale.value },
   meta: [
@@ -821,45 +694,21 @@ const skuOptions: SkuOption[] = [
 
 const sizes: string[] = ["S", "M", "L", "XL", "2XL"];
 
-const sizeChart: SizeChartItem[] = [
-  {
-    label: "S",
-    hip: "Hông 86–92 cm",
-    weightRange: "58–66 kg",
-    minWeight: 58,
-    maxWeight: 66,
-  },
-  {
-    label: "M",
-    hip: "Hông 93–98 cm",
-    weightRange: "67–74 kg",
-    minWeight: 67,
-    maxWeight: 74,
-  },
-  {
-    label: "L",
-    hip: "Hông 99–104 cm",
-    weightRange: "75–84 kg",
-    minWeight: 75,
-    maxWeight: 84,
-  },
-  {
-    label: "XL",
-    hip: "Hông 105–110 cm",
-    weightRange: "85–93 kg",
-    minWeight: 85,
-    maxWeight: 93,
-  },
-  {
-    label: "2XL",
-    hip: "Hông 111–116 cm",
-    weightRange: "94–102 kg",
-    minWeight: 94,
-    maxWeight: 102,
-  },
-];
-
 const briefImages: string[] = ["Black", "Gray", "White"];
+const productSpecs = {
+  vi: {
+    brief: ["Viền lưng thấp", "Vải cotton modal", "Dây lưng chữ ký CK"],
+    boxer: ["Ống chân dài", "Không xê dịch", "Túi định hình giải phẫu"],
+  },
+  en: {
+    brief: [
+      "Low-rise silhouette",
+      "Modal-cotton blend",
+      "Signature CK waistband",
+    ],
+    boxer: ["Extended leg coverage", "Anti-ride-up hem", "Contoured support"],
+  },
+} as const;
 
 const colorOptions = computed<ColorOption[]>(() => [
   {
@@ -900,14 +749,8 @@ const orderState = ref<FormState>("idle");
 const productsRef = ref<HTMLElement | null>(null);
 const viewContentFired = ref<boolean>(false);
 
-// Size modal state
-const sizeModalOpen = ref<boolean>(false);
-const weightInput = ref<number>(72);
-
 // Size guide modal state
 const sizeGuideOpen = ref<boolean>(false);
-const bmiWeight = ref<number | null>(null);
-const bmiHeight = ref<number | null>(null);
 
 // Form state
 const access = reactive<{ name: string; email: string; phone: string }>({
@@ -942,11 +785,11 @@ const order = reactive<{
 
 // ─── Computed ────────────────────────────────────────────────────
 const selectedProvince = computed(
-  () => vietnamProvinces.find((p) => p.name === order.province) ?? null
+  () => vietnamProvinces.find((p) => p.name === order.province) ?? null,
 );
 
 const orderPreviewColor = computed<string>(
-  () => colorToImage[order.color] ?? "Black"
+  () => colorToImage[order.color] ?? "Black",
 );
 
 const orderPrice = computed<number>(() => {
@@ -956,11 +799,11 @@ const orderPrice = computed<number>(() => {
 });
 
 const skuLabel = computed<string>(
-  () => skuOptions.find((s) => s.value === order.sku)?.label ?? ""
+  () => skuOptions.find((s) => s.value === order.sku)?.label ?? "",
 );
 
 const colorLabel = computed<string>(
-  () => colorOptions.value.find((c) => c.value === order.color)?.label ?? ""
+  () => colorOptions.value.find((c) => c.value === order.color)?.label ?? "",
 );
 
 const orderValidationMsg = computed<string>(() => {
@@ -970,37 +813,13 @@ const orderValidationMsg = computed<string>(() => {
   return "";
 });
 
-// Size suggestion computed
-const suggestedSize = computed<string | null>(() => {
-  const weight = weightInput.value;
-  const match = sizeChart.find(
-    (item) => weight >= item.minWeight && weight <= item.maxWeight
-  );
-  return match?.label ?? null;
-});
+const briefSpecs = computed<string[]>(() => [
+  ...productSpecs[locale.value === "vi" ? "vi" : "en"].brief,
+]);
 
-const suggestedWeightRange = computed<string>(() => {
-  const match = sizeChart.find((item) => item.label === suggestedSize.value);
-  return match ? match.weightRange : "";
-});
-
-// BMI computed
-const calculatedBMI = computed<number | null>(() => {
-  if (bmiWeight.value && bmiHeight.value && bmiHeight.value > 0) {
-    const heightInMeters = bmiHeight.value / 100;
-    return bmiWeight.value / (heightInMeters * heightInMeters);
-  }
-  return null;
-});
-
-const bmiSuggestedSize = computed<string | null>(() => {
-  if (!calculatedBMI.value || !bmiWeight.value) return null;
-  const weight = bmiWeight.value;
-  if (weight < 55) return "S";
-  if (weight < 70) return "M";
-  if (weight < 85) return "L";
-  return "XL";
-});
+const boxerSpecs = computed<string[]>(() => [
+  ...productSpecs[locale.value === "vi" ? "vi" : "en"].boxer,
+]);
 
 // ─── Meta events ─────────────────────────────────────────────────
 const {
@@ -1035,7 +854,7 @@ function setupRevealObserver(): void {
       entries.forEach((e) => {
         if (e.isIntersecting) e.target.classList.add("is-visible");
       }),
-    { threshold: 0.12 }
+    { threshold: 0.12 },
   );
   document
     .querySelectorAll(".reveal, .product-card")
@@ -1047,13 +866,13 @@ function setupViewContentObserver(): void {
   if (!productsRef.value) return;
   const observer = new IntersectionObserver(
     ([entry]) => {
-      if (entry.isIntersecting && !viewContentFired.value) {
+      if (entry?.isIntersecting && !viewContentFired.value) {
         viewContentFired.value = true;
         trackViewContent();
         observer.disconnect();
       }
     },
-    { threshold: 0.25 }
+    { threshold: 0.25 },
   );
   observer.observe(productsRef.value);
   onUnmounted(() => observer.disconnect());
@@ -1079,27 +898,6 @@ function prefillOrder(sku: string): void {
 // ─── Form actions ────────────────────────────────────────────────
 function onProvinceChange(): void {
   order.district = "";
-}
-
-// ─── Size selection actions ──────────────────────────────────────
-function applySuggestedSize(): void {
-  const suggestion = suggestedSize.value;
-  if (suggestion) {
-    order.size = suggestion;
-    sizeModalOpen.value = false;
-  }
-}
-
-function applyBmiSize(): void {
-  if (bmiSuggestedSize.value) {
-    order.size = bmiSuggestedSize.value;
-    sizeGuideOpen.value = false;
-  }
-}
-
-function selectSizeFromChart(size: string): void {
-  order.size = size;
-  sizeGuideOpen.value = false;
 }
 
 // ─── Image carousel actions ──────────────────────────────────────
@@ -1226,7 +1024,9 @@ async function submitOrder(): Promise<void> {
   padding: 4px 10px;
   background: transparent;
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
 }
 .lang-switch:hover {
   color: var(--white);
@@ -1320,7 +1120,9 @@ async function submitOrder(): Promise<void> {
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition: background 0.2s, gap 0.2s;
+  transition:
+    background 0.2s,
+    gap 0.2s;
 }
 .btn-primary:hover {
   background: var(--off-white);
@@ -1394,7 +1196,9 @@ async function submitOrder(): Promise<void> {
   background: var(--grey-900);
   opacity: 0;
   transform: translateY(32px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s ease;
   overflow: hidden;
 }
 .product-card.is-visible {
@@ -1444,7 +1248,9 @@ async function submitOrder(): Promise<void> {
   font-size: 22px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s, background 0.2s;
+  transition:
+    opacity 0.2s,
+    background 0.2s;
 }
 .brief-gallery:hover .gallery-arrow {
   opacity: 1;
@@ -1475,7 +1281,9 @@ async function submitOrder(): Promise<void> {
   background: rgba(255, 255, 255, 0.35);
   border: none;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 .gallery-dot.active {
   background: var(--white);
@@ -1497,7 +1305,9 @@ async function submitOrder(): Promise<void> {
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.15s;
+  transition:
+    border-color 0.2s,
+    transform 0.15s;
 }
 .boxer-swatch.active {
   border-color: var(--white);
@@ -1589,7 +1399,9 @@ async function submitOrder(): Promise<void> {
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 .btn-order-now:hover {
   border-color: var(--white);
@@ -1698,7 +1510,9 @@ async function submitOrder(): Promise<void> {
   letter-spacing: 0.2em;
   cursor: pointer;
   color: var(--black);
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   min-width: 90px;
 }
 .copy-btn:hover,
@@ -1922,7 +1736,9 @@ async function submitOrder(): Promise<void> {
   background: transparent;
   border: 1px solid var(--grey-700);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
   text-align: left;
 }
 .select-tile:hover {
@@ -1967,7 +1783,10 @@ async function submitOrder(): Promise<void> {
   letter-spacing: 0.1em;
   color: var(--grey-400);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
 }
 .select-pill:hover {
   border-color: var(--grey-400);
@@ -2082,7 +1901,9 @@ async function submitOrder(): Promise<void> {
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition: background 0.2s, opacity 0.2s;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
 }
 .btn-submit:hover:not(:disabled),
 .btn-order-submit:hover:not(:disabled) {
@@ -2226,7 +2047,9 @@ async function submitOrder(): Promise<void> {
 .reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s ease;
 }
 .reveal.is-visible {
   opacity: 1;

@@ -143,4 +143,11 @@ export default {
   common: {
     error: "Something went wrong. Please try again.",
   },
+  sg: {
+    weightLabel: "ENTER YOUR WEIGHT",
+    weightPlaceholder: "e.g. 72",
+    recommended: "RECOMMENDED",
+    hip: "HIP (CM)",
+    weight: "WEIGHT (KG)",
+  },
 }
