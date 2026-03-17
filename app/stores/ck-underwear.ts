@@ -370,6 +370,30 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     }
   }
 
+  function nextBriefImage(): void {
+    const idx = boxerColors.findIndex((c) => c.value === briefColor.value);
+    const nextIdx = (idx + 1) % boxerColors.length;
+    briefColor.value = boxerColors[nextIdx]!.value;
+  }
+
+  function prevBriefImage(): void {
+    const idx = boxerColors.findIndex((c) => c.value === briefColor.value);
+    const prevIdx = (idx - 1 + boxerColors.length) % boxerColors.length;
+    briefColor.value = boxerColors[prevIdx]!.value;
+  }
+
+  function nextBoxerImage(): void {
+    const idx = boxerColors.findIndex((c) => c.value === boxerColor.value);
+    const nextIdx = (idx + 1) % boxerColors.length;
+    boxerColor.value = boxerColors[nextIdx]!.value;
+  }
+
+  function prevBoxerImage(): void {
+    const idx = boxerColors.findIndex((c) => c.value === boxerColor.value);
+    const prevIdx = (idx - 1 + boxerColors.length) % boxerColors.length;
+    boxerColor.value = boxerColors[prevIdx]!.value;
+  }
+
   return {
     access,
     accessState,
@@ -420,5 +444,9 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     trackProductsViewed,
     viewContentFired,
     copyCode,
+    nextBriefImage,
+    prevBriefImage,
+    nextBoxerImage,
+    prevBoxerImage,
   };
 });

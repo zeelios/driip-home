@@ -7,10 +7,11 @@
   --black: #000000;
   --white: #ffffff;
   --off-white: #f5f5f0;
-  --grey-100: #e8e8e4;
-  --grey-400: #999990;
-  --grey-700: #444440;
-  --grey-900: #111110;
+  --grey-100: #eeeeee;
+  --grey-400: #888888;
+  --grey-700: #333333;
+  --grey-800: #1a1a1a;
+  --grey-900: #111111;
   --font-display: 'Barlow Condensed', sans-serif;
   --font-body: 'Be Vietnam Pro', sans-serif;
 }

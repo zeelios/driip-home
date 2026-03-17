@@ -7,27 +7,33 @@
         <div class="product-grid">
           <div class="product-card reveal">
             <div class="product-img">
-              <NuxtImg
-                :src="`/products/Brief/${briefColor}.png`"
-                :width="600"
-                :height="750"
-                format="webp"
-                quality="85"
-                fit="cover"
-                :alt="`CK Brief ${briefColor}`"
-                loading="lazy"
-                class="product-img-el"
-              />
-              <div class="boxer-swatches">
-                <button
-                  v-for="col in boxerColors"
-                  :key="col.value"
-                  class="boxer-swatch"
-                  :class="{ active: briefColor === col.value }"
-                  :style="{ background: col.bg }"
-                  :aria-label="col.value"
-                  @click="briefColor = col.value"
-                ></button>
+              <Transition name="img-crossfade">
+                <NuxtImg
+                  :key="`brief-${briefColor}`"
+                  :src="`/products/Brief/${briefColor}.png`"
+                  :width="600"
+                  :height="750"
+                  format="webp"
+                  quality="85"
+                  fit="cover"
+                  :alt="`CK Brief ${briefColor}`"
+                  loading="lazy"
+                  class="product-img-el"
+                />
+              </Transition>
+              <div class="color-overlay">
+                <span class="color-name">{{ briefColor }}</span>
+                <div class="color-dots">
+                  <button
+                    v-for="col in boxerColors"
+                    :key="col.value"
+                    class="color-dot"
+                    :class="{ active: briefColor === col.value }"
+                    :style="{ background: col.bg }"
+                    :aria-label="col.value"
+                    @click="briefColor = col.value"
+                  />
+                </div>
               </div>
             </div>
             <div class="product-card-body">
@@ -58,27 +64,33 @@
 
           <div class="product-card reveal">
             <div class="product-img">
-              <NuxtImg
-                :src="`/products/Boxer/${boxerColor}.png`"
-                :width="600"
-                :height="750"
-                format="webp"
-                quality="85"
-                fit="cover"
-                :alt="`CK Boxer ${boxerColor}`"
-                loading="lazy"
-                class="product-img-el"
-              />
-              <div class="boxer-swatches">
-                <button
-                  v-for="col in boxerColors"
-                  :key="col.value"
-                  class="boxer-swatch"
-                  :class="{ active: boxerColor === col.value }"
-                  :style="{ background: col.bg }"
-                  :aria-label="col.value"
-                  @click="boxerColor = col.value"
-                ></button>
+              <Transition name="img-crossfade">
+                <NuxtImg
+                  :key="`boxer-${boxerColor}`"
+                  :src="`/products/Boxer/${boxerColor}.png`"
+                  :width="600"
+                  :height="750"
+                  format="webp"
+                  quality="85"
+                  fit="cover"
+                  :alt="`CK Boxer ${boxerColor}`"
+                  loading="lazy"
+                  class="product-img-el"
+                />
+              </Transition>
+              <div class="color-overlay">
+                <span class="color-name">{{ boxerColor }}</span>
+                <div class="color-dots">
+                  <button
+                    v-for="col in boxerColors"
+                    :key="col.value"
+                    class="color-dot"
+                    :class="{ active: boxerColor === col.value }"
+                    :style="{ background: col.bg }"
+                    :aria-label="col.value"
+                    @click="boxerColor = col.value"
+                  />
+                </div>
               </div>
             </div>
             <div class="product-card-body">
@@ -136,16 +148,19 @@ const {
   briefSpecs,
   formattedSkuPrice,
 } = storeToRefs(store);
+const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
+  store;
 </script>
 
 <style scoped>
 .products {
-  background: var(--black);
-  padding: 80px 24px;
+  background: var(--grey-900);
+  padding: 56px 0 64px;   /* no horizontal padding — let cards go edge-to-edge on mobile */
 }
 .products-inner {
   max-width: 1100px;
   margin: 0 auto;
+  padding: 0 20px;
 }
 .products-title {
   font-family: var(--font-display);
@@ -162,10 +177,12 @@ const {
   gap: 2px;
 }
 .product-card {
-  background: var(--grey-900);
+  background: var(--grey-800);
   opacity: 0;
   transform: translateY(32px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s ease;
   overflow: hidden;
 }
 .product-card.is-visible {
@@ -179,6 +196,24 @@ const {
   background: #1a1a1a;
   overflow: hidden;
 }
+/* ── Image crossfade ─────────────────────────────────────────── */
+.img-crossfade-enter-active,
+.img-crossfade-leave-active {
+  transition: opacity 0.4s ease;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.img-crossfade-enter-from {
+  opacity: 0;
+}
+.img-crossfade-leave-to {
+  opacity: 0;
+}
+
 .product-img-el {
   width: 100%;
   height: 100%;
@@ -190,28 +225,88 @@ const {
 .product-card:hover .product-img-el {
   transform: scale(1.04);
 }
-.boxer-swatches {
+/* ── Color overlay ───────────────────────────────────────────── */
+.color-overlay {
   position: absolute;
-  bottom: 14px;
-  left: 14px;
-  display: flex;
-  gap: 6px;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 4;
+  padding: 40px 18px 18px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, transparent 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
-.boxer-swatch {
-  width: 24px;
-  height: 24px;
+.color-name {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.color-dots {
+  display: flex;
+  gap: 10px;
+}
+.color-dot {
+  /* Outer white ring via box-shadow so every color is visible, incl. Black */
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid transparent;        /* transparent gap between fill and ring */
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.55);
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.15s;
+  flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.2s;
 }
-.boxer-swatch.active {
-  border-color: var(--white);
-  transform: scale(1.2);
+.color-dot:hover:not(.active) {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.85);
 }
-.boxer-swatch:hover:not(.active) {
-  border-color: rgba(255, 255, 255, 0.7);
+.color-dot.active {
+  transform: scale(1.22);
+  box-shadow: 0 0 0 2px var(--white);
+}
+.image-nav {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 5;
+  pointer-events: none;
+}
+.image-nav-btn {
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 300;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    border-color 0.2s;
+}
+.image-nav-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
 }
 .product-card-body {
   padding: 28px 24px 32px;
@@ -252,29 +347,30 @@ const {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.2em;
-  color: var(--grey-700);
+  color: var(--grey-400);
   border: 1px solid var(--grey-700);
   padding: 6px 12px;
   white-space: nowrap;
 }
 .btn-order-now {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  background: transparent;
-  color: var(--white);
-  border: 1px solid var(--grey-700);
-  padding: 12px 24px;
+  width: 100%;            /* full-width touch target on mobile */
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  padding: 18px 24px;     /* 48 px+ touch target */
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: background 0.2s;
 }
 .btn-order-now:hover {
-  border-color: var(--white);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--off-white);
 }
 .fabric-bar {
   background: var(--grey-900);
@@ -308,7 +404,9 @@ const {
 .reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s ease;
 }
 .reveal.is-visible {
   opacity: 1;
@@ -318,6 +416,18 @@ const {
   .product-grid {
     grid-template-columns: 1fr 1fr;
     gap: 2px;
+  }
+  .btn-order-now {
+    width: auto;
+    background: transparent;
+    color: var(--white);
+    border: 1px solid var(--grey-400);
+    padding: 13px 24px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-order-now:hover {
+    background: var(--grey-800);
+    border-color: var(--white);
   }
 }
 @media (min-width: 1024px) {

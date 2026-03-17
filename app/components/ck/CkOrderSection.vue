@@ -50,7 +50,7 @@
                   autocomplete="tel"
                   @input="
                     normalizePhoneInput(
-                      ($event.target as HTMLInputElement).value
+                      ($event.target as HTMLInputElement).value,
                     )
                   "
                 />
@@ -315,9 +315,9 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
 
 <style scoped>
 .order-section {
-  background: var(--black);
+  background: var(--grey-900);
   padding: 80px 24px 120px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 .order-inner {
   max-width: 760px;
@@ -437,7 +437,9 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   background: transparent;
   border: 1px solid var(--grey-700);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
   text-align: left;
 }
 .select-tile.active {
@@ -457,16 +459,27 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   color: var(--grey-400);
 }
 .size-guide-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
   background: transparent;
   border: 1px solid var(--grey-700);
   color: var(--grey-400);
+  font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.15em;
-  padding: 12px 16px;
+  padding: 14px 16px;   /* 44px+ touch target */
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
   margin-bottom: 20px;
+}
+.size-guide-trigger:hover {
+  border-color: var(--white);
+  color: var(--white);
 }
 .select-pills {
   display: flex;
@@ -474,8 +487,10 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   gap: 8px;
 }
 .select-pill {
-  width: 52px;
-  height: 48px;
+  flex: 1;              /* stretch to fill row on mobile */
+  min-width: 52px;
+  max-width: 80px;
+  height: 52px;         /* 52px touch target */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -487,7 +502,10 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   letter-spacing: 0.1em;
   color: var(--grey-400);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
 }
 .select-pill.active {
   border-color: var(--white);
@@ -564,7 +582,9 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
   font-weight: 600;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition: background 0.2s, opacity 0.2s;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
 }
 .btn-order-submit:disabled {
   opacity: 0.5;
@@ -626,7 +646,9 @@ const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
 .reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s ease;
 }
 .reveal.is-visible {
   opacity: 1;

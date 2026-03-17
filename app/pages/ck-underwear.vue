@@ -1,16 +1,23 @@
 <template>
   <div class="page">
-    <CkHeroNavSection @hero-cta="onHeroCTA" @scroll-to="scrollToSection" />
+    <CkHeroNavSection 
+      :nav-links="[
+        { id: 'products', label: 'BRIEF & BOXER' },
+        { id: 'order', label: 'ORDER NOW' }
+      ]"
+      @hero-cta="onHeroCTA" 
+      @scroll-to="scrollToSection" 
+    />
     <CkProductsSection @prefill-order="prefillOrder" />
     <CkManifestoSection />
-    <CkAccessSection />
+    <!-- <CkAccessSection /> -->
     <CkOrderSection />
     <SiteFooter />
-    <TrackingDebugPanel />
   </div>
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'default' });
 import { useMetaEvents } from "~/composables/useMetaEvents";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
 
@@ -22,7 +29,7 @@ useHead({
   title: computed(() =>
     locale.value === "vi"
       ? "driip- | CK Boxer & Brief — First Drop SS26"
-      : "driip- | CK Boxer & Brief — First Drop SS26"
+      : "driip- | CK Boxer & Brief — First Drop SS26",
   ),
   htmlAttrs: { lang: locale.value },
   meta: [
@@ -63,9 +70,11 @@ function setupRevealObserver(): void {
       entries.forEach((entry) => {
         if (entry.isIntersecting) entry.target.classList.add("is-visible");
       }),
-    { threshold: 0.12 }
+    { threshold: 0.12 },
   );
-  document.querySelectorAll(".reveal, .product-card").forEach((el) => observer.observe(el));
+  document
+    .querySelectorAll(".reveal, .product-card")
+    .forEach((el) => observer.observe(el));
   onUnmounted(() => observer.disconnect());
 }
 
@@ -79,21 +88,21 @@ function setupViewContentObserver(): void {
         observer.disconnect();
       }
     },
-    { threshold: 0.25 }
+    { threshold: 0.25 },
   );
   observer.observe(productsElement);
   onUnmounted(() => observer.disconnect());
 }
 
 function setupSectionNav(): void {
-  const ids = ["products", "access", "order"];
+  const ids = ["products", "order"];
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) ckStore.setActiveSection(entry.target.id);
       });
     },
-    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
+    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" },
   );
   ids.forEach((id) => {
     const element = document.getElementById(id);

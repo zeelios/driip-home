@@ -22,9 +22,9 @@ const { t } = useI18n();
 
 <style scoped>
 .footer {
-  background: var(--black);
+  background: var(--grey-800);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 32px 24px;
+  padding: 40px 24px;
 }
 .footer-inner {
   max-width: 1200px;
