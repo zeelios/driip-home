@@ -82,14 +82,26 @@ export default defineEventHandler(async (event) => {
   }
 
   // ─── POST to Facebook Graph API ──────────────────────────────────
-  const result = await $fetch(
-    `https://graph.facebook.com/v20.0/${pixelId}/events`,
-    {
-      method: 'POST',
-      query:  { access_token: token },
-      body:   payload,
-    },
-  )
+  try {
+    const result = await $fetch(
+      `https://graph.facebook.com/v20.0/${pixelId}/events`,
+      {
+        method: 'POST',
+        query:  { access_token: token },
+        body:   payload,
+      },
+    )
+    
+    // Debug logging for CAPI events
+    console.log(`[CAPI] Successfully sent ${eventName} event:`, {
+      eventId,
+      testEventCode: config.metaTestEventCode || 'none',
+      graphResponse: result
+    })
 
-  return result
+    return result
+  } catch (err: any) {
+    console.error(`[CAPI] Failed to send ${eventName} event:`, err.data || err.message)
+    throw err
+  }
 })

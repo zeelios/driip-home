@@ -3,7 +3,7 @@
     <HomeHeroSection @scroll-to-drops="scrollTo('drops')" />
     <HomeDropsSection />
     <HomeManifestoSection />
-    <SiteFooter />
+    <SharedSiteFooter />
   </div>
 </template>
 

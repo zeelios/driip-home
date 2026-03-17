@@ -182,8 +182,8 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     formatVndCurrency(finalUnitPrice.value)
   );
   const formattedSkuPrice = computed<Record<string, string>>(() => ({
-    "ck-brief": formatVndCurrency(getTierTotal(1)),
-    "ck-boxer": formatVndCurrency(getTierTotal(1)),
+    "ck-brief": formatVndCurrency(getFinalUnitPrice(5)),
+    "ck-boxer": formatVndCurrency(getFinalUnitPrice(5)),
   }));
 
   const skuLabel = computed<string>(

@@ -12,7 +12,7 @@
     <CkManifestoSection />
     <!-- <CkAccessSection /> -->
     <CkOrderSection />
-    <SiteFooter />
+    <SharedSiteFooter />
   </div>
 </template>
 

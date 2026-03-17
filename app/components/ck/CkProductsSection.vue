@@ -31,7 +31,7 @@
                     :class="{ active: briefColor === col.value }"
                     :style="{ background: col.bg }"
                     :aria-label="col.value"
-                    @click="briefColor = col.value"
+                    @click="store.briefColor = col.value"
                   />
                 </div>
               </div>
@@ -88,7 +88,7 @@
                     :class="{ active: boxerColor === col.value }"
                     :style="{ background: col.bg }"
                     :aria-label="col.value"
-                    @click="boxerColor = col.value"
+                    @click="store.boxerColor = col.value"
                   />
                 </div>
               </div>
