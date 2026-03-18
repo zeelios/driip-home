@@ -1,14 +1,16 @@
 <template>
   <div class="page">
-    <CkHeroNavSection 
+    <CkHeroNavSection
       :nav-links="[
         { id: 'products', label: 'BRIEF & BOXER' },
-        { id: 'order', label: 'ORDER NOW' }
+        { id: 'gallery', label: 'LOOKBOOK' },
+        { id: 'order', label: 'ORDER NOW' },
       ]"
-      @hero-cta="onHeroCTA" 
-      @scroll-to="scrollToSection" 
+      @hero-cta="onHeroCTA"
+      @scroll-to="scrollToSection"
     />
     <CkProductsSection @prefill-order="prefillOrder" />
+    <CkGallerySection />
     <CkManifestoSection />
     <!-- <CkAccessSection /> -->
     <CkOrderSection />
@@ -17,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'default' });
+definePageMeta({ layout: "default" });
 import { useMetaEvents } from "~/composables/useMetaEvents";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
 
@@ -29,7 +31,7 @@ useHead({
   title: computed(() =>
     locale.value === "vi"
       ? "driip- | CK Boxer & Brief — First Drop SS26"
-      : "driip- | CK Boxer & Brief — First Drop SS26",
+      : "driip- | CK Boxer & Brief — First Drop SS26"
   ),
   htmlAttrs: { lang: locale.value },
   meta: [
@@ -70,7 +72,7 @@ function setupRevealObserver(): void {
       entries.forEach((entry) => {
         if (entry.isIntersecting) entry.target.classList.add("is-visible");
       }),
-    { threshold: 0.12 },
+    { threshold: 0.12 }
   );
   document
     .querySelectorAll(".reveal, .product-card")
@@ -88,21 +90,21 @@ function setupViewContentObserver(): void {
         observer.disconnect();
       }
     },
-    { threshold: 0.25 },
+    { threshold: 0.25 }
   );
   observer.observe(productsElement);
   onUnmounted(() => observer.disconnect());
 }
 
 function setupSectionNav(): void {
-  const ids = ["products", "order"];
+  const ids = ["products", "gallery", "order"];
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) ckStore.setActiveSection(entry.target.id);
       });
     },
-    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" },
+    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
   );
   ids.forEach((id) => {
     const element = document.getElementById(id);

@@ -2,7 +2,8 @@
   "nav": {
     "comingSoon": "COMING SOON",
     "firstDrop": "FIRST DROP — SS26",
-    "langSwitch": "VI"
+    "langSwitch": "VI",
+    "home": "HOME"
   },
   "home": {
     "hero": {
@@ -84,6 +85,11 @@
       "fine": "By submitting you agree to receive launch communications from driip-",
       "successTitle": "YOU'RE ON THE LIST",
       "successBody": "Code {code} is locked in. We'll message you when it goes live."
+    },
+    "gallery": {
+      "pre": "LOOKBOOK — SS26",
+      "title": "THE COLLECTION",
+      "sub": "BOXER & BRIEF · THREE COLOURWAYS"
     },
     "order": {
       "label": "LIMITED STOCK — ORDER NOW",

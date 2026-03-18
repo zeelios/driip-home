@@ -2,7 +2,8 @@
   "nav": {
     "comingSoon": "SẮP RA MẮT",
     "firstDrop": "FIRST DROP — SS26",
-    "langSwitch": "EN"
+    "langSwitch": "EN",
+    "home": "TRANG CHỦ"
   },
   "home": {
     "hero": {
@@ -91,6 +92,11 @@
       "successTitle": "BẠN ĐÃ ĐĂNG KÝ",
       "successBody": "Mã {code} của bạn đã được giữ. Chúng tôi sẽ nhắn tin khi hàng sẵn sàng."
     },
+    "gallery": {
+      "pre": "LOOKBOOK — SS26",
+      "title": "BỘ SƯU TẬP",
+      "sub": "BOXER & BRIEF · BA MÀU SẮC"
+    },
     "order": {
       "label": "SỐ LƯỢNG CÓ HẠN — ĐẶT NGAY",
       "title": "ĐẶT HÀNG",
@@ -110,7 +116,7 @@
       "ward": "PHƯỜNG / XÃ",
       "wardPlaceholder": "Tên phường/xã",
       "street": "ĐỊA CHỈ (SỐ NHÀ, TÊN ĐƯỜNG)",
-      "streetPlaceholder": "VD: 123 Nguyễn Trãi",
+      "streetPlaceholder": "VD: 123 Nguyễn Trãi, phường A, quận B, TP HCM",
       "selection": "LỰA CHỌN SẢN PHẨM",
       "product": "SẢN PHẨM",
       "boxes": "SỐ HỘP",

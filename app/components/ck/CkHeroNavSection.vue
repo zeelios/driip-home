@@ -32,6 +32,9 @@
   </div>
 
   <nav class="section-nav">
+    <NuxtLinkLocale to="/" class="snav-home-link" :title="t('nav.home')">
+      ‹
+    </NuxtLinkLocale>
     <NuxtLinkLocale to="/" class="snav-logo-link">
       <NuxtImg src="/logo.png" alt="driip" class="snav-logo-img" width="56" />
     </NuxtLinkLocale>
@@ -47,8 +50,12 @@
       </button>
     </div>
     <div class="snav-right">
-      <button class="lang-switch" @click="switchLang">{{ t("nav.langSwitch") }}</button>
-      <button class="snav-cta" @click="$emit('scroll-to', 'order')">{{ t("ck.hero.cta") }}</button>
+      <button class="lang-switch" @click="switchLang">
+        {{ t("nav.langSwitch") }}
+      </button>
+      <button class="snav-cta" @click="$emit('scroll-to', 'order')">
+        {{ t("ck.hero.cta") }}
+      </button>
     </div>
   </nav>
 </template>
@@ -74,7 +81,7 @@ const props = withDefaults(
   }
 );
 
-defineEmits<{ 'hero-cta': []; 'scroll-to': [id: string] }>();
+defineEmits<{ "hero-cta": []; "scroll-to": [id: string] }>();
 const { t } = useI18n();
 const ckStore = useCkUnderwearStore();
 const { activeSection } = storeToRefs(ckStore);
@@ -112,10 +119,32 @@ const { switchLang } = ckStore;
   line-height: 0.88;
   margin-bottom: 36px;
 }
-.line-1 { font-family: var(--font-display); font-size: clamp(64px, 14vw, 130px); color: var(--grey-700); letter-spacing: 0.05em; }
-.line-2 { font-family: var(--font-display); font-size: clamp(96px, 22vw, 210px); color: var(--white); letter-spacing: -0.02em; }
-.line-3 { font-family: var(--font-display); font-size: clamp(72px, 16vw, 150px); color: var(--white); letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 16px; }
-.dash-end { font-family: var(--font-display); font-size: clamp(48px, 10vw, 100px); color: var(--grey-700); }
+.line-1 {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 14vw, 130px);
+  color: var(--grey-700);
+  letter-spacing: 0.05em;
+}
+.line-2 {
+  font-family: var(--font-display);
+  font-size: clamp(96px, 22vw, 210px);
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+.line-3 {
+  font-family: var(--font-display);
+  font-size: clamp(72px, 16vw, 150px);
+  color: var(--white);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.dash-end {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 10vw, 100px);
+  color: var(--grey-700);
+}
 .hero-sub {
   font-size: clamp(11px, 2vw, 14px);
   font-weight: 300;
@@ -147,7 +176,9 @@ const { switchLang } = ckStore;
   background: var(--grey-100);
   gap: 20px;
 }
-.btn-arrow { font-size: 16px; }
+.btn-arrow {
+  font-size: 16px;
+}
 .parallax-bg {
   position: absolute;
   right: -8%;
@@ -167,7 +198,12 @@ const { switchLang } = ckStore;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(160deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%);
+  background: linear-gradient(
+    160deg,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
 }
 
 /* ─── PROMO STRIP ──────────────────────────────────────────────── */
@@ -184,8 +220,13 @@ const { switchLang } = ckStore;
   letter-spacing: 0.25em;
   white-space: nowrap;
 }
-.promo-strip .dot { color: #aaa; flex-shrink: 0; }
-.dash { color: var(--grey-400); }
+.promo-strip .dot {
+  color: #aaa;
+  flex-shrink: 0;
+}
+.dash {
+  color: var(--grey-400);
+}
 
 /* ─── SECTION NAV ──────────────────────────────────────────────── */
 .section-nav {
@@ -201,6 +242,23 @@ const { switchLang } = ckStore;
   padding: 0 20px;
   height: 52px;
   gap: 0;
+}
+.snav-home-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 100%;
+  color: var(--grey-500);
+  font-size: 20px;
+  line-height: 1;
+  text-decoration: none;
+  transition: color 0.2s;
+  margin-right: 4px;
+}
+.snav-home-link:hover {
+  color: var(--white);
 }
 .snav-logo-link {
   display: flex;
@@ -228,7 +286,9 @@ const { switchLang } = ckStore;
   scrollbar-width: none;
   flex: 1;
 }
-.snav-links::-webkit-scrollbar { display: none; }
+.snav-links::-webkit-scrollbar {
+  display: none;
+}
 .snav-right {
   display: flex;
   align-items: center;
@@ -247,7 +307,10 @@ const { switchLang } = ckStore;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 }
-.lang-switch:hover { color: var(--white); border-color: var(--white); }
+.lang-switch:hover {
+  color: var(--white);
+  border-color: var(--white);
+}
 .snav-link {
   font-family: var(--font-body);
   font-size: 10px;
@@ -275,9 +338,15 @@ const { switchLang } = ckStore;
   transform-origin: left;
   transition: transform 0.25s ease;
 }
-.snav-link:hover { color: rgba(255, 255, 255, 0.7); }
-.snav-link.active { color: var(--white); }
-.snav-link.active::after { transform: scaleX(1); }
+.snav-link:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+.snav-link.active {
+  color: var(--white);
+}
+.snav-link.active::after {
+  transform: scaleX(1);
+}
 .snav-cta {
   flex-shrink: 0;
   font-family: var(--font-body);
@@ -292,18 +361,34 @@ const { switchLang } = ckStore;
   white-space: nowrap;
   transition: background 0.15s;
 }
-.snav-cta:hover { background: var(--grey-100); }
+.snav-cta:hover {
+  background: var(--grey-100);
+}
 
 /* ─── TABLET+ ──────────────────────────────────────────────────── */
 @media (min-width: 640px) {
-  .snav-links { display: flex; }
-  .section-nav { padding: 0 32px; height: 54px; }
+  .snav-links {
+    display: flex;
+  }
+  .section-nav {
+    padding: 0 32px;
+    height: 54px;
+  }
 }
 
 /* ─── DESKTOP ──────────────────────────────────────────────────── */
 @media (min-width: 1024px) {
-  .section-nav { padding: 0 64px; }
-  .hero { padding: 80px 64px; }
-  .promo-strip { justify-content: center; gap: 32px; font-size: 10px; padding: 13px 64px; }
+  .section-nav {
+    padding: 0 64px;
+  }
+  .hero {
+    padding: 80px 64px;
+  }
+  .promo-strip {
+    justify-content: center;
+    gap: 32px;
+    font-size: 10px;
+    padding: 13px 64px;
+  }
 }
 </style>
