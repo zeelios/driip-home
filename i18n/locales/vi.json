@@ -7,27 +7,27 @@
   },
   "home": {
     "hero": {
-      "pre": "SS26 — FIRST DROP",
-      "tagline": "ĐƯỢC XÂY DỰNG KHÁC BIỆT.",
-      "sub": "PHONG CÁCH ĐỈNH CAO.\nBẮT ĐẦU TỪ NỀN TẢNG.",
-      "cta": "KHÁM PHÁ DROPS ↓"
+      "pre": "SS26 — Đợt đầu tiên",
+      "tagline": "Khác biệt ngay từ nền tảng.",
+      "sub": "Phong cách chỉn chu.\nBắt đầu từ những điều cơ bản nhất.",
+      "cta": "Khám phá bộ sưu tập ↓"
     },
     "drops": {
-      "label": "SS26 DROPS",
-      "title": "BỘ SƯU TẬP",
-      "live": "ĐANG BÁN",
-      "comingSoon": "SẮP RA",
-      "from": "TỪ",
-      "shopNow": "MUA NGAY →",
-      "notify": "THÔNG BÁO KHI CÓ HÀNG"
+      "label": "Bộ sưu tập SS26",
+      "title": "Bộ sưu tập",
+      "live": "Đang mở bán",
+      "comingSoon": "Sắp ra mắt",
+      "from": "Từ",
+      "shopNow": "Mua ngay →",
+      "notify": "Thông báo khi có hàng"
     },
     "upcoming": {
-      "label": "DROPS TIẾP THEO",
-      "title": "NHIỀU HƠN ĐANG ĐẾN.",
+      "label": "Các đợt tiếp theo",
+      "title": "Sắp có thêm nhiều điều đáng chờ đợi.",
       "q3": "Q3 2026",
       "q4": "Q4 2026"
     },
-    "manifesto": "\"Không chỉ là sản phẩm.\nCam kết về chất lượng.\""
+    "manifesto": "\"Không chỉ là sản phẩm.\nĐó là cam kết về chất lượng.\""
   },
   "ck": {
     "hero": {
@@ -41,131 +41,131 @@
       "stock": "SỐ LƯỢNG CÓ HẠN"
     },
     "products": {
-      "label": "CK CALVIN KLEIN",
-      "title": "SỐ LƯỢNG CÓ HẠN — ĐẶT NGAY",
-      "from": "TỪ",
+      "label": "CK Calvin Klein",
+      "title": "Số lượng có hạn — đặt ngay",
+      "from": "Từ",
       "brief": {
-        "desc": "Kiểu dáng gốc. Thiết yếu nhất. Kiểu cắt thấp lưng cổ điển cho cả ngày.",
-        "specs": ["Viền lưng thấp", "Vải cotton modal", "Dây lưng chữ ký CK"]
+        "desc": "Phiên bản nguyên bản, tối giản và cần thiết nhất. Dáng lưng thấp cổ điển, thoải mái suốt cả ngày.",
+        "specs": ["Dáng lưng thấp", "Chất liệu cotton modal", "Dây lưng CK đặc trưng"]
       },
       "boxer": {
-        "desc": "Độ che phủ tối đa. Form dáng phù hợp. Đảm bảo không bị xê dịch cả ngày.",
-        "specs": ["Ống chân dài", "Không xê dịch", "Túi định hình giải phẫu"]
+        "desc": "Độ che phủ tốt hơn, form ôm gọn và hạn chế xê dịch tối đa trong ngày.",
+        "specs": ["Ống chân dài", "Ít xê dịch", "Thiết kế hỗ trợ theo đường cong cơ thể"]
       },
       "orderThis": "ĐẶT NGAY →"
     },
     "fabric": {
-      "modal": "95% COTTON MODAL",
-      "elastane": "5% SỢI ĐÀN HỒI",
-      "rideUp": "KHÔNG XÊ DỊCH",
-      "waistband": "DÂY LƯNG CHỮ KÝ"
+      "modal": "95% cotton modal",
+      "elastane": "5% sợi đàn hồi",
+      "rideUp": "Hạn chế xê dịch",
+      "waistband": "Dây lưng đặc trưng"
     },
     "offer": {
-      "label": "ƯU ĐÃI TRÊN WEB",
-      "title": "GIẢM THÊM 20%\nCHO ĐƠN HÀNG CỦA BẠN",
-      "body": "Đang bán trên website. Mỗi khách hàng một mã. Tự động áp dụng khi thanh toán.",
-      "yourCode": "MÃ CỦA BẠN",
-      "validity": "Áp dụng ngay · Sử dụng một lần · CK Boxer & Brief",
-      "copy": "SAO CHÉP",
-      "copied": "ĐÃ SAO CHÉP ✓"
+      "label": "Ưu đãi trên web",
+      "title": "Giảm thêm 20%\ncho đơn hàng của bạn",
+      "body": "Ưu đãi áp dụng trực tiếp trên website. Mỗi khách hàng có một mã duy nhất và sẽ tự động được áp dụng khi thanh toán.",
+      "yourCode": "Mã của bạn",
+      "validity": "Áp dụng ngay · Dùng một lần · CK Boxer & Brief",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép ✓"
     },
-    "manifesto": "\"Nền tảng của mọi bộ trang phục\nlà thứ không ai nhìn thấy.\nHãy làm đúng điều đó trước.\"",
+    "manifesto": "\"Nền tảng của mọi bộ trang phục\nlà thứ không ai nhìn thấy.\nHãy làm đúng ngay từ đầu.\"",
     "sizechart": {
-      "label": "BẢNG SIZE",
-      "note": "Dựa theo vòng hông và cân nặng của bạn",
-      "measurement": "Cách đo: đo vòng hông quanh chỗ rộng nhất của mông, giữ thước ngang.",
+      "label": "Bảng size",
+      "note": "Dựa trên vòng hông và cân nặng của bạn",
+      "measurement": "Cách đo: đo vòng hông tại vị trí rộng nhất của vòng mông và giữ thước đo song song với mặt đất.",
       "modalButton": "Tìm size theo cân nặng"
     },
     "access": {
-      "label": "CẬP NHẬT MỚI NHẤT",
-      "title": "MẪU CỔ ĐIỂN.\nĐÃ CÓ TRÊN WEB.",
-      "sub": "Để lại thông tin. Chúng tôi sẽ cập nhật khi có hàng bổ sung, tin mới và ưu đãi chỉ dành cho web.",
-      "name": "HỌ VÀ TÊN",
+      "label": "Cập nhật mới nhất",
+      "title": "Mẫu kinh điển.\nĐã có trên web.",
+      "sub": "Để lại thông tin của bạn, chúng tôi sẽ gửi cập nhật khi có hàng bổ sung, tin mới và ưu đãi chỉ dành riêng cho website.",
+      "name": "Họ và tên",
       "namePlaceholder": "Tên của bạn",
-      "email": "ĐỊA CHỈ EMAIL",
+      "email": "Địa chỉ email",
       "emailPlaceholder": "email example com",
-      "phone": "SỐ ĐIỆN THOẠI",
+      "phone": "Số điện thoại",
       "phonePlaceholder": "+84 9XX XXX XXX | 09x xxx xxxx",
-      "optional": "(TÙY CHỌN)",
-      "submit": "NHẬN THÔNG BÁO + KHÓA MÃ GIẢM GIÁ",
-      "fine": "Bằng cách gửi, bạn đồng ý nhận cập nhật và ưu đãi chỉ dành cho web từ driip-",
-      "successTitle": "BẠN ĐÃ ĐĂNG KÝ",
-      "successBody": "Mã {code} của bạn đã được giữ. Chúng tôi sẽ nhắn tin khi hàng sẵn sàng."
+      "optional": "(Tùy chọn)",
+      "submit": "Nhận thông báo + giữ mã giảm giá",
+      "fine": "Bằng việc gửi thông tin, bạn đồng ý nhận cập nhật và ưu đãi chỉ dành cho web từ driip-.",
+      "successTitle": "Bạn đã đăng ký",
+      "successBody": "Mã {code} của bạn đã được giữ. Chúng tôi sẽ liên hệ khi sản phẩm sẵn sàng."
     },
     "gallery": {
-      "pre": "LOOKBOOK — SS26",
-      "title": "BỘ SƯU TẬP",
-      "sub": "BOXER & BRIEF · BA MÀU SẮC"
+      "pre": "Lookbook — SS26",
+      "title": "Bộ sưu tập",
+      "sub": "Boxer & Brief · Ba phối màu"
     },
     "order": {
-      "label": "SỐ LƯỢNG CÓ HẠN — ĐẶT NGAY",
-      "title": "ĐẶT HÀNG",
-      "sub": "Điền thông tin giao hàng. Chúng tôi sẽ xác nhận đơn hàng trong vòng 24 giờ và gửi thông tin theo dõi sau khi xuất hàng.",
-      "details": "THÔNG TIN CỦA BẠN",
-      "firstName": "HỌ",
+      "label": "Số lượng có hạn — đặt ngay",
+      "title": "Đặt hàng",
+      "sub": "Vui lòng điền thông tin giao hàng. Chúng tôi sẽ xác nhận đơn trong vòng 24 giờ và gửi thông tin theo dõi sau khi xuất hàng.",
+      "details": "Thông tin của bạn",
+      "firstName": "Họ",
       "firstNamePlaceholder": "Họ",
-      "lastName": "TÊN",
+      "lastName": "Tên",
       "lastNamePlaceholder": "Tên",
-      "phone": "SỐ ĐIỆN THOẠI",
+      "phone": "Số điện thoại",
       "phonePlaceholder": "+84 9XX XXX XXX / 09x xxx xxxx",
-      "province": "TỈNH / THÀNH PHỐ",
+      "province": "Tỉnh / thành phố",
       "provincePlaceholder": "Tìm tỉnh / thành phố",
-      "district": "QUẬN / HUYỆN",
-      "districtPlaceholder": "Chọn quận/huyện",
-      "districtTextPlaceholder": "Nhập quận/huyện",
-      "ward": "PHƯỜNG / XÃ",
-      "wardPlaceholder": "Tên phường/xã",
-      "street": "ĐỊA CHỈ (SỐ NHÀ, TÊN ĐƯỜNG)",
-      "streetPlaceholder": "VD: 123 Nguyễn Trãi, phường A, quận B, TP HCM",
-      "selection": "LỰA CHỌN SẢN PHẨM",
-      "product": "SẢN PHẨM",
-      "boxes": "SỐ HỘP",
-      "boxCount": "{count} HỘP",
-      "perBox": "{price} / HỘP",
-      "size": "SIZE",
-      "colorPack": "GÓI MÀU SẮC",
-      "colorPackSub": "BỘ 3 CÁI",
+      "district": "Quận / huyện",
+      "districtPlaceholder": "Chọn quận / huyện",
+      "districtTextPlaceholder": "Nhập quận / huyện",
+      "ward": "Phường / xã",
+      "wardPlaceholder": "Tên phường / xã",
+      "street": "Địa chỉ (số nhà, tên đường)",
+      "streetPlaceholder": "Ví dụ: 123 Nguyễn Trãi, phường A, quận B",
+      "selection": "Lựa chọn sản phẩm",
+      "product": "Sản phẩm",
+      "boxes": "Số hộp",
+      "boxCount": "{count} hộp",
+      "perBox": "{price} / hộp",
+      "size": "Size",
+      "colorPack": "Gói màu sắc",
+      "colorPackSub": "Bộ 3 chiếc",
       "colors": {
-        "black": "3× ĐEN",
-        "white": "3× TRẮNG",
-        "grey": "3× XÁM",
-        "mix": "GÓI MIX"
+        "black": "3× đen",
+        "white": "3× trắng",
+        "grey": "3× xám",
+        "mix": "Gói phối màu"
       },
-      "submit": "ĐẶT HÀNG → {price}đ",
-      "fine": "Thanh toán khi nhận hàng · Miễn phí vận chuyển toàn quốc · Bộ 3 cái mỗi hộp",
-      "codeApplied": "MÃ DRIIP20 ĐÃ ÁP DỤNG — GIẢM 20%",
-      "originalTotal": "GIÁ GỐC",
-      "salePrice": "GIÁ THEO CHƯƠNG TRÌNH",
-      "extraDiscount": "GIẢM THÊM WEBSITE",
-      "finalPerBox": "GIÁ CUỐI / HỘP",
+      "submit": "Đặt hàng → {price}đ",
+      "fine": "Thanh toán khi nhận hàng · Miễn phí vận chuyển toàn quốc · Mỗi hộp gồm 3 chiếc",
+      "codeApplied": "Đã áp dụng mã DRIIP20 — giảm 20%",
+      "originalTotal": "Giá gốc",
+      "salePrice": "Giá ưu đãi",
+      "extraDiscount": "Giảm thêm từ website",
+      "finalPerBox": "Giá cuối / hộp",
       "validate": {
         "province": "Vui lòng chọn tỉnh hoặc thành phố.",
         "sku": "Vui lòng chọn sản phẩm.",
         "size": "Vui lòng chọn size.",
-        "color": "Vui lòng chọn loại màu."
+        "color": "Vui lòng chọn phối màu."
       },
-      "successTitle": "ĐÃ NHẬN ĐƠN HÀNG",
-      "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}."
+      "successTitle": "Đã nhận đơn hàng",
+      "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}."
     }
   },
   "sizechart": {
-    "label": "BẢNG SIZE",
-    "note": "Dựa theo vòng hông và cân nặng của bạn",
-    "measurement": "Cách đo: đo vòng hông quanh chỗ rộng nhất của mông, giữ thước ngang.",
+    "label": "Bảng size",
+    "note": "Dựa trên vòng hông và cân nặng của bạn",
+    "measurement": "Cách đo: đo vòng hông tại vị trí rộng nhất của vòng mông và giữ thước đo song song với mặt đất.",
     "modalButton": "Tìm size theo cân nặng"
   },
   "footer": {
-    "copyright": "© 2026 DRIIP. BẢO LƯU MỌI QUYỀN.",
+    "copyright": "© 2026 DRIIP. Thiết kế bởi Zeelios. Bảo lưu mọi quyền.",
     "facebook": "FACEBOOK"
   },
   "common": {
-    "error": "Đã có lỗi xảy ra. Vui lòng thử lại."
+    "error": "Đã xảy ra lỗi. Vui lòng thử lại."
   },
   "sg": {
-    "weightLabel": "NHẬP CÂN NẶNG",
-    "weightPlaceholder": "vd. 72",
-    "recommended": "PHÙ HỢP",
-    "hip": "VÒNG HÔNG (CM)",
-    "weight": "CÂN NẶNG (KG)"
+    "weightLabel": "Nhập cân nặng",
+    "weightPlaceholder": "Ví dụ: 72",
+    "recommended": "Phù hợp",
+    "hip": "Vòng hông (cm)",
+    "weight": "Cân nặng (kg)"
   }
 }
