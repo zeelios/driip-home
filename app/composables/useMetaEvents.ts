@@ -1,3 +1,10 @@
+import {
+  buildMetaPurchaseCustomData,
+  compactMetaObject,
+} from "~/utils/meta-conversions";
+import { getFinalTotal } from "~/composables/usePricing";
+import { useTrackingDebug } from "~/composables/useTrackingDebug";
+
 /**
  * Meta Pixel + CAPI event composable.
  *
@@ -24,9 +31,6 @@ export interface OrderData {
   ward?: string;
   street?: string;
 }
-
-import { getFinalTotal } from "~/composables/usePricing";
-import { useTrackingDebug } from "~/composables/useTrackingDebug";
 
 const SKU_PRICES: Record<string, number> = {
   "ck-brief": getFinalTotal(1),
@@ -55,18 +59,6 @@ function getSessionEventId(storageKey: string): string {
   } catch {
     return genEventId();
   }
-}
-
-function compactUserData(
-  userData: Record<string, unknown>
-): Record<string, unknown> {
-  return Object.fromEntries(
-    Object.entries(userData).filter(([, value]) => {
-      if (value == null) return false;
-      if (typeof value === "string") return value.trim().length > 0;
-      return true;
-    })
-  );
 }
 
 export function useMetaEvents() {
@@ -124,7 +116,7 @@ export function useMetaEvents() {
 
     dbg("capi", eventName, {
       ...customData,
-      _userData: compactUserData(userData),
+      _userData: compactMetaObject(userData),
       _request: {
         clientIp: response?.debug?.clientIp,
         userAgent: response?.debug?.userAgent ?? userAgent,
@@ -141,19 +133,7 @@ export function useMetaEvents() {
   function trackViewContent(sku?: string) {
     const id = genEventId();
     const value = sku ? SKU_PRICES[sku] ?? 89 : 89;
-    const custom = {
-      content_ids: [sku ?? "ck-boxer-brief"],
-      content_name:
-        sku === "ck-brief"
-          ? "CK Brief"
-          : sku === "ck-boxer"
-          ? "CK Boxer"
-          : "CK Boxer & Brief",
-      content_category: "Underwear",
-      content_type: "product",
-      value,
-      currency: "VND",
-    };
+    const custom = buildMetaPurchaseCustomData({ sku, value });
     pixel("track", "ViewContent", { ...custom, eventID: id });
     // Only client_user_agent needed — added server-side
     capi("ViewContent", getFbCookies(), custom, id);
@@ -166,18 +146,7 @@ export function useMetaEvents() {
   function trackPurchase(order: OrderData) {
     const id = genEventId();
     const value = order.value ?? (order.sku ? SKU_PRICES[order.sku] ?? 89 : 89);
-    const custom = {
-      content_ids: [order.sku ?? "ck-boxer-brief"],
-      content_name:
-        order.sku === "ck-brief"
-          ? "CK Brief"
-          : order.sku === "ck-boxer"
-          ? "CK Boxer"
-          : "CK Boxer & Brief",
-      content_type: "product",
-      value,
-      currency: "VND",
-    };
+    const custom = buildMetaPurchaseCustomData({ sku: order.sku, value });
     pixel("track", "Purchase", { ...custom, eventID: id });
     capi(
       "Purchase",
@@ -205,13 +174,7 @@ export function useMetaEvents() {
   function trackAddToCart(sku: string, value?: number) {
     const id = genEventId();
     const v = value ?? SKU_PRICES[sku] ?? 89;
-    const custom = {
-      content_ids: [sku],
-      content_name: sku === "ck-brief" ? "CK Brief" : "CK Boxer",
-      content_type: "product",
-      value: v,
-      currency: "VND",
-    };
+    const custom = buildMetaPurchaseCustomData({ sku, value: v });
     pixel("track", "AddToCart", { ...custom, eventID: id });
     capi("AddToCart", getFbCookies(), custom, id);
   }
@@ -228,12 +191,7 @@ export function useMetaEvents() {
     );
 
     const id = initiateCheckoutEventId;
-    const custom = {
-      content_ids: ["ck-boxer-brief"],
-      content_type: "product",
-      value: getFinalTotal(1),
-      currency: "VND",
-    };
+    const custom = buildMetaPurchaseCustomData({ value: getFinalTotal(1) });
     pixel("track", "InitiateCheckout", { ...custom, eventID: id });
     capi("InitiateCheckout", getFbCookies(), custom, id);
   }
