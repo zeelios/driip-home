@@ -1,7 +1,14 @@
 <template>
   <footer class="footer">
     <div class="footer-inner">
-      <NuxtImg src="/logo.png" alt="driip" class="footer-logo-img" width="80" />
+      <NuxtImg
+        src="/logo.png"
+        alt="driip"
+        class="footer-logo-img"
+        width="80"
+        quality="70"
+        format="webp"
+      />
       <div class="footer-links">
         <a
           href="https://www.facebook.com/profile.php?id=61586812299701"

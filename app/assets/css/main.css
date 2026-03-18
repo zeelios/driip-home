@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
 /* ─── RESET & BASE ─────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 :root {
   --black: #000000;
@@ -12,11 +18,13 @@
   --grey-700: #333333;
   --grey-800: #1a1a1a;
   --grey-900: #111111;
-  --font-display: 'Barlow Condensed', sans-serif;
-  --font-body: 'Be Vietnam Pro', sans-serif;
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-body: "Be Vietnam Pro", sans-serif;
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   background: var(--black);
@@ -25,4 +33,22 @@ body {
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-leave-active {
+    transition: none;
+  }
 }

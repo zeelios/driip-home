@@ -36,7 +36,14 @@
       ‹
     </NuxtLinkLocale>
     <NuxtLinkLocale to="/" class="snav-logo-link">
-      <NuxtImg src="/logo.png" alt="driip" class="snav-logo-img" width="56" />
+      <NuxtImg
+        src="/logo.png"
+        alt="driip"
+        class="snav-logo-img"
+        width="56"
+        quality="70"
+        format="webp"
+      />
     </NuxtLinkLocale>
     <div class="snav-links">
       <button
