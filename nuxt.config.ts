@@ -8,7 +8,13 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: true },
 
-  modules: ["@nuxt/image", "@nuxtjs/i18n", "@pinia/nuxt", "@vercel/analytics"],
+  modules: [
+    "@nuxt/image",
+    "@nuxtjs/i18n",
+    "@pinia/nuxt",
+    "@vercel/analytics",
+    "@vercel/speed-insights",
+  ],
 
   css: ["~/assets/css/main.css"],
 
