@@ -40,6 +40,7 @@ const { t } = useI18n();
   width: auto;
   object-fit: contain;
   opacity: 0.7;
+  filter: invert(1);
   transition: opacity 0.2s;
 }
 .footer-logo-img:hover {

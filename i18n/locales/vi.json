@@ -33,11 +33,11 @@
     "hero": {
       "pre": "CALVIN KLEIN ESSENTIALS · SS26",
       "sub": "ĐƯỢC THIẾT KẾ CHO NGƯỜI ĐÀN ÔNG\nKHÔNG CHẤP NHẬN THỎA HIỆP",
-      "cta": "ĐẶT HÀNG SỚM — GIẢM 20%"
+      "cta": "MUA ONLINE — GIẢM THÊM 20%"
     },
     "strip": {
       "shipping": "MIỄN PHÍ VẬN CHUYỂN",
-      "offer": "GIẢM 20% ĐƠN ĐẦU TIÊN",
+      "offer": "MUA QUA WEB — GIẢM THÊM 20%",
       "stock": "SỐ LƯỢNG CÓ HẠN"
     },
     "products": {
@@ -61,11 +61,11 @@
       "waistband": "DÂY LƯNG CHỮ KÝ"
     },
     "offer": {
-      "label": "ƯU ĐÃI ĐỘC QUYỀN",
-      "title": "GIẢM 20%\nĐƠN HÀNG ĐẦU TIÊN",
-      "body": "Dành riêng cho thành viên truy cập sớm. Một mã giảm giá mỗi khách hàng. Được áp dụng tự động khi thanh toán vào ngày ra mắt.",
-      "yourCode": "MÃ GIẢM GIÁ CỦA BẠN",
-      "validity": "Có hiệu lực đến ngày ra mắt · Sử dụng một lần · CK Boxer & Brief",
+      "label": "ƯU ĐÃI TRÊN WEB",
+      "title": "GIẢM THÊM 20%\nCHO ĐƠN HÀNG CỦA BẠN",
+      "body": "Đang bán trên website. Mỗi khách hàng một mã. Tự động áp dụng khi thanh toán.",
+      "yourCode": "MÃ CỦA BẠN",
+      "validity": "Áp dụng ngay · Sử dụng một lần · CK Boxer & Brief",
       "copy": "SAO CHÉP",
       "copied": "ĐÃ SAO CHÉP ✓"
     },
@@ -77,9 +77,9 @@
       "modalButton": "Tìm size theo cân nặng"
     },
     "access": {
-      "label": "ĐĂNG KÝ NHẬN THÔNG BÁO",
-      "title": "ĐẶT TRƯỚC.\nSỞ HỮU TRƯỚC.",
-      "sub": "Để lại thông tin. Chúng tôi sẽ thông báo ngay khi hàng có sẵn — kèm mã giảm giá 20% của bạn.",
+      "label": "CẬP NHẬT MỚI NHẤT",
+      "title": "MẪU CỔ ĐIỂN.\nĐÃ CÓ TRÊN WEB.",
+      "sub": "Để lại thông tin. Chúng tôi sẽ cập nhật khi có hàng bổ sung, tin mới và ưu đãi chỉ dành cho web.",
       "name": "HỌ VÀ TÊN",
       "namePlaceholder": "Tên của bạn",
       "email": "ĐỊA CHỈ EMAIL",
@@ -88,7 +88,7 @@
       "phonePlaceholder": "+84 9XX XXX XXX | 09x xxx xxxx",
       "optional": "(TÙY CHỌN)",
       "submit": "NHẬN THÔNG BÁO + KHÓA MÃ GIẢM GIÁ",
-      "fine": "Bằng cách gửi, bạn đồng ý nhận thông báo ra mắt từ driip-",
+      "fine": "Bằng cách gửi, bạn đồng ý nhận cập nhật và ưu đãi chỉ dành cho web từ driip-",
       "successTitle": "BẠN ĐÃ ĐĂNG KÝ",
       "successBody": "Mã {code} của bạn đã được giữ. Chúng tôi sẽ nhắn tin khi hàng sẵn sàng."
     },

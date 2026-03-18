@@ -33,11 +33,11 @@
     "hero": {
       "pre": "CALVIN KLEIN ESSENTIALS · SS26",
       "sub": "ENGINEERED FOR THE MAN\nWHO REFUSES TO COMPROMISE",
-      "cta": "ORDER EARLY — 20% OFF"
+      "cta": "BUY ONLINE — EXTRA 20% OFF"
     },
     "strip": {
       "shipping": "FREE SHIPPING",
-      "offer": "20% OFF — CODE DRIIP20",
+      "offer": "BUY THROUGH WEB — EXTRA 20% OFF",
       "stock": "LIMITED STOCK"
     },
     "products": {
@@ -61,19 +61,19 @@
       "waistband": "SIGNATURE WAISTBAND"
     },
     "offer": {
-      "label": "EXCLUSIVE OFFER",
-      "title": "20% OFF\nYOUR FIRST ORDER",
-      "body": "Reserved for early access members only. One code per customer. Applied automatically at checkout on launch day.",
+      "label": "WEB EXCLUSIVE",
+      "title": "EXTRA 20% OFF\nYOUR ORDER",
+      "body": "Available now through our website. One code per customer. Applied automatically at checkout.",
       "yourCode": "YOUR CODE",
-      "validity": "Valid until launch day · Single use · CK Boxer & Brief",
+      "validity": "Available now · Single use · CK Boxer & Brief",
       "copy": "COPY",
       "copied": "COPIED ✓"
     },
     "manifesto": "\"The foundation of every outfit\nis what nobody sees.\nGet that right first.\"",
     "access": {
-      "label": "GET NOTIFIED",
-      "title": "FIRST TO KNOW.\nFIRST TO OWN.",
-      "sub": "Drop your details and we'll notify you the moment stock goes live — with your 20% off code locked in.",
+      "label": "STAY UPDATED",
+      "title": "THE CLASSIC PACK.\nNOW ONLINE.",
+      "sub": "Drop your details and we'll keep you posted on restocks, updates, and web-only offers.",
       "name": "FULL NAME",
       "namePlaceholder": "Your name",
       "email": "EMAIL ADDRESS",
@@ -82,7 +82,7 @@
       "phonePlaceholder": "+84 9XX XXX XXX",
       "optional": "(OPTIONAL)",
       "submit": "NOTIFY ME + LOCK MY CODE",
-      "fine": "By submitting you agree to receive launch communications from driip-",
+      "fine": "By submitting you agree to receive updates and web-only offers from driip-", 
       "successTitle": "YOU'RE ON THE LIST",
       "successBody": "Code {code} is locked in. We'll message you when it goes live."
     },
