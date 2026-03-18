@@ -237,6 +237,7 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
 
   const orderValidationMsg = computed<string>(() => {
     if (phoneValidationMsg.value) return phoneValidationMsg.value;
+    if (!order.value.province) return t("ck.order.validate.province");
     if (!order.value.sku) return t("ck.order.validate.sku");
     if (!order.value.size) return t("ck.order.validate.size");
     if (!order.value.color) return t("ck.order.validate.color");

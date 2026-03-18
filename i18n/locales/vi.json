@@ -109,7 +109,7 @@
       "phone": "SỐ ĐIỆN THOẠI",
       "phonePlaceholder": "+84 9XX XXX XXX / 09x xxx xxxx",
       "province": "TỈNH / THÀNH PHỐ",
-      "provincePlaceholder": "Chọn tỉnh/thành phố",
+      "provincePlaceholder": "Tìm tỉnh / thành phố",
       "district": "QUẬN / HUYỆN",
       "districtPlaceholder": "Chọn quận/huyện",
       "districtTextPlaceholder": "Nhập quận/huyện",
@@ -139,9 +139,10 @@
       "extraDiscount": "GIẢM THÊM WEBSITE",
       "finalPerBox": "GIÁ CUỐI / HỘP",
       "validate": {
+        "province": "Vui lòng chọn tỉnh hoặc thành phố.",
         "sku": "Vui lòng chọn sản phẩm.",
         "size": "Vui lòng chọn size.",
-        "color": "Vui lòng chọn gói màu sắc."
+        "color": "Vui lòng chọn loại màu."
       },
       "successTitle": "ĐÃ NHẬN ĐƠN HÀNG",
       "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}."

@@ -1,50 +1,4 @@
-import {
-  appendGoogleSheetRow,
-  readGoogleSheetValues,
-} from "../utils/google-sheets";
-
-function getVietnamDateCode(date = new Date()): string {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Ho_Chi_Minh",
-    month: "short",
-    day: "2-digit",
-  }).formatToParts(date);
-
-  const month = parts.find((part) => part.type === "month")?.value ?? "";
-  const day = parts.find((part) => part.type === "day")?.value ?? "";
-
-  return `${month}${day}`;
-}
-
-async function generateOrderId(): Promise<string> {
-  const todayCode = getVietnamDateCode();
-  const prefix = `${todayCode}-`;
-
-  let highestSequence = 0;
-
-  try {
-    const rows = await readGoogleSheetValues("Web!A2:A");
-
-    for (const row of rows) {
-      const value = String(row[0] ?? "").trim();
-      if (!value.startsWith(prefix)) continue;
-
-      const suffix = value.slice(prefix.length);
-      if (!/^\d{2}$/.test(suffix)) continue;
-
-      highestSequence = Math.max(highestSequence, Number(suffix));
-    }
-  } catch (error) {
-    console.warn(
-      "[Google Sheets] Could not read existing order IDs, falling back to a local sequence.",
-      error
-    );
-    return `${todayCode}-01`;
-  }
-
-  const nextSequence = String(highestSequence + 1).padStart(2, "0");
-  return `${todayCode}-${nextSequence}`;
-}
+import { queueOrderRows, reserveOrderId } from "../utils/order-queue";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -104,7 +58,7 @@ export default defineEventHandler(async (event) => {
     formattedColor.charAt(0).toUpperCase() + formattedColor.slice(1);
 
   try {
-    const orderId = await generateOrderId();
+    const orderId = await reserveOrderId();
     const rows = [];
 
     for (let i = 0; i < quantity; i++) {
@@ -134,14 +88,14 @@ export default defineEventHandler(async (event) => {
       rows.push(row);
     }
 
-    await appendGoogleSheetRow("Web!A:R", rows);
+    queueOrderRows(rows);
 
-    return { ok: true, orderId };
+    return { ok: true, queued: true, orderId };
   } catch (error: any) {
-    console.error("[Google Sheets API Error]", error);
+    console.error("[Order Queue Error]", error);
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to sync order to Google Sheets",
+      statusMessage: "Failed to queue order for Google Sheets sync",
       cause: error.message,
     });
   }

@@ -33,8 +33,40 @@ const SKU_PRICES: Record<string, number> = {
   "ck-boxer": getFinalTotal(1),
 };
 
+const INITIATE_CHECKOUT_STORAGE_KEY = "driip_meta_initiate_checkout_event_id";
+
+let initiateCheckoutSent = false;
+let initiateCheckoutEventId: string | null = null;
+
 function genEventId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function getSessionEventId(storageKey: string): string {
+  if (!import.meta.client) return genEventId();
+
+  try {
+    const existing = window.sessionStorage.getItem(storageKey);
+    if (existing) return existing;
+
+    const next = genEventId();
+    window.sessionStorage.setItem(storageKey, next);
+    return next;
+  } catch {
+    return genEventId();
+  }
+}
+
+function compactUserData(
+  userData: Record<string, unknown>
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(userData).filter(([, value]) => {
+      if (value == null) return false;
+      if (typeof value === "string") return value.trim().length > 0;
+      return true;
+    })
+  );
 }
 
 export function useMetaEvents() {
@@ -71,11 +103,13 @@ export function useMetaEvents() {
     eventId: string
   ) {
     if (!import.meta.client) return;
-    dbg("capi", eventName, {
-      ...customData,
-      _userData: Object.keys(userData).filter((k) => userData[k]),
-    });
-    await $fetch("/api/meta-capi", {
+    const userAgent = navigator.userAgent;
+    const response = await $fetch<{
+      debug?: {
+        clientIp?: string;
+        userAgent?: string;
+      };
+    }>("/api/meta-capi", {
       method: "POST",
       body: {
         eventName,
@@ -86,6 +120,15 @@ export function useMetaEvents() {
       },
     }).catch((err) => {
       if (import.meta.dev) console.warn("[CAPI]", err);
+    });
+
+    dbg("capi", eventName, {
+      ...customData,
+      _userData: compactUserData(userData),
+      _request: {
+        clientIp: response?.debug?.clientIp,
+        userAgent: response?.debug?.userAgent ?? userAgent,
+      },
     });
   }
 
@@ -177,7 +220,14 @@ export function useMetaEvents() {
    * InitiateCheckout — fires when hero CTA is clicked.
    */
   function trackInitiateCheckout() {
-    const id = genEventId();
+    if (initiateCheckoutSent) return;
+
+    initiateCheckoutSent = true;
+    initiateCheckoutEventId ??= getSessionEventId(
+      INITIATE_CHECKOUT_STORAGE_KEY
+    );
+
+    const id = initiateCheckoutEventId;
     const custom = {
       content_ids: ["ck-boxer-brief"],
       content_type: "product",

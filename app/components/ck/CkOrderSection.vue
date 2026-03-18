@@ -70,18 +70,14 @@
             <div class="form-row single">
               <div class="form-field">
                 <label>{{ t("ck.order.province") }}</label>
-                <select v-model="order.province" required>
-                  <option value="" disabled>
-                    {{ t("ck.order.provincePlaceholder") }}
-                  </option>
-                  <option
-                    v-for="prov in vietnamProvinces"
-                    :key="prov.code"
-                    :value="prov.name"
-                  >
-                    {{ prov.name }}
-                  </option>
-                </select>
+                <ZSelect
+                  v-model="order.province"
+                  embedded
+                  :placeholder="t('ck.order.provincePlaceholder')"
+                  :search-placeholder="t('ck.order.provincePlaceholder')"
+                  :empty-state="t('ck.order.validate.province')"
+                  :options="provinceOptions"
+                />
               </div>
             </div>
             <div class="form-row single">
@@ -295,6 +291,12 @@ import { vietnamProvinces } from "~/data/vietnam-addresses";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
 const { t } = useI18n();
 const store = useCkUnderwearStore();
+const provinceOptions = computed(() =>
+  vietnamProvinces.map((province) => ({
+    value: province.name,
+    label: province.name,
+  }))
+);
 const {
   boxOptions,
   colorLabel,

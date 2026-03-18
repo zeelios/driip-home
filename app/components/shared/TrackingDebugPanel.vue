@@ -17,18 +17,41 @@
         </div>
 
         <div class="dbg-scroll">
-          <div v-if="!events.length" class="dbg-empty">No events fired yet.</div>
+          <div v-if="!events.length" class="dbg-empty">
+            No events fired yet.
+          </div>
 
           <div v-for="e in events" :key="e.id" class="dbg-row">
-            <span class="dbg-source" :class="e.source">{{ e.source === 'pixel' ? 'PX' : 'CAPI' }}</span>
+            <span class="dbg-source" :class="e.source">{{
+              e.source === "pixel" ? "PX" : "CAPI"
+            }}</span>
             <span class="dbg-name">{{ e.name }}</span>
             <span class="dbg-time">{{ e.time }}</span>
             <button
               v-if="e.params && Object.keys(e.params).length"
               class="dbg-expand"
               @click="toggle(e.id)"
-            >{{ expanded.has(e.id) ? '▲' : '▼' }}</button>
-            <pre v-if="expanded.has(e.id)" class="dbg-params">{{ JSON.stringify(e.params, null, 2) }}</pre>
+            >
+              {{ expanded.has(e.id) ? "▲" : "▼" }}
+            </button>
+            <div v-if="getRequestMeta(e.params)" class="dbg-request-meta">
+              <span v-if="getRequestMeta(e.params)?.clientIp"
+                >IP: {{ getRequestMeta(e.params)?.clientIp }}</span
+              >
+              <span
+                v-if="
+                  getRequestMeta(e.params)?.clientIp &&
+                  getRequestMeta(e.params)?.userAgent
+                "
+                >·</span
+              >
+              <span v-if="getRequestMeta(e.params)?.userAgent" class="dbg-ua">
+                UA: {{ getRequestMeta(e.params)?.userAgent }}
+              </span>
+            </div>
+            <pre v-if="expanded.has(e.id)" class="dbg-params">{{
+              JSON.stringify(e.params, null, 2)
+            }}</pre>
           </div>
         </div>
       </div>
@@ -37,16 +60,32 @@
 </template>
 
 <script setup lang="ts">
-import { useTrackingDebug } from '~/composables/useTrackingDebug'
+import { useTrackingDebug } from "~/composables/useTrackingDebug";
 
-const isDev = import.meta.dev
-const { events, clear } = useTrackingDebug()
-const open     = ref(false)
-const expanded = reactive(new Set<string>())
+const isDev = import.meta.dev;
+const { events, clear } = useTrackingDebug();
+const open = ref(false);
+const expanded = reactive(new Set<string>());
+
+type RequestMeta = {
+  clientIp?: string;
+  userAgent?: string;
+};
 
 function toggle(id: string) {
-  if (expanded.has(id)) expanded.delete(id)
-  else expanded.add(id)
+  if (expanded.has(id)) expanded.delete(id);
+  else expanded.add(id);
+}
+
+function getRequestMeta(params?: Record<string, unknown>): RequestMeta | null {
+  const meta = params?._request;
+
+  if (!meta || typeof meta !== "object") return null;
+
+  const request = meta as RequestMeta;
+  if (!request.clientIp && !request.userAgent) return null;
+
+  return request;
 }
 </script>
 
@@ -56,7 +95,7 @@ function toggle(id: string) {
   bottom: 20px;
   right: 20px;
   z-index: 9999;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: "SF Mono", "Fira Code", monospace;
   font-size: 11px;
 }
 
@@ -66,18 +105,26 @@ function toggle(id: string) {
   align-items: center;
   gap: 6px;
   background: #1a1a1a;
-  border: 1px solid rgba(255,255,255,.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #e5e5e5;
   padding: 7px 12px;
   cursor: pointer;
   border-radius: 6px;
-  letter-spacing: .08em;
-  transition: border-color .15s;
+  letter-spacing: 0.08em;
+  transition: border-color 0.15s;
   margin-left: auto;
 }
-.dbg-toggle:hover { border-color: rgba(255,255,255,.4); }
-.dbg-icon { color: #10b981; font-size: 10px; }
-.dbg-label { font-weight: 700; letter-spacing: .15em; }
+.dbg-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.dbg-icon {
+  color: #10b981;
+  font-size: 10px;
+}
+.dbg-label {
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
 .dbg-count {
   background: #1877f2;
   color: #fff;
@@ -97,12 +144,12 @@ function toggle(id: string) {
   width: 360px;
   max-height: 480px;
   background: #0d0d0d;
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0,0,0,.7);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
 }
 
 .dbg-panel-head {
@@ -110,27 +157,30 @@ function toggle(id: string) {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
 }
 .dbg-panel-title {
   font-weight: 700;
-  letter-spacing: .15em;
+  letter-spacing: 0.15em;
   color: #e5e5e5;
   flex: 1;
 }
 .dbg-clear {
   background: transparent;
-  border: 1px solid rgba(255,255,255,.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #666;
   font-size: 9px;
-  letter-spacing: .15em;
+  letter-spacing: 0.15em;
   padding: 2px 8px;
   cursor: pointer;
   border-radius: 3px;
-  transition: color .15s, border-color .15s;
+  transition: color 0.15s, border-color 0.15s;
 }
-.dbg-clear:hover { color: #e5e5e5; border-color: rgba(255,255,255,.4); }
+.dbg-clear:hover {
+  color: #e5e5e5;
+  border-color: rgba(255, 255, 255, 0.4);
+}
 .dbg-close {
   background: transparent;
   border: none;
@@ -138,9 +188,11 @@ function toggle(id: string) {
   font-size: 13px;
   cursor: pointer;
   padding: 0 4px;
-  transition: color .15s;
+  transition: color 0.15s;
 }
-.dbg-close:hover { color: #e5e5e5; }
+.dbg-close:hover {
+  color: #e5e5e5;
+}
 
 .dbg-scroll {
   overflow-y: auto;
@@ -156,32 +208,54 @@ function toggle(id: string) {
   flex-wrap: wrap;
   gap: 6px;
   padding: 8px 14px;
-  border-bottom: 1px solid rgba(255,255,255,.04);
-  transition: background .1s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.1s;
 }
-.dbg-row:hover { background: rgba(255,255,255,.03); }
+.dbg-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
 
 .dbg-source {
   font-weight: 700;
   font-size: 9px;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   padding: 2px 5px;
   border-radius: 3px;
   flex-shrink: 0;
 }
-.dbg-source.pixel { background: #1877f2; color: #fff; }
-.dbg-source.capi  { background: #10b981; color: #fff; }
+.dbg-source.pixel {
+  background: #1877f2;
+  color: #fff;
+}
+.dbg-source.capi {
+  background: #10b981;
+  color: #fff;
+}
 
 .dbg-name {
   flex: 1;
   color: #e5e5e5;
   font-weight: 600;
-  letter-spacing: .05em;
+  letter-spacing: 0.05em;
 }
 .dbg-time {
   color: #555;
   flex-shrink: 0;
   font-size: 10px;
+}
+
+.dbg-request-meta {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #9ca3af;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+.dbg-ua {
+  word-break: break-word;
 }
 .dbg-expand {
   background: transparent;
@@ -190,15 +264,17 @@ function toggle(id: string) {
   cursor: pointer;
   font-size: 9px;
   padding: 0 2px;
-  transition: color .15s;
+  transition: color 0.15s;
 }
-.dbg-expand:hover { color: #e5e5e5; }
+.dbg-expand:hover {
+  color: #e5e5e5;
+}
 
 .dbg-params {
   width: 100%;
   margin-top: 4px;
   background: #111;
-  border: 1px solid rgba(255,255,255,.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 4px;
   padding: 8px 10px;
   color: #aaa;
@@ -212,13 +288,13 @@ function toggle(id: string) {
   padding: 24px;
   text-align: center;
   color: #444;
-  letter-spacing: .1em;
+  letter-spacing: 0.1em;
 }
 
 /* ── Transition ────────────────────────────────── */
 .dbg-slide-enter-active,
 .dbg-slide-leave-active {
-  transition: opacity .15s, transform .15s;
+  transition: opacity 0.15s, transform 0.15s;
 }
 .dbg-slide-enter-from,
 .dbg-slide-leave-to {

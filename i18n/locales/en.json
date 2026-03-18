@@ -103,7 +103,7 @@
       "phone": "PHONE NUMBER",
       "phonePlaceholder": "+84 9XX XXX XXX",
       "province": "PROVINCE / CITY",
-      "provincePlaceholder": "Select province/city",
+      "provincePlaceholder": "Search province / city",
       "district": "DISTRICT",
       "districtPlaceholder": "Select district",
       "districtTextPlaceholder": "Enter district",
@@ -133,6 +133,7 @@
       "extraDiscount": "EXTRA WEBSITE OFF",
       "finalPerBox": "FINAL PRICE / BOX",
       "validate": {
+        "province": "Please select a province or city.",
         "sku": "Please select a product.",
         "size": "Please select a size.",
         "color": "Please select a colour pack."

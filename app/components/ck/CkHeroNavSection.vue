@@ -8,7 +8,7 @@
         <span class="line-3">& BRIEF<span class="dash-end">—</span></span>
       </h1>
       <p class="hero-sub">{{ t("ck.hero.sub") }}</p>
-      <button class="btn-primary" @click="$emit('hero-cta')">
+      <button class="btn-checkout-cta" @click="$emit('hero-cta')">
         {{ t("ck.hero.cta") }}
         <span class="btn-arrow">→</span>
       </button>
@@ -164,7 +164,7 @@ const { switchLang } = ckStore;
   padding-left: 16px;
   white-space: pre-line;
 }
-.btn-primary {
+.btn-checkout-cta {
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -179,7 +179,7 @@ const { switchLang } = ckStore;
   cursor: pointer;
   transition: background 0.2s, gap 0.2s;
 }
-.btn-primary:hover {
+.btn-checkout-cta:hover {
   background: var(--grey-100);
   gap: 20px;
 }
