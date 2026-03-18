@@ -94,6 +94,7 @@ export default defineNuxtConfig({
     googleClientEmail: process.env.GOOGLE_CLIENT_EMAIL || "",
     googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY || "",
     googleSheetId: process.env.GOOGLE_SHEET_ID || "",
+    googleServiceAccountJson: process.env.GOOGLE_SERVICE_ACCOUNT_JSON || "",
     metaCAPIAccessToken: process.env.META_CAPI_ACCESS_TOKEN || "",
     metaTestEventCode: process.env.META_TEST_EVENT_CODE || "",
     // Public — populated from NUXT_PUBLIC_META_PIXEL_ID

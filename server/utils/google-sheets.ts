@@ -1,14 +1,57 @@
 import { useRuntimeConfig } from "#imports";
 import { google } from "googleapis";
 
+type GoogleServiceAccountJson = {
+  client_email?: string;
+  private_key?: string;
+};
+
+function getServiceAccountCredentials(
+  config: ReturnType<typeof useRuntimeConfig>
+) {
+  if (config.googleServiceAccountJson) {
+    try {
+      const parsed = JSON.parse(
+        config.googleServiceAccountJson
+      ) as GoogleServiceAccountJson;
+
+      if (!parsed.client_email || !parsed.private_key) {
+        throw new Error(
+          "service account JSON is missing client_email or private_key"
+        );
+      }
+
+      return {
+        client_email: parsed.client_email,
+        private_key: parsed.private_key.replace(/\\n/g, "\n"),
+      };
+    } catch (error) {
+      throw new Error(
+        `[Google Sheets] Invalid GOOGLE_SERVICE_ACCOUNT_JSON: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  if (!config.googleClientEmail || !config.googlePrivateKey) {
+    throw new Error(
+      "[Google Sheets] Missing Google credentials. Set GOOGLE_SERVICE_ACCOUNT_JSON or both GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY."
+    );
+  }
+
+  return {
+    client_email: config.googleClientEmail as string,
+    private_key: (config.googlePrivateKey as string).replace(/\\n/g, "\n"),
+  };
+}
+
 function createSheetsClient() {
   const config = useRuntimeConfig();
+  const credentials = getServiceAccountCredentials(config);
 
   const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: config.googleClientEmail as string,
-      private_key: (config.googlePrivateKey as string).replace(/\\n/g, "\n"),
-    },
+    credentials,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 
@@ -28,12 +71,16 @@ export async function appendGoogleSheetRow(
     range,
     valueInputOption: "USER_ENTERED",
     requestBody: {
-      values: isMultiRow ? (values as (string | number)[][]) : [values as (string | number)[]],
+      values: isMultiRow
+        ? (values as (string | number)[][])
+        : [values as (string | number)[]],
     },
   });
 }
 
-export async function readGoogleSheetValues(range: string): Promise<(string | number)[][]> {
+export async function readGoogleSheetValues(
+  range: string
+): Promise<(string | number)[][]> {
   const config = useRuntimeConfig();
   const sheets = createSheetsClient();
 

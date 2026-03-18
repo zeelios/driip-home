@@ -288,8 +288,8 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     order.value.sku = sku;
   }
 
-  function trackHeroCTA(): void {
-    trackInitiateCheckout();
+  function trackHeroCTA(boxes: number = order.value.boxes): void {
+    trackInitiateCheckout(boxes);
   }
 
   function trackProductsViewed(): void {

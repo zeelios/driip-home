@@ -182,7 +182,7 @@ export function useMetaEvents() {
   /**
    * InitiateCheckout — fires when hero CTA is clicked.
    */
-  function trackInitiateCheckout() {
+  function trackInitiateCheckout(boxes = 1) {
     if (initiateCheckoutSent) return;
 
     initiateCheckoutSent = true;
@@ -191,7 +191,7 @@ export function useMetaEvents() {
     );
 
     const id = initiateCheckoutEventId;
-    const custom = buildMetaPurchaseCustomData({ value: getFinalTotal(1) });
+    const custom = buildMetaPurchaseCustomData({ value: getFinalTotal(boxes) });
     pixel("track", "InitiateCheckout", { ...custom, eventID: id });
     capi("InitiateCheckout", getFbCookies(), custom, id);
   }

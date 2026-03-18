@@ -38,7 +38,9 @@ async function seedHighestSequence(dateCode: string): Promise<number> {
     let highestSequence = 0;
 
     try {
-      const rows = await readGoogleSheetValues("Web!A2:A");
+      // Read from the first row so blank sheets and single-header sheets don't
+      // trigger a grid-limits error before we can fall back to the local seed.
+      const rows = await readGoogleSheetValues("Web!A:A");
 
       for (const row of rows) {
         const value = String(row[0] ?? "").trim();

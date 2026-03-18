@@ -20,36 +20,67 @@
     </button>
 
     <Transition name="z-select-fade">
-      <div v-if="isOpen" class="z-select-panel">
-        <input
-          ref="searchRef"
-          v-model="query"
-          class="z-select-search"
-          type="text"
-          :placeholder="searchPlaceholder || placeholder"
-          autocomplete="off"
-          spellcheck="false"
-          @keydown.esc.prevent="closeDropdown"
-          @keydown.enter.prevent="selectFirstVisible"
+      <div v-if="isOpen" class="z-select-overlay">
+        <button
+          type="button"
+          class="z-select-backdrop"
+          aria-label="Close picker"
+          @click="closeDropdown"
         />
 
-        <div class="z-select-options" role="listbox">
-          <button
-            v-for="option in visibleOptions"
-            :key="option.value"
-            type="button"
-            class="z-select-option"
-            :class="{ active: option.value === modelValue }"
-            @click="selectOption(option)"
-          >
-            <span class="z-select-option-label">{{ option.label }}</span>
-            <span v-if="option.hint" class="z-select-option-hint">{{
-              option.hint
-            }}</span>
-          </button>
+        <div
+          class="z-select-panel"
+          role="dialog"
+          :aria-label="label || placeholder"
+        >
+          <div class="z-select-panel-bar">
+            <div class="z-select-panel-grabber" aria-hidden="true" />
 
-          <div v-if="!visibleOptions.length" class="z-select-empty">
-            {{ emptyState }}
+            <div class="z-select-panel-heading">
+              <span class="z-select-panel-title">{{
+                label || placeholder
+              }}</span>
+
+              <button
+                type="button"
+                class="z-select-panel-done"
+                @click="closeDropdown"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+
+          <input
+            ref="searchRef"
+            v-model="query"
+            class="z-select-search"
+            type="text"
+            :placeholder="searchPlaceholder || placeholder"
+            autocomplete="off"
+            spellcheck="false"
+            @keydown.esc.prevent="closeDropdown"
+            @keydown.enter.prevent="selectFirstVisible"
+          />
+
+          <div class="z-select-options" role="listbox">
+            <button
+              v-for="option in visibleOptions"
+              :key="option.value"
+              type="button"
+              class="z-select-option"
+              :class="{ active: option.value === modelValue }"
+              @click="selectOption(option)"
+            >
+              <span class="z-select-option-label">{{ option.label }}</span>
+              <span v-if="option.hint" class="z-select-option-hint">{{
+                option.hint
+              }}</span>
+            </button>
+
+            <div v-if="!visibleOptions.length" class="z-select-empty">
+              {{ emptyState }}
+            </div>
           </div>
         </div>
       </div>
@@ -185,6 +216,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener("mousedown", onDocumentPointerDown, true);
 });
+
+watch(isOpen, (open) => {
+  if (!process.client) return;
+
+  document.documentElement.style.overflow = open ? "hidden" : "";
+});
 </script>
 
 <style scoped>
@@ -265,16 +302,95 @@ onBeforeUnmount(() => {
   color: var(--grey-400);
 }
 
-.z-select-panel {
+.z-select-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.z-select-backdrop {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 8px);
-  z-index: 40;
-  background: #0f0f0f;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+  inset: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 0;
+}
+
+.z-select-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+  max-height: min(82vh, 760px);
+  display: flex;
+  flex-direction: column;
+  background: rgba(14, 14, 14, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
   overflow: hidden;
+  border-radius: 28px 28px 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.z-select-panel-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 18, 18, 0.98),
+    rgba(18, 18, 18, 0.92)
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 14px 10px;
+}
+
+.z-select-panel-grabber {
+  width: 42px;
+  height: 5px;
+  margin: 0 auto 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.z-select-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.z-select-panel-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.z-select-panel-done {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--grey-400);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 0;
+}
+
+.z-select-panel-done:hover {
+  color: var(--white);
 }
 
 .embedded .z-select-panel {
@@ -285,12 +401,12 @@ onBeforeUnmount(() => {
   width: 100%;
   border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: #111;
+  background: rgba(255, 255, 255, 0.03);
   color: var(--white);
   font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 300;
-  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 16px 16px;
   outline: none;
 }
 
@@ -299,7 +415,7 @@ onBeforeUnmount(() => {
 }
 
 .z-select-options {
-  max-height: 280px;
+  max-height: 50vh;
   overflow-y: auto;
 }
 
@@ -314,7 +430,7 @@ onBeforeUnmount(() => {
   background: transparent;
   color: var(--white);
   cursor: pointer;
-  padding: 14px 16px;
+  padding: 16px;
   text-align: left;
   transition: background 0.15s;
 }
@@ -358,6 +474,39 @@ onBeforeUnmount(() => {
 }
 
 @media (min-width: 640px) {
+  .z-select-overlay {
+    align-items: flex-start;
+    justify-content: flex-start;
+    position: absolute;
+  }
+
+  .z-select-backdrop {
+    display: none;
+  }
+
+  .z-select-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 100%;
+    max-height: none;
+    border-radius: 0;
+    padding-bottom: 0;
+  }
+
+  .z-select-panel-bar {
+    padding: 0;
+    border-bottom: none;
+    background: transparent;
+  }
+
+  .z-select-panel-grabber,
+  .z-select-panel-heading,
+  .z-select-panel-done {
+    display: none;
+  }
+
   .z-select-search {
     padding: 16px 18px;
   }

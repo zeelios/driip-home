@@ -118,7 +118,7 @@ function scrollToSection(id: string): void {
 }
 
 function onHeroCTA(): void {
-  ckStore.trackHeroCTA();
+  ckStore.trackHeroCTA(ckStore.order.boxes);
   scrollToSection("order");
 }
 
