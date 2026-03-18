@@ -16,10 +16,10 @@
       "label": "Bộ sưu tập SS26",
       "title": "Bộ sưu tập",
       "live": "Đang mở bán",
-      "comingSoon": "Sắp ra mắt",
+      "comingSoon": "Đợt tiếp theo",
       "from": "Từ",
       "shopNow": "Mua ngay →",
-      "notify": "Thông báo khi có hàng"
+      "notify": "Xem đợt hàng"
     },
     "upcoming": {
       "label": "Các đợt tiếp theo",
@@ -33,7 +33,14 @@
     "hero": {
       "pre": "CALVIN KLEIN ESSENTIALS · SS26",
       "sub": "ĐƯỢC THIẾT KẾ CHO NGƯỜI ĐÀN ÔNG\nKHÔNG CHẤP NHẬN THỎA HIỆP",
-      "cta": "MUA ONLINE — GIẢM THÊM 20%"
+      "cta": "MUA ONLINE — GIẢM THÊM 20%",
+      "priceLabel": "GIÁ",
+      "priceValue": "TỪ 699K VND",
+      "configLabel": "CẤU HÌNH",
+      "configValue": "BRIEF / BOXER",
+      "previewLabel": "XEM TRƯỚC",
+      "previewTitle": "XEM DÁNG MẶC TRƯỚC KHI MUA",
+      "previewBody": "Một khối preview gọn hơn giúp landing page có nhiều bằng chứng hơn, rõ hơn, và có lý do mạnh hơn để người dùng tiếp tục cuộn xuống."
     },
     "strip": {
       "shipping": "MIỄN PHÍ VẬN CHUYỂN",
@@ -147,6 +154,62 @@
       "successTitle": "Đã nhận đơn hàng",
       "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}."
     }
+  },
+  "tee": {
+    "nav": {
+      "lang": "EN",
+      "cta": "XEM CHI TIẾT",
+      "details": "CHI TIẾT",
+      "manifesto": "TUYÊN NGÔN",
+      "top": "ĐẦU TRANG"
+    },
+    "hero": {
+      "pre": "ĐỢT MỚI — DRIIP TEE",
+      "title": "ÁO THUN ĐƯỢC LÀM LẠI CHỈNH CHU.",
+      "sub": "Sử dụng vải Sonoma cao cấp, cảm giác dày dặn hơn, hoàn thiện sạch hơn và mức độ đầu tư sản xuất thực sự cao.",
+      "cta": "XEM ĐỢT MỚI",
+      "secondary": "VỀ TRANG CHỦ",
+      "metrics": {
+        "fabric": "CHẤT LIỆU",
+        "fabricValue": "SONOMA",
+        "build": "HOÀN THIỆN",
+        "buildValue": "CAO CẤP, DÀY DẶN",
+        "run": "SẢN LƯỢNG",
+        "runValue": "GIỚI HẠN"
+      }
+    },
+    "visual": {
+      "pre": "XEM TRƯỚC",
+      "pill": "SẢN LƯỢNG ÍT",
+      "frontLabel": "Hoàn thiện dày dặn",
+      "title": "Cảm giác cầm nắm dày hơn, rơi dáng sạch hơn.",
+      "body": "Trang này được thiết kế để có độ “chạm” và cảm giác cao cấp ngay từ đầu — nhiều bầu không khí hơn, có chiều sâu hơn và rõ chất của một đợt drop thực thụ."
+    },
+    "strip": {
+      "fabric": "VẢI SONOMA",
+      "weight": "CẢM GIÁC DÀY DẶN",
+      "production": "CHI PHÍ SẢN XUẤT CAO",
+      "run": "SẢN LƯỢNG GIỚI HẠN"
+    },
+    "fabric": {
+      "label": "CHẤT LIỆU",
+      "title": "VẢI SONOMA",
+      "body": "Sonoma mang lại bề mặt dày, rơi dáng đẹp và cảm giác mặc chắc tay nhưng vẫn thoải mái trong suốt ngày dài."
+    },
+    "build": {
+      "label": "CẤU TRÚC",
+      "title": "LÀM RA CẢM GIÁC XỨNG ĐÁNG",
+      "body": "Từng chi tiết được làm kỹ: form sạch hơn, thân áo đầm hơn và phần hoàn thiện cho thấy rõ chi phí sản xuất thực tế phía sau."
+    },
+    "run": {
+      "label": "CHIẾN LƯỢC DROP",
+      "title": "SỐ LƯỢNG ÍT, CÓ CHỦ ĐÍCH",
+      "body": "Đợt này được giữ ở quy mô nhỏ để đảm bảo chất lượng luôn là ưu tiên từ khâu mẫu đến khâu sản xuất cuối cùng."
+    },
+    "manifesto": "Chiếc áo thun này phải cho cảm giác như chiếc áo đẹp nhất trong tủ: dày, sạch và được làm bằng sự đầu tư thật sự.",
+    "manifestoLabel": "ĐỊNH VỊ",
+    "footerText": "Đợt tiếp theo của Driip sẽ ra mắt với vải Sonoma. Cao cấp hơn, giới hạn hơn.",
+    "backToDrops": "QUAY LẠI BỘ SƯU TẬP"
   },
   "sizechart": {
     "label": "Bảng size",

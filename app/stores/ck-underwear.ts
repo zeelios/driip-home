@@ -81,14 +81,8 @@ const couponCode = "DRIIP20";
 
 export const useCkUnderwearStore = defineStore("ck-underwear", () => {
   const { t, locale, setLocale } = useI18n();
-  const {
-    trackViewContent,
-    trackAddToCart,
-    trackPurchase,
-    trackInitiateCheckout,
-    trackLead,
-    trackSubscribe,
-  } = useMetaEvents();
+  const { trackViewContent, trackPurchase, trackLead, trackSubscribe } =
+    useMetaEvents();
 
   const boxerColor = ref<string>("Black");
   const briefColor = ref<string>("Black");
@@ -284,12 +278,7 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
   }
 
   function prefillOrder(sku: string): void {
-    trackAddToCart(sku, orderPrice.value);
     order.value.sku = sku;
-  }
-
-  function trackHeroCTA(boxes: number = order.value.boxes): void {
-    trackInitiateCheckout(boxes);
   }
 
   function trackProductsViewed(): void {
@@ -450,7 +439,6 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     switchLang,
     tierTotal,
     tierUnitPrice,
-    trackHeroCTA,
     trackProductsViewed,
     viewContentFired,
     copyCode,

@@ -1,17 +1,90 @@
 <template>
   <section class="hero">
-    <div class="hero-inner parallax-content">
-      <p class="hero-pre">{{ t("ck.hero.pre") }}</p>
-      <h1 class="hero-title">
-        <span class="line-1">THE</span>
-        <span class="line-2">BOXER</span>
-        <span class="line-3">& BRIEF<span class="dash-end">—</span></span>
-      </h1>
-      <p class="hero-sub">{{ t("ck.hero.sub") }}</p>
-      <button class="btn-checkout-cta" @click="$emit('hero-cta')">
-        {{ t("ck.hero.cta") }}
-        <span class="btn-arrow">→</span>
-      </button>
+    <div class="hero-inner">
+      <div class="hero-copy parallax-content">
+        <p class="hero-pre">{{ t("ck.hero.pre") }}</p>
+        <h1 class="hero-title">
+          <span class="line-1">THE</span>
+          <span class="line-2">BOXER</span>
+          <span class="line-3">& BRIEF<span class="dash-end">—</span></span>
+        </h1>
+        <p class="hero-sub">{{ t("ck.hero.sub") }}</p>
+
+        <div class="hero-meta" aria-label="Product information">
+          <div class="hero-meta-card">
+            <span class="hero-meta-label">{{ t("ck.hero.priceLabel") }}</span>
+            <strong class="hero-meta-value">{{
+              formattedSkuPrice["ck-brief"]
+            }}</strong>
+            <span class="hero-meta-note">{{ t("ck.hero.priceValue") }}</span>
+          </div>
+          <div class="hero-meta-card">
+            <span class="hero-meta-label">{{ t("ck.hero.configLabel") }}</span>
+            <strong class="hero-meta-value">{{
+              t("ck.hero.configValue")
+            }}</strong>
+            <span class="hero-meta-note">Brief / Boxer</span>
+          </div>
+          <div class="hero-meta-card">
+            <span class="hero-meta-label">{{ t("ck.strip.stock") }}</span>
+            <strong class="hero-meta-value">LIMITED RUN</strong>
+            <span class="hero-meta-note">Web drop only</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn-checkout-cta" @click="$emit('hero-cta')">
+            {{ t("ck.hero.cta") }}
+            <span class="btn-arrow">→</span>
+          </button>
+          <button
+            class="btn-preview-cta"
+            @click="$emit('scroll-to', 'products')"
+          >
+            {{ t("ck.hero.previewLabel") }}
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-preview reveal">
+        <div class="hero-preview-card hero-preview-card--primary">
+          <p class="hero-preview-label">{{ t("ck.hero.previewLabel") }}</p>
+          <h2 class="hero-preview-title">{{ t("ck.hero.previewTitle") }}</h2>
+          <p class="hero-preview-body">{{ t("ck.hero.previewBody") }}</p>
+          <div class="hero-preview-grid">
+            <article class="preview-item">
+              <NuxtImg
+                :src="`/products/Brief/${briefColor}.png`"
+                :alt="`CK Brief ${briefColor}`"
+                width="220"
+                height="275"
+                format="webp"
+                quality="80"
+                fit="cover"
+                class="preview-image"
+              />
+              <div class="preview-item-copy">
+                <span>{{ t("ck.products.brief.desc") }}</span>
+              </div>
+            </article>
+            <article class="preview-item preview-item--secondary">
+              <NuxtImg
+                :src="`/products/Boxer/${boxerColor}.png`"
+                :alt="`CK Boxer ${boxerColor}`"
+                width="220"
+                height="275"
+                format="webp"
+                quality="80"
+                fit="cover"
+                class="preview-image"
+              />
+              <div class="preview-item-copy">
+                <span>{{ t("ck.products.boxer.desc") }}</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="hero-overlay" aria-hidden="true"></div>
     <div class="hero-bg-text parallax-bg" aria-hidden="true">CK</div>
@@ -47,7 +120,7 @@
     </NuxtLinkLocale>
     <div class="snav-links">
       <button
-        v-for="link in navLinks"
+        v-for="link in props.navLinks"
         :key="link.id"
         class="snav-link"
         :class="{ active: activeSection === link.id }"
@@ -91,7 +164,8 @@ const props = withDefaults(
 defineEmits<{ "hero-cta": []; "scroll-to": [id: string] }>();
 const { t } = useI18n();
 const ckStore = useCkUnderwearStore();
-const { activeSection } = storeToRefs(ckStore);
+const { activeSection, boxerColor, briefColor, formattedSkuPrice } =
+  storeToRefs(ckStore);
 const { switchLang } = ckStore;
 </script>
 
@@ -103,12 +177,20 @@ const { switchLang } = ckStore;
   display: flex;
   align-items: center;
   background: var(--black);
-  overflow: hidden;
-  padding: 60px 24px;
+  overflow: clip;
+  padding: 48px 16px 32px;
 }
-.parallax-content {
+.hero-inner {
   position: relative;
   z-index: 2;
+  width: min(1220px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: center;
+}
+.parallax-content {
   max-width: 640px;
   will-change: transform;
   transform: translateY(calc(var(--scroll-y, 0) * -0.06px));
@@ -182,6 +264,127 @@ const { switchLang } = ckStore;
 .btn-checkout-cta:hover {
   background: var(--grey-100);
   gap: 20px;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.btn-preview-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  padding: 16px 22px;
+  border: 1px solid var(--grey-700);
+  background: transparent;
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-preview-cta:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--white);
+}
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.hero-meta-card {
+  padding: 14px 14px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.hero-meta-label,
+.hero-preview-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--grey-400);
+  text-transform: uppercase;
+}
+.hero-meta-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+.hero-meta-note {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.hero-preview {
+  width: 100%;
+}
+.hero-preview-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: radial-gradient(
+      circle at top,
+      rgba(255, 255, 255, 0.14),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04),
+      rgba(255, 255, 255, 0.01)
+    );
+  padding: 18px;
+}
+.hero-preview-title {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 0.92;
+  margin-bottom: 10px;
+  max-width: 8ch;
+}
+.hero-preview-body {
+  max-width: 54ch;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hero-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+.preview-item {
+  background: rgba(0, 0, 0, 0.36);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.preview-image {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.preview-item-copy {
+  padding: 12px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
 }
 .btn-arrow {
   font-size: 16px;
@@ -372,6 +575,52 @@ const { switchLang } = ckStore;
   background: var(--grey-100);
 }
 
+@media (max-width: 420px) {
+  .section-nav {
+    padding: 0 12px;
+  }
+  .snav-logo-link {
+    margin-right: 10px;
+  }
+  .snav-cta {
+    display: none;
+  }
+  .hero {
+    padding-inline: 12px;
+  }
+  .hero-pre {
+    margin-bottom: 18px;
+  }
+  .hero-title {
+    margin-bottom: 24px;
+  }
+  .line-1 {
+    font-size: clamp(52px, 16vw, 96px);
+  }
+  .line-2 {
+    font-size: clamp(74px, 20vw, 146px);
+  }
+  .line-3 {
+    font-size: clamp(56px, 14vw, 112px);
+    gap: 10px;
+  }
+  .dash-end {
+    font-size: clamp(36px, 8vw, 68px);
+  }
+  .hero-sub {
+    margin-bottom: 28px;
+  }
+  .hero-meta {
+    grid-template-columns: 1fr;
+  }
+  .hero-preview-card {
+    padding: 14px;
+  }
+  .hero-preview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ─── TABLET+ ──────────────────────────────────────────────────── */
 @media (min-width: 640px) {
   .snav-links {
@@ -381,15 +630,34 @@ const { switchLang } = ckStore;
     padding: 0 32px;
     height: 54px;
   }
+  .hero {
+    padding: 56px 24px 36px;
+  }
+  .hero-inner {
+    gap: 24px;
+  }
+  .hero-meta-card {
+    padding: 16px;
+  }
 }
 
 /* ─── DESKTOP ──────────────────────────────────────────────────── */
 @media (min-width: 1024px) {
+  .hero-inner {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 32px;
+  }
   .section-nav {
     padding: 0 64px;
   }
   .hero {
-    padding: 80px 64px;
+    padding: 80px 64px 56px;
+  }
+  .hero-preview-card {
+    padding: 22px;
+  }
+  .hero-preview-body {
+    font-size: 13px;
   }
   .promo-strip {
     justify-content: center;

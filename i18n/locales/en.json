@@ -16,10 +16,10 @@
       "label": "SS26 DROPS",
       "title": "THE COLLECTION",
       "live": "LIVE NOW",
-      "comingSoon": "COMING SOON",
+      "comingSoon": "COMING NEXT",
       "from": "FROM",
       "shopNow": "SHOP NOW →",
-      "notify": "NOTIFY ME"
+      "notify": "VIEW DROP"
     },
     "upcoming": {
       "label": "UPCOMING DROPS",
@@ -33,7 +33,14 @@
     "hero": {
       "pre": "CALVIN KLEIN ESSENTIALS · SS26",
       "sub": "ENGINEERED FOR THE MAN\nWHO REFUSES TO COMPROMISE",
-      "cta": "BUY ONLINE — EXTRA 20% OFF"
+      "cta": "BUY ONLINE — EXTRA 20% OFF",
+      "priceLabel": "PRICE",
+      "priceValue": "FROM 699K VND",
+      "configLabel": "CONFIG",
+      "configValue": "BRIEF / BOXER",
+      "previewLabel": "PREVIEW",
+      "previewTitle": "SEE THE FIT BEFORE YOU BUY",
+      "previewBody": "A tighter preview block gives the landing page more proof, more clarity, and a stronger reason to keep scrolling."
     },
     "strip": {
       "shipping": "FREE SHIPPING",
@@ -141,6 +148,62 @@
       "successTitle": "ORDER RECEIVED",
       "successBody": "{name}, your order for {sku} · {size} · {color} has been received. We'll confirm within 24 hours to {phone}."
     }
+  },
+  "tee": {
+    "nav": {
+      "lang": "VI",
+      "cta": "VIEW DETAILS",
+      "details": "DETAILS",
+      "manifesto": "MANIFESTO",
+      "top": "TOP"
+    },
+    "hero": {
+      "pre": "NEXT DROP — DRIIP TEE",
+      "title": "THE TEE, REFINED.",
+      "sub": "Made from Sonoma fabric with a premium handfeel, a cleaner build, and the kind of finish that only comes from expensive production.",
+      "cta": "EXPLORE THE DROP",
+      "secondary": "BACK TO HOME",
+      "metrics": {
+        "fabric": "FABRIC",
+        "fabricValue": "SONOMA",
+        "build": "BUILD",
+        "buildValue": "PREMIUM HEAVYWEIGHT",
+        "run": "RUN",
+        "runValue": "LIMITED PRODUCTION"
+      }
+    },
+    "visual": {
+      "pre": "PREVIEW",
+      "pill": "LIMITED RUN",
+      "frontLabel": "Heavyweight finish",
+      "title": "Built with a denser handfeel and a cleaner drape.",
+      "body": "The page is designed to feel tactile and premium before the tee even lands — more atmosphere, more depth, and a stronger drop identity."
+    },
+    "strip": {
+      "fabric": "SONOMA FABRIC",
+      "weight": "HEAVYWEIGHT FEEL",
+      "production": "HIGH PRODUCTION COST",
+      "run": "LIMITED RUN"
+    },
+    "fabric": {
+      "label": "MATERIAL",
+      "title": "SONOMA FABRIC",
+      "body": "Sonoma gives the tee a dense, elevated handfeel with a clean drape that holds its shape while still wearing comfortably."
+    },
+    "build": {
+      "label": "CONSTRUCTION",
+      "title": "MADE TO FEEL EXPENSIVE",
+      "body": "The details are intentionally precise: a cleaner silhouette, a more substantial body, and finishing that reflects the production cost behind it."
+    },
+    "run": {
+      "label": "DROP STRATEGY",
+      "title": "SMALL, INTENTIONAL RUN",
+      "body": "This launch is kept tight by design so quality stays the priority from sampling to final production."
+    },
+    "manifesto": "The tee should feel like the best shirt in the room — heavy, clean, and built with real intent.",
+    "manifestoLabel": "POSITIONING",
+    "footerText": "The next Driip drop is coming in Sonoma fabric. Built premium, kept limited.",
+    "backToDrops": "BACK TO DROPS"
   },
   "footer": {
     "copyright": "© 2026 DRIIP. ALL RIGHTS RESERVED.",

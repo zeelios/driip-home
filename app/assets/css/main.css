@@ -24,6 +24,9 @@
 
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -33,6 +36,15 @@ body {
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#__nuxt {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .page-enter-active,
