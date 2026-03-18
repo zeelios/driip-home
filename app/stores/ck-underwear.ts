@@ -360,8 +360,10 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
         firstName: order.value.firstName,
         lastName: order.value.lastName,
         phone: order.value.phone,
-        email: order.value.email, // using order's email
+        email: order.value.email,
         city: order.value.province,
+        state: order.value.province,
+        country: "VN",
         street: order.value.fullAddress,
         sku: order.value.sku,
         value: orderPrice.value,

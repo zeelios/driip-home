@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 const { locale } = useI18n();
+const { setupScrollDepth } = useMetaEvents();
 const showLogoLoader = ref(true);
 
 let loaderTimer: number | null = null;
@@ -53,6 +54,8 @@ function scrollTo(id: string): void {
 }
 
 onMounted(() => {
+  setupScrollDepth();
+
   loaderTimer = window.setTimeout(() => {
     showLogoLoader.value = false;
   }, 450);

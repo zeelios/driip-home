@@ -1,4 +1,7 @@
-import { appendGoogleSheetRow, readGoogleSheetValues } from "../utils/google-sheets";
+import {
+  appendGoogleSheetRow,
+  readGoogleSheetValues,
+} from "../utils/google-sheets";
 
 function getVietnamDateCode(date = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -15,19 +18,28 @@ function getVietnamDateCode(date = new Date()): string {
 
 async function generateOrderId(): Promise<string> {
   const todayCode = getVietnamDateCode();
-  const rows = await readGoogleSheetValues("Web!A2:A");
   const prefix = `${todayCode}-`;
 
   let highestSequence = 0;
 
-  for (const row of rows) {
-    const value = String(row[0] ?? "").trim();
-    if (!value.startsWith(prefix)) continue;
+  try {
+    const rows = await readGoogleSheetValues("Web!A2:A");
 
-    const suffix = value.slice(prefix.length);
-    if (!/^\d{2}$/.test(suffix)) continue;
+    for (const row of rows) {
+      const value = String(row[0] ?? "").trim();
+      if (!value.startsWith(prefix)) continue;
 
-    highestSequence = Math.max(highestSequence, Number(suffix));
+      const suffix = value.slice(prefix.length);
+      if (!/^\d{2}$/.test(suffix)) continue;
+
+      highestSequence = Math.max(highestSequence, Number(suffix));
+    }
+  } catch (error) {
+    console.warn(
+      "[Google Sheets] Could not read existing order IDs, falling back to a local sequence.",
+      error
+    );
+    return `${todayCode}-01`;
   }
 
   const nextSequence = String(highestSequence + 1).padStart(2, "0");
@@ -79,14 +91,17 @@ export default defineEventHandler(async (event) => {
   const itemDiscount = itemOriginalPrice - itemFinalTotal;
 
   const cleanPhone = phone.startsWith("+") ? `'${phone}` : phone;
-  const formattedSku = sku.replace("ck-", "cK ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+  const formattedSku = sku
+    .replace("ck-", "cK ")
+    .replace(/\b\w/g, (c: string) => c.toUpperCase());
   const formattedSize = size ? size.toUpperCase() : "";
 
   let formattedColor = color ?? "";
   if (formattedColor.includes("-")) {
     formattedColor = formattedColor.split("-")[1] ?? formattedColor;
   }
-  formattedColor = formattedColor.charAt(0).toUpperCase() + formattedColor.slice(1);
+  formattedColor =
+    formattedColor.charAt(0).toUpperCase() + formattedColor.slice(1);
 
   try {
     const orderId = await generateOrderId();
@@ -102,7 +117,7 @@ export default defineEventHandler(async (event) => {
         formattedSize, // D: Size
         "Chờ Mua", // E: Tình Trạng
         "", // F: Facebook
-        isFirstRow ? (email ?? "") : "", // G: Email
+        isFirstRow ? email ?? "" : "", // G: Email
         isFirstRow ? cleanPhone : "", // H: SĐT
         isFirstRow ? fullName : "", // I: Tên
         isFirstRow ? address : "", // J: Địa Chỉ
