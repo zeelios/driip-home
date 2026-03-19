@@ -62,11 +62,9 @@ const config = useRuntimeConfig();
 const pageId = computed(() => config.public.fbPageId as string | undefined);
 const isMobile = ref(false);
 const messengerHref = computed(() => {
-  if (!pageId.value) return "https://www.messenger.com";
+  if (!pageId.value) return "https://m.me";
 
-  return isMobile.value
-    ? `https://m.me/${pageId.value}`
-    : `https://www.messenger.com/t/${pageId.value}`;
+  return `https://m.me/${pageId.value}`;
 });
 
 const tipVisible = ref(false);
