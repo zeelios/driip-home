@@ -7,21 +7,36 @@
         <div class="product-grid">
           <div class="product-card reveal">
             <div class="product-img">
-              <Transition name="img-crossfade">
-                <DriipImage
-                  :key="`brief-${briefColor}`"
-                  :src="`/products/Brief/${briefColor}.png`"
-                  :width="600"
-                  :height="750"
+              <NuxtImg
+                :key="`brief-${briefColor}`"
+                :src="`/products/Brief/${briefColor}.png`"
+                :width="600"
+                :height="750"
+                format="webp"
+                quality="85"
+                fit="cover"
+                :alt="`CK Brief ${briefColor}`"
+                loading="lazy"
+                class="product-img-el"
+                :class="{ 'is-loaded': briefImageLoaded }"
+                @load="briefImageLoaded = true"
+                @error="briefImageLoaded = true"
+              />
+              <div
+                v-if="!briefImageLoaded"
+                class="image-loader"
+                aria-hidden="true"
+              >
+                <NuxtImg
+                  src="/logo.png"
+                  alt=""
+                  class="image-loader-logo"
+                  width="64"
+                  height="64"
+                  quality="70"
                   format="webp"
-                  quality="85"
-                  fit="cover"
-                  :alt="`CK Brief ${briefColor}`"
-                  loading="lazy"
-                  img-class="product-img-el"
-                  stretch
                 />
-              </Transition>
+              </div>
               <div class="color-overlay">
                 <span class="color-name">{{ briefColor }}</span>
                 <div class="color-dots">
@@ -65,21 +80,36 @@
 
           <div class="product-card reveal">
             <div class="product-img">
-              <Transition name="img-crossfade">
-                <DriipImage
-                  :key="`boxer-${boxerColor}`"
-                  :src="`/products/Boxer/${boxerColor}.png`"
-                  :width="600"
-                  :height="750"
+              <NuxtImg
+                :key="`boxer-${boxerColor}`"
+                :src="`/products/Boxer/${boxerColor}.png`"
+                :width="600"
+                :height="750"
+                format="webp"
+                quality="85"
+                fit="cover"
+                :alt="`CK Boxer ${boxerColor}`"
+                loading="lazy"
+                class="product-img-el"
+                :class="{ 'is-loaded': boxerImageLoaded }"
+                @load="boxerImageLoaded = true"
+                @error="boxerImageLoaded = true"
+              />
+              <div
+                v-if="!boxerImageLoaded"
+                class="image-loader"
+                aria-hidden="true"
+              >
+                <NuxtImg
+                  src="/logo.png"
+                  alt=""
+                  class="image-loader-logo"
+                  width="64"
+                  height="64"
+                  quality="70"
                   format="webp"
-                  quality="85"
-                  fit="cover"
-                  :alt="`CK Boxer ${boxerColor}`"
-                  loading="lazy"
-                  img-class="product-img-el"
-                  stretch
                 />
-              </Transition>
+              </div>
               <div class="color-overlay">
                 <span class="color-name">{{ boxerColor }}</span>
                 <div class="color-dots">
@@ -139,6 +169,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
+import { ref, watch } from "vue";
 defineEmits<{ "prefill-order": [sku: string] }>();
 const { t } = useI18n();
 const store = useCkUnderwearStore();
@@ -147,6 +178,16 @@ const { boxerColor, boxerSpecs, briefColor, briefSpecs, formattedSkuPrice } =
 const boxerColors = store.boxerColors;
 const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   store;
+const briefImageLoaded = ref(false);
+const boxerImageLoaded = ref(false);
+
+watch(briefColor, () => {
+  briefImageLoaded.value = false;
+});
+
+watch(boxerColor, () => {
+  boxerImageLoaded.value = false;
+});
 </script>
 
 <style scoped>
@@ -219,9 +260,34 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   object-position: center top;
   display: block;
   transition: transform 0.6s ease;
+  opacity: 0;
+}
+.product-img-el.is-loaded {
+  opacity: 1;
 }
 .product-card:hover .product-img-el {
   transform: scale(1.04);
+}
+.image-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  pointer-events: none;
+}
+.image-loader-logo {
+  width: 56px;
+  height: auto;
+  opacity: 0.9;
+  animation: pulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
 }
 /* ── Color overlay ───────────────────────────────────────────── */
 .color-overlay {

@@ -1,4 +1,56 @@
 <template>
+  <nav class="section-nav">
+    <NuxtLinkLocale to="/" class="snav-home-link" :title="t('nav.home')">
+      ‹
+    </NuxtLinkLocale>
+    <NuxtLinkLocale to="/" class="snav-logo-link">
+      <div class="snav-logo-wrap">
+        <NuxtImg
+          src="/logo.png"
+          alt="driip"
+          width="56"
+          height="26"
+          quality="70"
+          format="webp"
+          class="snav-logo-img"
+          :class="{ 'is-loaded': logoLoaded }"
+          @load="logoLoaded = true"
+          @error="logoLoaded = true"
+        />
+        <div v-if="!logoLoaded" class="image-loader" aria-hidden="true">
+          <NuxtImg
+            src="/logo.png"
+            alt=""
+            class="image-loader-logo"
+            width="64"
+            height="64"
+            quality="70"
+            format="webp"
+          />
+        </div>
+      </div>
+    </NuxtLinkLocale>
+    <div class="snav-links">
+      <button
+        v-for="link in props.navLinks"
+        :key="link.id"
+        class="snav-link"
+        :class="{ active: activeSection === link.id }"
+        @click="$emit('scroll-to', link.id)"
+      >
+        {{ link.label }}
+      </button>
+    </div>
+    <div class="snav-right">
+      <button class="lang-switch" @click="switchLang">
+        {{ t("nav.langSwitch") }}
+      </button>
+      <button class="snav-cta" @click="$emit('scroll-to', 'order')">
+        {{ t("ck.hero.cta") }}
+      </button>
+    </div>
+  </nav>
+
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-copy parallax-content">
@@ -52,7 +104,7 @@
           <p class="hero-preview-body">{{ t("ck.hero.previewBody") }}</p>
           <div class="hero-preview-grid">
             <article class="preview-item">
-              <DriipImage
+              <NuxtImg
                 :src="`/products/Brief/${briefColor}.png`"
                 :alt="`CK Brief ${briefColor}`"
                 width="220"
@@ -60,15 +112,32 @@
                 format="webp"
                 quality="80"
                 fit="cover"
-                img-class="preview-image"
-                stretch
+                class="preview-image"
+                :class="{ 'is-loaded': briefPreviewLoaded }"
+                @load="briefPreviewLoaded = true"
+                @error="briefPreviewLoaded = true"
               />
+              <div
+                v-if="!briefPreviewLoaded"
+                class="image-loader"
+                aria-hidden="true"
+              >
+                <NuxtImg
+                  src="/logo.png"
+                  alt=""
+                  class="image-loader-logo"
+                  width="64"
+                  height="64"
+                  quality="70"
+                  format="webp"
+                />
+              </div>
               <div class="preview-item-copy">
                 <span>{{ t("ck.products.brief.desc") }}</span>
               </div>
             </article>
             <article class="preview-item preview-item--secondary">
-              <DriipImage
+              <NuxtImg
                 :src="`/products/Boxer/${boxerColor}.png`"
                 :alt="`CK Boxer ${boxerColor}`"
                 width="220"
@@ -76,9 +145,26 @@
                 format="webp"
                 quality="80"
                 fit="cover"
-                img-class="preview-image"
-                stretch
+                class="preview-image"
+                :class="{ 'is-loaded': boxerPreviewLoaded }"
+                @load="boxerPreviewLoaded = true"
+                @error="boxerPreviewLoaded = true"
               />
+              <div
+                v-if="!boxerPreviewLoaded"
+                class="image-loader"
+                aria-hidden="true"
+              >
+                <NuxtImg
+                  src="/logo.png"
+                  alt=""
+                  class="image-loader-logo"
+                  width="64"
+                  height="64"
+                  quality="70"
+                  format="webp"
+                />
+              </div>
               <div class="preview-item-copy">
                 <span>{{ t("ck.products.boxer.desc") }}</span>
               </div>
@@ -104,45 +190,11 @@
     <span class="dot">·</span>
     <span>{{ t("ck.strip.stock") }}</span>
   </div>
-
-  <nav class="section-nav">
-    <NuxtLinkLocale to="/" class="snav-home-link" :title="t('nav.home')">
-      ‹
-    </NuxtLinkLocale>
-    <NuxtLinkLocale to="/" class="snav-logo-link">
-      <DriipImage
-        src="/logo.png"
-        alt="driip"
-        width="56"
-        quality="70"
-        format="webp"
-        img-class="snav-logo-img"
-      />
-    </NuxtLinkLocale>
-    <div class="snav-links">
-      <button
-        v-for="link in props.navLinks"
-        :key="link.id"
-        class="snav-link"
-        :class="{ active: activeSection === link.id }"
-        @click="$emit('scroll-to', link.id)"
-      >
-        {{ link.label }}
-      </button>
-    </div>
-    <div class="snav-right">
-      <button class="lang-switch" @click="switchLang">
-        {{ t("nav.langSwitch") }}
-      </button>
-      <button class="snav-cta" @click="$emit('scroll-to', 'order')">
-        {{ t("ck.hero.cta") }}
-      </button>
-    </div>
-  </nav>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
+import { ref, watch } from "vue";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
 
 interface NavLink {
@@ -168,6 +220,17 @@ const ckStore = useCkUnderwearStore();
 const { activeSection, boxerColor, briefColor, formattedSkuPrice } =
   storeToRefs(ckStore);
 const { switchLang } = ckStore;
+const logoLoaded = ref(false);
+const briefPreviewLoaded = ref(false);
+const boxerPreviewLoaded = ref(false);
+
+watch(briefColor, () => {
+  briefPreviewLoaded.value = false;
+});
+
+watch(boxerColor, () => {
+  boxerPreviewLoaded.value = false;
+});
 </script>
 
 <style scoped>
@@ -380,6 +443,32 @@ const { switchLang } = ckStore;
   object-fit: cover;
   object-position: center top;
   display: block;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.preview-image.is-loaded {
+  opacity: 1;
+}
+.image-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  pointer-events: none;
+}
+.image-loader-logo {
+  width: 64px;
+  height: auto;
+  opacity: 0.9;
+  animation: pulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
 }
 .preview-item-copy {
   padding: 12px;
@@ -478,12 +567,23 @@ const { switchLang } = ckStore;
   margin-right: 16px;
   text-decoration: none;
 }
+.snav-logo-wrap {
+  position: relative;
+  width: 56px;
+  height: 26px;
+  flex-shrink: 0;
+}
 .snav-logo-img {
-  height: 18px;
-  width: auto;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  opacity: 0.9;
-  transition: opacity 0.2s;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.snav-logo-img.is-loaded {
+  opacity: 1;
 }
 .snav-logo-link:hover .snav-logo-img {
   opacity: 1;

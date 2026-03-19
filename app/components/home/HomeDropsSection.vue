@@ -9,7 +9,7 @@
           class="drop-card drop-card--live reveal"
         >
           <div class="drop-img">
-            <DriipImage
+            <NuxtImg
               src="/products/Brief/Black.png"
               :width="640"
               :height="800"
@@ -18,10 +18,23 @@
               fit="cover"
               alt="CK Brief"
               loading="eager"
-              img-class="drop-img-main"
-              stretch
+              class="drop-img-main"
+              :class="{ 'is-loaded': briefLoaded }"
+              @load="briefLoaded = true"
+              @error="briefLoaded = true"
             />
-            <DriipImage
+            <div v-if="!briefLoaded" class="image-loader" aria-hidden="true">
+              <NuxtImg
+                src="/logo.png"
+                alt=""
+                class="image-loader-logo"
+                width="64"
+                height="64"
+                quality="70"
+                format="webp"
+              />
+            </div>
+            <NuxtImg
               src="/products/Boxer/Black.png"
               :width="280"
               :height="350"
@@ -30,8 +43,26 @@
               fit="cover"
               alt="CK Boxer Black"
               loading="lazy"
-              img-class="drop-img-secondary"
+              class="drop-img-secondary"
+              :class="{ 'is-loaded': boxerLoaded }"
+              @load="boxerLoaded = true"
+              @error="boxerLoaded = true"
             />
+            <div
+              v-if="!boxerLoaded"
+              class="image-loader image-loader--secondary"
+              aria-hidden="true"
+            >
+              <NuxtImg
+                src="/logo.png"
+                alt=""
+                class="image-loader-logo"
+                width="56"
+                height="56"
+                quality="70"
+                format="webp"
+              />
+            </div>
             <div class="drop-badge">{{ t("home.drops.live") }}</div>
           </div>
           <div class="drop-body">
@@ -68,9 +99,20 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from "vue";
 import { formatVndCurrency, getTierTotal } from "~/composables/usePricing";
 const { t } = useI18n();
 const launchPrice = formatVndCurrency(getTierTotal(1));
+const briefLoaded = ref(false);
+const boxerLoaded = ref(false);
+
+watch(
+  () => launchPrice,
+  () => {
+    briefLoaded.value = false;
+    boxerLoaded.value = false;
+  }
+);
 </script>
 
 <style scoped>
@@ -110,6 +152,10 @@ const launchPrice = formatVndCurrency(getTierTotal(1));
   object-fit: cover;
   transition: transform 0.6s ease;
   display: block;
+  opacity: 0;
+}
+.drop-card--live .drop-img-main.is-loaded {
+  opacity: 1;
 }
 .drop-card--live:hover .drop-img-main {
   transform: scale(1.03);
@@ -127,9 +173,40 @@ const launchPrice = formatVndCurrency(getTierTotal(1));
   right: 16px;
   width: 28%;
   height: auto;
-  object-fit: cover;
   border: 2px solid var(--white);
   display: block;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.drop-img-secondary.is-loaded {
+  opacity: 1;
+}
+.image-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  pointer-events: none;
+}
+.image-loader--secondary {
+  inset: auto 16px 16px auto;
+  width: 28%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+}
+.image-loader-logo {
+  width: 56px;
+  height: auto;
+  opacity: 0.9;
+  animation: pulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
 }
 .drop-badge {
   position: absolute;

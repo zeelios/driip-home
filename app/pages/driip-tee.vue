@@ -33,6 +33,7 @@
       <div class="tee-hero-grid">
         <div class="tee-hero-copy">
           <p class="tee-kicker reveal">{{ t("tee.hero.pre") }}</p>
+          <p class="tee-status reveal">{{ t("tee.hero.status") }}</p>
           <h1 class="tee-title reveal">{{ t("tee.hero.title") }}</h1>
           <p class="tee-subtitle reveal">{{ t("tee.hero.sub") }}</p>
 
@@ -418,6 +419,20 @@ onMounted(() => {
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: var(--grey-400);
+}
+
+.tee-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
 }
 
 .tee-title {

@@ -1,14 +1,31 @@
 <template>
   <footer class="footer">
     <div class="footer-inner">
-      <DriipImage
-        src="/logo.png"
-        alt="driip"
-        width="80"
-        quality="70"
-        format="webp"
-        img-class="footer-logo-img"
-      />
+      <div class="footer-logo-wrap">
+        <NuxtImg
+          src="/logo.png"
+          alt="driip"
+          width="80"
+          height="38"
+          quality="70"
+          format="webp"
+          class="footer-logo-img"
+          :class="{ 'is-loaded': logoLoaded }"
+          @load="logoLoaded = true"
+          @error="logoLoaded = true"
+        />
+        <div v-if="!logoLoaded" class="image-loader" aria-hidden="true">
+          <NuxtImg
+            src="/logo.png"
+            alt=""
+            class="image-loader-logo"
+            width="56"
+            height="56"
+            quality="70"
+            format="webp"
+          />
+        </div>
+      </div>
       <div class="footer-links">
         <a
           href="https://www.facebook.com/profile.php?id=61586812299701"
@@ -24,7 +41,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
+
 const { t } = useI18n();
+const logoLoaded = ref(false);
 </script>
 
 <style scoped>
@@ -42,15 +62,26 @@ const { t } = useI18n();
   gap: 20px;
   text-align: center;
 }
+.footer-logo-wrap {
+  position: relative;
+  width: 80px;
+  height: 38px;
+  flex-shrink: 0;
+}
 .footer-logo-img {
-  height: 28px;
-  width: auto;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.footer-logo-img.is-loaded {
   opacity: 0.7;
   filter: invert(1);
-  transition: opacity 0.2s;
 }
-.footer-logo-img:hover {
+.footer-logo-img.is-loaded:hover {
   opacity: 1;
 }
 .footer-links {

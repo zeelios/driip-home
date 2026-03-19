@@ -32,21 +32,31 @@
           :class="[`item-${i}`, item.span]"
           @click="openLightbox(i)"
         >
-          <DriipImage
+          <NuxtImg
             :src="item.src"
             :alt="item.alt"
             :width="item.w"
             :height="item.h"
-            :img-class="[
-              'masonry-img',
-              { 'is-loaded': isImageLoaded(item.src) },
-            ]"
+            class="masonry-img"
+            :class="{ 'is-loaded': isImageLoaded(item.src) }"
             loading="lazy"
             format="webp"
-            stretch
             @load="onImageLoaded(item.src)"
             @error="onImageLoaded(item.src)"
           />
+          <div
+            v-if="!isImageLoaded(item.src)"
+            class="image-loader"
+            aria-hidden="true"
+          >
+            <NuxtImg
+              src="/logo.png"
+              alt=""
+              class="image-loader-logo"
+              width="72"
+              height="72"
+            />
+          </div>
           <div class="masonry-overlay">
             <span class="masonry-label">{{ item.color }}</span>
           </div>
@@ -74,19 +84,29 @@
             ‹
           </button>
           <div class="lb-img-wrap">
-            <DriipImage
+            <NuxtImg
               :src="activeLightboxItem.src"
               :alt="activeLightboxItem.alt"
               width="1200"
+              class="lb-img"
+              :class="{ 'is-loaded': isImageLoaded(activeLightboxItem.src) }"
               format="webp"
-              :img-class="[
-                'lb-img',
-                { 'is-loaded': isImageLoaded(activeLightboxItem.src) },
-              ]"
-              stretch
               @load="onImageLoaded(activeLightboxItem.src)"
               @error="onImageLoaded(activeLightboxItem.src)"
             />
+            <div
+              v-if="!isImageLoaded(activeLightboxItem.src)"
+              class="image-loader image-loader--lightbox"
+              aria-hidden="true"
+            >
+              <NuxtImg
+                src="/logo.png"
+                alt=""
+                class="image-loader-logo"
+                width="96"
+                height="96"
+              />
+            </div>
             <p class="lb-caption">{{ activeLightboxItem.alt }}</p>
           </div>
           <button class="lb-next" aria-label="Next" @click="lightboxNext">

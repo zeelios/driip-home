@@ -1,11 +1,16 @@
 <template>
   <div
+    ref="rootRef"
     :class="[
       'driip-image',
-      { 'driip-image--stretch': stretch },
+      {
+        'driip-image--stretch': stretch && !intrinsic,
+        'driip-image--intrinsic': intrinsic,
+      },
       attrs.class,
       wrapperClass,
     ]"
+    :style="wrapperStyle"
   >
     <Transition name="driip-image-loader" appear>
       <div
@@ -29,7 +34,7 @@
       v-bind="imageAttrs"
       :src="src"
       :alt="alt"
-      :class="imgClass"
+      :class="['driip-image-img', { 'is-loaded': isLoaded }, imgClass]"
       :width="width"
       :height="height"
       :loading="loading"
@@ -43,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, watch } from "vue";
+import { computed, onMounted, ref, useAttrs, watch } from "vue";
 
 defineOptions({ inheritAttrs: false });
 
@@ -68,12 +73,14 @@ const props = withDefaults(
     loaderClass?: ClassValue;
     loaderSize?: number;
     stretch?: boolean;
+    intrinsic?: boolean;
   }>(),
   {
     alt: "",
     loading: "lazy",
     loaderSize: 72,
     stretch: false,
+    intrinsic: false,
   }
 );
 
@@ -83,7 +90,22 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+const rootRef = ref<HTMLElement | null>(null);
 const isLoaded = ref(false);
+
+const wrapperStyle = computed(() => {
+  if (!props.intrinsic) return undefined;
+
+  const width =
+    typeof props.width === "number" ? `${props.width}px` : props.width;
+  const height =
+    typeof props.height === "number" ? `${props.height}px` : props.height;
+
+  return {
+    width,
+    height,
+  };
+});
 
 const imageAttrs = computed(() => {
   const {
@@ -98,9 +120,33 @@ watch(
   () => props.src,
   () => {
     isLoaded.value = false;
+    queueImageLoadCheck();
   },
   { immediate: true }
 );
+
+onMounted(() => {
+  queueImageLoadCheck();
+});
+
+function queueImageLoadCheck(): void {
+  if (typeof window === "undefined") return;
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      const img = rootRef.value?.querySelector(
+        ".driip-image-img"
+      ) as HTMLImageElement | null;
+      if (
+        img instanceof HTMLImageElement &&
+        img.complete &&
+        img.naturalWidth > 0
+      ) {
+        isLoaded.value = true;
+      }
+    });
+  });
+}
 
 function onLoad(event: string | Event): void {
   isLoaded.value = true;
@@ -116,16 +162,33 @@ function onError(event: string | Event): void {
 <style scoped>
 .driip-image {
   position: relative;
-  display: inline-block;
-  width: auto;
+  display: block;
+  width: 100%;
   height: auto;
   overflow: hidden;
 }
 
 .driip-image--stretch {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+}
+
+.driip-image--intrinsic {
+  display: inline-block;
+  width: auto;
+  height: auto;
+}
+
+.driip-image-img {
+  display: block;
+  opacity: 0;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.driip-image-img.is-loaded {
+  opacity: 1;
 }
 
 .driip-image :deep(img) {
@@ -139,12 +202,18 @@ function onError(event: string | Event): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.08);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   pointer-events: none;
 }
 
 .driip-image-loader-logo {
-  width: 72px;
+  width: 64px;
   height: auto;
   opacity: 0.9;
   animation: driip-logo-pulse 1.2s ease-in-out infinite;
