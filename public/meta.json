@@ -1,0 +1,5 @@
+{
+  "name": "driip-",
+  "description": "Static metadata stub used to satisfy platform probes and avoid a missing-file 404.",
+  "generator": "Nuxt public asset"
+}

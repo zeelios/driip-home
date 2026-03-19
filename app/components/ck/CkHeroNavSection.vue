@@ -45,15 +45,14 @@
           </button>
         </div>
       </div>
-
-      <div class="hero-preview reveal">
+      <div class="hero-preview reveal hidden lg:block">
         <div class="hero-preview-card hero-preview-card--primary">
           <p class="hero-preview-label">{{ t("ck.hero.previewLabel") }}</p>
           <h2 class="hero-preview-title">{{ t("ck.hero.previewTitle") }}</h2>
           <p class="hero-preview-body">{{ t("ck.hero.previewBody") }}</p>
           <div class="hero-preview-grid">
             <article class="preview-item">
-              <NuxtImg
+              <DriipImage
                 :src="`/products/Brief/${briefColor}.png`"
                 :alt="`CK Brief ${briefColor}`"
                 width="220"
@@ -61,14 +60,15 @@
                 format="webp"
                 quality="80"
                 fit="cover"
-                class="preview-image"
+                img-class="preview-image"
+                stretch
               />
               <div class="preview-item-copy">
                 <span>{{ t("ck.products.brief.desc") }}</span>
               </div>
             </article>
             <article class="preview-item preview-item--secondary">
-              <NuxtImg
+              <DriipImage
                 :src="`/products/Boxer/${boxerColor}.png`"
                 :alt="`CK Boxer ${boxerColor}`"
                 width="220"
@@ -76,7 +76,8 @@
                 format="webp"
                 quality="80"
                 fit="cover"
-                class="preview-image"
+                img-class="preview-image"
+                stretch
               />
               <div class="preview-item-copy">
                 <span>{{ t("ck.products.boxer.desc") }}</span>
@@ -109,13 +110,13 @@
       ‹
     </NuxtLinkLocale>
     <NuxtLinkLocale to="/" class="snav-logo-link">
-      <NuxtImg
+      <DriipImage
         src="/logo.png"
         alt="driip"
-        class="snav-logo-img"
         width="56"
         quality="70"
         format="webp"
+        img-class="snav-logo-img"
       />
     </NuxtLinkLocale>
     <div class="snav-links">
@@ -578,46 +579,83 @@ const { switchLang } = ckStore;
 @media (max-width: 420px) {
   .section-nav {
     padding: 0 12px;
+    height: 48px;
   }
   .snav-logo-link {
-    margin-right: 10px;
+    margin-right: 8px;
   }
   .snav-cta {
     display: none;
   }
   .hero {
-    padding-inline: 12px;
+    align-items: flex-start;
+    padding: 24px 12px 20px;
+  }
+  .hero-inner {
+    gap: 12px;
+  }
+  .hero-copy {
+    max-width: 100%;
   }
   .hero-pre {
-    margin-bottom: 18px;
+    margin-bottom: 14px;
+    font-size: 10px;
+    letter-spacing: 0.26em;
   }
   .hero-title {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
   .line-1 {
-    font-size: clamp(52px, 16vw, 96px);
+    font-size: clamp(46px, 15vw, 84px);
   }
   .line-2 {
-    font-size: clamp(74px, 20vw, 146px);
+    font-size: clamp(62px, 18vw, 120px);
   }
   .line-3 {
-    font-size: clamp(56px, 14vw, 112px);
-    gap: 10px;
+    font-size: clamp(48px, 13vw, 96px);
+    gap: 8px;
   }
   .dash-end {
-    font-size: clamp(36px, 8vw, 68px);
+    font-size: clamp(30px, 7vw, 56px);
   }
   .hero-sub {
-    margin-bottom: 28px;
+    margin-bottom: 18px;
+    padding-left: 12px;
+    line-height: 1.5;
   }
   .hero-meta {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
   .hero-preview-card {
-    padding: 14px;
+    padding: 12px;
   }
   .hero-preview-grid {
     grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .hero-preview {
+    display: none;
+  }
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+  .btn-checkout-cta,
+  .btn-preview-cta {
+    width: 100%;
+    min-height: 48px;
+    padding: 14px 16px;
+    justify-content: space-between;
+  }
+  .btn-checkout-cta {
+    font-size: 10px;
+  }
+  .btn-preview-cta {
+    font-size: 10px;
   }
 }
 

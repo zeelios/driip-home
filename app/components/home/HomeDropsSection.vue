@@ -9,7 +9,7 @@
           class="drop-card drop-card--live reveal"
         >
           <div class="drop-img">
-            <NuxtImg
+            <DriipImage
               src="/products/Brief/Black.png"
               :width="640"
               :height="800"
@@ -18,9 +18,10 @@
               fit="cover"
               alt="CK Brief"
               loading="eager"
-              class="drop-img-main"
+              img-class="drop-img-main"
+              stretch
             />
-            <NuxtImg
+            <DriipImage
               src="/products/Boxer/Black.png"
               :width="280"
               :height="350"
@@ -29,7 +30,7 @@
               fit="cover"
               alt="CK Boxer Black"
               loading="lazy"
-              class="drop-img-secondary"
+              img-class="drop-img-secondary"
             />
             <div class="drop-badge">{{ t("home.drops.live") }}</div>
           </div>

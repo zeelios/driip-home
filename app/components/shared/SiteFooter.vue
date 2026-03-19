@@ -1,13 +1,13 @@
 <template>
   <footer class="footer">
     <div class="footer-inner">
-      <NuxtImg
+      <DriipImage
         src="/logo.png"
         alt="driip"
-        class="footer-logo-img"
         width="80"
         quality="70"
         format="webp"
+        img-class="footer-logo-img"
       />
       <div class="footer-links">
         <a

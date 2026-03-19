@@ -32,30 +32,21 @@
           :class="[`item-${i}`, item.span]"
           @click="openLightbox(i)"
         >
-          <NuxtImg
+          <DriipImage
             :src="item.src"
             :alt="item.alt"
             :width="item.w"
             :height="item.h"
-            class="masonry-img"
-            :class="{ 'is-loaded': isImageLoaded(item.src) }"
+            :img-class="[
+              'masonry-img',
+              { 'is-loaded': isImageLoaded(item.src) },
+            ]"
             loading="lazy"
             format="webp"
+            stretch
             @load="onImageLoaded(item.src)"
             @error="onImageLoaded(item.src)"
           />
-          <div
-            v-if="!isImageLoaded(item.src)"
-            class="image-loader"
-            aria-hidden="true"
-          >
-            <NuxtImg
-              src="/logo.png"
-              alt=""
-              class="image-loader-logo"
-              width="72"
-            />
-          </div>
           <div class="masonry-overlay">
             <span class="masonry-label">{{ item.color }}</span>
           </div>
@@ -83,25 +74,16 @@
             ‹
           </button>
           <div class="lb-img-wrap">
-            <div
-              v-if="!isImageLoaded(activeLightboxItem.src)"
-              class="image-loader image-loader--lightbox"
-              aria-hidden="true"
-            >
-              <NuxtImg
-                src="/logo.png"
-                alt=""
-                class="image-loader-logo"
-                width="96"
-              />
-            </div>
-            <NuxtImg
+            <DriipImage
               :src="activeLightboxItem.src"
               :alt="activeLightboxItem.alt"
-              class="lb-img"
               width="1200"
               format="webp"
-              :class="{ 'is-loaded': isImageLoaded(activeLightboxItem.src) }"
+              :img-class="[
+                'lb-img',
+                { 'is-loaded': isImageLoaded(activeLightboxItem.src) },
+              ]"
+              stretch
               @load="onImageLoaded(activeLightboxItem.src)"
               @error="onImageLoaded(activeLightboxItem.src)"
             />

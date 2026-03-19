@@ -8,7 +8,7 @@
           <div class="product-card reveal">
             <div class="product-img">
               <Transition name="img-crossfade">
-                <NuxtImg
+                <DriipImage
                   :key="`brief-${briefColor}`"
                   :src="`/products/Brief/${briefColor}.png`"
                   :width="600"
@@ -18,7 +18,8 @@
                   fit="cover"
                   :alt="`CK Brief ${briefColor}`"
                   loading="lazy"
-                  class="product-img-el"
+                  img-class="product-img-el"
+                  stretch
                 />
               </Transition>
               <div class="color-overlay">
@@ -65,7 +66,7 @@
           <div class="product-card reveal">
             <div class="product-img">
               <Transition name="img-crossfade">
-                <NuxtImg
+                <DriipImage
                   :key="`boxer-${boxerColor}`"
                   :src="`/products/Boxer/${boxerColor}.png`"
                   :width="600"
@@ -75,7 +76,8 @@
                   fit="cover"
                   :alt="`CK Boxer ${boxerColor}`"
                   loading="lazy"
-                  class="product-img-el"
+                  img-class="product-img-el"
+                  stretch
                 />
               </Transition>
               <div class="color-overlay">
@@ -140,14 +142,9 @@ import { useCkUnderwearStore } from "~/stores/ck-underwear";
 defineEmits<{ "prefill-order": [sku: string] }>();
 const { t } = useI18n();
 const store = useCkUnderwearStore();
-const {
-  boxerColor,
-  boxerColors,
-  boxerSpecs,
-  briefColor,
-  briefSpecs,
-  formattedSkuPrice,
-} = storeToRefs(store);
+const { boxerColor, boxerSpecs, briefColor, briefSpecs, formattedSkuPrice } =
+  storeToRefs(store);
+const boxerColors = store.boxerColors;
 const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   store;
 </script>
@@ -155,7 +152,7 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
 <style scoped>
 .products {
   background: var(--grey-900);
-  padding: 56px 0 64px;   /* no horizontal padding — let cards go edge-to-edge on mobile */
+  padding: 56px 0 64px; /* no horizontal padding — let cards go edge-to-edge on mobile */
 }
 .products-inner {
   max-width: 1100px;
@@ -180,9 +177,7 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   background: var(--grey-800);
   opacity: 0;
   transform: translateY(32px);
-  transition:
-    opacity 0.75s ease,
-    transform 0.75s ease;
+  transition: opacity 0.75s ease, transform 0.75s ease;
   overflow: hidden;
 }
 .product-card.is-visible {
@@ -195,6 +190,7 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   aspect-ratio: 3/4;
   background: #1a1a1a;
   overflow: hidden;
+  isolation: isolate;
 }
 /* ── Image crossfade ─────────────────────────────────────────── */
 .img-crossfade-enter-active,
@@ -215,6 +211,8 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
 }
 
 .product-img-el {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -231,19 +229,33 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 4;
-  padding: 40px 18px 18px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, transparent 100%);
+  z-index: 3;
+  padding: 24px 14px 14px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.94) 0%,
+    rgba(0, 0, 0, 0.78) 48%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
+@media (min-width: 768px) {
+  .color-overlay {
+    padding: 48px 18px 18px;
+  }
+}
 .color-name {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.25em;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   text-transform: uppercase;
   pointer-events: none;
 }
@@ -256,10 +268,12 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid transparent;        /* transparent gap between fill and ring */
+  border: 2px solid transparent; /* transparent gap between fill and ring */
   box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.55);
   cursor: pointer;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
   transition: transform 0.15s, box-shadow 0.2s;
 }
 .color-dot:hover:not(.active) {
@@ -298,10 +312,7 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   cursor: pointer;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition:
-    background 0.2s,
-    transform 0.2s,
-    border-color 0.2s;
+  transition: background 0.2s, transform 0.2s, border-color 0.2s;
 }
 .image-nav-btn:hover {
   background: rgba(0, 0, 0, 0.6);
@@ -357,11 +368,11 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;            /* full-width touch target on mobile */
+  width: 100%; /* full-width touch target on mobile */
   background: var(--white);
   color: var(--black);
   border: none;
-  padding: 18px 24px;     /* 48 px+ touch target */
+  padding: 18px 24px; /* 48 px+ touch target */
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
@@ -404,9 +415,7 @@ const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
 .reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition:
-    opacity 0.75s ease,
-    transform 0.75s ease;
+  transition: opacity 0.75s ease, transform 0.75s ease;
 }
 .reveal.is-visible {
   opacity: 1;
