@@ -26,8 +26,19 @@
         aria-label="Chat hỗ trợ qua Messenger"
         @click="dismissTip"
       >
-        <!-- Messenger lightning-M icon -->
         <svg
+          v-if="isMobile"
+          class="mc-icon"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M13.5 22v-7h2.25l.75-2.75H13.5V10c0-.9.3-1.5 1.8-1.5h1.2V6.1c-.2 0-.9-.1-1.7-.1-2.6 0-4.3 1.6-4.3 4.5v1.75H8v2.75h2.5V22h3Z"
+          />
+        </svg>
+        <svg
+          v-else
           class="mc-icon"
           viewBox="0 0 24 24"
           fill="currentColor"
@@ -55,7 +66,7 @@ const messengerHref = computed(() => {
 
   return isMobile.value
     ? `https://m.me/${pageId.value}`
-    : `https://m.me/${pageId.value}`;
+    : `https://www.messenger.com/t/${pageId.value}`;
 });
 
 const tipVisible = ref(false);
