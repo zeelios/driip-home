@@ -1,194 +1,135 @@
 <template>
-  <nav class="section-nav">
-    <NuxtLinkLocale to="/" class="snav-home-link" :title="t('nav.home')">
-      ‹
-    </NuxtLinkLocale>
-    <NuxtLinkLocale to="/" class="snav-logo-link">
-      <div class="snav-logo-wrap">
-        <NuxtImg
-          src="/logo.png"
-          alt="driip"
-          width="56"
-          height="26"
-          quality="70"
-          format="webp"
-          class="snav-logo-img"
-          :class="{ 'is-loaded': logoLoaded }"
-          @load="logoLoaded = true"
-          @error="logoLoaded = true"
-        />
-        <div v-if="!logoLoaded" class="image-loader" aria-hidden="true">
-          <NuxtImg
-            src="/logo.png"
-            alt=""
-            class="image-loader-logo"
-            width="64"
-            height="64"
-            quality="70"
-            format="webp"
-          />
+  <div class="ck-section">
+    <!-- ── HERO ─────────────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero-inner">
+        <!-- Left: editorial copy -->
+        <div class="hero-copy parallax-content">
+          <p class="hero-eyebrow">{{ t("ck.hero.pre") }}</p>
+
+          <h1 class="hero-title">
+            <span class="ht-muted">THE</span>
+            <span class="ht-bold">BOXER</span>
+            <span class="ht-bold">& BRIEF<span class="ht-dash">—</span></span>
+          </h1>
+
+          <p class="hero-sub">{{ t("ck.hero.sub") }}</p>
+
+          <div class="hero-stats" aria-label="Product details">
+            <div class="hero-stat">
+              <span class="stat-label">{{ t("ck.hero.priceLabel") }}</span>
+              <strong class="stat-value">{{ formattedSkuPrice["ck-brief"] }}</strong>
+            </div>
+            <span class="stat-rule" aria-hidden="true" />
+            <div class="hero-stat">
+              <span class="stat-label">{{ t("ck.hero.configLabel") }}</span>
+              <strong class="stat-value">{{ t("ck.hero.configValue") }}</strong>
+            </div>
+            <span class="stat-rule" aria-hidden="true" />
+            <div class="hero-stat">
+              <span class="stat-label">{{ t("ck.strip.stock") }}</span>
+              <strong class="stat-value">LIMITED</strong>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="btn-primary" @click="$emit('hero-cta')">
+              {{ t("ck.hero.cta") }}
+              <span aria-hidden="true">→</span>
+            </button>
+            <button class="btn-ghost" @click="$emit('scroll-to', 'products')">
+              {{ t("ck.hero.previewLabel") }}
+            </button>
+          </div>
         </div>
+
+        <!-- Right: product visual (desktop only) -->
+        <aside class="hero-visual" aria-label="Product preview">
+          <div class="hero-visual-card">
+            <p class="visual-label">{{ t("ck.hero.previewLabel") }}</p>
+            <h2 class="visual-title">{{ t("ck.hero.previewTitle") }}</h2>
+            <div class="visual-grid">
+              <article class="visual-item">
+                <div class="visual-img-wrap">
+                  <NuxtImg
+                    :src="`/products/Brief/${briefColor}.png`"
+                    :alt="`CK Brief ${briefColor}`"
+                    width="220"
+                    height="275"
+                    format="webp"
+                    quality="80"
+                    fit="cover"
+                    class="visual-img"
+                    :class="{ 'is-loaded': briefPreviewLoaded }"
+                    @load="briefPreviewLoaded = true"
+                    @error="briefPreviewLoaded = true"
+                  />
+                  <div v-if="!briefPreviewLoaded" class="img-placeholder" aria-hidden="true">
+                    <NuxtImg
+                      src="/logo.png"
+                      alt=""
+                      class="img-placeholder-logo"
+                      width="48"
+                      height="48"
+                      quality="70"
+                      format="webp"
+                    />
+                  </div>
+                </div>
+                <p class="visual-item-name">CK BRIEF</p>
+              </article>
+
+              <article class="visual-item">
+                <div class="visual-img-wrap">
+                  <NuxtImg
+                    :src="`/products/Boxer/${boxerColor}.png`"
+                    :alt="`CK Boxer ${boxerColor}`"
+                    width="220"
+                    height="275"
+                    format="webp"
+                    quality="80"
+                    fit="cover"
+                    class="visual-img"
+                    :class="{ 'is-loaded': boxerPreviewLoaded }"
+                    @load="boxerPreviewLoaded = true"
+                    @error="boxerPreviewLoaded = true"
+                  />
+                  <div v-if="!boxerPreviewLoaded" class="img-placeholder" aria-hidden="true">
+                    <NuxtImg
+                      src="/logo.png"
+                      alt=""
+                      class="img-placeholder-logo"
+                      width="48"
+                      height="48"
+                      quality="70"
+                      format="webp"
+                    />
+                  </div>
+                </div>
+                <p class="visual-item-name">CK BOXER</p>
+              </article>
+            </div>
+          </div>
+        </aside>
       </div>
-    </NuxtLinkLocale>
-    <div class="snav-links">
-      <button
-        v-for="link in props.navLinks"
-        :key="link.id"
-        class="snav-link"
-        :class="{ active: activeSection === link.id }"
-        @click="$emit('scroll-to', link.id)"
-      >
-        {{ link.label }}
-      </button>
+
+      <span class="hero-watermark" aria-hidden="true">CK</span>
+    </section>
+
+    <!-- ── PROMO STRIP ───────────────────────────────────────────── -->
+    <div class="promo-strip">
+      <span>{{ t("ck.strip.shipping") }}</span>
+      <span class="strip-dot">·</span>
+      <span>{{ t("ck.strip.offer") }}</span>
+      <span class="strip-dot">·</span>
+      <span>{{ t("ck.strip.stock") }}</span>
+      <span class="strip-dot">·</span>
+      <span>{{ t("ck.strip.shipping") }}</span>
+      <span class="strip-dot">·</span>
+      <span>{{ t("ck.strip.offer") }}</span>
+      <span class="strip-dot">·</span>
+      <span>{{ t("ck.strip.stock") }}</span>
     </div>
-    <div class="snav-right">
-      <button class="lang-switch" @click="switchLang">
-        {{ t("nav.langSwitch") }}
-      </button>
-      <button class="snav-cta" @click="$emit('scroll-to', 'order')">
-        {{ t("ck.hero.cta") }}
-      </button>
-    </div>
-  </nav>
-
-  <section class="hero">
-    <div class="hero-inner">
-      <div class="hero-copy parallax-content">
-        <p class="hero-pre">{{ t("ck.hero.pre") }}</p>
-        <h1 class="hero-title">
-          <span class="line-1">THE</span>
-          <span class="line-2">BOXER</span>
-          <span class="line-3">& BRIEF<span class="dash-end">—</span></span>
-        </h1>
-        <p class="hero-sub">{{ t("ck.hero.sub") }}</p>
-
-        <div class="hero-meta" aria-label="Product information">
-          <div class="hero-meta-card">
-            <span class="hero-meta-label">{{ t("ck.hero.priceLabel") }}</span>
-            <strong class="hero-meta-value">{{
-              formattedSkuPrice["ck-brief"]
-            }}</strong>
-            <span class="hero-meta-note">{{ t("ck.hero.priceValue") }}</span>
-          </div>
-          <div class="hero-meta-card">
-            <span class="hero-meta-label">{{ t("ck.hero.configLabel") }}</span>
-            <strong class="hero-meta-value">{{
-              t("ck.hero.configValue")
-            }}</strong>
-            <span class="hero-meta-note">Brief / Boxer</span>
-          </div>
-          <div class="hero-meta-card">
-            <span class="hero-meta-label">{{ t("ck.strip.stock") }}</span>
-            <strong class="hero-meta-value">LIMITED RUN</strong>
-            <span class="hero-meta-note">Web drop only</span>
-          </div>
-        </div>
-
-        <div class="hero-actions">
-          <button class="btn-checkout-cta" @click="$emit('hero-cta')">
-            {{ t("ck.hero.cta") }}
-            <span class="btn-arrow">→</span>
-          </button>
-          <button
-            class="btn-preview-cta"
-            @click="$emit('scroll-to', 'products')"
-          >
-            {{ t("ck.hero.previewLabel") }}
-          </button>
-        </div>
-      </div>
-      <div class="hero-preview reveal hidden lg:block">
-        <div class="hero-preview-card hero-preview-card--primary">
-          <p class="hero-preview-label">{{ t("ck.hero.previewLabel") }}</p>
-          <h2 class="hero-preview-title">{{ t("ck.hero.previewTitle") }}</h2>
-          <p class="hero-preview-body">{{ t("ck.hero.previewBody") }}</p>
-          <div class="hero-preview-grid">
-            <article class="preview-item">
-              <NuxtImg
-                :src="`/products/Brief/${briefColor}.png`"
-                :alt="`CK Brief ${briefColor}`"
-                width="220"
-                height="275"
-                format="webp"
-                quality="80"
-                fit="cover"
-                class="preview-image"
-                :class="{ 'is-loaded': briefPreviewLoaded }"
-                @load="briefPreviewLoaded = true"
-                @error="briefPreviewLoaded = true"
-              />
-              <div
-                v-if="!briefPreviewLoaded"
-                class="image-loader"
-                aria-hidden="true"
-              >
-                <NuxtImg
-                  src="/logo.png"
-                  alt=""
-                  class="image-loader-logo"
-                  width="64"
-                  height="64"
-                  quality="70"
-                  format="webp"
-                />
-              </div>
-              <div class="preview-item-copy">
-                <span>{{ t("ck.products.brief.desc") }}</span>
-              </div>
-            </article>
-            <article class="preview-item preview-item--secondary">
-              <NuxtImg
-                :src="`/products/Boxer/${boxerColor}.png`"
-                :alt="`CK Boxer ${boxerColor}`"
-                width="220"
-                height="275"
-                format="webp"
-                quality="80"
-                fit="cover"
-                class="preview-image"
-                :class="{ 'is-loaded': boxerPreviewLoaded }"
-                @load="boxerPreviewLoaded = true"
-                @error="boxerPreviewLoaded = true"
-              />
-              <div
-                v-if="!boxerPreviewLoaded"
-                class="image-loader"
-                aria-hidden="true"
-              >
-                <NuxtImg
-                  src="/logo.png"
-                  alt=""
-                  class="image-loader-logo"
-                  width="64"
-                  height="64"
-                  quality="70"
-                  format="webp"
-                />
-              </div>
-              <div class="preview-item-copy">
-                <span>{{ t("ck.products.boxer.desc") }}</span>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="hero-overlay" aria-hidden="true"></div>
-    <div class="hero-bg-text parallax-bg" aria-hidden="true">CK</div>
-  </section>
-
-  <div class="promo-strip">
-    <span>{{ t("ck.strip.shipping") }}</span>
-    <span class="dot">·</span>
-    <span>{{ t("ck.strip.offer") }}</span>
-    <span class="dot">·</span>
-    <span>{{ t("ck.strip.stock") }}</span>
-    <span class="dot">·</span>
-    <span>{{ t("ck.strip.shipping") }}</span>
-    <span class="dot">·</span>
-    <span>{{ t("ck.strip.offer") }}</span>
-    <span class="dot">·</span>
-    <span>{{ t("ck.strip.stock") }}</span>
   </div>
 </template>
 
@@ -197,30 +138,10 @@ import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
 
-interface NavLink {
-  id: string;
-  label: string;
-}
-
-const props = withDefaults(
-  defineProps<{
-    navLinks?: NavLink[];
-  }>(),
-  {
-    navLinks: () => [
-      { id: "products", label: "BRIEF & BOXER" },
-      { id: "order", label: "ORDER NOW" },
-    ],
-  }
-);
-
 defineEmits<{ "hero-cta": []; "scroll-to": [id: string] }>();
 const { t } = useI18n();
 const ckStore = useCkUnderwearStore();
-const { activeSection, boxerColor, briefColor, formattedSkuPrice } =
-  storeToRefs(ckStore);
-const { switchLang } = ckStore;
-const logoLoaded = ref(false);
+const { boxerColor, briefColor, formattedSkuPrice } = storeToRefs(ckStore);
 const briefPreviewLoaded = ref(false);
 const boxerPreviewLoaded = ref(false);
 
@@ -234,83 +155,152 @@ watch(boxerColor, () => {
 </script>
 
 <style scoped>
-/* ─── HERO ─────────────────────────────────────────────────────── */
+/* ── WRAPPER ────────────────────────────────────────────────────── */
+.ck-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HERO ───────────────────────────────────────────────────────── */
+/*
+ * padding-top = safe-area-inset-top + visual nav height (56px) + breathing room
+ * Compensates for the fixed SharedSiteNav rendered in the layout.
+ */
 .hero {
   position: relative;
   min-height: 100dvh;
   display: flex;
   align-items: center;
   background: var(--black);
-  overflow: clip;
-  padding: 48px 16px 32px;
+  overflow: hidden;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 56px + 32px);
+  padding-bottom: 40px;
+  padding-left: calc(24px + env(safe-area-inset-left, 0px));
+  padding-right: calc(24px + env(safe-area-inset-right, 0px));
 }
+
 .hero-inner {
   position: relative;
   z-index: 2;
-  width: min(1220px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 18px;
+  gap: 40px;
   align-items: center;
 }
+
+/* ── COPY ───────────────────────────────────────────────────────── */
 .parallax-content {
-  max-width: 640px;
   will-change: transform;
-  transform: translateY(calc(var(--scroll-y, 0) * -0.06px));
+  transform: translateY(calc(var(--scroll-y, 0) * -0.05px));
 }
-.hero-pre {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.3em;
+
+.hero-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
   color: var(--grey-400);
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
+
 .hero-title {
   display: flex;
   flex-direction: column;
-  line-height: 0.88;
-  margin-bottom: 36px;
+  line-height: 0.87;
+  margin-bottom: 28px;
 }
-.line-1 {
+
+.ht-muted {
   font-family: var(--font-display);
-  font-size: clamp(64px, 14vw, 130px);
+  font-size: clamp(52px, 11vw, 108px);
   color: var(--grey-700);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
-.line-2 {
+
+.ht-bold {
   font-family: var(--font-display);
-  font-size: clamp(96px, 22vw, 210px);
+  font-size: clamp(80px, 17vw, 168px);
   color: var(--white);
   letter-spacing: -0.02em;
 }
-.line-3 {
-  font-family: var(--font-display);
-  font-size: clamp(72px, 16vw, 150px);
-  color: var(--white);
-  letter-spacing: -0.02em;
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-}
-.dash-end {
-  font-family: var(--font-display);
-  font-size: clamp(48px, 10vw, 100px);
+
+.ht-dash {
   color: var(--grey-700);
+  font-size: 0.58em;
+  margin-left: 6px;
+  vertical-align: baseline;
 }
+
 .hero-sub {
-  font-size: clamp(11px, 2vw, 14px);
+  font-size: 13px;
   font-weight: 300;
-  letter-spacing: 0.2em;
-  color: var(--grey-400);
-  text-transform: uppercase;
-  line-height: 1.8;
-  margin-bottom: 48px;
-  border-left: 1px solid var(--grey-700);
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.85;
+  margin-bottom: 32px;
+  max-width: 480px;
   padding-left: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
   white-space: pre-line;
 }
-.btn-checkout-cta {
+
+/* Stats row */
+.hero-stats {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  max-width: 520px;
+}
+
+.hero-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+
+.stat-rule {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.stat-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+  white-space: nowrap;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.5vw, 28px);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Actions */
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -320,193 +310,147 @@ watch(boxerColor, () => {
   padding: 16px 28px;
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.2em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: background 0.2s, gap 0.2s;
 }
-.btn-checkout-cta:hover {
+.btn-primary:hover {
   background: var(--grey-100);
-  gap: 20px;
+  gap: 18px;
 }
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.btn-preview-cta {
+
+.btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 54px;
-  padding: 16px 22px;
-  border: 1px solid var(--grey-700);
+  padding: 16px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   background: transparent;
-  color: var(--white);
+  color: rgba(255, 255, 255, 0.76);
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  transition: border-color 0.2s, color 0.2s;
 }
-.btn-preview-cta:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: var(--white);
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--white);
 }
-.hero-meta {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+
+/* ── VISUAL (desktop sidebar) ───────────────────────────────────── */
+.hero-visual {
+  display: none;
+  align-self: stretch;
 }
-.hero-meta-card {
-  padding: 14px 14px 12px;
+
+.hero-visual-card {
+  height: 100%;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
 }
-.hero-meta-label,
-.hero-preview-label {
-  display: block;
-  margin-bottom: 8px;
+
+.visual-label {
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
   color: var(--grey-400);
-  text-transform: uppercase;
-}
-.hero-meta-value {
-  display: block;
-  font-family: var(--font-display);
-  font-size: clamp(28px, 4vw, 48px);
-  line-height: 0.92;
-  letter-spacing: -0.03em;
-  margin-bottom: 6px;
-}
-.hero-meta-note {
-  display: block;
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-}
-.hero-preview {
-  width: 100%;
-}
-.hero-preview-card {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: radial-gradient(
-      circle at top,
-      rgba(255, 255, 255, 0.14),
-      transparent 42%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.04),
-      rgba(255, 255, 255, 0.01)
-    );
-  padding: 18px;
-}
-.hero-preview-title {
-  font-family: var(--font-display);
-  font-size: clamp(34px, 5vw, 56px);
-  line-height: 0.92;
   margin-bottom: 10px;
-  max-width: 8ch;
 }
-.hero-preview-body {
-  max-width: 54ch;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
-  line-height: 1.7;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+
+.visual-title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.5vw, 48px);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
 }
-.hero-preview-grid {
+
+.visual-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 10px;
+  flex: 1;
 }
-.preview-item {
-  background: rgba(0, 0, 0, 0.36);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+
+.visual-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.visual-img-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 160px;
+  background: rgba(255, 255, 255, 0.03);
   overflow: hidden;
 }
-.preview-image {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  object-position: center top;
-  display: block;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-.preview-image.is-loaded {
-  opacity: 1;
-}
-.image-loader {
+
+.visual-img {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.visual-img.is-loaded {
+  opacity: 1;
+}
+
+.img-placeholder {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
-  );
-  pointer-events: none;
 }
-.image-loader-logo {
-  width: 64px;
+.img-placeholder-logo {
+  width: 36px;
   height: auto;
-  opacity: 0.9;
+  opacity: 0.35;
   animation: pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
-}
-.preview-item-copy {
-  padding: 12px;
-  font-size: 11px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.72);
-}
-.btn-arrow {
-  font-size: 16px;
-}
-.parallax-bg {
-  position: absolute;
-  right: -8%;
-  top: 50%;
-  will-change: transform;
-  transform: translateY(calc(-50% + var(--scroll-y, 0) * 0.35px));
-  font-family: var(--font-display);
-  font-size: clamp(180px, 44vw, 580px);
-  color: rgba(255, 255, 255, 0.05);
-  letter-spacing: -0.05em;
-  pointer-events: none;
-  user-select: none;
-  line-height: 1;
-}
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    160deg,
-    rgba(0, 0, 0, 0.25) 0%,
-    rgba(0, 0, 0, 0) 50%,
-    rgba(0, 0, 0, 0.55) 100%
-  );
 }
 
-/* ─── PROMO STRIP ──────────────────────────────────────────────── */
+.visual-item-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  line-height: 1;
+}
+
+/* ── WATERMARK ──────────────────────────────────────────────────── */
+.hero-watermark {
+  position: absolute;
+  right: -3%;
+  bottom: -10%;
+  font-family: var(--font-display);
+  font-size: clamp(200px, 42vw, 600px);
+  color: rgba(255, 255, 255, 0.03);
+  letter-spacing: -0.06em;
+  line-height: 0.8;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* ── PROMO STRIP ────────────────────────────────────────────────── */
 .promo-strip {
   background: var(--white);
   color: var(--black);
@@ -516,292 +460,89 @@ watch(boxerColor, () => {
   padding: 11px 24px;
   overflow: hidden;
   font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.25em;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
-.promo-strip .dot {
-  color: #aaa;
+.strip-dot {
+  color: rgba(0, 0, 0, 0.28);
   flex-shrink: 0;
-}
-.dash {
-  color: var(--grey-400);
 }
 
-/* ─── SECTION NAV ──────────────────────────────────────────────── */
-.section-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.96);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  height: 52px;
-  gap: 0;
-}
-.snav-home-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 32px;
-  height: 100%;
-  color: var(--grey-500);
-  font-size: 20px;
-  line-height: 1;
-  text-decoration: none;
-  transition: color 0.2s;
-  margin-right: 4px;
-}
-.snav-home-link:hover {
-  color: var(--white);
-}
-.snav-logo-link {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  margin-right: 16px;
-  text-decoration: none;
-}
-.snav-logo-wrap {
-  position: relative;
-  width: 56px;
-  height: 26px;
-  flex-shrink: 0;
-}
-.snav-logo-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-.snav-logo-img.is-loaded {
-  opacity: 1;
-}
-.snav-logo-link:hover .snav-logo-img {
-  opacity: 1;
-}
-/* Links: hidden on mobile, shown at md+ */
-.snav-links {
-  display: none;
-  align-items: center;
-  height: 100%;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex: 1;
-}
-.snav-links::-webkit-scrollbar {
-  display: none;
-}
-.snav-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-.lang-switch {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  color: var(--grey-400);
-  border: 1px solid var(--grey-700);
-  padding: 4px 8px;
-  background: transparent;
-  cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
-}
-.lang-switch:hover {
-  color: var(--white);
-  border-color: var(--white);
-}
-.snav-link {
-  font-family: var(--font-body);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  color: rgba(255, 255, 255, 0.35);
-  background: transparent;
-  border: none;
-  padding: 0 12px;
-  height: 100%;
-  cursor: pointer;
-  white-space: nowrap;
-  position: relative;
-  transition: color 0.2s;
-}
-.snav-link::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 12px;
-  right: 12px;
-  height: 1px;
-  background: var(--white);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.25s ease;
-}
-.snav-link:hover {
-  color: rgba(255, 255, 255, 0.7);
-}
-.snav-link.active {
-  color: var(--white);
-}
-.snav-link.active::after {
-  transform: scaleX(1);
-}
-.snav-cta {
-  flex-shrink: 0;
-  font-family: var(--font-body);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  background: var(--white);
-  color: var(--black);
-  border: none;
-  padding: 8px 12px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-}
-.snav-cta:hover {
-  background: var(--grey-100);
-}
-
+/* ── MOBILE SMALL (≤420px) ──────────────────────────────────────── */
 @media (max-width: 420px) {
-  .section-nav {
-    padding: 0 12px;
-    height: 48px;
-  }
-  .snav-logo-link {
-    margin-right: 8px;
-  }
-  .snav-cta {
-    display: none;
-  }
   .hero {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 52px + 24px);
+    padding-left: calc(16px + env(safe-area-inset-left, 0px));
+    padding-right: calc(16px + env(safe-area-inset-right, 0px));
     align-items: flex-start;
-    padding: 24px 12px 20px;
   }
-  .hero-inner {
-    gap: 12px;
-  }
-  .hero-copy {
+  .hero-stats {
+    flex-wrap: wrap;
     max-width: 100%;
   }
-  .hero-pre {
-    margin-bottom: 14px;
-    font-size: 10px;
-    letter-spacing: 0.26em;
+  .hero-stat {
+    flex: 0 0 calc(50% - 0.5px);
+    padding: 12px 14px;
   }
-  .hero-title {
-    margin-bottom: 16px;
-  }
-  .line-1 {
-    font-size: clamp(46px, 15vw, 84px);
-  }
-  .line-2 {
-    font-size: clamp(62px, 18vw, 120px);
-  }
-  .line-3 {
-    font-size: clamp(48px, 13vw, 96px);
-    gap: 8px;
-  }
-  .dash-end {
-    font-size: clamp(30px, 7vw, 56px);
-  }
-  .hero-sub {
-    margin-bottom: 18px;
-    padding-left: 12px;
-    line-height: 1.5;
-  }
-  .hero-meta {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  .hero-preview-card {
-    padding: 12px;
-  }
-  .hero-preview-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .hero-preview {
+  .stat-rule:last-of-type {
     display: none;
   }
   .hero-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
+    flex-direction: column;
     width: 100%;
   }
-  .btn-checkout-cta,
-  .btn-preview-cta {
+  .btn-primary,
+  .btn-ghost {
     width: 100%;
+    justify-content: center;
     min-height: 48px;
-    padding: 14px 16px;
-    justify-content: space-between;
-  }
-  .btn-checkout-cta {
-    font-size: 10px;
-  }
-  .btn-preview-cta {
-    font-size: 10px;
   }
 }
 
-/* ─── TABLET+ ──────────────────────────────────────────────────── */
+/* ── TABLET (≥640px) ────────────────────────────────────────────── */
 @media (min-width: 640px) {
-  .snav-links {
-    display: flex;
-  }
-  .section-nav {
-    padding: 0 32px;
-    height: 54px;
-  }
   .hero {
-    padding: 56px 24px 36px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 58px + 40px);
+    padding-left: calc(32px + env(safe-area-inset-left, 0px));
+    padding-right: calc(32px + env(safe-area-inset-right, 0px));
+    padding-bottom: 48px;
   }
-  .hero-inner {
-    gap: 24px;
-  }
-  .hero-meta-card {
-    padding: 16px;
+  .promo-strip {
+    gap: 28px;
+    padding: 12px 32px;
   }
 }
 
-/* ─── DESKTOP ──────────────────────────────────────────────────── */
+/* ── DESKTOP (≥1024px) ──────────────────────────────────────────── */
 @media (min-width: 1024px) {
-  .hero-inner {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    gap: 32px;
-  }
-  .section-nav {
-    padding: 0 64px;
-  }
   .hero {
-    padding: 80px 64px 56px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 60px + 48px);
+    padding-left: calc(64px + env(safe-area-inset-left, 0px));
+    padding-right: calc(64px + env(safe-area-inset-right, 0px));
+    padding-bottom: 56px;
   }
-  .hero-preview-card {
-    padding: 22px;
+  .hero-inner {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    gap: 48px;
   }
-  .hero-preview-body {
-    font-size: 13px;
+  .hero-visual {
+    display: flex;
+    flex-direction: column;
   }
   .promo-strip {
     justify-content: center;
-    gap: 32px;
+    gap: 36px;
     font-size: 10px;
     padding: 13px 64px;
+  }
+}
+
+/* ── WIDE (≥1280px) ─────────────────────────────────────────────── */
+@media (min-width: 1280px) {
+  .hero-inner {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   }
 }
 </style>

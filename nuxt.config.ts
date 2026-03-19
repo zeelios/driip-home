@@ -52,6 +52,10 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: "vi" },
       meta: [
+        {
+          name: "viewport",
+          content: "width=device-width, initial-scale=1, viewport-fit=cover",
+        },
         { name: "theme-color", content: "#000000" },
         { name: "author", content: "Zeelios" },
         { name: "robots", content: "index, follow" },

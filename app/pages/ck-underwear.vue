@@ -1,14 +1,6 @@
 <template>
   <div class="page">
-    <CkHeroNavSection
-      :nav-links="[
-        { id: 'products', label: 'BRIEF & BOXER' },
-        { id: 'gallery', label: 'LOOKBOOK' },
-        { id: 'order', label: 'ORDER NOW' },
-      ]"
-      @hero-cta="onHeroCTA"
-      @scroll-to="scrollToSection"
-    />
+    <CkHeroNavSection @hero-cta="onHeroCTA" @scroll-to="scrollToSection" />
     <CkProductsSection @prefill-order="prefillOrder" />
     <CkGallerySection />
     <CkManifestoSection />
@@ -22,10 +14,35 @@
 definePageMeta({ layout: "default" });
 import { useMetaEvents } from "~/composables/useMetaEvents";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
+import { useSiteNavStore } from "~/stores/site-nav";
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const { setupScrollDepth } = useMetaEvents();
 const ckStore = useCkUnderwearStore();
+const siteNavStore = useSiteNavStore();
+
+watchEffect(() => {
+  siteNavStore.setNav({
+    title: "CK ESSENTIALS",
+    links: [
+      { id: "products", label: "BRIEF & BOXER" },
+      { id: "gallery", label: "LOOKBOOK" },
+      { id: "order", label: t("ck.hero.cta") },
+    ],
+    ctaLabel: t("ck.hero.cta"),
+    ctaTarget: "order",
+  });
+});
+
+watch(
+  () => siteNavStore.scrollRequest,
+  (id) => {
+    if (id) {
+      scrollToSection(id);
+      siteNavStore.clearScrollRequest();
+    }
+  }
+);
 
 useHead({
   title: computed(() =>
@@ -101,7 +118,10 @@ function setupSectionNav(): void {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) ckStore.setActiveSection(entry.target.id);
+        if (entry.isIntersecting) {
+          ckStore.setActiveSection(entry.target.id);
+          siteNavStore.setActiveSection(entry.target.id);
+        }
       });
     },
     { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }

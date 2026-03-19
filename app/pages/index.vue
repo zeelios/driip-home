@@ -21,8 +21,15 @@
 </template>
 
 <script setup lang="ts">
+import { useSiteNavStore } from "~/stores/site-nav";
+
 const { locale } = useI18n();
 const { setupScrollDepth } = useMetaEvents();
+const siteNavStore = useSiteNavStore();
+
+watchEffect(() => {
+  siteNavStore.setNav({ title: "", links: [], ctaLabel: "", ctaTarget: "" });
+});
 const showLogoLoader = ref(true);
 
 let loaderTimer: number | null = null;
@@ -95,7 +102,7 @@ onMounted(() => {
 .home-loader {
   position: fixed;
   inset: 0;
-  z-index: 250;
+  z-index: 1001;
   display: flex;
   align-items: center;
   justify-content: center;

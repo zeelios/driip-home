@@ -1,39 +1,10 @@
 <template>
   <div class="page tee-page">
-    <header class="tee-nav">
-      <NuxtLinkLocale to="/" class="tee-brand">
-        <span class="tee-brand-mark">driip-</span>
-        <span class="tee-brand-divider" aria-hidden="true" />
-        <span class="tee-brand-drop">TEE / SONOMA</span>
-      </NuxtLinkLocale>
-
-      <nav class="tee-nav-links" aria-label="Driip tee page navigation">
-        <button
-          v-for="link in navLinks"
-          :key="link.id"
-          class="tee-nav-link"
-          :class="{ active: activeSection === link.id }"
-          @click="scrollToSection(link.id)"
-        >
-          {{ link.label }}
-        </button>
-      </nav>
-
-      <div class="tee-nav-actions">
-        <button class="tee-nav-lang" @click="switchLang">
-          {{ t("tee.nav.lang") }}
-        </button>
-        <button class="tee-nav-cta" @click="scrollToSection('details')">
-          {{ t("tee.nav.cta") }}
-        </button>
-      </div>
-    </header>
-
     <section class="tee-hero" id="hero">
       <div class="tee-hero-grid">
         <div class="tee-hero-copy">
           <p class="tee-kicker reveal">{{ t("tee.hero.pre") }}</p>
-          <p class="tee-status reveal">{{ t("tee.hero.status") }}</p>
+          <p class="tee-status reveal">{{ t("nav.comingSoon") }}</p>
           <h1 class="tee-title reveal">{{ t("tee.hero.title") }}</h1>
           <p class="tee-subtitle reveal">{{ t("tee.hero.sub") }}</p>
 
@@ -144,16 +115,33 @@
 <script setup lang="ts">
 definePageMeta({ layout: "default" });
 
-const { locale, t, setLocale } = useI18n();
+import { useSiteNavStore } from "~/stores/site-nav";
+
+const { locale, t } = useI18n();
 const { setupScrollDepth } = useMetaEvents();
+const siteNavStore = useSiteNavStore();
 
-const activeSection = ref("hero");
+watchEffect(() => {
+  siteNavStore.setNav({
+    title: "DRIIP TEE",
+    links: [
+      { id: "details", label: t("tee.nav.details") },
+      { id: "manifesto", label: t("tee.nav.manifesto") },
+    ],
+    ctaLabel: t("tee.nav.cta"),
+    ctaTarget: "details",
+  });
+});
 
-const navLinks = computed(() => [
-  { id: "details", label: t("tee.nav.details") },
-  { id: "manifesto", label: t("tee.nav.manifesto") },
-  { id: "hero", label: t("tee.nav.top") },
-]);
+watch(
+  () => siteNavStore.scrollRequest,
+  (id) => {
+    if (id) {
+      scrollToSection(id);
+      siteNavStore.clearScrollRequest();
+    }
+  }
+);
 
 const metrics = computed(() => [
   {
@@ -196,10 +184,6 @@ useHead({
   ],
 });
 
-function switchLang(): void {
-  setLocale(locale.value === "vi" ? "en" : "vi");
-}
-
 function scrollToSection(id: string): void {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
@@ -234,10 +218,11 @@ function setupSectionNav(): void {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) activeSection.value = entry.target.id;
+        if (entry.isIntersecting)
+          siteNavStore.setActiveSection(entry.target.id);
       });
     },
-    { threshold: 0.35, rootMargin: "-56px 0px 0px 0px" }
+    { threshold: 0.35, rootMargin: "-60px 0px 0px 0px" }
   );
 
   ids.forEach((id) => {
@@ -277,115 +262,11 @@ onMounted(() => {
   color: var(--white);
 }
 
-.tee-nav {
-  position: sticky;
-  top: 0;
-  z-index: 120;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 14px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(10, 10, 10, 0.84);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.tee-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  text-decoration: none;
-  color: var(--white);
-}
-
-.tee-brand-mark,
-.tee-brand-drop {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.tee-brand-mark {
-  color: var(--white);
-}
-
-.tee-brand-drop {
-  color: var(--grey-400);
-}
-
-.tee-brand-divider {
-  width: 1px;
-  height: 16px;
-  background: rgba(255, 255, 255, 0.18);
-  flex-shrink: 0;
-}
-
-.tee-nav-links {
-  display: none;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  justify-content: center;
-}
-
-.tee-nav-link {
-  border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.42);
-  font-family: var(--font-body);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  cursor: pointer;
-  padding: 8px 10px;
-  transition: color 0.2s ease;
-}
-
-.tee-nav-link.active,
-.tee-nav-link:hover {
-  color: var(--white);
-}
-
-.tee-nav-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tee-nav-lang,
-.tee-nav-cta {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: transparent;
-  color: var(--white);
-  font-family: var(--font-body);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  padding: 9px 12px;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.tee-nav-lang:hover,
-.tee-nav-cta:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.34);
-}
-
-.tee-nav-cta {
-  background: var(--white);
-  color: var(--black);
-}
-
 .tee-hero {
-  padding: 26px 24px 44px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 56px + 26px);
+  padding-bottom: 44px;
+  padding-left: calc(24px + env(safe-area-inset-left, 0px));
+  padding-right: calc(24px + env(safe-area-inset-right, 0px));
 }
 
 .tee-hero-grid,
@@ -739,17 +620,10 @@ onMounted(() => {
 }
 
 @media (min-width: 640px) {
-  .tee-nav {
-    padding-left: 32px;
-    padding-right: 32px;
-  }
-
-  .tee-nav-links {
-    display: flex;
-  }
-
   .tee-hero {
-    padding-top: 32px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 58px + 32px);
+    padding-left: calc(32px + env(safe-area-inset-left, 0px));
+    padding-right: calc(32px + env(safe-area-inset-right, 0px));
   }
 
   .tee-hero-grid {
@@ -771,15 +645,10 @@ onMounted(() => {
 }
 
 @media (min-width: 1024px) {
-  .tee-nav {
-    padding-left: 64px;
-    padding-right: 64px;
-  }
-
   .tee-hero {
-    padding-left: 64px;
-    padding-right: 64px;
-    padding-top: 36px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 60px + 36px);
+    padding-left: calc(64px + env(safe-area-inset-left, 0px));
+    padding-right: calc(64px + env(safe-area-inset-right, 0px));
   }
 
   .tee-strip,

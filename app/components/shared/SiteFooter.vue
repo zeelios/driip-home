@@ -84,6 +84,27 @@ const logoLoaded = ref(false);
 .footer-logo-img.is-loaded:hover {
   opacity: 1;
 }
+.image-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  pointer-events: none;
+}
+.image-loader-logo {
+  width: 56px;
+  height: auto;
+  opacity: 0.9;
+  animation: pulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
+}
 .footer-links {
   display: flex;
   gap: 24px;

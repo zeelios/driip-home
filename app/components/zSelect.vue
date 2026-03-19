@@ -19,84 +19,86 @@
       <span class="z-select-arrow" aria-hidden="true">⌄</span>
     </button>
 
-    <Transition name="z-select-fade">
-      <div v-if="isOpen" class="z-select-overlay">
-        <button
-          type="button"
-          class="z-select-backdrop"
-          aria-label="Close picker"
-          @click="closeDropdown"
-        />
-
+    <!--
+      Teleported to <body> to escape any parent transform / overflow / stacking
+      context that would break position:fixed on iOS Safari.
+    -->
+    <Teleport to="body">
+      <Transition :name="isMobile ? 'zs-sheet' : 'zs-drop'">
         <div
-          class="z-select-panel"
-          role="dialog"
-          :aria-label="label || placeholder"
+          v-if="isOpen"
+          class="zs-overlay"
+          :class="{ 'zs-overlay--mobile': isMobile, 'zs-overlay--desktop': !isMobile }"
+          @mousedown.self="closeDropdown"
+          @touchstart.self="closeDropdown"
         >
-          <div class="z-select-panel-bar">
-            <div class="z-select-panel-grabber" aria-hidden="true" />
-
-            <div class="z-select-panel-heading">
-              <span class="z-select-panel-title">{{
-                label || placeholder
-              }}</span>
-
-              <button
-                type="button"
-                class="z-select-panel-done"
-                @click="closeDropdown"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-
-          <input
-            ref="searchRef"
-            v-model="query"
-            class="z-select-search"
-            type="text"
-            :placeholder="searchPlaceholder || placeholder"
-            autocomplete="off"
-            spellcheck="false"
-            @keydown.esc.prevent="closeDropdown"
-            @keydown.enter.prevent="selectFirstVisible"
+          <!-- Mobile backdrop -->
+          <div
+            v-if="isMobile"
+            class="zs-backdrop"
+            @click="closeDropdown"
           />
 
-          <div class="z-select-options" role="listbox">
-            <button
-              v-for="option in visibleOptions"
-              :key="option.value"
-              type="button"
-              class="z-select-option"
-              :class="{ active: option.value === modelValue }"
-              @click="selectOption(option)"
-            >
-              <span class="z-select-option-label">{{ option.label }}</span>
-              <span v-if="option.hint" class="z-select-option-hint">{{
-                option.hint
-              }}</span>
-            </button>
+          <!-- Panel -->
+          <div
+            class="zs-panel"
+            :class="{ 'zs-panel--mobile': isMobile, 'zs-panel--desktop': !isMobile }"
+            :style="!isMobile ? desktopPanelStyle : undefined"
+            role="dialog"
+            :aria-label="label || placeholder"
+          >
+            <!-- Mobile handle bar -->
+            <div v-if="isMobile" class="zs-bar">
+              <div class="zs-grabber" aria-hidden="true" />
+              <div class="zs-bar-row">
+                <span class="zs-bar-title">{{ label || placeholder }}</span>
+                <button type="button" class="zs-done" @click="closeDropdown">
+                  Xong
+                </button>
+              </div>
+            </div>
 
-            <div v-if="!visibleOptions.length" class="z-select-empty">
-              {{ emptyState }}
+            <!-- Search -->
+            <input
+              ref="searchRef"
+              v-model="query"
+              class="zs-search"
+              type="text"
+              :placeholder="searchPlaceholder || placeholder"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+              @keydown.esc.prevent="closeDropdown"
+              @keydown.enter.prevent="selectFirstVisible"
+            />
+
+            <!-- Options -->
+            <div class="zs-options" role="listbox">
+              <button
+                v-for="option in visibleOptions"
+                :key="option.value"
+                type="button"
+                class="zs-option"
+                :class="{ active: option.value === modelValue }"
+                @click="selectOption(option)"
+              >
+                <span class="zs-option-label">{{ option.label }}</span>
+                <span v-if="option.hint" class="zs-option-hint">{{ option.hint }}</span>
+              </button>
+
+              <div v-if="!visibleOptions.length" class="zs-empty">
+                {{ emptyState }}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  watch,
-} from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 export interface ZSelectOption {
   value: string;
@@ -134,10 +136,11 @@ const rootRef = ref<HTMLElement | null>(null);
 const searchRef = ref<HTMLInputElement | null>(null);
 const isOpen = ref(false);
 const query = ref("");
+const isMobile = ref(true);
+const desktopPanelStyle = ref<Record<string, string>>({});
 
 const selectedOption = computed(
-  () =>
-    props.options.find((option) => option.value === props.modelValue) ?? null
+  () => props.options.find((o) => o.value === props.modelValue) ?? null
 );
 
 const selectedText = computed(
@@ -147,25 +150,40 @@ const selectedText = computed(
 const visibleOptions = computed(() => {
   const q = query.value.trim().toLowerCase();
   if (!q) return props.options;
-
-  return props.options.filter((option) => {
-    const searchable = [option.label, option.value, option.hint ?? ""]
-      .join(" ")
-      .toLowerCase();
-
-    return searchable.includes(q);
-  });
+  return props.options.filter((o) =>
+    [o.label, o.value, o.hint ?? ""].join(" ").toLowerCase().includes(q)
+  );
 });
+
+function computeDesktopPosition(): void {
+  if (!rootRef.value) return;
+  const rect = rootRef.value.getBoundingClientRect();
+  desktopPanelStyle.value = {
+    top: `${rect.bottom + 6}px`,
+    left: `${rect.left}px`,
+    width: `${rect.width}px`,
+  };
+}
 
 function openDropdown(): void {
   if (props.disabled) return;
 
+  if (process.client) {
+    isMobile.value = window.innerWidth < 640;
+    if (!isMobile.value) {
+      computeDesktopPosition();
+    }
+  }
+
   isOpen.value = true;
   query.value = "";
 
-  void nextTick(() => {
-    searchRef.value?.focus();
-  });
+  // Only auto-focus search on desktop — on mobile it triggers the iOS
+  // virtual keyboard before the bottom sheet has finished animating in,
+  // which pushes the sheet off-screen.
+  if (!isMobile.value) {
+    void nextTick(() => searchRef.value?.focus());
+  }
 }
 
 function closeDropdown(): void {
@@ -176,10 +194,9 @@ function closeDropdown(): void {
 function toggleDropdown(): void {
   if (isOpen.value) {
     closeDropdown();
-    return;
+  } else {
+    openDropdown();
   }
-
-  openDropdown();
 }
 
 function selectOption(option: ZSelectOption): void {
@@ -193,9 +210,8 @@ function selectFirstVisible(): void {
   if (first) selectOption(first);
 }
 
-function onDocumentPointerDown(event: MouseEvent): void {
-  if (!isOpen.value) return;
-
+function onOutsidePointerDown(event: MouseEvent): void {
+  if (!isOpen.value || isMobile.value) return;
   const target = event.target as Node | null;
   if (rootRef.value && target && !rootRef.value.contains(target)) {
     closeDropdown();
@@ -209,22 +225,23 @@ watch(
   }
 );
 
+watch(isOpen, (open) => {
+  if (!process.client) return;
+  document.documentElement.style.overflow = open ? "hidden" : "";
+});
+
 onMounted(() => {
-  document.addEventListener("mousedown", onDocumentPointerDown, true);
+  document.addEventListener("mousedown", onOutsidePointerDown, true);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener("mousedown", onDocumentPointerDown, true);
-});
-
-watch(isOpen, (open) => {
-  if (!process.client) return;
-
-  document.documentElement.style.overflow = open ? "hidden" : "";
+  document.removeEventListener("mousedown", onOutsidePointerDown, true);
+  document.documentElement.style.overflow = "";
 });
 </script>
 
 <style scoped>
+/* ── TRIGGER ────────────────────────────────────────────────────── */
 .z-select {
   position: relative;
   display: flex;
@@ -258,11 +275,12 @@ watch(isOpen, (open) => {
   outline: none;
   padding: 4px 0;
   font-family: var(--font-body);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 300;
   color: var(--white);
   cursor: pointer;
   text-align: left;
+  min-height: 36px;
 }
 
 .z-select-trigger:disabled {
@@ -277,17 +295,13 @@ watch(isOpen, (open) => {
   white-space: nowrap;
 }
 
-.z-select-value:not(:empty) {
-  color: var(--white);
-}
-
 .z-select-trigger:not(.has-value) .z-select-value {
-  color: var(--grey-700);
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .z-select-arrow {
   flex-shrink: 0;
-  color: var(--grey-700);
+  color: rgba(255, 255, 255, 0.25);
   font-size: 14px;
   line-height: 1;
   transition: transform 0.2s, color 0.2s;
@@ -299,105 +313,122 @@ watch(isOpen, (open) => {
 
 .is-open .z-select-arrow {
   transform: rotate(180deg);
-  color: var(--grey-400);
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.z-select-overlay {
+/* ── OVERLAY (teleported to body) ───────────────────────────────── */
+.zs-overlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  z-index: 1500;
 }
 
-.z-select-backdrop {
-  position: absolute;
-  inset: 0;
-  border: none;
-  background: rgba(0, 0, 0, 0.48);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 0;
-}
-
-.z-select-panel {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 560px);
-  max-height: min(82vh, 760px);
+/* Mobile: bottom-sheet layout */
+.zs-overlay--mobile {
   display: flex;
   flex-direction: column;
-  background: rgba(14, 14, 14, 0.96);
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+/* Desktop: transparent click-catcher */
+.zs-overlay--desktop {
+  background: transparent;
+  pointer-events: none;
+}
+
+/* ── BACKDROP (mobile only) ─────────────────────────────────────── */
+.zs-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ── PANEL ──────────────────────────────────────────────────────── */
+.zs-panel {
+  position: relative;
+  z-index: 1;
+  background: rgb(14, 14, 14);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  border-radius: 28px 28px 0 0;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
-.z-select-panel-bar {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: linear-gradient(
-    180deg,
-    rgba(18, 18, 18, 0.98),
-    rgba(18, 18, 18, 0.92)
-  );
+/* Mobile panel: bottom sheet */
+.zs-panel--mobile {
+  border-radius: 24px 24px 0 0;
+  max-height: 80dvh;
+  /* Safe area padding so options aren't hidden behind home bar */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-bottom: none;
+}
+
+/* Desktop panel: dropdown anchored by JS inline style */
+.zs-panel--desktop {
+  position: fixed;
+  border-radius: 0;
+  pointer-events: all;
+  max-height: 340px;
+}
+
+/* ── MOBILE HANDLE BAR ──────────────────────────────────────────── */
+.zs-bar {
+  flex-shrink: 0;
+  background: rgb(18, 18, 18);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 12px 14px 10px;
+  padding: 10px 16px 12px;
 }
 
-.z-select-panel-grabber {
-  width: 42px;
-  height: 5px;
-  margin: 0 auto 12px;
+.zs-grabber {
+  width: 40px;
+  height: 4px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
+  margin: 0 auto 12px;
 }
 
-.z-select-panel-heading {
+.zs-bar-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.z-select-panel-title {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.zs-bar-title {
   color: var(--white);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.z-select-panel-done {
+.zs-done {
   flex-shrink: 0;
   border: none;
   background: transparent;
-  color: var(--grey-400);
+  color: rgba(255, 255, 255, 0.55);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.04em;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 0 4px 16px;
+  transition: color 0.15s;
 }
 
-.z-select-panel-done:hover {
+.zs-done:hover {
   color: var(--white);
 }
 
-.embedded .z-select-panel {
-  top: calc(100% + 4px);
-}
-
-.z-select-search {
+/* ── SEARCH ─────────────────────────────────────────────────────── */
+.zs-search {
+  flex-shrink: 0;
   width: 100%;
   border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -406,20 +437,25 @@ watch(isOpen, (open) => {
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 400;
-  padding: 16px 16px;
+  padding: 16px;
   outline: none;
+  /* Prevent iOS zoom on focus (font-size must be ≥16px) */
+  font-size: 16px;
 }
 
-.z-select-search::placeholder {
-  color: var(--grey-700);
+.zs-search::placeholder {
+  color: rgba(255, 255, 255, 0.2);
 }
 
-.z-select-options {
-  max-height: 50vh;
+/* ── OPTIONS ────────────────────────────────────────────────────── */
+.zs-options {
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
 }
 
-.z-select-option {
+.zs-option {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -430,89 +466,73 @@ watch(isOpen, (open) => {
   background: transparent;
   color: var(--white);
   cursor: pointer;
+  /* 52px touch target on mobile */
   padding: 16px;
   text-align: left;
-  transition: background 0.15s;
+  transition: background 0.12s;
 }
 
-.z-select-option:hover,
-.z-select-option.active {
-  background: rgba(255, 255, 255, 0.05);
+.zs-option:hover,
+.zs-option.active {
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.z-select-option-label {
+.zs-option.active {
+  color: var(--white);
+}
+
+.zs-option-label {
   font-size: 15px;
   font-weight: 400;
   letter-spacing: 0.02em;
 }
 
-.z-select-option-hint {
+.zs-option-hint {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--grey-400);
+  color: rgba(255, 255, 255, 0.35);
 }
 
-.z-select-empty {
-  padding: 18px 16px;
-  color: var(--grey-700);
+.zs-empty {
+  padding: 20px 16px;
+  color: rgba(255, 255, 255, 0.3);
   font-size: 12px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
-.z-select-fade-enter-active,
-.z-select-fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
+/* ── TRANSITIONS ────────────────────────────────────────────────── */
 
-.z-select-fade-enter-from,
-.z-select-fade-leave-to {
+/* Mobile: slide up from bottom */
+.zs-sheet-enter-active {
+  transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.zs-sheet-leave-active {
+  transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.zs-sheet-enter-from .zs-backdrop,
+.zs-sheet-leave-to .zs-backdrop {
   opacity: 0;
-  transform: translateY(-4px);
+}
+.zs-sheet-enter-from .zs-panel--mobile,
+.zs-sheet-leave-to .zs-panel--mobile {
+  transform: translateY(100%);
+}
+.zs-sheet-enter-to .zs-panel--mobile,
+.zs-sheet-leave-from .zs-panel--mobile {
+  transform: translateY(0);
 }
 
-@media (min-width: 640px) {
-  .z-select-overlay {
-    align-items: flex-start;
-    justify-content: flex-start;
-    position: absolute;
-  }
-
-  .z-select-backdrop {
-    display: none;
-  }
-
-  .z-select-panel {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(100% + 8px);
-    width: 100%;
-    max-height: none;
-    border-radius: 0;
-    padding-bottom: 0;
-  }
-
-  .z-select-panel-bar {
-    padding: 0;
-    border-bottom: none;
-    background: transparent;
-  }
-
-  .z-select-panel-grabber,
-  .z-select-panel-heading,
-  .z-select-panel-done {
-    display: none;
-  }
-
-  .z-select-search {
-    padding: 16px 18px;
-  }
-
-  .z-select-option {
-    padding: 15px 18px;
-  }
+/* Desktop: fade + slight drop */
+.zs-drop-enter-active,
+.zs-drop-leave-active {
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+.zs-drop-enter-from,
+.zs-drop-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>

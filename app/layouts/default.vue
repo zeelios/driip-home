@@ -1,5 +1,6 @@
 <template>
   <div class="layout">
+    <SharedSiteNav />
     <slot />
     <!-- <SharedTrackingDebugPanel /> -->
   </div>
