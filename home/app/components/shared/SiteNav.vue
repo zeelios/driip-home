@@ -84,9 +84,12 @@ function switchLang(): void {
 
 <style scoped>
 /* ── NAV — position: fixed, teleported to body ──────────────────────
- * Escapes all overflow/transform ancestors in the page tree.
- * padding-top fills the iOS status bar / dynamic island area.
- * snav-inner holds the visible nav bar content.
+ * iOS 26 "Liquid Glass" fix:
+ *   The system chrome (status bar + Dynamic Island) bleeds into the page.
+ *   We set top: 0 and let the nav fill from the very top of the screen.
+ *   A ::before pseudo covers the safe-area zone with the same solid
+ *   background so there is never a hollow / transparent gap behind the
+ *   status bar — regardless of how tall iOS makes that region.
  */
 .snav {
   position: fixed;
@@ -94,11 +97,21 @@ function switchLang(): void {
   left: 0;
   right: 0;
   z-index: 1000;
-  padding-top: env(safe-area-inset-top, 0px);
+  /* No padding-top here — handled by snav-inner so ::before can fill the gap */
   background: rgba(5, 5, 5, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Extends the nav background upward behind the iOS status bar / Dynamic Island.
+ * Height = safe-area-inset-top, positioned just above snav-inner.
+ * This prevents the "hollow" see-through gap on iOS 26 Liquid Glass. */
+.snav::before {
+  content: "";
+  display: block;
+  height: env(safe-area-inset-top, 0px);
+  /* Inherit the same background — no extra blur needed, parent handles it */
 }
 
 .snav-inner {

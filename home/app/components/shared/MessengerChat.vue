@@ -18,9 +18,9 @@
 
       <!-- FAB -->
       <a
-        :href="pageId ? `https://m.me/${pageId}` : 'https://www.messenger.com'"
-        target="_blank"
-        rel="noopener noreferrer"
+        :href="messengerHref"
+        :target="isMobile ? '_self' : '_blank'"
+        :rel="isMobile ? undefined : 'noopener noreferrer'"
         class="mc-fab"
         :class="{ 'mc-fab--pulse': pulseActive }"
         aria-label="Chat hỗ trợ qua Messenger"
@@ -49,6 +49,14 @@ import { onMounted, onBeforeUnmount, ref } from "vue";
 
 const config = useRuntimeConfig();
 const pageId = computed(() => config.public.fbPageId as string | undefined);
+const isMobile = ref(false);
+const messengerHref = computed(() => {
+  if (!pageId.value) return "https://www.messenger.com";
+
+  return isMobile.value
+    ? `https://m.me/${pageId.value}`
+    : `https://m.me/${pageId.value}`;
+});
 
 const tipVisible = ref(false);
 const pulseActive = ref(false);
@@ -59,6 +67,13 @@ let pulseTimer: ReturnType<typeof setTimeout> | null = null;
 
 const TIP_KEY = "mc_tip_dismissed";
 
+function detectMobileDevice(): boolean {
+  if (!process.client) return false;
+
+  const ua = navigator.userAgent || navigator.vendor || "";
+  return /android|iphone|ipad|ipod|mobile/i.test(ua);
+}
+
 function dismissTip(): void {
   tipVisible.value = false;
   pulseActive.value = false;
@@ -68,6 +83,8 @@ function dismissTip(): void {
 
 onMounted(() => {
   if (!process.client) return;
+
+  isMobile.value = detectMobileDevice();
 
   const alreadyDismissed = sessionStorage.getItem(TIP_KEY);
 

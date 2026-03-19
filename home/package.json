@@ -1,0 +1,30 @@
+{
+  "name": "driip-home",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.11.3",
+    "@tailwindcss/vite": "^4.2.1",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "googleapis": "^171.4.0",
+    "pinia": "^3.0.4",
+    "tailwindcss": "^4.2.1",
+    "vite": "^8.0.0"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "^3.2.3",
+    "@nuxt/image": "^2.0.0",
+    "@nuxtjs/i18n": "^10.2.3",
+    "nuxt": "^4.4.2",
+    "typescript": "~5.9.3",
+    "vue-i18n": "^11.3.0"
+  }
+}

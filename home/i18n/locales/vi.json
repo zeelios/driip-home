@@ -7,7 +7,7 @@
   },
   "home": {
     "hero": {
-      "pre": "SS26 — Đợt đầu tiên",
+      "pre": "SS26 — DROP đầu tiên",
       "tagline": "Khác biệt ngay từ nền tảng.",
       "sub": "Phong cách chỉn chu.\nBắt đầu từ những điều cơ bản nhất.",
       "cta": "Khám phá bộ sưu tập ↓"
@@ -16,10 +16,10 @@
       "label": "Bộ sưu tập SS26",
       "title": "Bộ sưu tập",
       "live": "Đang mở bán",
-      "comingSoon": "Đợt tiếp theo",
+      "comingSoon": "DROP tiếp theo",
       "from": "Từ",
       "shopNow": "Mua ngay →",
-      "notify": "Xem đợt hàng",
+      "notify": "Xem DROP",
       "lacoste": {
         "alt": "Ảnh xem trước tạm thời cho Lacoste Polo",
         "collection": "SS26 · POLO",
@@ -27,7 +27,7 @@
       }
     },
     "upcoming": {
-      "label": "Các đợt tiếp theo",
+      "label": "Các DROP DROP tiếp theo",
       "title": "Sắp có thêm nhiều điều đáng chờ đợi.",
       "q3": "Q3 2026",
       "q4": "Q4 2026"
@@ -169,10 +169,10 @@
       "top": "ĐẦU TRANG"
     },
     "hero": {
-      "pre": "ĐỢT MỚI — DRIIP TEE",
+      "pre": "DROP MỚI — DRIIP TEE",
       "title": "ÁO THUN ĐƯỢC LÀM LẠI CHỈNH CHU.",
       "sub": "Sử dụng vải Sonoma cao cấp, cảm giác dày dặn hơn, hoàn thiện sạch hơn và mức độ đầu tư sản xuất thực sự cao.",
-      "cta": "XEM ĐỢT MỚI",
+      "cta": "XEM DROP DROP MỚI",
       "secondary": "VỀ TRANG CHỦ",
       "metrics": {
         "fabric": "CHẤT LIỆU",
@@ -188,7 +188,7 @@
       "pill": "SẢN LƯỢNG ÍT",
       "frontLabel": "Hoàn thiện dày dặn",
       "title": "Cảm giác cầm nắm dày hơn, rơi dáng sạch hơn.",
-      "body": "Trang này được thiết kế để có độ “chạm” và cảm giác cao cấp ngay từ đầu — nhiều bầu không khí hơn, có chiều sâu hơn và rõ chất của một đợt drop thực thụ."
+      "body": "Trang này được thiết kế để có độ “chạm” và cảm giác cao cấp ngay từ đầu — nhiều bầu không khí hơn, có chiều sâu hơn và rõ chất của một DROP drop thực thụ."
     },
     "strip": {
       "fabric": "VẢI SONOMA",
@@ -209,11 +209,11 @@
     "run": {
       "label": "CHIẾN LƯỢC DROP",
       "title": "SỐ LƯỢNG ÍT, CÓ CHỦ ĐÍCH",
-      "body": "Đợt này được giữ ở quy mô nhỏ để đảm bảo chất lượng luôn là ưu tiên từ khâu mẫu đến khâu sản xuất cuối cùng."
+      "body": "DROP này được giữ ở quy mô nhỏ để đảm bảo chất lượng luôn là ưu tiên từ khâu mẫu đến khâu sản xuất cuối cùng."
     },
     "manifesto": "Chiếc áo thun này phải cho cảm giác như chiếc áo đẹp nhất trong tủ: dày, sạch và được làm bằng sự đầu tư thật sự.",
     "manifestoLabel": "ĐỊNH VỊ",
-    "footerText": "Đợt tiếp theo của Driip sẽ ra mắt với vải Sonoma. Cao cấp hơn, giới hạn hơn.",
+    "footerText": "DROP tiếp theo của Driip sẽ ra mắt với vải Sonoma. Cao cấp hơn, giới hạn hơn.",
     "backToDrops": "QUAY LẠI BỘ SƯU TẬP"
   },
   "lacostePolo": {
@@ -223,11 +223,11 @@
       "top": "ĐẦU TRANG"
     },
     "hero": {
-      "pre": "ĐỢT MỚI — LACOSTE POLO",
+      "pre": "DROP MỚI — LACOSTE POLO",
       "status": "ẢNH TẠM THỜI",
       "title": "CHIẾC POLO SẴN SÀNG CHO BƯỚC TIẾP THEO.",
-      "sub": "Trang này đã được chuẩn bị cho đợt Lacoste Polo. Tạm thời đang dùng một hình ảnh placeholder để bạn có thể thay ảnh sản phẩm sau mà không cần làm lại bố cục.",
-      "cta": "XEM ĐỢT MỚI",
+      "sub": "Trang này đã được chuẩn bị cho DROP Lacoste Polo. Tạm thời đang dùng một hình ảnh placeholder để bạn có thể thay ảnh sản phẩm sau mà không cần làm lại bố cục.",
+      "cta": "XEM DROP MỚI",
       "secondary": "VỀ TRANG CHỦ",
       "metrics": {
         "fabric": "CHẤT LIỆU",
@@ -251,7 +251,7 @@
     },
     "material": {
       "label": "CHẤT LIỆU",
-      "title": "ĐƯỢC DỰNG CHO ĐỢT POLO",
+      "title": "ĐƯỢC DỰNG CHO DROP POLO",
       "body": "Phần này tạo khung trình bày cao cấp trong lúc ảnh sản phẩm cuối cùng vẫn đang được chuẩn bị."
     },
     "fit": {
