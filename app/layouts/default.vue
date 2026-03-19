@@ -2,6 +2,7 @@
   <div class="layout">
     <SharedSiteNav />
     <slot />
+    <SharedMessengerChat />
     <!-- <SharedTrackingDebugPanel /> -->
   </div>
 </template>

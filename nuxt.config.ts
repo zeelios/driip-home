@@ -110,6 +110,7 @@ export default defineNuxtConfig({
     // Public — populated from NUXT_PUBLIC_META_PIXEL_ID
     public: {
       metaPixelId: "",
+      fbPageId: "",
     },
   },
 });

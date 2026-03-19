@@ -81,6 +81,7 @@ const props = withDefaults(
     loaderSize: 72,
     stretch: false,
     intrinsic: false,
+    fit: "contain",
   }
 );
 
@@ -165,7 +166,7 @@ function onError(event: string | Event): void {
   display: block;
   width: 100%;
   height: auto;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .driip-image--stretch {
@@ -183,6 +184,12 @@ function onError(event: string | Event): void {
 
 .driip-image-img {
   display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
   opacity: 0;
   transition: opacity 0.28s ease, transform 0.28s ease;
 }

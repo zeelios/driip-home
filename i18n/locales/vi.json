@@ -19,7 +19,12 @@
       "comingSoon": "Đợt tiếp theo",
       "from": "Từ",
       "shopNow": "Mua ngay →",
-      "notify": "Xem đợt hàng"
+      "notify": "Xem đợt hàng",
+      "lacoste": {
+        "alt": "Ảnh xem trước tạm thời cho Lacoste Polo",
+        "collection": "SS26 · POLO",
+        "name": "LACOSTE\nPOLO"
+      }
     },
     "upcoming": {
       "label": "Các đợt tiếp theo",
@@ -209,6 +214,57 @@
     "manifesto": "Chiếc áo thun này phải cho cảm giác như chiếc áo đẹp nhất trong tủ: dày, sạch và được làm bằng sự đầu tư thật sự.",
     "manifestoLabel": "ĐỊNH VỊ",
     "footerText": "Đợt tiếp theo của Driip sẽ ra mắt với vải Sonoma. Cao cấp hơn, giới hạn hơn.",
+    "backToDrops": "QUAY LẠI BỘ SƯU TẬP"
+  },
+  "lacostePolo": {
+    "nav": {
+      "cta": "XEM CHI TIẾT",
+      "details": "CHI TIẾT",
+      "top": "ĐẦU TRANG"
+    },
+    "hero": {
+      "pre": "ĐỢT MỚI — LACOSTE POLO",
+      "status": "ẢNH TẠM THỜI",
+      "title": "CHIẾC POLO SẴN SÀNG CHO BƯỚC TIẾP THEO.",
+      "sub": "Trang này đã được chuẩn bị cho đợt Lacoste Polo. Tạm thời đang dùng một hình ảnh placeholder để bạn có thể thay ảnh sản phẩm sau mà không cần làm lại bố cục.",
+      "cta": "XEM ĐỢT MỚI",
+      "secondary": "VỀ TRANG CHỦ",
+      "metrics": {
+        "fabric": "CHẤT LIỆU",
+        "fabricValue": "POLO KNIT",
+        "finish": "HOÀN THIỆN",
+        "finishValue": "CỔ ÁO GỌN",
+        "run": "SẢN LƯỢNG",
+        "runValue": "BẢN XEM TRƯỚC"
+      }
+    },
+    "visual": {
+      "alt": "Ảnh xem trước tạm thời cho Lacoste Polo",
+      "label": "HÌNH ẢNH TẠM",
+      "body": "Hãy thay ảnh này bằng visual Lacoste Polo chính thức khi asset cuối cùng sẵn sàng."
+    },
+    "strip": {
+      "fabric": "POLO KNIT",
+      "finish": "ARTWORK TẠM THỜI",
+      "detail": "THAY ẢNH SAU",
+      "run": "TRANG XEM TRƯỚC"
+    },
+    "material": {
+      "label": "CHẤT LIỆU",
+      "title": "ĐƯỢC DỰNG CHO ĐỢT POLO",
+      "body": "Phần này tạo khung trình bày cao cấp trong lúc ảnh sản phẩm cuối cùng vẫn đang được chuẩn bị."
+    },
+    "fit": {
+      "label": "PHOM DÁNG",
+      "title": "GỌN, TỐI GIẢN, DỄ CHỈNH SỬA",
+      "body": "Bố cục được giữ tối giản để việc thay ảnh trong tương lai thật đơn giản mà trang vẫn giữ được cảm giác sang."
+    },
+    "drop": {
+      "label": "TRẠNG THÁI DROP",
+      "title": "TRANG MẪU TẠM THỜI",
+      "body": "Khi có asset thật, bạn chỉ cần thay đường dẫn ảnh tạm ở phần visual phía trên."
+    },
+    "footerText": "Trang Lacoste Polo đã sẵn sàng với ảnh placeholder tạm thời.",
     "backToDrops": "QUAY LẠI BỘ SƯU TẬP"
   },
   "sizechart": {

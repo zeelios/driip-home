@@ -1,7 +1,7 @@
 <template>
-  <div class="page tee-page">
+  <div class="page lp-page">
     <!-- ── BRAND MARK (non-clickable) ──────────────────────────────── -->
-    <div class="tee-brand" aria-hidden="true">
+    <div class="lp-brand" aria-hidden="true">
       <NuxtImg
         src="/logo.png"
         alt=""
@@ -9,123 +9,134 @@
         height="48"
         quality="70"
         format="webp"
-        class="tee-brand-logo"
+        class="lp-brand-logo"
       />
     </div>
 
     <!-- ── HERO ────────────────────────────────────────────────────── -->
-    <section class="tee-hero" id="hero">
-      <div class="tee-hero-grid">
-        <div class="tee-hero-copy">
-          <p class="tee-kicker reveal">{{ t("tee.hero.pre") }}</p>
+    <section class="lp-hero" id="hero">
+      <div class="lp-hero-inner">
+        <div class="lp-hero-copy parallax-content">
+          <p class="lp-eyebrow reveal">{{ t("lacostePolo.hero.pre") }}</p>
 
-          <h1 class="tee-title reveal">
-            <span class="tee-title-muted">THE</span>
-            <span class="tee-title-bold">DRIIP</span>
-            <span class="tee-title-bold"
-              >TEE<span class="tee-title-dash">—</span></span
+          <h1 class="lp-title reveal">
+            <span class="lp-title-muted">THE</span>
+            <span class="lp-title-bold">POLO</span>
+            <span class="lp-title-bold"
+              >SHIRT<span class="lp-title-dash">—</span></span
             >
           </h1>
 
-          <p class="tee-subtitle reveal">{{ t("tee.hero.sub") }}</p>
+          <p class="lp-sub reveal">{{ t("lacostePolo.hero.sub") }}</p>
 
-          <div class="tee-stats reveal" aria-label="Product details">
-            <div v-for="metric in metrics" :key="metric.label" class="tee-stat">
-              <span class="tee-stat-label">{{ metric.label }}</span>
-              <strong class="tee-stat-value">{{ metric.value }}</strong>
+          <div class="lp-stats reveal" aria-label="Product details">
+            <div v-for="metric in metrics" :key="metric.label" class="lp-stat">
+              <span class="lp-stat-label">{{ metric.label }}</span>
+              <strong class="lp-stat-value">{{ metric.value }}</strong>
             </div>
           </div>
 
-          <div class="tee-actions reveal">
+          <div class="lp-actions reveal">
             <button class="btn-primary" @click="scrollToSection('details')">
-              {{ t("tee.hero.cta") }}
+              {{ t("lacostePolo.hero.cta") }}
               <span aria-hidden="true">→</span>
             </button>
             <NuxtLinkLocale to="/" class="btn-ghost">
-              {{ t("tee.hero.secondary") }}
+              {{ t("lacostePolo.hero.secondary") }}
             </NuxtLinkLocale>
           </div>
         </div>
 
-        <aside class="tee-visual reveal" aria-label="Driip tee preview">
-          <div class="tee-visual-top">
-            <span class="tee-visual-kicker">{{ t("tee.visual.pre") }}</span>
-            <span class="tee-visual-pill">{{ t("tee.visual.pill") }}</span>
-          </div>
-
-          <div class="tee-art" aria-hidden="true">
-            <div class="tee-art-glow" />
-            <div class="tee-art-card tee-art-card--back">
-              <span>SONOMA</span>
+        <aside class="lp-visual reveal" aria-label="Product preview">
+          <div class="lp-visual-card">
+            <p class="lp-visual-label">{{ t("lacostePolo.visual.label") }}</p>
+            <h2 class="lp-visual-title">{{ t("lacostePolo.hero.title") }}</h2>
+            <div class="lp-visual-frame">
+              <NuxtImg
+                src="/products/Brief/Black.png"
+                :alt="t('lacostePolo.visual.alt')"
+                width="420"
+                height="525"
+                quality="80"
+                format="webp"
+                class="lp-visual-img"
+                :class="{ 'is-loaded': imgLoaded }"
+                @load="imgLoaded = true"
+                @error="imgLoaded = true"
+              />
+              <div
+                v-if="!imgLoaded"
+                class="lp-img-placeholder"
+                aria-hidden="true"
+              >
+                <NuxtImg
+                  src="/logo.png"
+                  alt=""
+                  class="lp-img-placeholder-logo"
+                  width="48"
+                  height="48"
+                  quality="70"
+                  format="webp"
+                />
+              </div>
             </div>
-            <div class="tee-art-card tee-art-card--front">
-              <span>DRIIP TEE</span>
-              <small>{{ t("tee.visual.frontLabel") }}</small>
-            </div>
-          </div>
-
-          <div class="tee-visual-copy">
-            <p class="tee-visual-title">{{ t("tee.visual.title") }}</p>
-            <p class="tee-visual-body">{{ t("tee.visual.body") }}</p>
+            <p class="lp-visual-body">{{ t("lacostePolo.visual.body") }}</p>
           </div>
         </aside>
       </div>
     </section>
 
     <!-- ── STRIP ───────────────────────────────────────────────────── -->
-    <div class="tee-strip reveal">
-      <span>{{ t("tee.strip.fabric") }}</span>
-      <span class="tee-strip-sep" aria-hidden="true" />
-      <span>{{ t("tee.strip.weight") }}</span>
-      <span class="tee-strip-sep" aria-hidden="true" />
-      <span>{{ t("tee.strip.production") }}</span>
-      <span class="tee-strip-sep" aria-hidden="true" />
-      <span>{{ t("tee.strip.run") }}</span>
+    <div class="lp-strip reveal">
+      <span>{{ t("lacostePolo.strip.fabric") }}</span>
+      <span class="lp-strip-sep" aria-hidden="true" />
+      <span>{{ t("lacostePolo.strip.finish") }}</span>
+      <span class="lp-strip-sep" aria-hidden="true" />
+      <span>{{ t("lacostePolo.strip.detail") }}</span>
+      <span class="lp-strip-sep" aria-hidden="true" />
+      <span>{{ t("lacostePolo.strip.run") }}</span>
     </div>
 
     <!-- ── DETAILS ─────────────────────────────────────────────────── -->
-    <section class="tee-story" id="details">
-      <div class="tee-story-inner">
-        <article class="tee-card tee-card--featured reveal">
-          <p class="tee-card-label">{{ t("tee.fabric.label") }}</p>
-          <h2 class="tee-card-title">{{ t("tee.fabric.title") }}</h2>
-          <p class="tee-card-body">{{ t("tee.fabric.body") }}</p>
+    <section class="lp-details" id="details">
+      <div class="lp-details-inner">
+        <article class="lp-card lp-card--featured reveal">
+          <p class="lp-card-label">{{ t("lacostePolo.material.label") }}</p>
+          <h2 class="lp-card-title">{{ t("lacostePolo.material.title") }}</h2>
+          <p class="lp-card-body">{{ t("lacostePolo.material.body") }}</p>
         </article>
 
-        <article class="tee-card reveal">
-          <p class="tee-card-label">{{ t("tee.build.label") }}</p>
-          <h2 class="tee-card-title">{{ t("tee.build.title") }}</h2>
-          <p class="tee-card-body">{{ t("tee.build.body") }}</p>
+        <article class="lp-card reveal">
+          <p class="lp-card-label">{{ t("lacostePolo.fit.label") }}</p>
+          <h2 class="lp-card-title">{{ t("lacostePolo.fit.title") }}</h2>
+          <p class="lp-card-body">{{ t("lacostePolo.fit.body") }}</p>
         </article>
 
-        <article class="tee-card reveal">
-          <p class="tee-card-label">{{ t("tee.run.label") }}</p>
-          <h2 class="tee-card-title">{{ t("tee.run.title") }}</h2>
-          <p class="tee-card-body">{{ t("tee.run.body") }}</p>
+        <article class="lp-card reveal">
+          <p class="lp-card-label">{{ t("lacostePolo.drop.label") }}</p>
+          <h2 class="lp-card-title">{{ t("lacostePolo.drop.title") }}</h2>
+          <p class="lp-card-body">{{ t("lacostePolo.drop.body") }}</p>
         </article>
       </div>
     </section>
 
     <!-- ── MANIFESTO ───────────────────────────────────────────────── -->
-    <section class="tee-manifesto" id="manifesto">
-      <div class="tee-manifesto-inner reveal">
-        <p class="tee-manifesto-label">{{ t("tee.manifestoLabel") }}</p>
-        <p class="tee-quote">{{ t("tee.manifesto") }}</p>
+    <section class="lp-manifesto" id="manifesto">
+      <div class="lp-manifesto-inner reveal">
+        <p class="lp-manifesto-label">POSITIONING</p>
+        <p class="lp-manifesto-quote">{{ t("lacostePolo.footerText") }}</p>
       </div>
     </section>
 
     <!-- ── BOTTOM CTA ──────────────────────────────────────────────── -->
-    <section class="tee-bottom reveal">
-      <div class="tee-bottom-inner">
-        <p class="tee-bottom-text">{{ t("tee.footerText") }}</p>
-        <div class="tee-bottom-actions">
-          <NuxtLinkLocale to="/#drops" class="btn-primary">
-            {{ t("tee.backToDrops") }}
-          </NuxtLinkLocale>
-          <NuxtLinkLocale to="/" class="btn-ghost">
-            {{ t("nav.home") }}
-          </NuxtLinkLocale>
-        </div>
+    <section class="lp-bottom reveal">
+      <div class="lp-bottom-inner">
+        <NuxtLinkLocale to="/#drops" class="btn-primary">
+          {{ t("lacostePolo.backToDrops") }}
+        </NuxtLinkLocale>
+        <NuxtLinkLocale to="/" class="btn-ghost">
+          {{ t("nav.home") }}
+        </NuxtLinkLocale>
       </div>
     </section>
 
@@ -141,15 +152,16 @@ import { useSiteNavStore } from "~/stores/site-nav";
 const { locale, t } = useI18n();
 const { setupScrollDepth } = useMetaEvents();
 const siteNavStore = useSiteNavStore();
+const imgLoaded = ref(false);
 
 watchEffect(() => {
   siteNavStore.setNav({
-    title: "DRIIP TEE",
+    title: "LACOSTE POLO",
     links: [
-      { id: "details", label: t("tee.nav.details") },
-      { id: "manifesto", label: t("tee.nav.manifesto") },
+      { id: "details", label: t("lacostePolo.nav.details") },
+      { id: "manifesto", label: "MANIFESTO" },
     ],
-    ctaLabel: t("tee.nav.cta"),
+    ctaLabel: t("lacostePolo.nav.cta"),
     ctaTarget: "details",
   });
 });
@@ -166,24 +178,24 @@ watch(
 
 const metrics = computed(() => [
   {
-    label: t("tee.hero.metrics.fabric"),
-    value: t("tee.hero.metrics.fabricValue"),
+    label: t("lacostePolo.hero.metrics.fabric"),
+    value: t("lacostePolo.hero.metrics.fabricValue"),
   },
   {
-    label: t("tee.hero.metrics.build"),
-    value: t("tee.hero.metrics.buildValue"),
+    label: t("lacostePolo.hero.metrics.finish"),
+    value: t("lacostePolo.hero.metrics.finishValue"),
   },
   {
-    label: t("tee.hero.metrics.run"),
-    value: t("tee.hero.metrics.runValue"),
+    label: t("lacostePolo.hero.metrics.run"),
+    value: t("lacostePolo.hero.metrics.runValue"),
   },
 ]);
 
 useHead({
   title: computed(() =>
     locale.value === "vi"
-      ? "driip- | Driip TEE — Sonoma Fabric Drop"
-      : "driip- | Driip TEE — Sonoma Fabric Drop"
+      ? "driip- | Lacoste Polo — Preview"
+      : "driip- | Lacoste Polo — Preview"
   ),
   htmlAttrs: { lang: locale.value },
   meta: [
@@ -191,16 +203,16 @@ useHead({
       name: "description",
       content:
         locale.value === "vi"
-          ? "Driip TEE — đợt áo thun mới từ vải Sonoma cao cấp. Form dày, hoàn thiện chỉn chu và sản xuất giới hạn vì chi phí sản xuất rất cao."
-          : "Driip TEE — the next drop in premium Sonoma fabric. Heavyweight feel, clean finishing, and a limited production run because the production cost is genuinely high.",
+          ? "Trang mẫu Lacoste Polo của driip- với hình ảnh tạm thời."
+          : "Temporary Lacoste Polo page for driip- with a placeholder product image.",
     },
-    { property: "og:title", content: "driip- | Driip TEE" },
+    { property: "og:title", content: "driip- | Lacoste Polo" },
     {
       property: "og:description",
       content:
         locale.value === "vi"
-          ? "Áo thun Driip TEE từ vải Sonoma cao cấp, sản xuất giới hạn."
-          : "Driip TEE in premium Sonoma fabric, produced in a limited run.",
+          ? "Trang mẫu Lacoste Polo với ảnh tạm thời."
+          : "Temporary Lacoste Polo landing page with a placeholder image.",
     },
   ],
 });
@@ -217,11 +229,7 @@ function setupRevealObserver(): void {
       }),
     { threshold: 0.12 }
   );
-
-  document
-    .querySelectorAll(".reveal")
-    .forEach((element) => observer.observe(element));
-
+  document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
   onUnmounted(() => observer.disconnect());
 }
 
@@ -229,7 +237,6 @@ function setupParallax(): void {
   const root = document.documentElement;
   const onScroll = (): void =>
     root.style.setProperty("--scroll-y", window.scrollY.toString());
-
   window.addEventListener("scroll", onScroll, { passive: true });
   onUnmounted(() => window.removeEventListener("scroll", onScroll));
 }
@@ -245,12 +252,10 @@ function setupSectionNav(): void {
     },
     { threshold: 0.35, rootMargin: "-60px 0px 0px 0px" }
   );
-
   ids.forEach((id) => {
-    const element = document.getElementById(id);
-    if (element) observer.observe(element);
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
   });
-
   onUnmounted(() => observer.disconnect());
 }
 
@@ -268,7 +273,7 @@ onMounted(() => {
   min-height: 100dvh;
 }
 
-.tee-page {
+.lp-page {
   background: radial-gradient(
       circle at 20% 10%,
       rgba(255, 255, 255, 0.08),
@@ -284,7 +289,7 @@ onMounted(() => {
 }
 
 /* ── Brand mark ─────────────────────────────────────────────────── */
-.tee-brand {
+.lp-brand {
   position: fixed;
   top: 18px;
   left: 50%;
@@ -296,35 +301,28 @@ onMounted(() => {
   filter: invert(1);
   transition: opacity 0.2s ease;
 }
-.tee-brand-logo {
+.lp-brand-logo {
   width: 36px;
   height: 36px;
   object-fit: contain;
 }
 
 /* ── Hero ────────────────────────────────────────────────────────── */
-.tee-hero {
+.lp-hero {
   padding-top: calc(env(safe-area-inset-top, 0px) + 56px + 26px);
   padding-bottom: 44px;
   padding-left: calc(24px + env(safe-area-inset-left, 0px));
   padding-right: calc(24px + env(safe-area-inset-right, 0px));
 }
-
-.tee-hero-grid,
-.tee-story-inner,
-.tee-manifesto-inner {
+.lp-hero-inner {
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.tee-hero-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 18px;
   align-items: stretch;
 }
-
-.tee-hero-copy {
+.lp-hero-copy {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -332,9 +330,7 @@ onMounted(() => {
   min-height: 0;
 }
 
-.tee-kicker,
-.tee-stat-label,
-.tee-card-label {
+.lp-eyebrow {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.32em;
@@ -342,26 +338,24 @@ onMounted(() => {
   color: var(--grey-400);
 }
 
-.tee-title {
+.lp-title {
   font-family: var(--font-display);
   font-size: clamp(64px, 13vw, 148px);
   line-height: 0.88;
   letter-spacing: -0.04em;
 }
-.tee-title-muted {
+.lp-title-muted {
   display: block;
   color: rgba(255, 255, 255, 0.38);
 }
-.tee-title-bold {
+.lp-title-bold {
   display: block;
 }
-.tee-title-dash {
+.lp-title-dash {
   color: rgba(255, 255, 255, 0.32);
 }
 
-.tee-subtitle,
-.tee-card-body,
-.tee-visual-body {
+.lp-sub {
   max-width: 620px;
   font-size: clamp(16px, 2vw, 20px);
   line-height: 1.7;
@@ -369,13 +363,13 @@ onMounted(() => {
 }
 
 /* ── Stats ───────────────────────────────────────────────────────── */
-.tee-stats {
+.lp-stats {
   display: flex;
   flex-wrap: wrap;
   gap: 0;
   margin-top: 8px;
 }
-.tee-stat {
+.lp-stat {
   flex: 1;
   min-width: 120px;
   padding: 18px 20px;
@@ -384,10 +378,18 @@ onMounted(() => {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
-.tee-stat + .tee-stat {
+.lp-stat + .lp-stat {
   border-left: none;
 }
-.tee-stat-value {
+.lp-stat-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+}
+.lp-stat-value {
   display: block;
   margin-top: 6px;
   font-size: 16px;
@@ -397,7 +399,7 @@ onMounted(() => {
 }
 
 /* ── Actions ─────────────────────────────────────────────────────── */
-.tee-actions {
+.lp-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -446,11 +448,10 @@ onMounted(() => {
   border-color: rgba(255, 255, 255, 0.38);
 }
 
-/* ── Visual card ─────────────────────────────────────────────────── */
-.tee-visual {
+/* ── Visual card (like CK hero) ──────────────────────────────────── */
+.lp-visual {
   position: relative;
   overflow: hidden;
-  min-height: 520px;
   padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: radial-gradient(
@@ -465,125 +466,86 @@ onMounted(() => {
     );
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
 }
-
-.tee-visual-top {
+.lp-visual-card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 24px;
+  flex-direction: column;
+  gap: 14px;
 }
-
-.tee-visual-kicker,
-.tee-visual-pill,
-.tee-manifesto-label,
-.tee-strip {
+.lp-visual-label {
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-}
-
-.tee-visual-kicker {
   color: var(--grey-400);
 }
-
-.tee-visual-pill {
-  color: var(--white);
-  padding: 7px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.tee-art {
-  position: relative;
-  min-height: 340px;
-  margin-bottom: 24px;
-}
-
-.tee-art-glow {
-  position: absolute;
-  inset: 18% 12% auto;
-  height: 52%;
-  border-radius: 999px;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.18),
-    transparent 70%
-  );
-  filter: blur(12px);
-}
-
-.tee-art-card {
-  position: absolute;
-  inset: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 26px 54px rgba(0, 0, 0, 0.32);
-}
-
-.tee-art-card span {
+.lp-visual-title {
   font-family: var(--font-display);
-  font-size: clamp(48px, 7vw, 86px);
-  line-height: 0.9;
-  letter-spacing: -0.04em;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
 }
-
-.tee-art-card small {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+.lp-visual-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.3);
 }
-
-.tee-art-card--back {
-  inset: 44px 24px 36px 18%;
-  transform: rotate(-6deg);
+.lp-visual-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.6s ease;
+}
+.lp-visual-img.is-loaded {
+  opacity: 1;
+}
+.lp-visual:hover .lp-visual-img.is-loaded {
+  transform: scale(1.02);
+}
+.lp-img-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.06),
     rgba(255, 255, 255, 0.02)
   );
+  pointer-events: none;
 }
-
-.tee-art-card--front {
-  inset: 20px 20px 22px 8%;
-  transform: rotate(6deg);
-  background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.16),
-      rgba(255, 255, 255, 0.05)
-    ),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 62%);
+.lp-img-placeholder-logo {
+  width: 48px;
+  height: auto;
+  opacity: 0.9;
+  animation: lp-pulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
 }
-
-.tee-visual-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 420px;
-}
-
-.tee-visual-title {
+.lp-visual-body {
   font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.58);
 }
 
 /* ── Strip ───────────────────────────────────────────────────────── */
-.tee-strip {
-  margin: 16px auto 0;
+.lp-strip {
   max-width: 1200px;
+  margin: 16px auto 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
   padding: 14px 18px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
   color: var(--white);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -591,7 +553,7 @@ onMounted(() => {
   overflow: hidden;
   white-space: nowrap;
 }
-.tee-strip-sep {
+.lp-strip-sep {
   width: 4px;
   height: 4px;
   border-radius: 50%;
@@ -599,25 +561,24 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-/* ── Detail cards ────────────────────────────────────────────────── */
-.tee-story {
+/* ── Details cards ───────────────────────────────────────────────── */
+.lp-details {
   padding: 28px 24px 20px;
 }
-
-.tee-story-inner {
+.lp-details-inner {
+  max-width: 1200px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
   gap: 2px;
 }
-
-.tee-card {
+.lp-card {
   min-height: 220px;
   padding: 28px;
   background: rgba(255, 255, 255, 0.045);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
-
-.tee-card--featured {
+.lp-card--featured {
   background: radial-gradient(
       circle at top right,
       rgba(255, 255, 255, 0.09),
@@ -625,56 +586,60 @@ onMounted(() => {
     ),
     rgba(255, 255, 255, 0.06);
 }
-
-.tee-card-title {
+.lp-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+}
+.lp-card-title {
   margin: 14px 0 12px;
   font-family: var(--font-display);
   font-size: clamp(34px, 6vw, 56px);
   line-height: 0.95;
   letter-spacing: -0.02em;
 }
-
-/* ── Manifesto ───────────────────────────────────────────────────── */
-.tee-manifesto {
-  padding: 72px 24px 18px;
-}
-
-.tee-manifesto-inner {
-  padding: 34px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.tee-manifesto-label {
-  color: var(--grey-400);
-  margin-bottom: 18px;
-}
-
-.tee-quote {
-  font-family: var(--font-display);
-  font-size: clamp(34px, 7vw, 72px);
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-  max-width: 12ch;
-}
-
-/* ── Bottom CTA ──────────────────────────────────────────────────── */
-.tee-bottom {
-  padding: 20px 24px 80px;
-}
-.tee-bottom-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.tee-bottom-text {
+.lp-card-body {
   max-width: 620px;
   font-size: clamp(16px, 2vw, 20px);
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.78);
 }
-.tee-bottom-actions {
+
+/* ── Manifesto ───────────────────────────────────────────────────── */
+.lp-manifesto {
+  padding: 72px 24px 18px;
+}
+.lp-manifesto-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 34px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.lp-manifesto-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+  margin-bottom: 18px;
+}
+.lp-manifesto-quote {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 7vw, 72px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  max-width: 14ch;
+}
+
+/* ── Bottom CTA ──────────────────────────────────────────────────── */
+.lp-bottom {
+  padding: 20px 24px 80px;
+}
+.lp-bottom-inner {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -686,7 +651,6 @@ onMounted(() => {
   transform: translateY(28px);
   transition: opacity 0.75s ease, transform 0.75s ease;
 }
-
 .reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
@@ -694,57 +658,57 @@ onMounted(() => {
 
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (min-width: 640px) {
-  .tee-hero {
+  .lp-hero {
     padding-top: calc(env(safe-area-inset-top, 0px) + 58px + 32px);
     padding-left: calc(32px + env(safe-area-inset-left, 0px));
     padding-right: calc(32px + env(safe-area-inset-right, 0px));
   }
-
-  .tee-hero-grid {
+  .lp-hero-inner {
     grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
     gap: 22px;
   }
-
-  .tee-story-inner {
+  .lp-details-inner {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-
-  .tee-story {
+  .lp-details {
     padding-top: 40px;
   }
-
-  .tee-card {
+  .lp-card {
     min-height: 260px;
   }
 }
 
 @media (min-width: 1024px) {
-  .tee-hero {
+  .lp-hero {
     padding-top: calc(env(safe-area-inset-top, 0px) + 60px + 36px);
     padding-left: calc(64px + env(safe-area-inset-left, 0px));
     padding-right: calc(64px + env(safe-area-inset-right, 0px));
   }
-
-  .tee-strip,
-  .tee-story,
-  .tee-manifesto,
-  .tee-bottom {
+  .lp-strip,
+  .lp-details,
+  .lp-manifesto,
+  .lp-bottom {
     padding-left: 64px;
     padding-right: 64px;
   }
-
-  .tee-hero-grid {
+  .lp-hero-inner {
     grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
     gap: 28px;
   }
-
-  .tee-visual {
-    min-height: 580px;
+  .lp-visual {
     padding: 24px;
   }
+}
 
-  .tee-art {
-    min-height: 390px;
+@keyframes lp-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
   }
 }
 </style>

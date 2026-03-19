@@ -93,6 +93,51 @@
             <span class="drop-notify">{{ t("home.drops.notify") }}</span>
           </div>
         </NuxtLinkLocale>
+        <NuxtLinkLocale
+          to="/lacoste-polo"
+          class="drop-card drop-card--soon drop-card--preview reveal"
+        >
+          <div class="drop-img drop-img--soon drop-img--lacoste">
+            <NuxtImg
+              src="/products/Brief/Black.png"
+              :width="640"
+              :height="800"
+              format="webp"
+              quality="80"
+              fit="cover"
+              :alt="t('home.drops.lacoste.alt')"
+              loading="lazy"
+              class="lacoste-preview-image"
+              :class="{ 'is-loaded': lacosteLoaded }"
+              @load="lacosteLoaded = true"
+              @error="lacosteLoaded = true"
+            />
+            <div v-if="!lacosteLoaded" class="image-loader" aria-hidden="true">
+              <NuxtImg
+                src="/logo.png"
+                alt=""
+                class="image-loader-logo"
+                width="56"
+                height="56"
+                quality="70"
+                format="webp"
+              />
+            </div>
+            <div class="drop-badge">{{ t("home.drops.comingSoon") }}</div>
+          </div>
+          <div class="drop-body">
+            <p class="drop-collection">
+              {{ t("home.drops.lacoste.collection") }}
+            </p>
+            <p class="drop-name soon-name">
+              {{ t("home.drops.lacoste.name") }}
+            </p>
+            <p class="drop-soon-tag">
+              {{ t("home.drops.comingSoon") }} · {{ t("home.upcoming.q4") }}
+            </p>
+            <span class="drop-notify">{{ t("home.drops.notify") }}</span>
+          </div>
+        </NuxtLinkLocale>
       </div>
     </div>
   </section>
@@ -105,12 +150,14 @@ const { t } = useI18n();
 const launchPrice = formatVndCurrency(getTierTotal(1));
 const briefLoaded = ref(false);
 const boxerLoaded = ref(false);
+const lacosteLoaded = ref(false);
 
 watch(
   () => launchPrice,
   () => {
     briefLoaded.value = false;
     boxerLoaded.value = false;
+    lacosteLoaded.value = false;
   }
 );
 </script>
@@ -224,6 +271,33 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.drop-img--lacoste {
+  position: relative;
+  overflow: hidden;
+}
+.drop-card--preview {
+  opacity: 0.6;
+  filter: grayscale(1) saturate(0.65);
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+.drop-card--preview:hover {
+  opacity: 0.78;
+  filter: grayscale(0.6) saturate(0.8);
+}
+.lacoste-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.6s ease;
+}
+.lacoste-preview-image.is-loaded {
+  opacity: 1;
+}
+.drop-card--preview:hover .lacoste-preview-image {
+  transform: scale(1.03);
 }
 .tee-preview {
   position: relative;

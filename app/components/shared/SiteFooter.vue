@@ -64,13 +64,16 @@ const logoLoaded = ref(false);
 }
 .footer-logo-wrap {
   position: relative;
-  width: 80px;
-  height: 38px;
+  width: 96px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  overflow: visible;
 }
 .footer-logo-img {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -78,8 +81,8 @@ const logoLoaded = ref(false);
   transition: opacity 0.25s ease;
 }
 .footer-logo-img.is-loaded {
-  opacity: 0.7;
-  filter: invert(1);
+  opacity: 0.92;
+  filter: invert(1) brightness(1.08);
 }
 .footer-logo-img.is-loaded:hover {
   opacity: 1;
@@ -91,16 +94,12 @@ const logoLoaded = ref(false);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
-  );
   pointer-events: none;
 }
 .image-loader-logo {
-  width: 56px;
-  height: auto;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
   opacity: 0.9;
   animation: pulse 1.2s ease-in-out infinite;
   filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));

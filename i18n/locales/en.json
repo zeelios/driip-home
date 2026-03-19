@@ -19,7 +19,12 @@
       "comingSoon": "COMING NEXT",
       "from": "FROM",
       "shopNow": "SHOP NOW →",
-      "notify": "VIEW DROP"
+      "notify": "VIEW DROP",
+      "lacoste": {
+        "alt": "Temporary Lacoste Polo preview image",
+        "collection": "SS26 · POLO",
+        "name": "LACOSTE\nPOLO"
+      }
     },
     "upcoming": {
       "label": "UPCOMING DROPS",
@@ -203,6 +208,57 @@
     "manifesto": "The tee should feel like the best shirt in the room — heavy, clean, and built with real intent.",
     "manifestoLabel": "POSITIONING",
     "footerText": "The next Driip drop is coming in Sonoma fabric. Built premium, kept limited.",
+    "backToDrops": "BACK TO DROPS"
+  },
+  "lacostePolo": {
+    "nav": {
+      "cta": "VIEW DETAILS",
+      "details": "DETAILS",
+      "top": "TOP"
+    },
+    "hero": {
+      "pre": "NEXT DROP — LACOSTE POLO",
+      "status": "TEMPORARY IMAGE PLACEHOLDER",
+      "title": "THE POLO, READY FOR THE NEXT PASS.",
+      "sub": "This page is prepared for the Lacoste Polo drop. A temporary visual is in place for now, so you can swap the product image later without rebuilding the page.",
+      "cta": "EXPLORE THE DROP",
+      "secondary": "BACK TO HOME",
+      "metrics": {
+        "fabric": "FABRIC",
+        "fabricValue": "POLO KNIT",
+        "finish": "FINISH",
+        "finishValue": "CLEAN COLLAR",
+        "run": "RUN",
+        "runValue": "TEMP PREVIEW"
+      }
+    },
+    "visual": {
+      "alt": "Temporary Lacoste Polo preview image",
+      "label": "TEMP VISUAL",
+      "body": "Replace this image with the final Lacoste Polo visual when the asset is ready."
+    },
+    "strip": {
+      "fabric": "POLO KNIT",
+      "finish": "TEMPORARY ARTWORK",
+      "detail": "SWAP IMAGE LATER",
+      "run": "PREVIEW PAGE"
+    },
+    "material": {
+      "label": "MATERIAL",
+      "title": "BUILT FOR THE POLO DROP",
+      "body": "This section gives the page a premium editorial frame while the final product image is still being prepared."
+    },
+    "fit": {
+      "label": "FIT",
+      "title": "CLEAN, SIMPLE, READY TO EDIT",
+      "body": "The layout is intentionally minimal so the future image replacement stays easy and the page keeps a luxury feel."
+    },
+    "drop": {
+      "label": "DROP STATUS",
+      "title": "TEMPORARY PLACEHOLDER PAGE",
+      "body": "Once the real asset is available, you only need to replace the temporary image path in the hero visual."
+    },
+    "footerText": "Lacoste Polo page is ready with a temporary visual placeholder.",
     "backToDrops": "BACK TO DROPS"
   },
   "footer": {
