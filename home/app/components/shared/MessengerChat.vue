@@ -1,30 +1,13 @@
 <template>
   <Teleport to="body">
     <div class="mc">
-      <!-- Tooltip bubble -->
-      <Transition name="mc-tip">
-        <div v-if="tipVisible" class="mc-tooltip">
-          <p class="mc-tooltip-text">Hỗ trợ đặt hàng<br />qua Messenger!</p>
-          <button
-            type="button"
-            class="mc-tooltip-close"
-            aria-label="Đóng"
-            @click="dismissTip"
-          >
-            ✕
-          </button>
-        </div>
-      </Transition>
-
       <!-- FAB -->
       <a
         :href="messengerHref"
         :target="isMobile ? '_self' : '_blank'"
         :rel="isMobile ? undefined : 'noopener noreferrer'"
         class="mc-fab"
-        :class="{ 'mc-fab--pulse': pulseActive }"
         aria-label="Chat hỗ trợ qua Messenger"
-        @click="dismissTip"
       >
         <svg
           v-if="isMobile"
@@ -56,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const config = useRuntimeConfig();
 const pageId = computed(() => config.public.fbPageId as string | undefined);
@@ -67,14 +50,7 @@ const messengerHref = computed(() => {
   return `https://m.me/${pageId.value}`;
 });
 
-const tipVisible = ref(false);
-const pulseActive = ref(false);
 const showBadge = ref(true);
-
-let tipTimer: ReturnType<typeof setTimeout> | null = null;
-let pulseTimer: ReturnType<typeof setTimeout> | null = null;
-
-const TIP_KEY = "mc_tip_dismissed";
 
 function detectMobileDevice(): boolean {
   if (!process.client) return false;
@@ -83,37 +59,10 @@ function detectMobileDevice(): boolean {
   return /android|iphone|ipad|ipod|mobile/i.test(ua);
 }
 
-function dismissTip(): void {
-  tipVisible.value = false;
-  pulseActive.value = false;
-  showBadge.value = false;
-  if (process.client) sessionStorage.setItem(TIP_KEY, "1");
-}
-
 onMounted(() => {
   if (!process.client) return;
 
   isMobile.value = detectMobileDevice();
-
-  const alreadyDismissed = sessionStorage.getItem(TIP_KEY);
-
-  if (!alreadyDismissed) {
-    // Show tooltip after 3 s
-    tipTimer = setTimeout(() => {
-      tipVisible.value = true;
-      pulseActive.value = true;
-    }, 3000);
-
-    // Stop pulsing after 10 s
-    pulseTimer = setTimeout(() => {
-      pulseActive.value = false;
-    }, 10000);
-  }
-});
-
-onBeforeUnmount(() => {
-  if (tipTimer) clearTimeout(tipTimer);
-  if (pulseTimer) clearTimeout(pulseTimer);
 });
 </script>
 

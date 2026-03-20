@@ -57,9 +57,9 @@ const sizes: string[] = ["S", "M", "L", "XL", "2XL"];
 const productSpecs = {
   vi: {
     brief: [
-      "Dáng lưng thấp",
-      "Chất liệu cotton modal",
-      "Dây lưng CK đặc trưng",
+      "Dáng lưng thấp, thoải mái suốt ngày",
+      "Chất liệu cotton modal mềm mại",
+      "Dây lưng CK đặc trưng, co giãn tốt",
     ],
     boxer: [
       "Ống chân dài",
