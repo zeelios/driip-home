@@ -1,6 +1,11 @@
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { defineStore } from "pinia";
 import { useMetaEvents, type OrderData } from "~/composables/useMetaEvents";
+import {
+  compactMetaObject,
+  META_ORDER_PROFILE_COOKIE_KEY,
+  type MetaOrderProfileCookie,
+} from "~/utils/meta-conversions";
 import {
   BOX_TIERS,
   EXTRA_PROMO_RATE,
@@ -92,6 +97,15 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
   const { trackViewContent, trackPurchase, trackLead, trackSubscribe } =
     useMetaEvents();
 
+  const orderProfileCookie = useCookie<MetaOrderProfileCookie | null>(
+    META_ORDER_PROFILE_COOKIE_KEY,
+    {
+      maxAge: 60 * 60 * 24 * 90,
+      path: "/",
+      sameSite: "lax",
+    }
+  );
+
   const boxerColor = ref<string>("Black");
   const briefColor = ref<string>("Black");
   const codeCopied = ref<boolean>(false);
@@ -108,17 +122,34 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
   });
 
   const order = ref({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    email: "",
-    province: "",
-    fullAddress: "",
+    firstName: orderProfileCookie.value?.firstName ?? "",
+    lastName: orderProfileCookie.value?.lastName ?? "",
+    phone: orderProfileCookie.value?.phone ?? "",
+    email: orderProfileCookie.value?.email ?? "",
+    province: orderProfileCookie.value?.province ?? "",
+    fullAddress: orderProfileCookie.value?.fullAddress ?? "",
     boxes: 1,
     sku: "",
     size: "",
     color: "",
   });
+
+  watch(
+    order,
+    () => {
+      const profile = compactMetaObject({
+        firstName: order.value.firstName.trim(),
+        lastName: order.value.lastName.trim(),
+        phone: order.value.phone.trim(),
+        email: order.value.email.trim(),
+        province: order.value.province.trim(),
+        fullAddress: order.value.fullAddress.trim(),
+      }) as MetaOrderProfileCookie;
+
+      orderProfileCookie.value = Object.keys(profile).length ? profile : null;
+    },
+    { deep: true, immediate: true }
+  );
 
   const boxOptions = computed<BoxOption[]>(() =>
     BOX_TIERS.map((tier) => ({

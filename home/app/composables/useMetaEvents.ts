@@ -1,6 +1,8 @@
 import {
   buildMetaPurchaseCustomData,
   compactMetaObject,
+  META_ORDER_PROFILE_COOKIE_KEY,
+  type MetaOrderProfileCookie,
 } from "~/utils/meta-conversions";
 import { getFinalTotal } from "~/composables/usePricing";
 import { useTrackingDebug } from "~/composables/useTrackingDebug";
@@ -62,6 +64,12 @@ function getSessionEventId(storageKey: string): string {
   }
 }
 
+function getQueryStringValue(value: unknown): string | undefined {
+  if (typeof value === "string") return value.trim() || undefined;
+  if (Array.isArray(value)) return getQueryStringValue(value[0]);
+  return undefined;
+}
+
 export function useMetaEvents() {
   const { $fbq } = useNuxtApp() as {
     $fbq?: (
@@ -91,6 +99,52 @@ export function useMetaEvents() {
     };
   }
 
+  function getStoredOrderProfile(): MetaOrderProfileCookie | null {
+    return useCookie<MetaOrderProfileCookie | null>(
+      META_ORDER_PROFILE_COOKIE_KEY
+    ).value;
+  }
+
+  function mergeOrderProfileIntoUserData(
+    userData: Record<string, unknown>
+  ): Record<string, unknown> {
+    const profile = getStoredOrderProfile();
+    if (!profile) return userData;
+
+    return compactMetaObject({
+      ...userData,
+      email: userData.email ?? profile.email,
+      phone: userData.phone ?? profile.phone,
+      firstName: userData.firstName ?? profile.firstName,
+      lastName: userData.lastName ?? profile.lastName,
+      city: userData.city ?? profile.province,
+      state: userData.state ?? profile.province,
+      street: userData.street ?? profile.fullAddress,
+    });
+  }
+
+  function syncClickIdFromRoute(): void {
+    if (!import.meta.client) return;
+
+    const route = useRoute();
+    const clickId =
+      getQueryStringValue(route.query.fbclid) ??
+      getQueryStringValue(route.query.click_id);
+
+    if (!clickId) return;
+
+    const fbc = `fb.1.${Math.floor(Date.now() / 1000)}.${clickId}`;
+    const cookie = useCookie<string | null>("_fbc", {
+      maxAge: 60 * 60 * 24 * 90,
+      path: "/",
+      sameSite: "lax",
+    });
+
+    if (cookie.value !== fbc) {
+      cookie.value = fbc;
+    }
+  }
+
   async function capi(
     event_name: string,
     user_data: Record<string, unknown>,
@@ -99,6 +153,7 @@ export function useMetaEvents() {
   ) {
     if (!import.meta.client) return;
     const user_agent = navigator.userAgent;
+    const enrichedUserData = mergeOrderProfileIntoUserData(user_data);
     const response = await $fetch<{
       debug?: {
         client_ip?: string;
@@ -109,7 +164,7 @@ export function useMetaEvents() {
       body: {
         event_name,
         event_id,
-        user_data,
+        user_data: enrichedUserData,
         custom_data,
         event_source_url: window.location.href,
       },
@@ -120,7 +175,7 @@ export function useMetaEvents() {
     dbg("capi", event_name, {
       event_id,
       ...custom_data,
-      _userData: compactMetaObject(user_data),
+      _userData: enrichedUserData,
       _request: {
         event_id,
         clientIp: response?.debug?.client_ip,
@@ -299,6 +354,7 @@ export function useMetaEvents() {
   }
 
   return {
+    syncClickIdFromRoute,
     trackPageView,
     trackViewContent,
     trackAddToCart,

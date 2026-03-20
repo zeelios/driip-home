@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://driip.com/</loc>
+    <xhtml:link rel="alternate" hreflang="vi" href="https://driip.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://driip.com/en/" />
+  </url>
+  <url>
+    <loc>https://driip.com/ck-underwear</loc>
+    <xhtml:link rel="alternate" hreflang="vi" href="https://driip.com/ck-underwear" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://driip.com/en/ck-underwear" />
+  </url>
+  <url>
+    <loc>https://driip.com/driip-tee</loc>
+    <xhtml:link rel="alternate" hreflang="vi" href="https://driip.com/driip-tee" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://driip.com/en/driip-tee" />
+  </url>
+  <url>
+    <loc>https://driip.com/lacoste-polo</loc>
+    <xhtml:link rel="alternate" hreflang="vi" href="https://driip.com/lacoste-polo" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://driip.com/en/lacoste-polo" />
+  </url>
+</urlset>

@@ -20,6 +20,17 @@ export interface MetaUserDataInput
   fbp?: string;
 }
 
+export const META_ORDER_PROFILE_COOKIE_KEY = "driip_ck_order_profile";
+
+export interface MetaOrderProfileCookie {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  province?: string;
+  fullAddress?: string;
+}
+
 export interface MetaUserDataBuilderOptions {
   clientIp?: string;
   userAgent?: string;
@@ -94,6 +105,9 @@ export function buildMetaUserData(
   if (input.city) userData.ct = [options.hash(input.city)];
   if (input.state) userData.st = [options.hash(input.state)];
   if (input.country) userData.country = [options.hash(input.country)];
+  if (input.district) userData.district = [options.hash(input.district)];
+  if (input.ward) userData.ward = [options.hash(input.ward)];
+  if (input.street) userData.street = [options.hash(input.street)];
   if (input.gender) userData.ge = [options.hash(input.gender)];
 
   if (input.fbc) userData.fbc = input.fbc;
