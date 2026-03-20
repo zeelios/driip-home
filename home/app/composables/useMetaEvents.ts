@@ -70,6 +70,44 @@ function getQueryStringValue(value: unknown): string | undefined {
   return undefined;
 }
 
+function buildFbcValue(
+  clickId: string,
+  timestamp = Math.floor(Date.now() / 1000)
+) {
+  return `fb.1.${timestamp}.${clickId}`;
+}
+
+function parseFbcValue(
+  value: unknown
+): { timestamp: number; clickId: string } | null {
+  if (typeof value !== "string") return null;
+
+  const match = value.match(/^fb\.1\.(\d+)\.(.+)$/);
+  if (!match) return null;
+
+  const timestamp = Number(match[1]);
+  const clickId = match[2]?.trim();
+
+  if (!Number.isFinite(timestamp) || timestamp <= 0 || !clickId) return null;
+
+  return { timestamp, clickId };
+}
+
+function normalizeFbcValue(value: unknown): string | undefined {
+  const parsed = parseFbcValue(value);
+  if (!parsed) return undefined;
+
+  const now = Math.floor(Date.now() / 1000);
+  const maxFutureSkewSeconds = 300;
+  const isFutureDated = parsed.timestamp > now + maxFutureSkewSeconds;
+
+  if (isFutureDated) {
+    return buildFbcValue(parsed.clickId, now);
+  }
+
+  return buildFbcValue(parsed.clickId, parsed.timestamp);
+}
+
 export function useMetaEvents() {
   const { $fbq } = useNuxtApp() as {
     $fbq?: (
@@ -93,8 +131,15 @@ export function useMetaEvents() {
   }
 
   function getFbCookies() {
+    const fbcCookie = useCookie("_fbc");
+    const normalizedFbc = normalizeFbcValue(fbcCookie.value);
+
+    if (normalizedFbc && normalizedFbc !== fbcCookie.value) {
+      fbcCookie.value = normalizedFbc;
+    }
+
     return {
-      fbc: useCookie("_fbc").value ?? undefined,
+      fbc: normalizedFbc ?? fbcCookie.value ?? undefined,
       fbp: useCookie("_fbp").value ?? undefined,
     };
   }
@@ -119,7 +164,6 @@ export function useMetaEvents() {
       lastName: userData.lastName ?? profile.lastName,
       city: userData.city ?? profile.province,
       state: userData.state ?? profile.province,
-      street: userData.street ?? profile.fullAddress,
     });
   }
 
@@ -133,12 +177,12 @@ export function useMetaEvents() {
 
     if (!clickId) return;
 
-    const fbc = `fb.1.${Math.floor(Date.now() / 1000)}.${clickId}`;
     const cookie = useCookie<string | null>("_fbc", {
       maxAge: 60 * 60 * 24 * 90,
       path: "/",
       sameSite: "lax",
     });
+    const fbc = buildFbcValue(clickId);
 
     if (cookie.value !== fbc) {
       cookie.value = fbc;
