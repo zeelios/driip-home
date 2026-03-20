@@ -110,7 +110,6 @@ export default defineEventHandler(async (event) => {
           isFirstRow ? cleanPhone : "", // H: SĐT
           isFirstRow ? fullName : "", // I: Tên
           isFirstRow ? address : "", // J: Địa Chỉ
-          isFirstRow ? zipCode ?? "" : "", // K: Zip
           itemOriginalPrice, // K: Tổng Tiền
           itemDiscount, // L: Chiết Khấu
           "0", // M: Đặt Cọc
@@ -119,6 +118,7 @@ export default defineEventHandler(async (event) => {
           "Website", // P: Sales
           "", // Q: Comestic Tracking
           "", // R: Global Tracking
+          isFirstRow ? body.dob ?? "" : "", // Q: DoB
         ]);
 
         if (i === 0) isFirstCustomerRow = false;
