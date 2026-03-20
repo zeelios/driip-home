@@ -1,5 +1,4 @@
-import { reserveOrderId } from "../utils/order-queue";
-import { appendGoogleSheetRow } from "../utils/google-sheets";
+import { queueOrderRows, reserveOrderId } from "../utils/order-queue";
 
 interface CartItemPayload {
   sku: string;
@@ -124,7 +123,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    await appendGoogleSheetRow("Web!A:R", rows);
+    queueOrderRows(rows);
 
     return { ok: true, queued: true, orderId };
   } catch (error: unknown) {

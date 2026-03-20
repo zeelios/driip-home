@@ -33,28 +33,9 @@ export interface MetaOrderProfileCookie {
 
 export function buildMetaFbcValue(
   clickId: string,
-  timestamp = Math.floor(Date.now() / 1000)
+  timestamp = Date.now()
 ): string {
   return `fb.1.${timestamp}.${clickId}`;
-}
-
-export function normalizeMetaFbcValue(value: unknown): string | undefined {
-  if (typeof value !== "string") return undefined;
-
-  const match = value.match(/^fb\.1\.(\d+)\.(.+)$/);
-  if (!match) return undefined;
-
-  const timestamp = Number(match[1]);
-  const clickId = match[2]?.trim();
-  if (!Number.isFinite(timestamp) || timestamp <= 0 || !clickId)
-    return undefined;
-
-  const now = Math.floor(Date.now() / 1000);
-  const maxFutureSkewSeconds = 300;
-  const normalizedTimestamp =
-    timestamp > now + maxFutureSkewSeconds ? now : timestamp;
-
-  return buildMetaFbcValue(clickId, normalizedTimestamp);
 }
 
 export interface MetaUserDataBuilderOptions {
@@ -133,8 +114,7 @@ export function buildMetaUserData(
   if (input.country) userData.country = [options.hash(input.country)];
   if (input.gender) userData.ge = [options.hash(input.gender)];
 
-  const normalizedFbc = normalizeMetaFbcValue(input.fbc);
-  if (normalizedFbc) userData.fbc = normalizedFbc;
+  if (input.fbc) userData.fbc = input.fbc;
   if (input.fbp) userData.fbp = input.fbp;
 
   return compactMetaObject(userData);
