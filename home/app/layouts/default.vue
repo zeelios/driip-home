@@ -3,7 +3,7 @@
     <SharedSiteNav />
     <slot />
     <SharedMessengerChat />
-    <!-- <SharedTrackingDebugPanel /> -->
+    <SharedTrackingDebugPanel />
   </div>
 </template>
 

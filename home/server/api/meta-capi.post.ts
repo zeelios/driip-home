@@ -59,22 +59,22 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
   const {
-    eventName,
-    eventId,
-    userData = {},
-    customData = {},
-    eventSourceUrl,
+    event_name,
+    event_id,
+    user_data = {},
+    custom_data = {},
+    event_source_url,
   } = body;
 
-  if (!eventName) {
+  if (!event_name) {
     throw createError({
       statusCode: 400,
-      statusMessage: "eventName is required",
+      statusMessage: "event_name is required",
     });
   }
 
   const clientIp = getClientIpAddress(event);
-  const hashedUser = buildMetaUserData(userData, {
+  const hashedUser = buildMetaUserData(user_data, {
     clientIp,
     userAgent: getRequestHeader(event, "user-agent") ?? undefined,
     hash: sha256,
@@ -82,11 +82,11 @@ export default defineEventHandler(async (event) => {
   });
 
   const payload = buildMetaCapiEventPayload({
-    eventName,
-    eventId,
-    eventSourceUrl,
-    userData: hashedUser,
-    customData,
+    event_name,
+    event_id,
+    event_source_url,
+    user_data: hashedUser,
+    custom_data,
   });
 
   if (config.metaTestEventCode) {
@@ -111,8 +111,8 @@ export default defineEventHandler(async (event) => {
     );
 
     // Debug logging for CAPI events
-    console.log(`[CAPI] Successfully sent ${eventName} event:`, {
-      eventId,
+    console.log(`[CAPI] Successfully sent ${event_name} event:`, {
+      event_id,
       testEventCode: config.metaTestEventCode || "none",
       debugMeta,
       graphResponse: result,
@@ -124,7 +124,7 @@ export default defineEventHandler(async (event) => {
     };
   } catch (err: any) {
     console.error(
-      `[CAPI] Failed to send ${eventName} event:`,
+      `[CAPI] Failed to send ${event_name} event:`,
       err.data || err.message
     );
     throw err;

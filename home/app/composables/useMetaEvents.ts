@@ -9,6 +9,7 @@ import { useTrackingDebug } from "~/composables/useTrackingDebug";
  * Meta Pixel + CAPI event composable.
  *
  * Matches the exact parameter config in Meta Events Manager:
+ *   PageView    — browser + CAPI pair with shared event_id
  *   Purchase    — value, currency + firstName, lastName, phone, city
  *   ViewContent — client_user_agent only (added server-side)
  *   Search      — client_user_agent only (added server-side)
@@ -66,7 +67,8 @@ export function useMetaEvents() {
     $fbq?: (
       type: string,
       name: string,
-      params?: Record<string, unknown>
+      params?: Record<string, unknown>,
+      options?: Record<string, unknown>
     ) => void;
   };
   const route = useRoute();
@@ -75,9 +77,10 @@ export function useMetaEvents() {
   function pixel(
     type: string,
     name: string,
-    params: Record<string, unknown> = {}
+    params: Record<string, unknown> = {},
+    event_id?: string
   ) {
-    $fbq?.(type, name, params);
+    $fbq?.(type, name, params, event_id ? { eventID: event_id } : undefined);
     dbg("pixel", name, params);
   }
 
@@ -89,39 +92,54 @@ export function useMetaEvents() {
   }
 
   async function capi(
-    eventName: string,
-    userData: Record<string, unknown>,
-    customData: Record<string, unknown>,
-    eventId: string
+    event_name: string,
+    user_data: Record<string, unknown>,
+    custom_data: Record<string, unknown>,
+    event_id: string
   ) {
     if (!import.meta.client) return;
-    const userAgent = navigator.userAgent;
+    const user_agent = navigator.userAgent;
     const response = await $fetch<{
       debug?: {
-        clientIp?: string;
-        userAgent?: string;
+        client_ip?: string;
+        user_agent?: string;
       };
     }>("/api/meta-capi", {
       method: "POST",
       body: {
-        eventName,
-        eventId,
-        userData,
-        customData,
-        eventSourceUrl: window.location.href,
+        event_name,
+        event_id,
+        user_data,
+        custom_data,
+        event_source_url: window.location.href,
       },
     }).catch((err) => {
       if (import.meta.dev) console.warn("[CAPI]", err);
     });
 
-    dbg("capi", eventName, {
-      ...customData,
-      _userData: compactMetaObject(userData),
+    dbg("capi", event_name, {
+      event_id,
+      ...custom_data,
+      _userData: compactMetaObject(user_data),
       _request: {
-        clientIp: response?.debug?.clientIp,
-        userAgent: response?.debug?.userAgent ?? userAgent,
+        event_id,
+        clientIp: response?.debug?.client_ip,
+        userAgent: response?.debug?.user_agent ?? user_agent,
       },
     });
+  }
+
+  function trackPageView(): void {
+    const event_id = genEventId();
+    pixel("track", "PageView", {}, event_id);
+    capi("PageView", getFbCookies(), {}, event_id);
+  }
+
+  function trackScrollDepth(depth: number): void {
+    const event_id = genEventId();
+    const custom_data = { depth, page: route.path };
+    pixel("trackCustom", "ScrollDepth", custom_data, event_id);
+    capi("ScrollDepth", getFbCookies(), custom_data, event_id);
   }
 
   // ─── EVENTS ───────────────────────────────────────────────────────
@@ -131,12 +149,12 @@ export function useMetaEvents() {
    * Customer info: client_user_agent (server-side only, no hash).
    */
   function trackViewContent(sku?: string) {
-    const id = genEventId();
+    const event_id = genEventId();
     const value = sku ? SKU_PRICES[sku] ?? 89 : 89;
-    const custom = buildMetaPurchaseCustomData({ sku, value });
-    pixel("track", "ViewContent", { ...custom, eventID: id });
+    const custom_data = buildMetaPurchaseCustomData({ sku, value });
+    pixel("track", "ViewContent", custom_data, event_id);
     // Only client_user_agent needed — added server-side
-    capi("ViewContent", getFbCookies(), custom, id);
+    capi("ViewContent", getFbCookies(), custom_data, event_id);
   }
 
   /**
@@ -144,10 +162,10 @@ export function useMetaEvents() {
    * Customer info: city, client_user_agent, firstName, lastName, phone.
    */
   function trackPurchase(order: OrderData) {
-    const id = genEventId();
+    const event_id = genEventId();
     const value = order.value ?? (order.sku ? SKU_PRICES[order.sku] ?? 89 : 89);
-    const custom = buildMetaPurchaseCustomData({ sku: order.sku, value });
-    pixel("track", "Purchase", { ...custom, eventID: id });
+    const custom_data = buildMetaPurchaseCustomData({ sku: order.sku, value });
+    pixel("track", "Purchase", custom_data, event_id);
     capi(
       "Purchase",
       {
@@ -163,8 +181,8 @@ export function useMetaEvents() {
         ward: order.ward ?? undefined,
         street: order.street ?? undefined,
       },
-      custom,
-      id
+      custom_data,
+      event_id
     );
   }
 
@@ -172,11 +190,11 @@ export function useMetaEvents() {
    * AddToCart — fires when user clicks the "Order This" button on a product card.
    */
   function trackAddToCart(sku: string, value?: number) {
-    const id = genEventId();
+    const event_id = genEventId();
     const v = value ?? SKU_PRICES[sku] ?? 89;
-    const custom = buildMetaPurchaseCustomData({ sku, value: v });
-    pixel("track", "AddToCart", { ...custom, eventID: id });
-    capi("AddToCart", getFbCookies(), custom, id);
+    const custom_data = buildMetaPurchaseCustomData({ sku, value: v });
+    pixel("track", "AddToCart", custom_data, event_id);
+    capi("AddToCart", getFbCookies(), custom_data, event_id);
   }
 
   /**
@@ -190,20 +208,22 @@ export function useMetaEvents() {
       INITIATE_CHECKOUT_STORAGE_KEY
     );
 
-    const id = initiateCheckoutEventId;
-    const custom = buildMetaPurchaseCustomData({ value: getFinalTotal(boxes) });
-    pixel("track", "InitiateCheckout", { ...custom, eventID: id });
-    capi("InitiateCheckout", getFbCookies(), custom, id);
+    const event_id = initiateCheckoutEventId;
+    const custom_data = buildMetaPurchaseCustomData({
+      value: getFinalTotal(boxes),
+    });
+    pixel("track", "InitiateCheckout", custom_data, event_id);
+    capi("InitiateCheckout", getFbCookies(), custom_data, event_id);
   }
 
   /**
    * Lead — fires on early-access form submit.
    */
   function trackLead(email: string, phone?: string, name?: string) {
-    const id = genEventId();
+    const event_id = genEventId();
     const [firstName, ...rest] = (name ?? "").trim().split(/\s+/);
     const lastName = rest.join(" ");
-    pixel("track", "Lead", { eventID: id });
+    pixel("track", "Lead", {}, event_id);
     capi(
       "Lead",
       {
@@ -214,7 +234,7 @@ export function useMetaEvents() {
         ...(lastName ? { lastName } : {}),
       },
       {},
-      id
+      event_id
     );
   }
 
@@ -222,13 +242,15 @@ export function useMetaEvents() {
    * Subscribe — fires on early-access form submit (alongside Lead).
    */
   function trackSubscribe(email: string, phone?: string, name?: string) {
-    const id = genEventId();
+    const event_id = genEventId();
     const [firstName, ...rest] = (name ?? "").trim().split(/\s+/);
     const lastName = rest.join(" ");
-    pixel("trackCustom", "Subscribe", {
-      content_name: "Early Access",
-      eventID: id,
-    });
+    pixel(
+      "trackCustom",
+      "Subscribe",
+      { content_name: "Early Access" },
+      event_id
+    );
     capi(
       "Subscribe",
       {
@@ -239,7 +261,7 @@ export function useMetaEvents() {
         ...(lastName ? { lastName } : {}),
       },
       { content_name: "Early Access" },
-      id
+      event_id
     );
   }
 
@@ -248,9 +270,9 @@ export function useMetaEvents() {
    * Customer info: client_user_agent only (server-side).
    */
   function trackSearch(query?: string) {
-    const id = genEventId();
-    pixel("track", "Search", { search_string: query, eventID: id });
-    capi("Search", getFbCookies(), { search_string: query }, id);
+    const event_id = genEventId();
+    pixel("track", "Search", { search_string: query }, event_id);
+    capi("Search", getFbCookies(), { search_string: query }, event_id);
   }
 
   // ─── SCROLL DEPTH ────────────────────────────────────────────────
@@ -267,7 +289,7 @@ export function useMetaEvents() {
       for (const m of milestones) {
         if (pct >= m && !fired.has(m)) {
           fired.add(m);
-          pixel("trackCustom", "ScrollDepth", { depth: m, page: route.path });
+          trackScrollDepth(m);
         }
       }
     }
@@ -277,6 +299,7 @@ export function useMetaEvents() {
   }
 
   return {
+    trackPageView,
     trackViewContent,
     trackAddToCart,
     trackPurchase,

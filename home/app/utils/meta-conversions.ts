@@ -14,7 +14,8 @@ export interface MetaPurchaseData {
   value?: number;
 }
 
-export interface MetaUserDataInput extends Omit<MetaPurchaseData, "sku" | "value"> {
+export interface MetaUserDataInput
+  extends Omit<MetaPurchaseData, "sku" | "value"> {
   fbc?: string;
   fbp?: string;
 }
@@ -27,16 +28,18 @@ export interface MetaUserDataBuilderOptions {
 }
 
 export interface MetaCapiEventPayloadInput {
-  eventName: string;
-  eventId: string;
-  eventSourceUrl?: string;
-  userData?: Record<string, unknown>;
-  customData?: Record<string, unknown>;
-  eventTime?: number;
+  event_name: string;
+  event_id: string;
+  event_source_url?: string;
+  user_data?: Record<string, unknown>;
+  custom_data?: Record<string, unknown>;
+  event_time?: number;
   actionSource?: string;
 }
 
-export function compactMetaObject<T extends Record<string, unknown>>(input: T): Record<string, unknown> {
+export function compactMetaObject<T extends Record<string, unknown>>(
+  input: T
+): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(input).filter(([, value]) => {
       if (value == null) return false;
@@ -57,7 +60,9 @@ export function buildMetaPurchaseContentName(sku?: string): string {
   return "CK Boxer & Brief";
 }
 
-export function buildMetaPurchaseCustomData(input: Pick<MetaPurchaseData, "sku" | "value">): Record<string, unknown> {
+export function buildMetaPurchaseCustomData(
+  input: Pick<MetaPurchaseData, "sku" | "value">
+): Record<string, unknown> {
   return compactMetaObject({
     content_ids: [input.sku ?? "ck-boxer-brief"],
     content_name: buildMetaPurchaseContentName(input.sku),
@@ -77,8 +82,13 @@ export function buildMetaUserData(
   };
 
   if (input.email) userData.em = [options.hash(input.email)];
+  if (input.email) userData.external_id = [options.hash(input.email)];
   if (input.phone)
-    userData.ph = [options.hash(options.normalizePhone?.(input.phone) ?? normalizeMetaPhone(input.phone))];
+    userData.ph = [
+      options.hash(
+        options.normalizePhone?.(input.phone) ?? normalizeMetaPhone(input.phone)
+      ),
+    ];
   if (input.firstName) userData.fn = [options.hash(input.firstName)];
   if (input.lastName) userData.ln = [options.hash(input.lastName)];
   if (input.city) userData.ct = [options.hash(input.city)];
@@ -92,17 +102,19 @@ export function buildMetaUserData(
   return compactMetaObject(userData);
 }
 
-export function buildMetaCapiEventPayload(input: MetaCapiEventPayloadInput): Record<string, unknown> {
+export function buildMetaCapiEventPayload(
+  input: MetaCapiEventPayloadInput
+): Record<string, unknown> {
   return {
     data: [
       {
-        event_name: input.eventName,
-        event_id: input.eventId,
-        event_time: input.eventTime ?? Math.floor(Date.now() / 1000),
-        event_source_url: input.eventSourceUrl,
+        event_name: input.event_name,
+        event_id: input.event_id,
+        event_time: input.event_time ?? Math.floor(Date.now() / 1000),
+        event_source_url: input.event_source_url,
         action_source: input.actionSource ?? "website",
-        user_data: input.userData ?? {},
-        custom_data: input.customData ?? {},
+        user_data: input.user_data ?? {},
+        custom_data: input.custom_data ?? {},
       },
     ],
   };

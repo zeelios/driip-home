@@ -4,8 +4,69 @@
       <div class="products-inner">
         <p class="label reveal">{{ t("ck.products.label") }}</p>
         <h2 class="products-title reveal">{{ t("ck.products.title") }}</h2>
+
+        <!-- ── Cart summary bar ──────────────────────────────────── -->
+        <Transition name="cart-bar">
+          <div v-if="!cart.isEmpty" class="cart-bar reveal">
+            <div class="cart-bar-left">
+              <span class="cart-bar-count">{{ cart.itemCount }} sản phẩm</span>
+              <span class="cart-bar-items">
+                <span
+                  v-for="(item, i) in cart.items"
+                  :key="item.id"
+                  class="cart-bar-pill"
+                >
+                  {{ item.skuLabel }} · {{ item.size }} · {{ item.colorLabel }}
+                  <button
+                    class="cart-bar-remove"
+                    @click="cart.removeItem(item.id)"
+                    aria-label="Xóa"
+                  >
+                    ✕
+                  </button>
+                </span>
+              </span>
+            </div>
+            <div class="cart-bar-pricing">
+              <span class="cart-bar-compare">{{
+                cart.formattedGrandCompareTotal
+              }}</span>
+              <span class="cart-bar-final">{{
+                cart.formattedGrandFinalTotal
+              }}</span>
+            </div>
+            <button class="cart-bar-cta" @click="$emit('go-to-order')">
+              ĐẶT HÀNG →
+            </button>
+          </div>
+        </Transition>
+
+        <!-- ── Mobile tab switcher (hidden on desktop via CSS) ──── -->
+        <div class="product-tabs">
+          <button
+            type="button"
+            class="product-tab"
+            :class="{ active: mobileTab === 'brief' }"
+            @click="mobileTab = 'brief'"
+          >
+            CK BRIEF
+          </button>
+          <button
+            type="button"
+            class="product-tab"
+            :class="{ active: mobileTab === 'boxer' }"
+            @click="mobileTab = 'boxer'"
+          >
+            CK BOXER
+          </button>
+        </div>
+
         <div class="product-grid">
-          <div class="product-card reveal">
+          <!-- ═══════════ BRIEF ═══════════ -->
+          <div
+            class="product-card reveal"
+            :class="{ 'tab-hidden': mobileTab !== 'brief' }"
+          >
             <div class="product-img">
               <NuxtImg
                 :key="`brief-${briefColor}`"
@@ -50,6 +111,7 @@
                 </div>
               </div>
             </div>
+
             <div class="product-card-body">
               <div class="product-card-header">
                 <p class="product-name">CK BRIEF</p>
@@ -61,22 +123,116 @@
               <p class="product-desc">{{ t("ck.products.brief.desc") }}</p>
               <div class="product-specs-inline">
                 <span
-                  v-for="(spec, index) in briefSpecs"
-                  :key="`brief-${index}`"
+                  v-for="(spec, i) in briefSpecs"
+                  :key="`brief-${i}`"
                   class="spec-tag"
                   >{{ spec }}</span
                 >
               </div>
-              <button
-                class="btn-order-now"
-                @click="$emit('prefill-order', 'ck-brief')"
-              >
-                {{ t("ck.products.orderThis") }}
-              </button>
+
+              <!-- Inline add-to-cart controls -->
+              <div class="atc-controls">
+                <!-- Size -->
+                <div class="atc-row">
+                  <div class="atc-row-head">
+                    <p class="atc-label">SIZE</p>
+                    <button
+                      type="button"
+                      class="atc-size-guide"
+                      @click="openSizeGuide('brief')"
+                    >
+                      Size guide
+                    </button>
+                  </div>
+                  <div class="atc-sizes">
+                    <button
+                      v-for="sz in sizes"
+                      :key="sz"
+                      type="button"
+                      class="atc-size"
+                      :class="{ active: briefDraft.size === sz }"
+                      @click="briefDraft.size = sz"
+                    >
+                      {{ sz }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Color pack -->
+                <div class="atc-row">
+                  <p class="atc-label">MÀU SẮC</p>
+                  <div class="atc-colors">
+                    <button
+                      v-for="c in colorOptions"
+                      :key="c.value"
+                      type="button"
+                      class="atc-color"
+                      :class="{ active: briefDraft.color === c.value }"
+                      @click="briefDraft.color = c.value"
+                    >
+                      <span class="atc-swatches">
+                        <span
+                          v-for="sw in c.swatches"
+                          :key="sw"
+                          class="atc-swatch"
+                          :style="{ background: sw }"
+                        />
+                      </span>
+                      <span class="atc-color-label">{{ c.label }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Boxes -->
+                <div class="atc-row">
+                  <p class="atc-label">SỐ HỘP</p>
+                  <div class="atc-boxes">
+                    <button
+                      v-for="opt in boxOptions"
+                      :key="opt.boxes"
+                      type="button"
+                      class="atc-box"
+                      :class="{
+                        active: briefDraft.boxes === opt.boxes,
+                        best: opt.boxes === 3,
+                      }"
+                      @click="briefDraft.boxes = opt.boxes"
+                    >
+                      <span v-if="opt.boxes === 3" class="atc-best"
+                        >TIẾT KIỆM</span
+                      >
+                      <span class="atc-box-count">{{ opt.boxes }} hộp</span>
+                      <span class="atc-box-price"
+                        >{{ formatVndCurrency(opt.finalUnitPrice) }}/hộp</span
+                      >
+                    </button>
+                  </div>
+                </div>
+
+                <Transition name="atc-added">
+                  <p v-if="briefAdded" class="atc-added-msg">
+                    ✓ Đã thêm vào giỏ hàng
+                  </p>
+                </Transition>
+
+                <button
+                  class="btn-atc"
+                  :class="{ 'btn-atc--ready': briefDraftValid }"
+                  :disabled="!briefDraftValid"
+                  @click="addBriefToCart"
+                >
+                  <span v-if="briefDraftValid">THÊM VÀO GIỎ HÀNG +</span>
+                  <span v-else>CHỌN SIZE & MÀU ĐỂ THÊM</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="product-card reveal">
+          <!-- ═══════════ BOXER ═══════════ -->
+          <div
+            class="product-card reveal"
+            :class="{ 'tab-hidden': mobileTab !== 'boxer' }"
+          >
             <div class="product-img">
               <NuxtImg
                 :key="`boxer-${boxerColor}`"
@@ -121,6 +277,7 @@
                 </div>
               </div>
             </div>
+
             <div class="product-card-body">
               <div class="product-card-header">
                 <p class="product-name">CK BOXER</p>
@@ -132,23 +289,116 @@
               <p class="product-desc">{{ t("ck.products.boxer.desc") }}</p>
               <div class="product-specs-inline">
                 <span
-                  v-for="(spec, index) in boxerSpecs"
-                  :key="`boxer-${index}`"
+                  v-for="(spec, i) in boxerSpecs"
+                  :key="`boxer-${i}`"
                   class="spec-tag"
                   >{{ spec }}</span
                 >
               </div>
-              <button
-                class="btn-order-now"
-                @click="$emit('prefill-order', 'ck-boxer')"
-              >
-                {{ t("ck.products.orderThis") }}
-              </button>
+
+              <!-- Inline add-to-cart controls -->
+              <div class="atc-controls">
+                <div class="atc-row">
+                  <div class="atc-row-head">
+                    <p class="atc-label">SIZE</p>
+                    <button
+                      type="button"
+                      class="atc-size-guide"
+                      @click="openSizeGuide('boxer')"
+                    >
+                      Size guide
+                    </button>
+                  </div>
+                  <div class="atc-sizes">
+                    <button
+                      v-for="sz in sizes"
+                      :key="sz"
+                      type="button"
+                      class="atc-size"
+                      :class="{ active: boxerDraft.size === sz }"
+                      @click="boxerDraft.size = sz"
+                    >
+                      {{ sz }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="atc-row">
+                  <p class="atc-label">MÀU SẮC</p>
+                  <div class="atc-colors">
+                    <button
+                      v-for="c in colorOptions"
+                      :key="c.value"
+                      type="button"
+                      class="atc-color"
+                      :class="{ active: boxerDraft.color === c.value }"
+                      @click="boxerDraft.color = c.value"
+                    >
+                      <span class="atc-swatches">
+                        <span
+                          v-for="sw in c.swatches"
+                          :key="sw"
+                          class="atc-swatch"
+                          :style="{ background: sw }"
+                        />
+                      </span>
+                      <span class="atc-color-label">{{ c.label }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="atc-row">
+                  <p class="atc-label">SỐ HỘP</p>
+                  <div class="atc-boxes">
+                    <button
+                      v-for="opt in boxOptions"
+                      :key="opt.boxes"
+                      type="button"
+                      class="atc-box"
+                      :class="{
+                        active: boxerDraft.boxes === opt.boxes,
+                        best: opt.boxes === 3,
+                      }"
+                      @click="boxerDraft.boxes = opt.boxes"
+                    >
+                      <span v-if="opt.boxes === 3" class="atc-best"
+                        >TIẾT KIỆM</span
+                      >
+                      <span class="atc-box-count">{{ opt.boxes }} hộp</span>
+                      <span class="atc-box-price"
+                        >{{ formatVndCurrency(opt.finalUnitPrice) }}/hộp</span
+                      >
+                    </button>
+                  </div>
+                </div>
+
+                <Transition name="atc-added">
+                  <p v-if="boxerAdded" class="atc-added-msg">
+                    ✓ Đã thêm vào giỏ hàng
+                  </p>
+                </Transition>
+
+                <button
+                  class="btn-atc"
+                  :class="{ 'btn-atc--ready': boxerDraftValid }"
+                  :disabled="!boxerDraftValid"
+                  @click="addBoxerToCart"
+                >
+                  <span v-if="boxerDraftValid">THÊM VÀO GIỎ HÀNG +</span>
+                  <span v-else>CHỌN SIZE & MÀU ĐỂ THÊM</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
+
+    <SizeGuide
+      v-model:open="sizeGuideOpen"
+      :selected-size="sizeGuideSelectedSize"
+      @select="applySizeGuide"
+    />
 
     <div class="fabric-bar reveal">
       <span class="fabric-item">{{ t("ck.fabric.modal") }}</span>
@@ -163,33 +413,121 @@
 </template>
 
 <script setup lang="ts">
+import { computed, reactive, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
-import { ref, watch } from "vue";
-defineEmits<{ "prefill-order": [sku: string] }>();
+import { useCartStore } from "~/stores/cart";
+import { useMetaEvents } from "~/composables/useMetaEvents";
+import { getFinalTotal } from "~/composables/usePricing";
+import { formatVndCurrency } from "~/composables/usePricing";
+
+defineEmits<{ "go-to-order": [] }>();
+
 const { t } = useI18n();
 const store = useCkUnderwearStore();
-const { boxerColor, boxerSpecs, briefColor, briefSpecs, formattedSkuPrice } =
-  storeToRefs(store);
-const boxerColors = store.boxerColors;
-const { nextBriefImage, prevBriefImage, nextBoxerImage, prevBoxerImage } =
-  store;
+const cart = useCartStore();
+const { trackAddToCart } = useMetaEvents();
+
+const {
+  boxerColor,
+  boxerSpecs,
+  briefColor,
+  briefSpecs,
+  sizeGuideOpen,
+  formattedSkuPrice,
+  colorOptions,
+  boxOptions,
+} = storeToRefs(store);
+const { boxerColors, sizes } = store;
+
 const briefImageLoaded = ref(false);
 const boxerImageLoaded = ref(false);
 
 watch(briefColor, () => {
   briefImageLoaded.value = false;
 });
-
 watch(boxerColor, () => {
   boxerImageLoaded.value = false;
 });
+
+// ── Mobile tab state ─────────────────────────────────────────────
+const mobileTab = ref<"brief" | "boxer">("brief");
+
+// ── Per-product draft selections ──────────────────────────────────
+const briefDraft = reactive({ size: "", color: "", boxes: 1 });
+const boxerDraft = reactive({ size: "", color: "", boxes: 1 });
+const sizeGuideTarget = ref<"brief" | "boxer">("brief");
+
+const briefDraftValid = computed(() => !!briefDraft.size && !!briefDraft.color);
+const boxerDraftValid = computed(() => !!boxerDraft.size && !!boxerDraft.color);
+const sizeGuideSelectedSize = computed(() =>
+  sizeGuideTarget.value === "brief" ? briefDraft.size : boxerDraft.size
+);
+
+// ── Feedback flash ────────────────────────────────────────────────
+const briefAdded = ref(false);
+const boxerAdded = ref(false);
+let briefTimer: ReturnType<typeof setTimeout> | null = null;
+let boxerTimer: ReturnType<typeof setTimeout> | null = null;
+
+function addBriefToCart(): void {
+  if (!briefDraftValid.value) return;
+  const colorOpt = colorOptions.value.find((c) => c.value === briefDraft.color);
+  trackAddToCart("ck-brief", getFinalTotal(briefDraft.boxes));
+  cart.addItem({
+    sku: "ck-brief",
+    skuLabel: "Brief",
+    boxes: briefDraft.boxes,
+    size: briefDraft.size,
+    color: briefDraft.color,
+    colorLabel: colorOpt?.label ?? briefDraft.color,
+  });
+  briefAdded.value = true;
+  if (briefTimer) clearTimeout(briefTimer);
+  briefTimer = setTimeout(() => {
+    briefAdded.value = false;
+  }, 2500);
+}
+
+function addBoxerToCart(): void {
+  if (!boxerDraftValid.value) return;
+  const colorOpt = colorOptions.value.find((c) => c.value === boxerDraft.color);
+  trackAddToCart("ck-boxer", getFinalTotal(boxerDraft.boxes));
+  cart.addItem({
+    sku: "ck-boxer",
+    skuLabel: "Boxer",
+    boxes: boxerDraft.boxes,
+    size: boxerDraft.size,
+    color: boxerDraft.color,
+    colorLabel: colorOpt?.label ?? boxerDraft.color,
+  });
+  boxerAdded.value = true;
+  if (boxerTimer) clearTimeout(boxerTimer);
+  boxerTimer = setTimeout(() => {
+    boxerAdded.value = false;
+  }, 2500);
+}
+
+function openSizeGuide(target: "brief" | "boxer"): void {
+  sizeGuideTarget.value = target;
+  sizeGuideOpen.value = true;
+}
+
+function applySizeGuide(size: string): void {
+  if (sizeGuideTarget.value === "brief") {
+    briefDraft.size = size;
+    return;
+  }
+
+  boxerDraft.size = size;
+}
 </script>
 
 <style scoped>
+/* ── SECTION ─────────────────────────────────────────────────────── */
 .products {
   background: var(--grey-900);
-  padding: 56px 0 64px; /* no horizontal padding — let cards go edge-to-edge on mobile */
+  padding: 56px 0 64px;
 }
 .products-inner {
   max-width: 1100px;
@@ -202,9 +540,118 @@ watch(boxerColor, () => {
   line-height: 0.9;
   color: var(--white);
   letter-spacing: -0.01em;
-  margin-bottom: 64px;
+  margin-bottom: 40px;
   white-space: pre-line;
 }
+
+/* ── CART BAR ────────────────────────────────────────────────────── */
+.cart-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 14px 20px;
+  margin-bottom: 32px;
+}
+.cart-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.cart-bar-count {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cart-bar-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cart-bar-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 4px 10px 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--white);
+}
+.cart-bar-remove {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.cart-bar-remove:hover {
+  color: var(--white);
+}
+.cart-bar-pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.cart-bar-compare {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  text-decoration: line-through;
+  letter-spacing: 0.06em;
+}
+.cart-bar-final {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--white);
+}
+.cart-bar-cta {
+  flex-shrink: 0;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  padding: 14px 24px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s;
+}
+.cart-bar-cta:hover {
+  background: var(--grey-100);
+}
+
+/* ── CART BAR TRANSITION ─────────────────────────────────────────── */
+.cart-bar-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.cart-bar-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.cart-bar-enter-from,
+.cart-bar-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ── PRODUCT GRID ────────────────────────────────────────────────── */
 .product-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -221,6 +668,8 @@ watch(boxerColor, () => {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ── IMAGE ───────────────────────────────────────────────────────── */
 .product-img {
   position: relative;
   width: 100%;
@@ -229,24 +678,6 @@ watch(boxerColor, () => {
   overflow: hidden;
   isolation: isolate;
 }
-/* ── Image crossfade ─────────────────────────────────────────── */
-.img-crossfade-enter-active,
-.img-crossfade-leave-active {
-  transition: opacity 0.4s ease;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-}
-.img-crossfade-enter-from {
-  opacity: 0;
-}
-.img-crossfade-leave-to {
-  opacity: 0;
-}
-
 .product-img-el {
   position: relative;
   z-index: 1;
@@ -264,6 +695,7 @@ watch(boxerColor, () => {
 .product-card:hover .product-img-el {
   transform: scale(1.04);
 }
+
 .image-loader {
   position: absolute;
   inset: 0;
@@ -285,7 +717,8 @@ watch(boxerColor, () => {
   animation: pulse 1.2s ease-in-out infinite;
   filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
 }
-/* ── Color overlay ───────────────────────────────────────────── */
+
+/* ── COLOR OVERLAY ───────────────────────────────────────────────── */
 .color-overlay {
   position: absolute;
   bottom: 0;
@@ -326,11 +759,10 @@ watch(boxerColor, () => {
   gap: 10px;
 }
 .color-dot {
-  /* Outer white ring via box-shadow so every color is visible, incl. Black */
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid transparent; /* transparent gap between fill and ring */
+  border: 2px solid transparent;
   box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.55);
   cursor: pointer;
   flex-shrink: 0;
@@ -346,41 +778,8 @@ watch(boxerColor, () => {
   transform: scale(1.22);
   box-shadow: 0 0 0 2px var(--white);
 }
-.image-nav {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  justify-content: space-between;
-  padding: 0 16px;
-  z-index: 5;
-  pointer-events: none;
-}
-.image-nav-btn {
-  pointer-events: auto;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  color: var(--white);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 300;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: background 0.2s, transform 0.2s, border-color 0.2s;
-}
-.image-nav-btn:hover {
-  background: rgba(0, 0, 0, 0.6);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: scale(1.05);
-}
+
+/* ── CARD BODY ───────────────────────────────────────────────────── */
 .product-card-body {
   padding: 28px 24px 32px;
 }
@@ -425,26 +824,236 @@ watch(boxerColor, () => {
   padding: 6px 12px;
   white-space: nowrap;
 }
-.btn-order-now {
+
+/* ── ADD-TO-CART CONTROLS ────────────────────────────────────────── */
+.atc-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 20px;
+}
+.atc-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.atc-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.atc-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+.atc-size-guide {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+.atc-size-guide:hover,
+.atc-size-guide:focus-visible {
+  color: var(--white);
+  outline: none;
+}
+
+/* Size pills */
+.atc-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.atc-size {
+  min-width: 48px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  width: 100%; /* full-width touch target on mobile */
-  background: var(--white);
-  color: var(--black);
-  border: none;
-  padding: 18px 24px; /* 48 px+ touch target */
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
-  transition: background 0.2s;
+  padding: 0 14px;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
-.btn-order-now:hover {
-  background: var(--off-white);
+.atc-size:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--white);
 }
+.atc-size.active {
+  border-color: var(--white);
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Color tiles */
+.atc-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.atc-color {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  min-width: 80px;
+}
+.atc-color:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.05);
+}
+.atc-color.active {
+  border-color: var(--white);
+  background: rgba(255, 255, 255, 0.07);
+}
+.atc-swatches {
+  display: flex;
+  gap: 3px;
+}
+.atc-swatch {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+.atc-color-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.atc-color.active .atc-color-label {
+  color: var(--white);
+}
+
+/* Box qty tiles */
+.atc-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.atc-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  min-width: 76px;
+}
+.atc-box:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.atc-box.active {
+  border-color: var(--white);
+  background: rgba(255, 255, 255, 0.07);
+}
+.atc-box.best {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.atc-best {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background: var(--white);
+  color: var(--black);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+}
+.atc-box-count {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  line-height: 1;
+}
+.atc-box-price {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Added feedback */
+.atc-added-msg {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6dde9a;
+  text-align: center;
+}
+.atc-added-enter-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.atc-added-leave-active {
+  transition: opacity 0.2s ease;
+}
+.atc-added-enter-from {
+  opacity: 0;
+  transform: translateY(4px);
+}
+.atc-added-leave-to {
+  opacity: 0;
+}
+
+/* ATC button */
+.btn-atc {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 18px 24px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  cursor: not-allowed;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.btn-atc--ready {
+  background: var(--white);
+  color: var(--black);
+  border-color: var(--white);
+  cursor: pointer;
+}
+.btn-atc--ready:hover {
+  background: var(--grey-100);
+}
+.btn-atc:disabled {
+  opacity: 0.9;
+}
+
+/* ── FABRIC BAR ──────────────────────────────────────────────────── */
 .fabric-bar {
   background: var(--grey-900);
   display: flex;
@@ -466,6 +1075,8 @@ watch(boxerColor, () => {
   color: var(--grey-700);
   font-size: 12px;
 }
+
+/* ── MISC ────────────────────────────────────────────────────────── */
 .label {
   font-size: 10px;
   font-weight: 600;
@@ -483,22 +1094,66 @@ watch(boxerColor, () => {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ── MOBILE PRODUCT TABS ─────────────────────────────────────────── */
+.product-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.product-tab {
+  flex: 1;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  position: relative;
+}
+.product-tab + .product-tab {
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+.product-tab.active {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--white);
+}
+.product-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--white);
+}
+
+/* On mobile: hide the non-active card */
+.tab-hidden {
+  display: none;
+}
+
 @media (min-width: 640px) {
+  /* Tabs irrelevant on desktop — hide them */
+  .product-tabs {
+    display: none;
+  }
+
+  /* Both cards always visible on desktop */
+  .tab-hidden {
+    display: block;
+  }
+
   .product-grid {
     grid-template-columns: 1fr 1fr;
     gap: 2px;
-  }
-  .btn-order-now {
-    width: auto;
-    background: transparent;
-    color: var(--white);
-    border: 1px solid var(--grey-400);
-    padding: 13px 24px;
-    transition: background 0.2s, border-color 0.2s;
-  }
-  .btn-order-now:hover {
-    background: var(--grey-800);
-    border-color: var(--white);
   }
 }
 @media (min-width: 1024px) {

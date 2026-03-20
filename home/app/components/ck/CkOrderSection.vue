@@ -1,7 +1,6 @@
 <template>
   <section class="os" id="order">
     <div class="os-inner">
-
       <!-- ── HEADER ──────────────────────────────────────────── -->
       <div class="os-head reveal">
         <p class="os-eyebrow">{{ t("ck.order.label") }}</p>
@@ -17,9 +16,9 @@
           {{
             t("ck.order.successBody", {
               name: `${order.firstName} ${order.lastName}`,
-              sku: skuLabel,
-              size: order.size,
-              color: colorLabel,
+              sku: cartItemsSummary,
+              size: "",
+              color: "",
               phone: order.phone,
             })
           }}
@@ -27,8 +26,7 @@
       </div>
 
       <!-- ── FORM ────────────────────────────────────────────── -->
-      <form v-else class="os-form" @submit.prevent="submitOrder">
-
+      <form v-else class="os-form" @submit.prevent="handleSubmit">
         <!-- Step progress bar -->
         <div class="os-progress" aria-label="Các bước đặt hàng">
           <div
@@ -50,133 +48,141 @@
         </div>
 
         <!-- ═══════════════════════════════════════════════════
-             STEP 1 — CHỌN SẢN PHẨM
+             STEP 1 — GIỎ HÀNG
         ════════════════════════════════════════════════════ -->
         <div v-show="currentStep === 1" class="os-panel">
-
-          <!-- Product type -->
-          <div class="os-block">
-            <p class="os-block-label">{{ t("ck.order.product") }}</p>
-            <div class="os-tiles">
-              <button
-                v-for="sku in skuOptions"
-                :key="sku.value"
-                type="button"
-                class="os-tile"
-                :class="{ active: order.sku === sku.value }"
-                @click="order.sku = sku.value"
-              >
-                <span class="os-tile-name">{{ sku.label }}</span>
-                <span class="os-tile-sub">
-                  {{ sku.value === "ck-boxer" ? "cK Boxer" : "cK Brief" }} ·
-                  từ {{ formatVndCurrency(sku.price) }}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Quantity -->
-          <div class="os-block">
-            <p class="os-block-label">{{ t("ck.order.boxes") }}</p>
-            <div class="os-tiles qty-tiles">
-              <button
-                v-for="opt in boxOptions"
-                :key="opt.boxes"
-                type="button"
-                class="os-tile"
-                :class="{ active: order.boxes === opt.boxes, recommended: opt.boxes === 3 }"
-                @click="order.boxes = opt.boxes"
-              >
-                <span v-if="opt.boxes === 3" class="os-tile-badge">TIẾT KIỆM NHẤT</span>
-                <span class="os-tile-name">
-                  {{ t("ck.order.boxCount", { count: opt.boxes }) }}
-                </span>
-                <span class="os-tile-sub">
-                  {{ t("ck.order.perBox", { price: formatVndCurrency(opt.unitPrice) }) }}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Size -->
-          <div class="os-block">
-            <div class="os-block-row">
-              <p class="os-block-label">{{ t("ck.order.size") }}</p>
-              <button
-                type="button"
-                class="os-size-guide-btn"
-                @click="sizeGuideOpen = true"
-              >
-                BẢNG SIZE ↗
-              </button>
-            </div>
-            <SizeGuide
-              :open="sizeGuideOpen"
-              :selected-size="order.size"
-              @update:open="sizeGuideOpen = $event"
-              @select="order.size = $event"
-            />
-            <div class="os-pills">
-              <button
-                v-for="sz in sizes"
-                :key="sz"
-                type="button"
-                class="os-pill"
-                :class="{ active: order.size === sz }"
-                @click="order.size = sz"
-              >
-                {{ sz }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Color pack -->
-          <div class="os-block">
-            <p class="os-block-label">
-              {{ t("ck.order.colorPack") }}
-              <span class="os-block-opt">{{ t("ck.order.colorPackSub") }}</span>
+          <!-- Empty cart -->
+          <div v-if="cart.isEmpty" class="os-empty-cart">
+            <p class="os-empty-icon">🛒</p>
+            <p class="os-empty-title">Giỏ hàng trống</p>
+            <p class="os-empty-sub">
+              Quay lại phần sản phẩm để thêm Brief hoặc Boxer vào giỏ hàng của
+              bạn.
             </p>
-            <div class="os-tiles color-tiles">
-              <button
-                v-for="c in colorOptions"
-                :key="c.value"
-                type="button"
-                class="os-tile color-tile"
-                :class="{ active: order.color === c.value }"
-                @click="order.color = c.value"
-              >
-                <div class="os-swatches">
-                  <span
-                    v-for="sw in c.swatches"
-                    :key="sw"
-                    class="os-swatch"
-                    :style="{ background: sw }"
-                  />
-                </div>
-                <span class="os-tile-name">{{ c.label }}</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              class="os-go-products-btn"
+              @click="scrollToProducts"
+            >
+              ← XEM SẢN PHẨM
+            </button>
           </div>
 
-          <button
-            type="button"
-            class="os-next-btn"
-            :disabled="!step1Valid"
-            @click="currentStep = 2"
-          >
-            TIẾP THEO — THÔNG TIN GIAO HÀNG
-            <span class="os-next-arrow">→</span>
-          </button>
-          <p v-if="!step1Valid" class="os-step-hint">
-            Chọn loại, số lượng, cỡ và màu để tiếp tục
-          </p>
+          <!-- Cart items -->
+          <template v-else>
+            <div class="os-cart-list">
+              <div
+                v-for="item in cart.items"
+                :key="item.id"
+                class="os-cart-item"
+              >
+                <div class="os-cart-item-info">
+                  <p class="os-cart-item-name">CK {{ item.skuLabel }}</p>
+                  <p class="os-cart-item-meta">
+                    Size {{ item.size }} · {{ item.colorLabel }} ·
+                    {{ item.boxes }} hộp
+                  </p>
+                </div>
+
+                <!-- Inline box qty adjuster -->
+                <div class="os-cart-item-qty">
+                  <button
+                    type="button"
+                    class="os-qty-btn"
+                    :disabled="item.boxes <= 1"
+                    @click="
+                      cart.updateItemBoxes(item.id, Math.max(1, item.boxes - 1))
+                    "
+                  >
+                    −
+                  </button>
+                  <span class="os-qty-val">{{ item.boxes }}</span>
+                  <button
+                    type="button"
+                    class="os-qty-btn"
+                    @click="cart.updateItemBoxes(item.id, item.boxes + 1)"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div class="os-cart-item-price">
+                  <span class="os-cart-item-final">{{
+                    formatVndCurrency(item.finalTotal)
+                  }}</span>
+                  <span class="os-cart-item-compare">{{
+                    formatVndCurrency(item.compareTotal)
+                  }}</span>
+                </div>
+
+                <button
+                  type="button"
+                  class="os-cart-remove"
+                  aria-label="Xóa"
+                  @click="cart.removeItem(item.id)"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <!-- Cart totals — 4-level price breakdown -->
+            <div class="os-cart-totals">
+              <!-- Level 1: Original -->
+              <div class="os-cart-total-row">
+                <span class="os-total-label">Giá gốc</span>
+                <span class="os-total-val os-strikethrough muted">{{
+                  cart.formattedGrandCompareTotal
+                }}</span>
+              </div>
+              <!-- Level 2: Bundle/tier sale -->
+              <div class="os-cart-total-row">
+                <span class="os-total-label">
+                  Giảm theo bộ
+                  <span class="os-total-badge yellow">BUNDLE</span>
+                </span>
+                <span class="os-total-val yellow"
+                  >−{{ formatVndCurrency(cart.grandTierDiscount) }}</span
+                >
+              </div>
+              <!-- Level 3: Extra sale -->
+              <div class="os-cart-total-row">
+                <span class="os-total-label">
+                  Giảm thêm {{ extraPromoPercent }}
+                  <span class="os-total-badge green">EXTRA SALE</span>
+                </span>
+                <span class="os-total-val green"
+                  >−{{ formatVndCurrency(cart.grandExtraDiscount) }}</span
+                >
+              </div>
+              <!-- Level 4: Website coupon (DRIIP20 = extra×2 effectively) -->
+              <div class="os-cart-total-row">
+                <span class="os-total-label">
+                  Mã website x2
+                  <span class="os-total-badge white">DRIIP20</span>
+                </span>
+                <span class="os-total-val white">đã áp dụng ✓</span>
+              </div>
+              <div class="os-cart-divider" />
+              <div class="os-cart-total-row total">
+                <span class="os-total-label">TỔNG CỘNG</span>
+                <span class="os-price-big">{{
+                  cart.formattedGrandFinalTotal
+                }}</span>
+              </div>
+            </div>
+
+            <button type="button" class="os-next-btn" @click="currentStep = 2">
+              TIẾP THEO — THÔNG TIN GIAO HÀNG
+              <span class="os-next-arrow">→</span>
+            </button>
+          </template>
         </div>
 
         <!-- ═══════════════════════════════════════════════════
              STEP 2 — THÔNG TIN GIAO HÀNG
         ════════════════════════════════════════════════════ -->
         <div v-show="currentStep === 2" class="os-panel">
-
           <div class="os-field-row">
             <div class="os-field">
               <label>{{ t("ck.order.firstName") }}</label>
@@ -213,7 +219,9 @@
               maxlength="13"
               required
               autocomplete="tel"
-              @input="normalizePhoneInput(($event.target as HTMLInputElement).value)"
+              @input="
+                normalizePhoneInput(($event.target as HTMLInputElement).value)
+              "
             />
             <p v-if="phoneValidationMsg" class="os-field-err">
               {{ phoneValidationMsg }}
@@ -262,7 +270,7 @@
             </button>
             <button
               type="button"
-              class="os-next-btn flex-grow"
+              class="os-next-btn os-next-btn--grow"
               :disabled="!step2Valid"
               @click="currentStep = 3"
             >
@@ -275,30 +283,30 @@
              STEP 3 — XÁC NHẬN & ĐẶT HÀNG
         ════════════════════════════════════════════════════ -->
         <div v-show="currentStep === 3" class="os-panel">
-
-          <!-- Order detail summary -->
+          <!-- Cart summary -->
           <div class="os-confirm">
-            <p class="os-confirm-heading">CHI TIẾT ĐƠN HÀNG</p>
-            <div class="os-confirm-row">
-              <span class="os-confirm-key">SẢN PHẨM</span>
-              <span class="os-confirm-val">{{ skuLabel }} · Size {{ order.size }}</span>
-            </div>
-            <div class="os-confirm-row">
-              <span class="os-confirm-key">MÀU SẮC</span>
-              <span class="os-confirm-val">{{ colorLabel }}</span>
-            </div>
-            <div class="os-confirm-row">
-              <span class="os-confirm-key">SỐ LƯỢNG</span>
+            <p class="os-confirm-heading">GIỎ HÀNG</p>
+            <div
+              v-for="item in cart.items"
+              :key="item.id"
+              class="os-confirm-row"
+            >
+              <span class="os-confirm-key">CK {{ item.skuLabel }}</span>
               <span class="os-confirm-val">
-                {{ t("ck.order.boxCount", { count: order.boxes }) }}
+                Size {{ item.size }} · {{ item.colorLabel }} ·
+                {{ item.boxes }} hộp —
+                {{ formatVndCurrency(item.finalTotal) }}
               </span>
             </div>
             <div class="os-confirm-divider" />
+            <p class="os-confirm-heading" style="margin-top: 16px">
+              THÔNG TIN GIAO HÀNG
+            </p>
             <div class="os-confirm-row">
               <span class="os-confirm-key">NGƯỜI NHẬN</span>
-              <span class="os-confirm-val">
-                {{ order.firstName }} {{ order.lastName }}
-              </span>
+              <span class="os-confirm-val"
+                >{{ order.firstName }} {{ order.lastName }}</span
+              >
             </div>
             <div class="os-confirm-row">
               <span class="os-confirm-key">SỐ ĐIỆN THOẠI</span>
@@ -306,37 +314,54 @@
             </div>
             <div class="os-confirm-row">
               <span class="os-confirm-key">ĐỊA CHỈ</span>
-              <span class="os-confirm-val">
-                {{ order.fullAddress }}, {{ order.province }}
-              </span>
+              <span class="os-confirm-val"
+                >{{ order.fullAddress }}, {{ order.province }}</span
+              >
             </div>
           </div>
 
-          <!-- Price breakdown -->
+          <!-- Price breakdown — 4-level -->
           <div class="os-price">
-            <div class="os-price-row muted">
-              <span>{{ t("ck.order.originalTotal") }}</span>
-              <span class="os-strikethrough">{{ formattedCompareTotal }}</span>
+            <div class="os-price-row">
+              <span class="os-total-label">Giá gốc</span>
+              <span class="os-total-val os-strikethrough muted">{{
+                cart.formattedGrandCompareTotal
+              }}</span>
             </div>
-            <div class="os-price-row muted">
-              <span>{{ t("ck.order.salePrice") }}</span>
-              <span>{{ formattedTierTotal }}</span>
+            <div class="os-price-row">
+              <span class="os-total-label">
+                Giảm theo bộ
+                <span class="os-total-badge yellow">BUNDLE</span>
+              </span>
+              <span class="os-total-val yellow"
+                >−{{ formatVndCurrency(cart.grandTierDiscount) }}</span
+              >
             </div>
-            <div class="os-price-row muted green">
-              <span>{{ t("ck.order.extraDiscount") }} ({{ extraPromoPercent }})</span>
-              <span>−{{ formattedExtraDiscountAmount }}</span>
+            <div class="os-price-row">
+              <span class="os-total-label">
+                Giảm thêm {{ extraPromoPercent }}
+                <span class="os-total-badge green">EXTRA SALE</span>
+              </span>
+              <span class="os-total-val green"
+                >−{{ formatVndCurrency(cart.grandExtraDiscount) }}</span
+              >
+            </div>
+            <div class="os-price-row">
+              <span class="os-total-label">
+                Mã website x2
+                <span class="os-total-badge white">DRIIP20</span>
+              </span>
+              <span class="os-total-val white">đã áp dụng ✓</span>
             </div>
             <div class="os-price-divider" />
             <div class="os-price-row total">
               <span>TỔNG CỘNG</span>
-              <span class="os-price-big">{{ formattedOrderPrice }}</span>
+              <span class="os-price-big">{{
+                cart.formattedGrandFinalTotal
+              }}</span>
             </div>
-            <p class="os-price-coupon">{{ t("ck.order.codeApplied") }}</p>
           </div>
 
-          <div v-if="orderValidationMsg" class="os-validation">
-            {{ orderValidationMsg }}
-          </div>
           <div v-if="orderState === 'error'" class="os-error">
             {{ t("common.error") }}
           </div>
@@ -344,27 +369,22 @@
           <button
             type="submit"
             class="os-submit-btn"
-            :disabled="orderState === 'loading'"
+            :disabled="orderState === 'loading' || cart.isEmpty"
           >
             <span v-if="orderState !== 'loading'">
-              {{ t("ck.order.submit", { price: formatVnd(orderPrice) }) }}
+              {{
+                t("ck.order.submit", { price: formatVnd(cart.grandFinalTotal) })
+              }}
             </span>
-            <span v-else class="os-dots">
-              <span /><span /><span />
-            </span>
+            <span v-else class="os-dots"> <span /><span /><span /> </span>
           </button>
 
           <p class="os-fine">{{ t("ck.order.fine") }}</p>
 
-          <button
-            type="button"
-            class="os-edit-btn"
-            @click="currentStep = 2"
-          >
+          <button type="button" class="os-edit-btn" @click="currentStep = 2">
             ← SỬA THÔNG TIN
           </button>
         </div>
-
       </form>
     </div>
   </section>
@@ -374,55 +394,33 @@
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { vietnamProvinces } from "~/data/vietnam-addresses";
+import { useMetaEvents } from "~/composables/useMetaEvents";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
+import { useCartStore } from "~/stores/cart";
+import {
+  EXTRA_PROMO_RATE,
+  formatVnd,
+  formatVndCurrency,
+} from "~/composables/usePricing";
 
 const { t } = useI18n();
 const store = useCkUnderwearStore();
+const cart = useCartStore();
+const { trackPurchase } = useMetaEvents();
 
 const provinceOptions = computed(() =>
-  vietnamProvinces.map((province) => ({
-    value: province.name,
-    label: province.name,
-  }))
+  vietnamProvinces.map((p) => ({ value: p.name, label: p.name }))
 );
 
-const {
-  boxOptions,
-  colorLabel,
-  colorOptions,
-  formattedCompareTotal,
-  formattedExtraDiscountAmount,
-  formattedFinalUnitPrice,
-  formattedOrderPrice,
-  formattedTierTotal,
-  order,
-  orderPrice,
-  orderState,
-  orderValidationMsg,
-  phoneValidationMsg,
-  sizeGuideOpen,
-  skuLabel,
-} = storeToRefs(store);
+const { order, orderState, phoneValidationMsg } = storeToRefs(store);
 
-const {
-  extraPromoRate,
-  formatVnd,
-  formatVndCurrency,
-  sizes,
-  skuOptions,
-  normalizePhoneInput,
-  submitOrder,
-} = store;
+const { normalizePhoneInput } = store;
 
-const extraPromoPercent = `${Math.round(extraPromoRate * 100)}%`;
+const extraPromoPercent = `${Math.round(EXTRA_PROMO_RATE * 100)}%`;
 
 /* ── Step wizard ──────────────────────────────────────────────── */
 const currentStep = ref(1);
-const stepLabels = ["SẢN PHẨM", "THÔNG TIN", "XÁC NHẬN"];
-
-const step1Valid = computed(
-  () => !!order.value.sku && !!order.value.size && !!order.value.color
-);
+const stepLabels = ["GIỎ HÀNG", "THÔNG TIN", "XÁC NHẬN"];
 
 const step2Valid = computed(
   () =>
@@ -438,6 +436,71 @@ const progressWidth = computed(() => {
   const map: Record<number, string> = { 1: "0%", 2: "50%", 3: "100%" };
   return map[currentStep.value] ?? "0%";
 });
+
+/* ── Cart summary string for success message ──────────────────── */
+const cartItemsSummary = computed(() =>
+  cart.items
+    .map(
+      (item) =>
+        `CK ${item.skuLabel} (${item.size}, ${item.colorLabel}, ${item.boxes} hộp)`
+    )
+    .join(" + ")
+);
+
+/* ── Submit ───────────────────────────────────────────────────── */
+async function handleSubmit(): Promise<void> {
+  if (cart.isEmpty || orderState.value === "loading") return;
+
+  orderState.value = "loading";
+  try {
+    await $fetch("/api/order", {
+      method: "POST",
+      body: {
+        firstName: order.value.firstName,
+        lastName: order.value.lastName,
+        phone: order.value.phone,
+        email: order.value.email,
+        province: order.value.province,
+        fullAddress: order.value.fullAddress,
+        cartItems: cart.items.map((item) => ({
+          sku: item.sku,
+          size: item.size,
+          color: item.color,
+          boxes: item.boxes,
+          finalTotal: item.finalTotal,
+          compareTotal: item.compareTotal,
+        })),
+        grandFinalTotal: cart.grandFinalTotal,
+        grandCompareTotal: cart.grandCompareTotal,
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+    trackPurchase({
+      firstName: order.value.firstName,
+      lastName: order.value.lastName,
+      phone: order.value.phone,
+      email: order.value.email,
+      city: order.value.province,
+      state: order.value.province,
+      country: "VN",
+      street: order.value.fullAddress,
+      value: cart.grandFinalTotal,
+    });
+
+    orderState.value = "success";
+    cart.clear();
+  } catch {
+    orderState.value = "error";
+    window.setTimeout(() => {
+      orderState.value = "idle";
+    }, 3000);
+  }
+}
+
+function scrollToProducts(): void {
+  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+}
 </script>
 
 <style scoped>
@@ -573,190 +636,282 @@ const progressWidth = computed(() => {
   gap: 0;
 }
 
-/* ── BLOCK (step 1 groups) ───────────────────────────────────────── */
-.os-block {
-  padding: 24px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+/* ── EMPTY CART ──────────────────────────────────────────────────── */
+.os-empty-cart {
+  padding: 48px 0;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
 }
 
-.os-block:first-child {
-  border-top: none;
-  padding-top: 0;
-}
-
-.os-block-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+.os-empty-icon {
+  font-size: 40px;
   margin-bottom: 16px;
+  filter: grayscale(1);
+  opacity: 0.5;
 }
 
-.os-block-opt {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.3);
-  margin-left: 8px;
+.os-empty-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 12px;
 }
 
-.os-block-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+.os-empty-sub {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.7;
+  max-width: 360px;
+  margin: 0 auto 28px;
 }
 
-.os-block-row .os-block-label {
-  margin-bottom: 0;
-}
-
-.os-size-guide-btn {
-  font-family: var(--font-body);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
+.os-go-products-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 6px 12px;
+  color: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 14px 28px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 }
 
-.os-size-guide-btn:hover {
+.os-go-products-btn:hover {
   color: var(--white);
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* ── TILES (product / qty / color) ──────────────────────────────── */
-.os-tiles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.qty-tiles {
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-}
-
-.os-tile {
-  position: relative;
+/* ── CART ITEMS ──────────────────────────────────────────────────── */
+.os-cart-list {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 18px 16px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-  text-align: left;
-  min-height: 72px;
+  margin-bottom: 16px;
 }
 
-.os-tile:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.os-tile.active {
-  border-color: var(--white);
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.os-tile.recommended {
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.os-tile-badge {
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  background: var(--white);
-  color: var(--black);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  padding: 3px 8px;
-}
-
-.os-tile-name {
-  font-family: var(--font-display);
-  font-size: 22px;
-  letter-spacing: 0.05em;
-  line-height: 1;
-  color: var(--white);
-}
-
-.os-tile-sub {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.45);
-  line-height: 1.4;
-}
-
-/* Color tiles */
-.color-tiles {
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
-}
-
-.color-tile {
-  gap: 10px;
-  min-height: 80px;
-}
-
-.os-swatches {
+.os-cart-item {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.os-swatch {
-  width: 14px;
-  height: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.os-cart-item:last-child {
+  border-bottom: none;
+}
+
+.os-cart-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.os-cart-item-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.os-cart-item-meta {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+/* Qty adjuster */
+.os-cart-item-qty {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   flex-shrink: 0;
 }
 
-/* ── SIZE PILLS ──────────────────────────────────────────────────── */
-.os-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.os-pill {
-  flex: 1;
-  min-width: 56px;
-  max-width: 80px;
-  height: 56px;
+.os-qty-btn {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-family: var(--font-body);
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.os-qty-btn:hover:not(:disabled) {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.os-qty-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.os-qty-val {
+  width: 28px;
+  text-align: center;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--white);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Price */
+.os-cart-item-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.os-cart-item-final {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.04em;
+}
+
+.os-cart-item-compare {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.25);
+  text-decoration: line-through;
+}
+
+/* Remove button */
+.os-cart-remove {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 12px;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  padding: 6px;
+  transition: color 0.15s;
+  flex-shrink: 0;
 }
 
-.os-pill:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  color: var(--white);
+.os-cart-remove:hover {
+  color: rgba(255, 80, 80, 0.8);
 }
 
-.os-pill.active {
-  border-color: var(--white);
+/* ── CART TOTALS ─────────────────────────────────────────────────── */
+.os-cart-totals {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.os-cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.os-cart-total-row:last-child {
+  border-bottom: none;
+}
+.os-cart-total-row.total {
+  padding-top: 12px;
+}
+
+.os-total-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+  flex: 1;
+  min-width: 0;
+}
+.os-total-val {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   color: var(--white);
-  background: rgba(255, 255, 255, 0.08);
+  text-align: right;
+  white-space: nowrap;
+}
+.os-total-val.muted {
+  color: rgba(255, 255, 255, 0.25);
+  text-decoration: line-through;
+  font-weight: 400;
+}
+.os-total-val.yellow {
+  color: #f5d06e;
+}
+.os-total-val.green {
+  color: #6dde9a;
+}
+.os-total-val.white {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+
+.os-total-badge {
+  display: inline-block;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  padding: 2px 6px;
+  border: 1px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.os-total-badge.yellow {
+  color: #f5d06e;
+  border-color: rgba(245, 208, 110, 0.35);
+  background: rgba(245, 208, 110, 0.06);
+}
+.os-total-badge.green {
+  color: #6dde9a;
+  border-color: rgba(109, 222, 154, 0.35);
+  background: rgba(109, 222, 154, 0.06);
+}
+.os-total-badge.white {
+  color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.os-cart-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+}
+
+.os-cart-coupon {
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
 }
 
 /* ── STEP NAV BUTTONS ────────────────────────────────────────────── */
@@ -766,7 +921,7 @@ const progressWidth = computed(() => {
   background: var(--white);
   color: var(--black);
   border: none;
-  padding: 20px 24px;
+  padding: 0 24px;
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 800;
@@ -785,27 +940,16 @@ const progressWidth = computed(() => {
   background: var(--grey-100);
   gap: 22px;
 }
-
 .os-next-btn:disabled {
   opacity: 0.25;
   cursor: not-allowed;
 }
-
-.os-next-btn.flex-grow {
+.os-next-btn--grow {
   flex: 1;
   width: auto;
 }
-
 .os-next-arrow {
   font-size: 16px;
-}
-
-.os-step-hint {
-  margin-top: 10px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
-  text-align: center;
-  letter-spacing: 0.05em;
 }
 
 /* ── STEP 2 FIELDS ───────────────────────────────────────────────── */
@@ -813,6 +957,23 @@ const progressWidth = computed(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0 20px;
+  position: relative;
+}
+
+/* Full-width divider under the paired row instead of per-cell borders */
+.os-field-row::after {
+  content: "";
+  display: block;
+  grid-column: 1 / -1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Remove individual bottom border from cells inside a paired row */
+.os-field-row .os-field {
+  border-bottom: none;
+  padding-top: 0;
+  padding-bottom: 22px;
 }
 
 .os-field {
@@ -821,10 +982,6 @@ const progressWidth = computed(() => {
   gap: 10px;
   padding: 22px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.os-field:first-child {
-  padding-top: 0;
 }
 
 .os-field label {
@@ -880,15 +1037,21 @@ const progressWidth = computed(() => {
 
 .os-panel-actions {
   display: flex;
+  align-items: stretch;
   gap: 12px;
   margin-top: 36px;
 }
 
 .os-back-btn {
+  flex: 0 0 auto;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   color: rgba(255, 255, 255, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 20px 20px;
+  padding: 0 20px;
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
@@ -896,6 +1059,7 @@ const progressWidth = computed(() => {
   cursor: pointer;
   white-space: nowrap;
   transition: color 0.18s, border-color 0.18s;
+  min-height: 60px;
 }
 
 .os-back-btn:hover {
@@ -917,7 +1081,7 @@ const progressWidth = computed(() => {
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.35);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .os-confirm-row {
@@ -967,29 +1131,20 @@ const progressWidth = computed(() => {
 .os-price-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  color: var(--white);
-  padding: 6px 0;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
-
-.os-price-row.muted {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 11px;
+.os-price-row:last-child {
+  border-bottom: none;
 }
-
-.os-price-row.green {
-  color: #6dde9a;
-}
-
 .os-price-row.total {
-  color: var(--white);
+  padding-top: 12px;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.12em;
+  color: var(--white);
 }
 
 .os-price-divider {
@@ -1019,15 +1174,7 @@ const progressWidth = computed(() => {
   text-transform: uppercase;
 }
 
-/* ── ERRORS / VALIDATION ─────────────────────────────────────────── */
-.os-validation {
-  margin-bottom: 12px;
-  font-size: 11px;
-  color: #ffab6b;
-  letter-spacing: 0.08em;
-  text-align: center;
-}
-
+/* ── ERRORS ──────────────────────────────────────────────────────── */
 .os-error {
   margin-bottom: 16px;
   padding: 14px 20px;
@@ -1058,7 +1205,6 @@ const progressWidth = computed(() => {
 .os-submit-btn:hover:not(:disabled) {
   background: var(--grey-100);
 }
-
 .os-submit-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -1111,7 +1257,6 @@ const progressWidth = computed(() => {
 .os-dots span:nth-child(2) {
   animation-delay: 0.2s;
 }
-
 .os-dots span:nth-child(3) {
   animation-delay: 0.4s;
 }
@@ -1152,7 +1297,7 @@ const progressWidth = computed(() => {
   margin: 0 auto;
 }
 
-/* ── REVEAL ANIMATION ────────────────────────────────────────────── */
+/* ── REVEAL ──────────────────────────────────────────────────────── */
 .reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -1199,26 +1344,20 @@ const progressWidth = computed(() => {
     font-size: 8px;
     letter-spacing: 0.12em;
   }
-  .os-tiles {
-    grid-template-columns: 1fr;
+  .os-cart-item {
+    flex-wrap: wrap;
+    gap: 10px;
   }
-  .color-tiles {
-    grid-template-columns: 1fr 1fr;
-  }
-  .qty-tiles {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  .os-cart-item-price {
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
   }
 }
 
 @media (min-width: 640px) {
   .os {
     padding: 80px 40px 120px;
-  }
-  .color-tiles {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .qty-tiles {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 

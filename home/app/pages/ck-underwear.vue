@@ -1,7 +1,7 @@
 <template>
   <div class="page">
     <CkHeroNavSection @hero-cta="onHeroCTA" @scroll-to="scrollToSection" />
-    <CkProductsSection @prefill-order="prefillOrder" />
+    <CkProductsSection @go-to-order="scrollToSection('order')" />
     <CkGallerySection />
     <CkManifestoSection />
     <!-- <CkAccessSection /> -->
@@ -138,11 +138,6 @@ function scrollToSection(id: string): void {
 }
 
 function onHeroCTA(): void {
-  scrollToSection("order");
-}
-
-function prefillOrder(sku: string): void {
-  ckStore.prefillOrder(sku);
   scrollToSection("order");
 }
 </script>
