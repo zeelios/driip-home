@@ -34,11 +34,11 @@ class BrandController extends BaseApiController
     {
         try {
             $brands = QueryBuilder::for(Brand::class)
-                ->allowedFilters([
+                ->allowedFilters(
                     AllowedFilter::partial('name'),
                     AllowedFilter::exact('is_active'),
-                ])
-                ->allowedSorts(['name', 'sort_order', 'created_at'])
+                )
+                ->allowedSorts('name', 'sort_order', 'created_at')
                 ->paginate(20);
 
             return BrandResource::collection($brands);

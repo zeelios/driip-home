@@ -36,7 +36,7 @@ class ProductController extends BaseApiController
     {
         try {
             $products = QueryBuilder::for(Product::class)
-                ->allowedFilters([
+                ->allowedFilters(
                     AllowedFilter::partial('name'),
                     AllowedFilter::exact('brand_id'),
                     AllowedFilter::exact('category_id'),
@@ -44,8 +44,8 @@ class ProductController extends BaseApiController
                     AllowedFilter::exact('gender'),
                     AllowedFilter::exact('season'),
                     AllowedFilter::exact('is_featured'),
-                ])
-                ->allowedSorts(['name', 'created_at', 'published_at', 'status'])
+                )
+                ->allowedSorts('name', 'created_at', 'published_at', 'status')
                 ->with(['brand', 'category'])
                 ->paginate(20);
 

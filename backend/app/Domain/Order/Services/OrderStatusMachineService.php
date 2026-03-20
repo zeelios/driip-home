@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Domain\Order\Services;
 
 use App\Domain\Order\Exceptions\InvalidOrderStatusTransitionException;
+use App\Domain\Order\Models\Order;
+use App\Domain\Order\Models\OrderStatusHistory;
+use App\Domain\Staff\Models\User;
 
 /**
  * Manages valid order status transitions.
@@ -64,5 +67,61 @@ class OrderStatusMachineService
     public function allowedTransitions(string $from): array
     {
         return self::TRANSITIONS[$from] ?? [];
+    }
+
+    /**
+     * Determine whether a transition from one status to another is valid.
+     *
+     * Unlike assertValidTransition, this method does not throw; it simply
+     * returns a boolean so callers can branch on the result.
+     *
+     * @param  string  $from  The current order status.
+     * @param  string  $to    The desired target status.
+     * @return bool           True when the transition is in the allowed map.
+     */
+    public function canTransition(string $from, string $to): bool
+    {
+        return in_array($to, self::TRANSITIONS[$from] ?? [], true);
+    }
+
+    /**
+     * Transition an order to a new status, persist the history record,
+     * and update any relevant timestamp columns.
+     *
+     * @param  Order        $order      The order to transition.
+     * @param  string       $newStatus  The target status.
+     * @param  string|null  $notes      Optional human-readable notes for the history entry.
+     * @param  User|null    $by         The staff member performing the transition, or null for system.
+     * @return OrderStatusHistory       The created history record.
+     *
+     * @throws InvalidOrderStatusTransitionException  If the transition is not allowed.
+     */
+    public function transition(Order $order, string $newStatus, ?string $notes, ?User $by): OrderStatusHistory
+    {
+        $this->assertValidTransition($order->status, $newStatus);
+
+        $fromStatus = $order->status;
+
+        $timestamps = match ($newStatus) {
+            'confirmed'  => ['confirmed_at' => now()],
+            'packed'     => ['packed_at'    => now()],
+            'delivered'  => ['delivered_at' => now()],
+            'cancelled'  => ['cancelled_at' => now()],
+            default      => [],
+        };
+
+        $order->update(array_merge(['status' => $newStatus], $timestamps));
+
+        /** @var OrderStatusHistory $history */
+        $history = OrderStatusHistory::create([
+            'order_id'    => $order->id,
+            'from_status' => $fromStatus,
+            'to_status'   => $newStatus,
+            'note'        => $notes,
+            'created_by'  => $by?->id,
+            'created_at'  => now(),
+        ]);
+
+        return $history;
     }
 }

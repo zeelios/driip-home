@@ -1023,6 +1023,7 @@ function scrollToProducts(): void {
 .os-next-btn--grow {
   flex: 1;
   width: auto;
+  margin-top: 0;
 }
 .os-next-arrow {
   font-size: 16px;
@@ -1274,7 +1275,12 @@ function scrollToProducts(): void {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 64px;
+  line-height: 1;
+  box-sizing: border-box;
   transition: background 0.18s, opacity 0.2s;
 }
 
@@ -1320,6 +1326,7 @@ function scrollToProducts(): void {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  line-height: 0;
 }
 
 .os-dots span {

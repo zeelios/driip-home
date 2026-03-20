@@ -48,7 +48,7 @@ class InventoryController extends BaseApiController
     {
         try {
             $inventory = QueryBuilder::for(Inventory::class)
-                ->allowedFilters(['warehouse_id', 'product_variant_id'])
+                ->allowedFilters('warehouse_id', 'product_variant_id')
                 ->with(['variant.product', 'warehouse'])
                 ->paginate($request->integer('per_page', 20));
 
@@ -126,19 +126,18 @@ class InventoryController extends BaseApiController
     {
         try {
             $query = QueryBuilder::for(InventoryTransaction::class)
-                ->allowedFilters([
+                ->allowedFilters(
                     'warehouse_id',
                     'product_variant_id',
                     'type',
-                    AllowedFilter::scope('created_after', 'whereDate'),
                     AllowedFilter::callback('created_after', function ($query, $value) {
                         $query->where('created_at', '>=', $value);
                     }),
                     AllowedFilter::callback('created_before', function ($query, $value) {
                         $query->where('created_at', '<=', $value);
                     }),
-                ])
-                ->allowedSorts(['created_at', 'type'])
+                )
+                ->allowedSorts('created_at', 'type')
                 ->with(['variant', 'warehouse'])
                 ->orderBy('created_at', 'desc')
                 ->paginate($request->integer('per_page', 30));

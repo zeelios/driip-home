@@ -33,12 +33,12 @@ class CategoryController extends BaseApiController
     {
         try {
             $categories = QueryBuilder::for(Category::class)
-                ->allowedFilters([
+                ->allowedFilters(
                     AllowedFilter::partial('name'),
                     AllowedFilter::exact('is_active'),
                     AllowedFilter::exact('parent_id'),
-                ])
-                ->allowedSorts(['name', 'sort_order', 'created_at'])
+                )
+                ->allowedSorts('name', 'sort_order', 'created_at')
                 ->with('children')
                 ->paginate(20);
 

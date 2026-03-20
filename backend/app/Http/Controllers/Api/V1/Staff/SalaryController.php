@@ -39,8 +39,8 @@ class SalaryController extends BaseApiController
         $records = QueryBuilder::for(
             SalaryRecord::where('user_id', $staff->id)
         )
-            ->allowedFilters(['period', 'payment_method'])
-            ->allowedSorts(['period', 'paid_at', 'created_at'])
+            ->allowedFilters('period', 'payment_method')
+            ->allowedSorts('period', 'paid_at', 'created_at')
             ->paginate($request->integer('per_page', 20));
 
         return SalaryRecordResource::collection($records);

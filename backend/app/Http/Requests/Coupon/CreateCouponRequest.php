@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Coupon;
 
+use App\Domain\Coupon\Data\CreateCouponDto;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -49,5 +50,15 @@ class CreateCouponRequest extends FormRequest
             'starts_at'             => ['nullable', 'date'],
             'expires_at'            => ['nullable', 'date', 'after_or_equal:starts_at'],
         ];
+    }
+
+    /**
+     * Build and return the CreateCouponDto from the validated input.
+     *
+     * @return CreateCouponDto
+     */
+    public function dto(): CreateCouponDto
+    {
+        return CreateCouponDto::fromArray($this->validated(), $this->user()?->id);
     }
 }

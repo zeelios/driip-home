@@ -66,13 +66,13 @@ class TaxConfigController extends BaseApiController
     /**
      * Show a single tax configuration.
      *
-     * @param  TaxConfig  $taxConfig
+     * @param  TaxConfig  $config
      * @return JsonResource|JsonResponse
      */
-    public function show(TaxConfig $taxConfig): JsonResource|JsonResponse
+    public function show(TaxConfig $config): JsonResource|JsonResponse
     {
         try {
-            return new JsonResource($taxConfig);
+            return new JsonResource($config);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'SHOW_TAX_CONFIG');
         }
@@ -82,10 +82,10 @@ class TaxConfigController extends BaseApiController
      * Update an existing tax configuration.
      *
      * @param  Request    $request
-     * @param  TaxConfig  $taxConfig
+     * @param  TaxConfig  $config
      * @return JsonResource|JsonResponse
      */
-    public function update(Request $request, TaxConfig $taxConfig): JsonResource|JsonResponse
+    public function update(Request $request, TaxConfig $config): JsonResource|JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -98,8 +98,8 @@ class TaxConfigController extends BaseApiController
                 'is_active'      => ['sometimes', 'boolean'],
             ]);
 
-            $taxConfig->update($validated);
-            return new JsonResource($taxConfig->refresh());
+            $config->update($validated);
+            return new JsonResource($config->refresh());
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationError($e, 'UPDATE_TAX_CONFIG');
         } catch (\Throwable $e) {
@@ -110,13 +110,13 @@ class TaxConfigController extends BaseApiController
     /**
      * Delete a tax configuration.
      *
-     * @param  TaxConfig  $taxConfig
+     * @param  TaxConfig  $config
      * @return JsonResponse
      */
-    public function destroy(TaxConfig $taxConfig): JsonResponse
+    public function destroy(TaxConfig $config): JsonResponse
     {
         try {
-            $taxConfig->delete();
+            $config->delete();
             return response()->json(['success' => true], 204);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'DELETE_TAX_CONFIG');

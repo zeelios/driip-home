@@ -52,15 +52,15 @@ class OrderController extends BaseApiController
     public function index(Request $request): AnonymousResourceCollection
     {
         $orders = QueryBuilder::for(Order::class)
-            ->allowedFilters([
+            ->allowedFilters(
                 'status',
                 'payment_status',
                 'source',
                 'customer_id',
                 AllowedFilter::scope('created_from', 'createdFrom'),
                 AllowedFilter::scope('created_to', 'createdTo'),
-            ])
-            ->allowedSorts(['created_at', 'total_after_tax', 'order_number'])
+            )
+            ->allowedSorts('created_at', 'total_after_tax', 'order_number')
             ->with(['customer'])
             ->paginate($request->integer('per_page', 20));
 

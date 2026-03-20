@@ -46,8 +46,8 @@ class StaffController extends BaseApiController
     public function index(Request $request): AnonymousResourceCollection
     {
         $staff = QueryBuilder::for(User::class)
-            ->allowedFilters(['name', 'email', 'department', 'status'])
-            ->allowedSorts(['name', 'created_at', 'hired_at'])
+            ->allowedFilters('name', 'email', 'department', 'status')
+            ->allowedSorts('name', 'created_at', 'hired_at')
             ->with(['roles'])
             ->paginate($request->integer('per_page', 20));
 

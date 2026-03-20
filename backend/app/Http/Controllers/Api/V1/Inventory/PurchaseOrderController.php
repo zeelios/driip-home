@@ -42,8 +42,8 @@ class PurchaseOrderController extends BaseApiController
     {
         try {
             $orders = QueryBuilder::for(PurchaseOrder::class)
-                ->allowedFilters(['status', 'supplier_id', 'warehouse_id'])
-                ->allowedSorts(['created_at', 'expected_arrival_at', 'po_number'])
+                ->allowedFilters('status', 'supplier_id', 'warehouse_id')
+                ->allowedSorts('created_at', 'expected_arrival_at', 'po_number')
                 ->with(['supplier', 'warehouse'])
                 ->paginate($request->integer('per_page', 20));
 

@@ -33,8 +33,8 @@ class WarehouseController extends BaseApiController
     {
         try {
             $warehouses = QueryBuilder::for(Warehouse::class)
-                ->allowedFilters(['name', 'code', 'type', 'is_active', 'province'])
-                ->allowedSorts(['name', 'code', 'created_at'])
+                ->allowedFilters('name', 'code', 'type', 'is_active', 'province')
+                ->allowedSorts('name', 'code', 'created_at')
                 ->with(['manager'])
                 ->paginate($request->integer('per_page', 20));
 
@@ -139,7 +139,7 @@ class WarehouseController extends BaseApiController
             $inventory = QueryBuilder::for(
                 $warehouse->inventory()->with(['variant.product'])->getQuery()
             )
-                ->allowedFilters(['product_variant_id'])
+                ->allowedFilters('product_variant_id')
                 ->paginate($request->integer('per_page', 20));
 
             return InventoryResource::collection($inventory);

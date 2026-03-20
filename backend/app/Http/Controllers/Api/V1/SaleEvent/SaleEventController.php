@@ -36,13 +36,13 @@ class SaleEventController extends BaseApiController
     {
         try {
             $events = QueryBuilder::for(SaleEvent::class)
-                ->allowedFilters([
+                ->allowedFilters(
                     AllowedFilter::partial('name'),
                     AllowedFilter::exact('type'),
                     AllowedFilter::exact('status'),
                     AllowedFilter::exact('is_public'),
-                ])
-                ->allowedSorts(['name', 'starts_at', 'ends_at', 'created_at', 'status'])
+                )
+                ->allowedSorts('name', 'starts_at', 'ends_at', 'created_at', 'status')
                 ->paginate(20);
 
             return SaleEventResource::collection($events);

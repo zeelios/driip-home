@@ -40,8 +40,8 @@ class ProductVariantController extends BaseApiController
             $variants = QueryBuilder::for(
                 ProductVariant::where('product_id', $product->id)
             )
-                ->allowedFilters(['status'])
-                ->allowedSorts(['sku', 'sort_order', 'created_at'])
+                ->allowedFilters('status')
+                ->allowedSorts('sku', 'sort_order', 'created_at')
                 ->paginate(50);
 
             return ProductVariantResource::collection($variants);

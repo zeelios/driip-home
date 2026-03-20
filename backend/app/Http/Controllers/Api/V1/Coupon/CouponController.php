@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Coupon;
 
+use App\Domain\Coupon\Actions\CreateCouponAction;
+use App\Domain\Coupon\Actions\UpdateCouponAction;
 use App\Domain\Coupon\Actions\ValidateCouponAction;
 use App\Domain\Coupon\Models\Coupon;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Requests\Coupon\CreateCouponRequest;
+use App\Http\Requests\Coupon\UpdateCouponRequest;
 use App\Http\Requests\Coupon\ValidateCouponRequest;
 use App\Http\Resources\Coupon\CouponResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\ValidationException;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -26,6 +30,15 @@ use Spatie\QueryBuilder\QueryBuilder;
 class CouponController extends BaseApiController
 {
     /**
+     * @param  CreateCouponAction   $createAction   Action for creating coupons.
+     * @param  UpdateCouponAction   $updateAction   Action for updating coupons.
+     */
+    public function __construct(
+        private readonly CreateCouponAction $createAction,
+        private readonly UpdateCouponAction $updateAction,
+    ) {}
+
+    /**
      * List all coupons with optional filtering and pagination.
      *
      * Allowed filters: code, type, is_active, is_public, applies_to.
@@ -37,15 +50,15 @@ class CouponController extends BaseApiController
     {
         try {
             $coupons = QueryBuilder::for(Coupon::class)
-                ->allowedFilters([
+                ->allowedFilters(
                     AllowedFilter::partial('code'),
                     AllowedFilter::partial('name'),
                     AllowedFilter::exact('type'),
                     AllowedFilter::exact('is_active'),
                     AllowedFilter::exact('is_public'),
                     AllowedFilter::exact('applies_to'),
-                ])
-                ->allowedSorts(['code', 'name', 'used_count', 'expires_at', 'created_at'])
+                )
+                ->allowedSorts('code', 'name', 'used_count', 'expires_at', 'created_at')
                 ->paginate(20);
 
             return CouponResource::collection($coupons);
@@ -55,7 +68,7 @@ class CouponController extends BaseApiController
     }
 
     /**
-     * Create a new coupon.
+     * Create a new coupon via CreateCouponAction.
      *
      * @param  CreateCouponRequest  $request
      * @return CouponResource|JsonResponse
@@ -63,13 +76,10 @@ class CouponController extends BaseApiController
     public function store(CreateCouponRequest $request): CouponResource|JsonResponse
     {
         try {
-            $data = $request->validated();
-            $data['created_by'] = $request->user()?->id;
-
-            $coupon = Coupon::create($data);
+            $coupon = $this->createAction->execute($request->dto());
 
             return new CouponResource($coupon);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return $this->validationError($e, 'CREATE_COUPON');
         } catch (\Throwable $e) {
             return $this->serverError($e, 'CREATE_COUPON');
@@ -92,39 +102,19 @@ class CouponController extends BaseApiController
     }
 
     /**
-     * Update an existing coupon.
+     * Update an existing coupon via UpdateCouponAction.
      *
-     * @param  Request  $request
-     * @param  Coupon   $coupon
+     * @param  UpdateCouponRequest  $request
+     * @param  Coupon               $coupon
      * @return CouponResource|JsonResponse
      */
-    public function update(Request $request, Coupon $coupon): CouponResource|JsonResponse
+    public function update(UpdateCouponRequest $request, Coupon $coupon): CouponResource|JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'code'                  => ['sometimes', 'string', 'max:50', 'unique:coupons,code,' . $coupon->id],
-                'name'                  => ['sometimes', 'string', 'max:255'],
-                'description'           => ['nullable', 'string'],
-                'type'                  => ['sometimes', 'in:percent,fixed_amount,free_shipping'],
-                'value'                 => ['sometimes', 'numeric', 'min:0'],
-                'min_order_amount'      => ['nullable', 'integer', 'min:0'],
-                'min_items'             => ['nullable', 'integer', 'min:1'],
-                'max_discount_amount'   => ['nullable', 'integer', 'min:0'],
-                'applies_to'            => ['nullable', 'in:all,category,product,brand'],
-                'applies_to_ids'        => ['nullable', 'array'],
-                'applies_to_ids.*'      => ['uuid'],
-                'max_uses'              => ['nullable', 'integer', 'min:1'],
-                'max_uses_per_customer' => ['nullable', 'integer', 'min:1'],
-                'is_public'             => ['nullable', 'boolean'],
-                'is_active'             => ['nullable', 'boolean'],
-                'starts_at'             => ['nullable', 'date'],
-                'expires_at'            => ['nullable', 'date'],
-            ]);
+            $updated = $this->updateAction->execute($request->dto(), $coupon);
 
-            $coupon->update($validated);
-
-            return new CouponResource($coupon->fresh());
-        } catch (\Illuminate\Validation\ValidationException $e) {
+            return new CouponResource($updated);
+        } catch (ValidationException $e) {
             return $this->validationError($e, 'UPDATE_COUPON');
         } catch (\Throwable $e) {
             return $this->serverError($e, 'UPDATE_COUPON');

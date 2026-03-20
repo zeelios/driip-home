@@ -4,61 +4,59 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Loyalty;
 
+use App\Domain\Loyalty\Actions\CreateCampaignAction;
+use App\Domain\Loyalty\Actions\UpdateCampaignAction;
 use App\Domain\Loyalty\Models\LoyaltyCampaign;
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Requests\Loyalty\CreateCampaignRequest;
+use App\Http\Requests\Loyalty\UpdateCampaignRequest;
+use App\Http\Resources\Loyalty\LoyaltyCampaignResource;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
- * Manages loyalty campaign definitions (CRUD).
+ * Manages loyalty campaign definitions — create, read, update, and delete.
+ *
+ * All write operations delegate to dedicated Action classes.
  */
 class LoyaltyCampaignController extends BaseApiController
 {
     /**
+     * @param CreateCampaignAction $createCampaign Action responsible for creating a loyalty campaign.
+     * @param UpdateCampaignAction $updateCampaign Action responsible for updating a loyalty campaign.
+     */
+    public function __construct(
+        private readonly CreateCampaignAction $createCampaign,
+        private readonly UpdateCampaignAction $updateCampaign,
+    ) {}
+
+    /**
      * List all loyalty campaigns, newest first.
      *
-     * @return AnonymousResourceCollection|JsonResponse
+     * @return AnonymousResourceCollection
      */
-    public function index(): AnonymousResourceCollection|JsonResponse
+    public function index(): AnonymousResourceCollection
     {
-        try {
-            $campaigns = LoyaltyCampaign::latest()->paginate(20);
-            return JsonResource::collection($campaigns);
-        } catch (\Throwable $e) {
-            return $this->serverError($e, 'LIST_LOYALTY_CAMPAIGNS');
-        }
+        $campaigns = LoyaltyCampaign::latest()->paginate(20);
+
+        return LoyaltyCampaignResource::collection($campaigns);
     }
 
     /**
      * Create a new loyalty campaign.
      *
-     * @param  Request  $request
-     * @return JsonResource|JsonResponse
+     * @param  CreateCampaignRequest  $request
+     * @return LoyaltyCampaignResource|JsonResponse
      */
-    public function store(Request $request): JsonResource|JsonResponse
+    public function store(CreateCampaignRequest $request): LoyaltyCampaignResource|JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'name'         => ['required', 'string', 'max:200'],
-                'type'         => ['required', 'string', 'max:50'],
-                'multiplier'   => ['nullable', 'numeric', 'min:1'],
-                'bonus_points' => ['nullable', 'integer', 'min:0'],
-                'conditions'   => ['nullable', 'array'],
-                'starts_at'    => ['nullable', 'date'],
-                'ends_at'      => ['nullable', 'date', 'after_or_equal:starts_at'],
-                'is_active'    => ['boolean'],
-            ]);
+            $campaign = $this->createCampaign->execute(
+                $request->validated(),
+                $request->user()?->id,
+            );
 
-            $campaign = LoyaltyCampaign::create([
-                ...$validated,
-                'created_by' => $request->user()?->id,
-            ]);
-
-            return (new JsonResource($campaign))->response()->setStatusCode(201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationError($e, 'CREATE_LOYALTY_CAMPAIGN');
+            return (new LoyaltyCampaignResource($campaign))->response()->setStatusCode(201);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'CREATE_LOYALTY_CAMPAIGN');
         }
@@ -68,49 +66,33 @@ class LoyaltyCampaignController extends BaseApiController
      * Show a single loyalty campaign.
      *
      * @param  LoyaltyCampaign  $loyaltyCampaign
-     * @return JsonResource|JsonResponse
+     * @return LoyaltyCampaignResource
      */
-    public function show(LoyaltyCampaign $loyaltyCampaign): JsonResource|JsonResponse
+    public function show(LoyaltyCampaign $loyaltyCampaign): LoyaltyCampaignResource
     {
-        try {
-            return new JsonResource($loyaltyCampaign);
-        } catch (\Throwable $e) {
-            return $this->serverError($e, 'SHOW_LOYALTY_CAMPAIGN');
-        }
+        return new LoyaltyCampaignResource($loyaltyCampaign);
     }
 
     /**
      * Update an existing loyalty campaign.
      *
-     * @param  Request          $request
-     * @param  LoyaltyCampaign  $loyaltyCampaign
-     * @return JsonResource|JsonResponse
+     * @param  UpdateCampaignRequest  $request
+     * @param  LoyaltyCampaign        $loyaltyCampaign
+     * @return LoyaltyCampaignResource|JsonResponse
      */
-    public function update(Request $request, LoyaltyCampaign $loyaltyCampaign): JsonResource|JsonResponse
+    public function update(UpdateCampaignRequest $request, LoyaltyCampaign $loyaltyCampaign): LoyaltyCampaignResource|JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'name'         => ['sometimes', 'string', 'max:200'],
-                'type'         => ['sometimes', 'string', 'max:50'],
-                'multiplier'   => ['sometimes', 'nullable', 'numeric', 'min:1'],
-                'bonus_points' => ['sometimes', 'nullable', 'integer', 'min:0'],
-                'conditions'   => ['sometimes', 'nullable', 'array'],
-                'starts_at'    => ['sometimes', 'nullable', 'date'],
-                'ends_at'      => ['sometimes', 'nullable', 'date'],
-                'is_active'    => ['sometimes', 'boolean'],
-            ]);
+            $campaign = $this->updateCampaign->execute($loyaltyCampaign, $request->validated());
 
-            $loyaltyCampaign->update($validated);
-            return new JsonResource($loyaltyCampaign->refresh());
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationError($e, 'UPDATE_LOYALTY_CAMPAIGN');
+            return new LoyaltyCampaignResource($campaign);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'UPDATE_LOYALTY_CAMPAIGN');
         }
     }
 
     /**
-     * Delete a loyalty campaign.
+     * Delete a loyalty campaign (hard delete).
      *
      * @param  LoyaltyCampaign  $loyaltyCampaign
      * @return JsonResponse
@@ -119,7 +101,8 @@ class LoyaltyCampaignController extends BaseApiController
     {
         try {
             $loyaltyCampaign->delete();
-            return response()->json(['success' => true], 204);
+
+            return response()->json(null, 204);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'DELETE_LOYALTY_CAMPAIGN');
         }

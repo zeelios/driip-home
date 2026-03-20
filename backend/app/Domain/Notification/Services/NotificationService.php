@@ -69,6 +69,99 @@ class NotificationService
     }
 
     /**
+     * Send an order-confirmed notification to the customer.
+     *
+     * Dispatches the 'order_confirmed' template with order context variables.
+     *
+     * @param  string  $recipient     Customer email address.
+     * @param  string  $orderNumber   Human-readable order number.
+     * @param  string  $customerName  Customer display name.
+     * @param  int     $total         Order total in VND.
+     * @param  string  $orderId       UUID of the order (used for polymorphic link).
+     * @return NotificationLog
+     */
+    public function orderConfirmed(
+        string $recipient,
+        string $orderNumber,
+        string $customerName,
+        int    $total,
+        string $orderId,
+    ): NotificationLog {
+        return $this->send(
+            slug:           'order_confirmed',
+            recipient:      $recipient,
+            variables:      [
+                'order_number'  => $orderNumber,
+                'customer_name' => $customerName,
+                'total'         => number_format($total),
+            ],
+            notifiableType: 'App\Domain\Order\Models\Order',
+            notifiableId:   $orderId,
+        );
+    }
+
+    /**
+     * Send an order-shipped notification to the customer.
+     *
+     * Dispatches the 'order_shipped' template with tracking context variables.
+     *
+     * @param  string       $recipient       Customer email address.
+     * @param  string       $orderNumber     Human-readable order number.
+     * @param  string       $customerName    Customer display name.
+     * @param  string|null  $trackingCode    Courier tracking code, if available.
+     * @param  string       $orderId         UUID of the order (used for polymorphic link).
+     * @return NotificationLog
+     */
+    public function orderShipped(
+        string  $recipient,
+        string  $orderNumber,
+        string  $customerName,
+        ?string $trackingCode,
+        string  $orderId,
+    ): NotificationLog {
+        return $this->send(
+            slug:           'order_shipped',
+            recipient:      $recipient,
+            variables:      [
+                'order_number'  => $orderNumber,
+                'customer_name' => $customerName,
+                'tracking_code' => $trackingCode ?? '',
+            ],
+            notifiableType: 'App\Domain\Order\Models\Order',
+            notifiableId:   $orderId,
+        );
+    }
+
+    /**
+     * Send an order-delivered notification to the customer.
+     *
+     * Dispatches the 'order_delivered' template to confirm successful delivery.
+     *
+     * @param  string  $recipient     Customer email address.
+     * @param  string  $orderNumber   Human-readable order number.
+     * @param  string  $customerName  Customer display name.
+     * @param  string  $orderId       UUID of the order (used for polymorphic link).
+     * @return NotificationLog
+     */
+    public function orderDelivered(
+        string $recipient,
+        string $orderNumber,
+        string $customerName,
+        string $orderId,
+    ): NotificationLog {
+        return $this->send(
+            slug:           'order_delivered',
+            recipient:      $recipient,
+            variables:      [
+                'order_number'  => $orderNumber,
+                'customer_name' => $customerName,
+            ],
+            notifiableType: 'App\Domain\Order\Models\Order',
+            notifiableId:   $orderId,
+        );
+    }
+
+    /**
      * Replace template variables in a string.
      *
      * Substitutes all occurrences of {{ variable_name }} with the

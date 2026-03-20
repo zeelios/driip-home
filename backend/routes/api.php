@@ -70,8 +70,16 @@ Route::prefix('v1')->group(function () {
         Route::get('products/{product}/variants/{variant}/inventory', [ProductVariantController::class, 'inventory']);
 
         // Coupons
-        Route::apiResource('coupons', CouponController::class);
         Route::post('coupons/validate', [CouponController::class, 'validate']);
+        Route::apiResource('coupons', CouponController::class);
+
+        // Bulk order operations (must be before individual order routes to avoid {order} wildcard match)
+        Route::prefix('orders/bulk')->group(function () {
+            Route::post('confirm', [BulkOrderController::class, 'confirm']);
+            Route::post('ship', [BulkOrderController::class, 'ship']);
+            Route::post('cancel', [BulkOrderController::class, 'cancel']);
+            Route::post('export', [BulkOrderController::class, 'export']);
+        });
 
         // Orders
         Route::apiResource('orders', OrderController::class);
@@ -85,20 +93,12 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('orders.claims', OrderClaimController::class)->only(['index', 'store', 'show', 'update']);
         Route::apiResource('orders.returns', OrderReturnController::class)->only(['index', 'store', 'show', 'update']);
 
-        // Bulk order operations
-        Route::prefix('orders/bulk')->group(function () {
-            Route::post('confirm', [BulkOrderController::class, 'confirm']);
-            Route::post('ship', [BulkOrderController::class, 'ship']);
-            Route::post('cancel', [BulkOrderController::class, 'cancel']);
-            Route::post('export', [BulkOrderController::class, 'export']);
-        });
-
         // Inventory
         Route::get('inventory', [InventoryController::class, 'index']);
-        Route::get('inventory/{variant}', [InventoryController::class, 'show']);
         Route::post('inventory/adjust', [InventoryController::class, 'adjust']);
         Route::get('inventory/movements', [InventoryController::class, 'movements']);
         Route::get('inventory/export', [InventoryController::class, 'export']);
+        Route::get('inventory/{variant}', [InventoryController::class, 'show']);
         Route::apiResource('purchase-orders', PurchaseOrderController::class);
         Route::post('purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve']);
         Route::post('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive']);

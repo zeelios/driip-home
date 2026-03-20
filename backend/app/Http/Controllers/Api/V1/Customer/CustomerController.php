@@ -34,14 +34,14 @@ class CustomerController extends BaseApiController
     {
         try {
             $customers = QueryBuilder::for(Customer::class)
-                ->allowedFilters([
+                ->allowedFilters(
                     AllowedFilter::partial('name', 'first_name'),
                     AllowedFilter::exact('email'),
                     AllowedFilter::exact('phone'),
                     AllowedFilter::exact('source'),
                     AllowedFilter::exact('is_blocked'),
                     AllowedFilter::scope('tags'),
-                ])
+                )
                 ->paginate(20);
 
             return CustomerResource::collection($customers);

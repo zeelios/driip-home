@@ -8,17 +8,31 @@ use App\Domain\Customer\Models\Customer;
 use App\Domain\Loyalty\Actions\EarnPointsAction;
 use App\Domain\Loyalty\Actions\RedeemPointsAction;
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Requests\Loyalty\EarnPointsRequest;
+use App\Http\Requests\Loyalty\RedeemPointsRequest;
 use App\Http\Resources\Loyalty\LoyaltyAccountResource;
+use App\Http\Resources\Loyalty\LoyaltyTransactionResource;
+use App\Http\Resources\ErrorResource;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 /**
- * Manages loyalty account operations for a customer (show, earn, redeem).
+ * Manages loyalty account operations for a customer — show, earn points, redeem points.
+ *
+ * Each write operation delegates to its dedicated Action class.
  */
 class LoyaltyAccountController extends BaseApiController
 {
     /**
-     * Show the loyalty account for a given customer.
+     * @param EarnPointsAction   $earnPoints   Action responsible for crediting loyalty points.
+     * @param RedeemPointsAction $redeemPoints Action responsible for debiting loyalty points.
+     */
+    public function __construct(
+        private readonly EarnPointsAction   $earnPoints,
+        private readonly RedeemPointsAction $redeemPoints,
+    ) {}
+
+    /**
+     * Show the loyalty account for a given customer, including tier info and last 20 transactions.
      *
      * @param  Customer  $customer
      * @return LoyaltyAccountResource|JsonResponse
@@ -26,13 +40,24 @@ class LoyaltyAccountController extends BaseApiController
     public function show(Customer $customer): LoyaltyAccountResource|JsonResponse
     {
         try {
-            $account = $customer->loyaltyAccount()->with('tier')->first();
+            $account = $customer->loyaltyAccount()
+                ->with([
+                    'tier',
+                    'transactions' => fn ($q) => $q->orderByDesc('created_at')->limit(20),
+                ])
+                ->first();
 
             if ($account === null) {
                 return $this->notFound('SHOW_LOYALTY_ACCOUNT', 'No loyalty account found for this customer.');
             }
 
-            return new LoyaltyAccountResource($account);
+            $resource = (new LoyaltyAccountResource($account))->additional([
+                'transactions' => LoyaltyTransactionResource::collection(
+                    $account->getRelation('transactions')
+                ),
+            ]);
+
+            return $resource->response();
         } catch (\Throwable $e) {
             return $this->serverError($e, 'SHOW_LOYALTY_ACCOUNT');
         }
@@ -41,28 +66,21 @@ class LoyaltyAccountController extends BaseApiController
     /**
      * Manually credit points to a customer's loyalty account.
      *
-     * @param  Request          $request
-     * @param  Customer         $customer
-     * @param  EarnPointsAction $action
+     * @param  EarnPointsRequest  $request
+     * @param  Customer           $customer
      * @return JsonResponse
      */
-    public function earn(Request $request, Customer $customer, EarnPointsAction $action): JsonResponse
+    public function earn(EarnPointsRequest $request, Customer $customer): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'points'         => ['required', 'integer', 'min:1'],
-                'reference_type' => ['nullable', 'string', 'max:100'],
-                'reference_id'   => ['nullable', 'string', 'max:36'],
-                'description'    => ['nullable', 'string'],
-            ]);
-
-            $account = $customer->loyaltyAccount;
+            $validated = $request->validated();
+            $account   = $customer->loyaltyAccount;
 
             if ($account === null) {
                 return $this->notFound('EARN_LOYALTY_POINTS', 'No loyalty account found for this customer.');
             }
 
-            $transaction = $action->execute(
+            $transaction = $this->earnPoints->execute(
                 loyaltyAccountId: $account->id,
                 points:           $validated['points'],
                 referenceType:    $validated['reference_type'] ?? null,
@@ -71,9 +89,11 @@ class LoyaltyAccountController extends BaseApiController
                 createdBy:        $request->user()?->id,
             );
 
-            return response()->json(['success' => true, 'transaction_id' => $transaction->id], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationError($e, 'EARN_LOYALTY_POINTS');
+            return response()->json([
+                'success'        => true,
+                'transaction_id' => $transaction->id,
+                'balance_after'  => $transaction->balance_after,
+            ]);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'EARN_LOYALTY_POINTS');
         }
@@ -82,40 +102,37 @@ class LoyaltyAccountController extends BaseApiController
     /**
      * Redeem points from a customer's loyalty account.
      *
-     * @param  Request             $request
-     * @param  Customer            $customer
-     * @param  RedeemPointsAction  $action
+     * @param  RedeemPointsRequest  $request
+     * @param  Customer             $customer
      * @return JsonResponse
      */
-    public function redeem(Request $request, Customer $customer, RedeemPointsAction $action): JsonResponse
+    public function redeem(RedeemPointsRequest $request, Customer $customer): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'points'      => ['required', 'integer', 'min:1'],
-                'order_id'    => ['nullable', 'string', 'max:36'],
-                'description' => ['nullable', 'string'],
-            ]);
-
-            $account = $customer->loyaltyAccount;
+            $validated = $request->validated();
+            $account   = $customer->loyaltyAccount;
 
             if ($account === null) {
                 return $this->notFound('REDEEM_LOYALTY_POINTS', 'No loyalty account found for this customer.');
             }
 
-            $transaction = $action->execute(
+            $transaction = $this->redeemPoints->execute(
                 loyaltyAccountId: $account->id,
                 points:           $validated['points'],
-                orderId:          $validated['order_id']    ?? null,
-                description:      $validated['description'] ?? null,
+                orderId:          $validated['reference_id'] ?? null,
+                description:      $validated['description']  ?? null,
                 createdBy:        $request->user()?->id,
             );
 
-            return response()->json(['success' => true, 'transaction_id' => $transaction->id], 200);
+            return response()->json([
+                'success'        => true,
+                'transaction_id' => $transaction->id,
+                'balance_after'  => $transaction->balance_after,
+            ]);
         } catch (\InvalidArgumentException $e) {
-            return \App\Http\Resources\ErrorResource::fromException($e, 'REDEEM_LOYALTY_POINTS')
-                ->response()->setStatusCode(422);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationError($e, 'REDEEM_LOYALTY_POINTS');
+            return ErrorResource::fromException($e, 'REDEEM_LOYALTY_POINTS')
+                ->response()
+                ->setStatusCode(422);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'REDEEM_LOYALTY_POINTS');
         }

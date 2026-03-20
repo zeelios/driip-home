@@ -36,37 +36,37 @@ class SettingsSeeder extends Seeder
                 'key'   => 'points_per_vnd',
                 'value' => '1000',
                 'type'  => 'integer',
-                'label' => 'Points earned per VND spent',
+                'label' => 'Điểm trên mỗi 1000 VND',
             ],
             [
                 'group' => 'loyalty',
                 'key'   => 'redeem_rate',
                 'value' => '1000',
                 'type'  => 'integer',
-                'label' => 'VND value of one redeemed point',
+                'label' => 'Giá trị quy đổi điểm (VND)',
             ],
             [
                 'group' => 'loyalty',
                 'key'   => 'min_redeem_points',
-                'value' => '10000',
+                'value' => '100',
                 'type'  => 'integer',
-                'label' => 'Minimum points required to redeem',
+                'label' => 'Điểm tối thiểu để đổi',
             ],
 
             // Tax
             [
                 'group' => 'tax',
                 'key'   => 'default_vat_rate',
-                'value' => '8.00',
-                'type'  => 'float',
-                'label' => 'Default VAT rate (%)',
+                'value' => '10',
+                'type'  => 'integer',
+                'label' => 'Thuế GTGT mặc định (%)',
             ],
             [
                 'group' => 'tax',
                 'key'   => 'vat_invoice_prefix',
                 'value' => 'INV',
                 'type'  => 'string',
-                'label' => 'Prefix for VAT invoice numbers',
+                'label' => 'Tiền tố số hóa đơn VAT',
             ],
 
             // Shipping
@@ -75,30 +75,30 @@ class SettingsSeeder extends Seeder
                 'key'   => 'free_shipping_threshold',
                 'value' => '500000',
                 'type'  => 'integer',
-                'label' => 'Order value threshold for free shipping (VND)',
+                'label' => 'Đơn hàng miễn phí vận chuyển (VND)',
             ],
             [
                 'group' => 'shipping',
                 'key'   => 'default_courier',
                 'value' => 'ghn',
                 'type'  => 'string',
-                'label' => 'Default courier service slug',
+                'label' => 'Đơn vị vận chuyển mặc định',
             ],
 
             // Order
             [
                 'group' => 'order',
                 'key'   => 'auto_cancel_unpaid_after_hours',
-                'value' => '48',
+                'value' => '24',
                 'type'  => 'integer',
-                'label' => 'Hours before an unpaid order is automatically cancelled',
+                'label' => 'Tự hủy đơn chưa thanh toán sau (giờ)',
             ],
             [
                 'group' => 'order',
                 'key'   => 'max_cod_amount',
-                'value' => '10000000',
+                'value' => '5000000',
                 'type'  => 'integer',
-                'label' => 'Maximum order value eligible for Cash on Delivery (VND)',
+                'label' => 'COD tối đa (VND)',
             ],
 
             // Invoice
@@ -107,28 +107,28 @@ class SettingsSeeder extends Seeder
                 'key'   => 'invoice_number_prefix',
                 'value' => 'INV',
                 'type'  => 'string',
-                'label' => 'Prefix used when generating invoice numbers',
+                'label' => 'Tiền tố số hóa đơn',
             ],
             [
                 'group' => 'invoice',
                 'key'   => 'company_name',
-                'value' => 'Driip',
+                'value' => 'Driip Brand',
                 'type'  => 'string',
-                'label' => 'Company name printed on invoices',
+                'label' => 'Tên công ty',
             ],
             [
                 'group' => 'invoice',
                 'key'   => 'company_tax_code',
-                'value' => '',
+                'value' => '0123456789',
                 'type'  => 'string',
-                'label' => 'Company tax identification number',
+                'label' => 'Mã số thuế công ty',
             ],
             [
                 'group' => 'invoice',
                 'key'   => 'company_address',
-                'value' => '',
+                'value' => '123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
                 'type'  => 'string',
-                'label' => 'Company address printed on invoices',
+                'label' => 'Địa chỉ công ty',
             ],
         ];
 
