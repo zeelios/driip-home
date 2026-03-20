@@ -129,6 +129,12 @@
       "wardPlaceholder": "Tên phường / xã",
       "street": "Địa chỉ (số nhà, tên đường)",
       "streetPlaceholder": "Ví dụ: 123 Nguyễn Trãi, phường A, quận B",
+      "dob": "Ngày sinh",
+      "dobPlaceholder": "DD/MM/YYYY",
+      "gender": "Giới tính",
+      "genderMale": "Nam",
+      "genderFemale": "Nữ",
+      "optionalTag": "(Tùy chọn)",
       "selection": "Lựa chọn sản phẩm",
       "product": "Sản phẩm",
       "boxes": "Số hộp",
@@ -163,57 +169,71 @@
   "tee": {
     "nav": {
       "lang": "EN",
-      "cta": "XEM CHI TIẾT",
-      "details": "CHI TIẾT",
-      "manifesto": "TUYÊN NGÔN",
+      "cta": "KHÁM PHÁ",
+      "details": "CÂU CHUYỆN",
+      "craft": "CRAFT",
+      "origin": "NGUỒN GỐC",
       "top": "ĐẦU TRANG"
     },
     "hero": {
-      "pre": "DROP MỚI — DRIIP TEE",
-      "title": "ÁO THUN ĐƯỢC LÀM LẠI CHỈNH CHU.",
-      "sub": "Sử dụng vải Sonoma cao cấp, cảm giác dày dặn hơn, hoàn thiện sạch hơn và mức độ đầu tư sản xuất thực sự cao.",
-      "cta": "XEM DROP DROP MỚI",
+      "pre": "DRIIP ORIGINAL — SS26",
+      "eyebrow": "SẢN PHẨM CHÍNH THỨC CỦA DRIIP",
+      "title": "KHÔNG CHỈ LÀ\nMỘT CHIẾC ÁO.",
+      "sub": "Sợi Sorona từ Mỹ. Sản xuất tại Pháp. Thiết kế tại Việt Nam. Cực kỳ thoải mái. Thời trang cao cấp không thỏa hiệp.",
+      "cta": "KHÁM PHÁ QUÁ TRÌNH LÀM RA",
       "secondary": "VỀ TRANG CHỦ",
       "metrics": {
-        "fabric": "CHẤT LIỆU",
-        "fabricValue": "SONOMA",
-        "build": "HOÀN THIỆN",
-        "buildValue": "CAO CẤP, DÀY DẶN",
-        "run": "SẢN LƯỢNG",
-        "runValue": "GIỚI HẠN"
+        "fabric": "SỢI VẢI",
+        "fabricValue": "SORONA™",
+        "origin": "NGUỒN GỐC",
+        "originValue": "USA · FR · VN",
+        "run": "SẢN XUẤT",
+        "runValue": "SỐ LƯỢNG GIỚI HẠN"
       }
     },
-    "visual": {
-      "pre": "XEM TRƯỚC",
-      "pill": "SẢN LƯỢNG ÍT",
-      "frontLabel": "Hoàn thiện dày dặn",
-      "title": "Cảm giác cầm nắm dày hơn, rơi dáng sạch hơn.",
-      "body": "Trang này được thiết kế để có độ “chạm” và cảm giác cao cấp ngay từ đầu — nhiều bầu không khí hơn, có chiều sâu hơn và rõ chất của một DROP drop thực thụ."
-    },
     "strip": {
-      "fabric": "VẢI SONOMA",
-      "weight": "CẢM GIÁC DÀY DẶN",
-      "production": "CHI PHÍ SẢN XUẤT CAO",
-      "run": "SẢN LƯỢNG GIỚI HẠN"
+      "sorona": "SỢI SORONA™ — MỸ",
+      "france": "SẢN XUẤT TẠI PHÁP",
+      "vietnam": "THIẾT KẾ TẠI VIỆT NAM",
+      "run": "SỐ LƯỢNG SẢN XUẤT GIỚI HẠN"
     },
-    "fabric": {
+    "origin": {
+      "label": "CÂU CHUYỆN NGUỒN GỐC",
+      "title": "BA QUỐC GIA.\nMỘT CHIẾC ÁO.",
+      "body": "Chúng tôi không thỏa hiệp ở bất kỳ khâu nào. Sợi vải là Sorona™ — một loại sợi sinh học được DuPont nghiên cứu tại Mỹ, nổi tiếng với độ mềm mại phi thường và hồ sơ bền vững. Sản phẩm được cắt may tại Pháp, nơi trăm năm thủ công atelier gặp gỡ độ chính xác sản xuất hiện đại. Thiết kế hoàn toàn là của chúng tôi — được hình thành tại Việt Nam, bắt nguồn từ tầm nhìn editorial của driip-."
+    },
+    "sorona": {
       "label": "CHẤT LIỆU",
-      "title": "VẢI SONOMA",
-      "body": "Sonoma mang lại bề mặt dày, rơi dáng đẹp và cảm giác mặc chắc tay nhưng vẫn thoải mái trong suốt ngày dài."
+      "chapter": "01",
+      "title": "SỢI\nSORONA™",
+      "origin": "DuPont · Mỹ",
+      "body": "Sorona™ là loại sợi polymer sinh học một phần được DuPont phát triển. Mềm hơn polyester thông thường, ấm hơn cotton thuần túy và được thiết kế để chuyển động cùng cơ thể. Rủ như lụa, thoáng khí như không có gì sánh được, và duy trì sự thoải mái từ sáng đến tối.",
+      "specs": ["37% thành phần sinh học", "Độ mềm mại đặc biệt", "Co giãn & phục hồi", "Kiểm soát độ ẩm"]
     },
-    "build": {
-      "label": "CẤU TRÚC",
-      "title": "LÀM RA CẢM GIÁC XỨNG ĐÁNG",
-      "body": "Từng chi tiết được làm kỹ: form sạch hơn, thân áo đầm hơn và phần hoàn thiện cho thấy rõ chi phí sản xuất thực tế phía sau."
+    "france": {
+      "label": "SẢN XUẤT",
+      "chapter": "02",
+      "title": "LÀM TẠI\nPHÁP",
+      "origin": "Atelier · Paris",
+      "body": "Mỗi sản phẩm Driip Tee được cắt và lắp ráp tại Pháp — nơi sự chính xác không phải là khẩu hiệu marketing mà là kỳ vọng. Sản xuất tại Pháp ở cấp độ này có nghĩa là đường may được đo lường cẩn thận, mép hoàn thiện nằm hoàn toàn phẳng, và sản phẩm giữ được form dáng qua từng lần giặt.",
+      "specs": ["Sản xuất atelier Pháp", "Cắt may chính xác", "Đường may phẳng", "Bền vững qua giặt giũ"]
     },
-    "run": {
-      "label": "CHIẾN LƯỢC DROP",
-      "title": "SỐ LƯỢNG ÍT, CÓ CHỦ ĐÍCH",
-      "body": "DROP này được giữ ở quy mô nhỏ để đảm bảo chất lượng luôn là ưu tiên từ khâu mẫu đến khâu sản xuất cuối cùng."
+    "design": {
+      "label": "THIẾT KẾ",
+      "chapter": "03",
+      "title": "THIẾT KẾ TẠI\nVIỆT NAM",
+      "origin": "driip- Studio · Việt Nam",
+      "body": "Phương hướng sáng tạo, hình học form dáng và bản sắc thẩm mỹ hoàn toàn là của Việt Nam — được sinh ra trong studio driip-. Đây không phải sản phẩm được cấp phép hay thương hiệu lại. Đây là tác phẩm nguyên bản: một chiếc áo được thiết kế từ tờ giấy trắng bởi những người tin rằng thời trang Việt Nam có thể đặt ra tiêu chuẩn toàn cầu.",
+      "specs": ["Thiết kế driip- nguyên bản", "Form oversized tinh chỉnh", "Dáng editorial", "Tư duy sáng tạo Việt Nam"]
     },
-    "manifesto": "Chiếc áo thun này phải cho cảm giác như chiếc áo đẹp nhất trong tủ: dày, sạch và được làm bằng sự đầu tư thật sự.",
-    "manifestoLabel": "ĐỊNH VỊ",
-    "footerText": "DROP tiếp theo của Driip sẽ ra mắt với vải Sonoma. Cao cấp hơn, giới hạn hơn.",
+    "feel": {
+      "label": "TRẢI NGHIỆM",
+      "title": "CỰC KỲ\nTHOẢI MÁI.",
+      "body": "Không có ngôn từ nào diễn tả đủ cho đến khi bạn mặc vào. Trọng lượng có mà không nặng. Cảm giác cầm vải mát và mượt. Form dáng rủ sạch từ vai mà không có điểm nào bị kéo. Mặc đi gallery, đi sân bay, hay chỉ đơn giản ở nhà — nó đáp ứng mọi tình huống."
+    },
+    "manifesto": "Thiết kế tại Việt Nam.\nLàm tại Pháp.\nSợi vải từ Mỹ.\nMặc ở khắp nơi.",
+    "manifestoLabel": "TIÊU CHUẨN DRIIP",
+    "footerText": "Driip Tee là sản phẩm nguyên bản của chúng tôi — biểu hiện rõ ràng nhất của những gì thương hiệu này tin rằng quần áo nên là.",
     "backToDrops": "QUAY LẠI BỘ SƯU TẬP"
   },
   "lacostePolo": {

@@ -391,6 +391,23 @@
             </div>
           </div>
         </div>
+
+        <!-- ── Quick order CTA ─────────────────────────────── -->
+        <Transition name="quick-order">
+          <div v-if="!cart.isEmpty" class="quick-order-bar">
+            <div class="quick-order-summary">
+              <span class="quick-order-count"
+                >{{ cart.itemCount }} sản phẩm trong giỏ</span
+              >
+              <span class="quick-order-total">{{
+                cart.formattedGrandFinalTotal
+              }}</span>
+            </div>
+            <button class="quick-order-btn" @click="$emit('go-to-order')">
+              ĐẶT HÀNG NGAY →
+            </button>
+          </div>
+        </Transition>
       </div>
     </section>
 
@@ -656,6 +673,7 @@ function applySizeGuide(size: string): void {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2px;
+  align-items: stretch;
 }
 .product-card {
   background: var(--grey-800);
@@ -663,6 +681,8 @@ function applySizeGuide(size: string): void {
   transform: translateY(32px);
   transition: opacity 0.75s ease, transform 0.75s ease;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .product-card.is-visible {
   opacity: 1;
@@ -782,6 +802,9 @@ function applySizeGuide(size: string): void {
 /* ── CARD BODY ───────────────────────────────────────────────────── */
 .product-card-body {
   padding: 28px 24px 32px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .product-card-header {
   display: flex;
@@ -830,6 +853,7 @@ function applySizeGuide(size: string): void {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin-top: auto;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 20px;
 }
@@ -1156,6 +1180,64 @@ function applySizeGuide(size: string): void {
     gap: 2px;
   }
 }
+/* ── QUICK ORDER BAR ─────────────────────────────────────────────── */
+.quick-order-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 18px 20px;
+  background: var(--white);
+  flex-wrap: wrap;
+}
+.quick-order-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.quick-order-count {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.45);
+}
+.quick-order-total {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--black);
+}
+.quick-order-btn {
+  flex-shrink: 0;
+  min-height: 48px;
+  padding: 0 28px;
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.18s;
+}
+.quick-order-btn:hover {
+  opacity: 0.82;
+}
+
+.quick-order-enter-active,
+.quick-order-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.quick-order-enter-from,
+.quick-order-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 @media (min-width: 1024px) {
   .products {
     padding: 100px 64px;

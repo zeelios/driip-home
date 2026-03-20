@@ -9,6 +9,8 @@ export interface MetaPurchaseData {
   district?: string;
   ward?: string;
   street?: string;
+  zip?: string;
+  dob?: string;
   gender?: string;
   sku?: string;
   value?: number;
@@ -29,6 +31,9 @@ export interface MetaOrderProfileCookie {
   email?: string;
   province?: string;
   fullAddress?: string;
+  zipCode?: string;
+  dob?: string;
+  gender?: string;
 }
 
 export function buildMetaFbcValue(
@@ -72,6 +77,14 @@ export function normalizeMetaPhone(raw: string): string {
   return raw.replace(/\D/g, "");
 }
 
+export function normalizeMetaDob(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length !== 8) return digits;
+
+  // Input is collected as DD/MM/YYYY in the form.
+  return `${digits.slice(4)}${digits.slice(2, 4)}${digits.slice(0, 2)}`;
+}
+
 export function buildMetaPurchaseContentName(sku?: string): string {
   if (sku === "ck-brief") return "CK Brief";
   if (sku === "ck-boxer") return "CK Boxer";
@@ -112,6 +125,8 @@ export function buildMetaUserData(
   if (input.city) userData.ct = [options.hash(input.city)];
   if (input.state) userData.st = [options.hash(input.state)];
   if (input.country) userData.country = [options.hash(input.country)];
+  if (input.zip) userData.zp = [options.hash(input.zip)];
+  if (input.dob) userData.db = [options.hash(normalizeMetaDob(input.dob))];
   if (input.gender) userData.ge = [options.hash(input.gender)];
 
   if (input.fbc) userData.fbc = input.fbc;

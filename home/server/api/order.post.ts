@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
     province,
     fullAddress,
     street,
+    zipCode,
     note,
     // Cart-based payload (new)
     cartItems,
@@ -68,8 +69,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const fullName = `${lastName} ${firstName}`.trim();
-  const address = `${fullAddress || street}, ${province}`;
-  const cleanPhone = phone.startsWith("+") ? `'${phone}` : phone;
+  const address = `${fullAddress || street}, ${province} ${zipCode}`;
+  const cleanPhone = `'${phone}`;
 
   try {
     const orderId = await reserveOrderId();
@@ -109,6 +110,7 @@ export default defineEventHandler(async (event) => {
           isFirstRow ? cleanPhone : "", // H: SĐT
           isFirstRow ? fullName : "", // I: Tên
           isFirstRow ? address : "", // J: Địa Chỉ
+          isFirstRow ? zipCode ?? "" : "", // K: Zip
           itemOriginalPrice, // K: Tổng Tiền
           itemDiscount, // L: Chiết Khấu
           "0", // M: Đặt Cọc

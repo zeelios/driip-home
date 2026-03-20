@@ -18,6 +18,7 @@ import {
   getTierTotal,
   getTierUnitPrice,
 } from "~/composables/usePricing";
+import { getProvinceZipCode } from "~/data/vietnam-addresses";
 
 export interface SkuOption {
   value: string;
@@ -128,6 +129,9 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     email: orderProfileCookie.value?.email ?? "",
     province: orderProfileCookie.value?.province ?? "",
     fullAddress: orderProfileCookie.value?.fullAddress ?? "",
+    zipCode: orderProfileCookie.value?.zipCode ?? "",
+    dob: "",
+    gender: "" as "" | "male" | "female",
     boxes: 1,
     sku: "",
     size: "",
@@ -144,11 +148,24 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
         email: order.value.email.trim(),
         province: order.value.province.trim(),
         fullAddress: order.value.fullAddress.trim(),
+        zipCode: order.value.zipCode.trim(),
+        dob: order.value.dob.trim(),
+        gender: order.value.gender.trim(),
       }) as MetaOrderProfileCookie;
 
       orderProfileCookie.value = Object.keys(profile).length ? profile : null;
     },
     { deep: true, immediate: true }
+  );
+
+  watch(
+    () => order.value.province,
+    (province) => {
+      const normalized = province.trim();
+      const nextZip = normalized ? getProvinceZipCode(normalized) ?? "" : "";
+      if (order.value.zipCode === nextZip) return;
+      order.value.zipCode = nextZip;
+    }
   );
 
   const boxOptions = computed<BoxOption[]>(() =>
@@ -380,6 +397,9 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
           sku: order.value.sku,
           size: order.value.size,
           color: order.value.color,
+          zipCode: order.value.zipCode,
+          dob: order.value.dob || undefined,
+          gender: order.value.gender || undefined,
           coupon: couponCode,
           timestamp: new Date().toISOString(),
         },

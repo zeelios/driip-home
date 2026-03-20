@@ -172,7 +172,14 @@
               </div>
             </div>
 
-            <button type="button" class="os-next-btn" @click="currentStep = 2">
+            <button
+              type="button"
+              class="os-next-btn"
+              @click="
+                currentStep = 2;
+                trackInitiateCheckout(1, cart.grandFinalTotal);
+              "
+            >
               TIẾP THEO — THÔNG TIN GIAO HÀNG
               <span class="os-next-arrow">→</span>
             </button>
@@ -262,6 +269,59 @@
               required
               autocomplete="street-address"
             />
+          </div>
+
+          <!-- Optional: DoB + Gender row -->
+          <div class="os-field-row">
+            <div class="os-field">
+              <label>
+                {{ t("ck.order.dob") }}
+                <span class="os-opt-tag">{{ t("ck.order.optionalTag") }}</span>
+              </label>
+              <div class="os-dob-input">
+                <input
+                  v-model="order.dob"
+                  type="text"
+                  class="os-dob-field"
+                  :placeholder="t('ck.order.dobPlaceholder')"
+                  maxlength="10"
+                  inputmode="numeric"
+                  autocomplete="bday"
+                  @input="
+                    formatDobInput(($event.target as HTMLInputElement).value)
+                  "
+                />
+              </div>
+            </div>
+
+            <div class="os-field">
+              <label>
+                {{ t("ck.order.gender") }}
+                <span class="os-opt-tag">{{ t("ck.order.optionalTag") }}</span>
+              </label>
+              <div class="os-gender-toggle">
+                <button
+                  type="button"
+                  class="os-gender-btn"
+                  :class="{ active: order.gender === 'male' }"
+                  @click="order.gender = order.gender === 'male' ? '' : 'male'"
+                >
+                  <span class="os-gender-icon">♂</span>
+                  {{ t("ck.order.genderMale") }}
+                </button>
+                <button
+                  type="button"
+                  class="os-gender-btn"
+                  :class="{ active: order.gender === 'female' }"
+                  @click="
+                    order.gender = order.gender === 'female' ? '' : 'female'
+                  "
+                >
+                  <span class="os-gender-icon">♀</span>
+                  {{ t("ck.order.genderFemale") }}
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="os-panel-actions">
@@ -406,7 +466,7 @@ import {
 const { t } = useI18n();
 const store = useCkUnderwearStore();
 const cart = useCartStore();
-const { trackPurchase } = useMetaEvents();
+const { trackPurchase, trackInitiateCheckout } = useMetaEvents();
 
 const provinceOptions = computed(() =>
   vietnamProvinces.map((p) => ({ value: p.name, label: p.name }))
@@ -415,6 +475,19 @@ const provinceOptions = computed(() =>
 const { order, orderState, phoneValidationMsg } = storeToRefs(store);
 
 const { normalizePhoneInput } = store;
+
+function formatDobInput(input: string): void {
+  let digits = input.replace(/\D/g, "").slice(0, 8);
+  let formatted = digits;
+  if (digits.length > 4) {
+    formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(
+      4
+    )}`;
+  } else if (digits.length > 2) {
+    formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  }
+  order.value.dob = formatted;
+}
 
 const extraPromoPercent = `${Math.round(EXTRA_PROMO_RATE * 100)}%`;
 
@@ -1365,5 +1438,71 @@ function scrollToProducts(): void {
   .os {
     padding: 100px 64px 140px;
   }
+}
+
+/* ── DOB INPUT ───────────────────────────────────────────────────── */
+.os-dob-input {
+  position: relative;
+}
+.os-dob-field {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  padding: 0 16px;
+  min-height: 52px;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.os-dob-field::placeholder {
+  color: rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.12em;
+}
+.os-dob-field:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── GENDER TOGGLE ───────────────────────────────────────────────── */
+.os-gender-toggle {
+  display: flex;
+  gap: 0;
+}
+.os-gender-btn {
+  flex: 1;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  position: relative;
+}
+.os-gender-btn + .os-gender-btn {
+  border-left: none;
+}
+.os-gender-btn.active {
+  background: var(--white);
+  color: var(--black);
+  border-color: var(--white);
+}
+.os-gender-btn.active + .os-gender-btn {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+.os-gender-icon {
+  font-size: 14px;
+  line-height: 1;
 }
 </style>

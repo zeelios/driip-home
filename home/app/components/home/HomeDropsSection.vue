@@ -93,13 +93,13 @@
             <span class="drop-notify">{{ t("home.drops.notify") }}</span>
           </div>
         </NuxtLinkLocale>
-        <NuxtLinkLocale
-          to="/lacoste-polo"
+        <div
           class="drop-card drop-card--soon drop-card--preview reveal"
+          aria-disabled="true"
         >
           <div class="drop-img drop-img--soon drop-img--lacoste">
             <NuxtImg
-              src="/products/Brief/Black.png"
+              src="/brands/lacoste/lacoste-cover.avif"
               :width="640"
               :height="800"
               format="webp"
@@ -137,7 +137,7 @@
             </p>
             <span class="drop-notify">{{ t("home.drops.notify") }}</span>
           </div>
-        </NuxtLinkLocale>
+        </div>
       </div>
     </div>
   </section>
@@ -291,6 +291,7 @@ watch(
   object-fit: cover;
   display: block;
   opacity: 0;
+  filter: grayscale(1) saturate(0.55);
   transition: opacity 0.25s ease, transform 0.6s ease;
 }
 .lacoste-preview-image.is-loaded {

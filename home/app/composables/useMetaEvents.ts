@@ -33,6 +33,9 @@ export interface OrderData {
   district?: string;
   ward?: string;
   street?: string;
+  zip?: string;
+  dob?: string;
+  gender?: string;
 }
 
 const SKU_PRICES: Record<string, number> = {
@@ -125,6 +128,9 @@ export function useMetaEvents() {
       lastName: userData.lastName ?? profile.lastName,
       city: userData.city ?? profile.province,
       state: userData.state ?? profile.province,
+      zip: userData.zip ?? profile.zipCode,
+      dob: userData.dob ?? profile.dob,
+      gender: userData.gender ?? profile.gender,
     });
   }
 
@@ -243,6 +249,9 @@ export function useMetaEvents() {
         district: order.district ?? undefined,
         ward: order.ward ?? undefined,
         street: order.street ?? undefined,
+        zip: order.zip ?? undefined,
+        dob: order.dob ?? undefined,
+        gender: order.gender ?? undefined,
       },
       custom_data,
       event_id
@@ -263,7 +272,7 @@ export function useMetaEvents() {
   /**
    * InitiateCheckout — fires when hero CTA is clicked.
    */
-  function trackInitiateCheckout(boxes = 1) {
+  function trackInitiateCheckout(boxesOrValue = 1, explicitValue?: number) {
     if (initiateCheckoutSent) return;
 
     initiateCheckoutSent = true;
@@ -272,9 +281,8 @@ export function useMetaEvents() {
     );
 
     const event_id = initiateCheckoutEventId;
-    const custom_data = buildMetaPurchaseCustomData({
-      value: getFinalTotal(boxes),
-    });
+    const value = explicitValue ?? getFinalTotal(boxesOrValue);
+    const custom_data = buildMetaPurchaseCustomData({ value });
     pixel("track", "InitiateCheckout", custom_data, event_id);
     capi("InitiateCheckout", getFbCookies(), custom_data, event_id);
   }

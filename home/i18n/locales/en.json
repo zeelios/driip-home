@@ -123,6 +123,12 @@
       "wardPlaceholder": "Ward / commune name",
       "street": "STREET ADDRESS",
       "streetPlaceholder": "e.g. 123 Nguyen Trai Street",
+      "dob": "DATE OF BIRTH",
+      "dobPlaceholder": "DD/MM/YYYY",
+      "gender": "GENDER",
+      "genderMale": "MALE",
+      "genderFemale": "FEMALE",
+      "optionalTag": "(OPTIONAL)",
       "selection": "YOUR SELECTION",
       "product": "PRODUCT",
       "boxes": "BOXES",
@@ -157,57 +163,71 @@
   "tee": {
     "nav": {
       "lang": "VI",
-      "cta": "VIEW DETAILS",
-      "details": "DETAILS",
-      "manifesto": "MANIFESTO",
+      "cta": "EXPLORE",
+      "details": "THE STORY",
+      "craft": "CRAFT",
+      "origin": "ORIGIN",
       "top": "TOP"
     },
     "hero": {
-      "pre": "NEXT DROP — DRIIP TEE",
-      "title": "THE TEE, REFINED.",
-      "sub": "Made from Sonoma fabric with a premium handfeel, a cleaner build, and the kind of finish that only comes from expensive production.",
-      "cta": "EXPLORE THE DROP",
+      "pre": "DRIIP ORIGINAL — SS26",
+      "eyebrow": "THE OFFICIAL DRIIP PRODUCT",
+      "title": "NOT JUST\nA TEE.",
+      "sub": "Sorona fibre from the USA. Manufactured in France. Designed in Vietnam. Exceptionally comfortable. Uncompromisingly high-fashion.",
+      "cta": "DISCOVER THE CRAFT",
       "secondary": "BACK TO HOME",
       "metrics": {
-        "fabric": "FABRIC",
-        "fabricValue": "SONOMA",
-        "build": "BUILD",
-        "buildValue": "PREMIUM HEAVYWEIGHT",
-        "run": "RUN",
-        "runValue": "LIMITED PRODUCTION"
+        "fabric": "FIBRE",
+        "fabricValue": "SORONA™",
+        "origin": "ORIGIN",
+        "originValue": "USA · FR · VN",
+        "run": "PRODUCTION",
+        "runValue": "LIMITED RUN"
       }
     },
-    "visual": {
-      "pre": "PREVIEW",
-      "pill": "LIMITED RUN",
-      "frontLabel": "Heavyweight finish",
-      "title": "Built with a denser handfeel and a cleaner drape.",
-      "body": "The page is designed to feel tactile and premium before the tee even lands — more atmosphere, more depth, and a stronger drop identity."
-    },
     "strip": {
-      "fabric": "SONOMA FABRIC",
-      "weight": "HEAVYWEIGHT FEEL",
-      "production": "HIGH PRODUCTION COST",
-      "run": "LIMITED RUN"
+      "sorona": "SORONA™ FIBRE — USA",
+      "france": "MANUFACTURED IN FRANCE",
+      "vietnam": "DESIGNED IN VIETNAM",
+      "run": "LIMITED PRODUCTION RUN"
     },
-    "fabric": {
+    "origin": {
+      "label": "ORIGIN STORY",
+      "title": "THREE COUNTRIES.\nONE TEE.",
+      "body": "We refused to compromise on a single step. The fibre is Sorona™ — a bio-based yarn engineered by DuPont in the USA, known for its extraordinary softness and sustainable profile. The garment is cut and sewn in France, where a century of atelier craftsmanship meets modern production precision. The design is entirely ours — conceived in Vietnam, rooted in driip-'s editorial vision."
+    },
+    "sorona": {
       "label": "MATERIAL",
-      "title": "SONOMA FABRIC",
-      "body": "Sonoma gives the tee a dense, elevated handfeel with a clean drape that holds its shape while still wearing comfortably."
+      "chapter": "01",
+      "title": "SORONA™\nFIBRE",
+      "origin": "DuPont · USA",
+      "body": "Sorona™ is a partially bio-based polymer fibre developed by DuPont. Softer than conventional polyester, warmer than cotton alone, and engineered to move with your body. It drapes like silk, breathes like nothing else, and stays comfortable from morning to midnight.",
+      "specs": ["37% bio-based content", "Exceptional softness", "Stretch & recovery", "Moisture management"]
     },
-    "build": {
-      "label": "CONSTRUCTION",
-      "title": "MADE TO FEEL EXPENSIVE",
-      "body": "The details are intentionally precise: a cleaner silhouette, a more substantial body, and finishing that reflects the production cost behind it."
+    "france": {
+      "label": "MANUFACTURING",
+      "chapter": "02",
+      "title": "MADE IN\nFRANCE",
+      "origin": "Atelier · Paris",
+      "body": "Every unit of the Driip Tee is cut and assembled in France — where precision is not a marketing line but an expectation. French production at this level means measured seam allowances, finished edges that lie perfectly flat, and a garment that holds its silhouette wash after wash.",
+      "specs": ["French atelier production", "Precision-cut silhouette", "Flat-locked seams", "Wash-stable construction"]
     },
-    "run": {
-      "label": "DROP STRATEGY",
-      "title": "SMALL, INTENTIONAL RUN",
-      "body": "This launch is kept tight by design so quality stays the priority from sampling to final production."
+    "design": {
+      "label": "DESIGN",
+      "chapter": "03",
+      "title": "DESIGNED IN\nVIETNAM",
+      "origin": "driip- Studio · Việt Nam",
+      "body": "The creative direction, fit geometry, and aesthetic identity are entirely Vietnamese — born inside the driip- studio. This is not a licensed product or a rebrand. It is an original work: a tee designed from a blank sheet of paper by people who believe that Vietnamese fashion can set global standards.",
+      "specs": ["Original driip- design", "Refined oversized fit", "Editorial silhouette", "Vietnamese creative direction"]
     },
-    "manifesto": "The tee should feel like the best shirt in the room — heavy, clean, and built with real intent.",
-    "manifestoLabel": "POSITIONING",
-    "footerText": "The next Driip drop is coming in Sonoma fabric. Built premium, kept limited.",
+    "feel": {
+      "label": "THE EXPERIENCE",
+      "title": "EXTRAORDINARILY\nCOMFORTABLE.",
+      "body": "Words fall short until you put it on. The weight is present but never heavy. The hand-feel is cool and smooth. The silhouette drops cleanly from the shoulder with zero pulling. Wear it to a gallery, to the airport, or over nothing at all — it performs at every level."
+    },
+    "manifesto": "Designed in Vietnam.\nBuilt in France.\nEngineered in the USA.\nWorn everywhere.",
+    "manifestoLabel": "THE DRIIP STANDARD",
+    "footerText": "The Driip Tee is our original product — the clearest expression of what this brand believes clothing should be.",
     "backToDrops": "BACK TO DROPS"
   },
   "lacostePolo": {
