@@ -78,8 +78,8 @@
                 loading="lazy"
                 class="product-img-el"
                 :class="{ 'is-loaded': briefImageLoaded }"
-                @load="briefImageLoaded = true"
-                @error="briefImageLoaded = true"
+                @load="settleBriefImageLoad"
+                @error="settleBriefImageLoad"
               />
               <div
                 v-if="!briefImageLoaded"
@@ -244,8 +244,8 @@
                 loading="lazy"
                 class="product-img-el"
                 :class="{ 'is-loaded': boxerImageLoaded }"
-                @load="boxerImageLoaded = true"
-                @error="boxerImageLoaded = true"
+                @load="settleBoxerImageLoad"
+                @error="settleBoxerImageLoad"
               />
               <div
                 v-if="!boxerImageLoaded"
@@ -437,6 +437,7 @@ import { useCartStore } from "~/stores/cart";
 import { useMetaEvents } from "~/composables/useMetaEvents";
 import { getFinalTotal } from "~/composables/usePricing";
 import { formatVndCurrency } from "~/composables/usePricing";
+import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 defineEmits<{ "go-to-order": [] }>();
 
@@ -457,15 +458,31 @@ const {
 } = storeToRefs(store);
 const { boxerColors, sizes } = store;
 
-const briefImageLoaded = ref(false);
-const boxerImageLoaded = ref(false);
+const {
+  arm: armBriefImageLoad,
+  isLoaded: briefImageLoaded,
+  settle: settleBriefImageLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
+const {
+  arm: armBoxerImageLoad,
+  isLoaded: boxerImageLoaded,
+  settle: settleBoxerImageLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
 
-watch(briefColor, () => {
-  briefImageLoaded.value = false;
-});
-watch(boxerColor, () => {
-  boxerImageLoaded.value = false;
-});
+watch(
+  briefColor,
+  () => {
+    armBriefImageLoad();
+  },
+  { immediate: true }
+);
+watch(
+  boxerColor,
+  () => {
+    armBoxerImageLoad();
+  },
+  { immediate: true }
+);
 
 // ── Mobile tab state ─────────────────────────────────────────────
 const mobileTab = ref<"brief" | "boxer">("brief");

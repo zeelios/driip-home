@@ -156,6 +156,7 @@
         "size": "Please select a size.",
         "color": "Please select a colour pack."
       },
+      "reviewOrder": "REVIEW ORDER",
       "successTitle": "ORDER RECEIVED",
       "successBody": "{name}, your order for {sku} · {size} · {color} has been received. We'll confirm within 24 hours to {phone}."
     }

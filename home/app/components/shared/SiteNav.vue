@@ -20,10 +20,11 @@
               height="22"
               quality="70"
               format="webp"
+              loading="eager"
               class="snav-logo"
               :class="{ 'is-loaded': logoLoaded }"
-              @load="logoLoaded = true"
-              @error="logoLoaded = true"
+              @load="settleLogoLoad"
+              @error="settleLogoLoad"
             />
           </NuxtLinkLocale>
           <template v-if="navStore.title">
@@ -64,13 +65,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useSiteNavStore } from "~/stores/site-nav";
+import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 const { t, locale, setLocale } = useI18n();
 const route = useRoute();
 const navStore = useSiteNavStore();
-const logoLoaded = ref(false);
+const {
+  arm: armLogoLoad,
+  isLoaded: logoLoaded,
+  settle: settleLogoLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 5000 });
+
+onMounted(() => {
+  armLogoLoad();
+});
 
 const showBack = computed(() => {
   const p = route.path;

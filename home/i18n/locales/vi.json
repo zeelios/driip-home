@@ -162,6 +162,7 @@
         "size": "Vui lòng chọn size.",
         "color": "Vui lòng chọn phối màu."
       },
+      "reviewOrder": "XÁC NHẬN ĐƠN HÀNG",
       "successTitle": "Đã nhận đơn hàng",
       "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}."
     }

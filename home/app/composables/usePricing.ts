@@ -26,8 +26,36 @@ export function getBoxTier(boxes: number): BoxTier {
   return tier ?? BOX_TIERS[0]!;
 }
 
+function getTierPriceByBundle(boxes: number): number {
+  if (boxes <= 0) return 0;
+
+  const bestPrices = Array.from(
+    { length: boxes + 1 },
+    () => Number.POSITIVE_INFINITY
+  );
+  bestPrices[0] = 0;
+
+  for (let currentBoxes = 1; currentBoxes <= boxes; currentBoxes += 1) {
+    for (const tier of BOX_TIERS) {
+      if (tier.boxes > currentBoxes) continue;
+
+      const previousPrice = bestPrices[currentBoxes - tier.boxes]!;
+      if (!Number.isFinite(previousPrice)) continue;
+
+      const nextPrice = previousPrice + tier.total;
+      const currentBest = bestPrices[currentBoxes]!;
+      if (nextPrice < currentBest) {
+        bestPrices[currentBoxes] = nextPrice;
+      }
+    }
+  }
+
+  const total = bestPrices[boxes]!;
+  return Number.isFinite(total) ? total : 0;
+}
+
 export function getTierTotal(boxes: number): number {
-  return getBoxTier(boxes).total;
+  return getTierPriceByBundle(boxes);
 }
 
 export function getCompareTotal(boxes: number): number {

@@ -119,6 +119,8 @@
 </template>
 
 <script setup lang="ts">
+import { useStableImageLoadMap } from "~/composables/use-stable-image-load";
+
 const { t } = useI18n();
 
 type GalleryItem = {
@@ -199,7 +201,21 @@ const touchStartX = ref<number | null>(null);
 const touchStartY = ref<number | null>(null);
 const touchLastX = ref<number | null>(null);
 const touchLastY = ref<number | null>(null);
-const loadedImages = reactive<Record<string, boolean>>({});
+const {
+  arm: armImageLoad,
+  isLoaded: isImageLoaded,
+  settle: onImageLoaded,
+} = useStableImageLoadMap({ minDelayMs: 250, maxWaitMs: 6000 });
+
+watch(
+  currentItems,
+  (items) => {
+    items.forEach((item) => {
+      if (!isImageLoaded(item.src)) armImageLoad(item.src);
+    });
+  },
+  { immediate: true }
+);
 
 function openLightbox(i: number): void {
   lightboxIndex.value = i;
@@ -210,14 +226,6 @@ function closeLightbox(): void {
   lightboxIndex.value = null;
   document.body.style.overflow = "";
   resetTouchState();
-}
-
-function onImageLoaded(src: string): void {
-  loadedImages[src] = true;
-}
-
-function isImageLoaded(src: string): boolean {
-  return loadedImages[src] === true;
 }
 
 function lightboxNext(): void {

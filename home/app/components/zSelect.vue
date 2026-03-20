@@ -28,21 +28,24 @@
         <div
           v-if="isOpen"
           class="zs-overlay"
-          :class="{ 'zs-overlay--mobile': isMobile, 'zs-overlay--desktop': !isMobile }"
+          :class="{
+            'zs-overlay--mobile': isMobile,
+            'zs-overlay--desktop': !isMobile,
+          }"
           @mousedown.self="closeDropdown"
           @touchstart.self="closeDropdown"
         >
           <!-- Mobile backdrop -->
-          <div
-            v-if="isMobile"
-            class="zs-backdrop"
-            @click="closeDropdown"
-          />
+          <div v-if="isMobile" class="zs-backdrop" @click="closeDropdown" />
 
           <!-- Panel -->
           <div
             class="zs-panel"
-            :class="{ 'zs-panel--mobile': isMobile, 'zs-panel--desktop': !isMobile }"
+            ref="panelRef"
+            :class="{
+              'zs-panel--mobile': isMobile,
+              'zs-panel--desktop': !isMobile,
+            }"
             :style="!isMobile ? desktopPanelStyle : undefined"
             role="dialog"
             :aria-label="label || placeholder"
@@ -83,7 +86,9 @@
                 @click="selectOption(option)"
               >
                 <span class="zs-option-label">{{ option.label }}</span>
-                <span v-if="option.hint" class="zs-option-hint">{{ option.hint }}</span>
+                <span v-if="option.hint" class="zs-option-hint">{{
+                  option.hint
+                }}</span>
               </button>
 
               <div v-if="!visibleOptions.length" class="zs-empty">
@@ -98,7 +103,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 
 export interface ZSelectOption {
   value: string;
@@ -133,6 +145,7 @@ const emit = defineEmits<{
 }>();
 
 const rootRef = ref<HTMLElement | null>(null);
+const panelRef = ref<HTMLElement | null>(null);
 const searchRef = ref<HTMLInputElement | null>(null);
 const isOpen = ref(false);
 const query = ref("");
@@ -213,7 +226,9 @@ function selectFirstVisible(): void {
 function onOutsidePointerDown(event: MouseEvent): void {
   if (!isOpen.value || isMobile.value) return;
   const target = event.target as Node | null;
-  if (rootRef.value && target && !rootRef.value.contains(target)) {
+  const isInsideRoot = rootRef.value?.contains(target ?? null) ?? false;
+  const isInsidePanel = panelRef.value?.contains(target ?? null) ?? false;
+  if (target && !isInsideRoot && !isInsidePanel) {
     closeDropdown();
   }
 }

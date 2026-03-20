@@ -1,9 +1,8 @@
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { defineStore } from "pinia";
 import {
-  EXTRA_PROMO_RATE,
+  BASE_BOX_COMPARE_PRICE,
   formatVndCurrency,
-  getCompareTotal,
   getExtraPromoDiscountAmount,
   getFinalTotal,
   getTierTotal,
@@ -23,16 +22,38 @@ export interface CartItem {
   finalTotal: number; // tierTotal − extraDiscount
 }
 
-export const useCartStore = defineStore("cart", () => {
-  const items = ref<CartItem[]>([]);
+interface CartCookieItem
+  extends Pick<
+    CartItem,
+    "id" | "sku" | "skuLabel" | "boxes" | "size" | "color" | "colorLabel"
+  > {}
 
-  // ── Totals ────────────────────────────────────────────────────────
-  const grandTierTotal = computed<number>(() =>
-    items.value.reduce((sum, item) => sum + item.tierTotal, 0)
+export const useCartStore = defineStore("cart", () => {
+  const cartCookie = useCookie<CartCookieItem[] | null>("ck-cart", {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  const hydrateFromCookie = (): CartItem[] =>
+    cartCookie.value?.map((entry) => ({
+      ...entry,
+      compareTotal: 0,
+      tierTotal: 0,
+      extraDiscount: 0,
+      finalTotal: 0,
+    })) ?? [];
+
+  const items = ref<CartItem[]>(hydrateFromCookie());
+
+  const totalBoxes = computed<number>(() =>
+    items.value.reduce((sum, item) => sum + item.boxes, 0)
   );
 
+  // ── Totals ────────────────────────────────────────────────────────
+  const grandTierTotal = computed<number>(() => getTierTotal(totalBoxes.value));
+
   const grandFinalTotal = computed<number>(() =>
-    items.value.reduce((sum, item) => sum + item.finalTotal, 0)
+    getFinalTotal(totalBoxes.value)
   );
 
   const grandCompareTotal = computed<number>(() =>
@@ -44,7 +65,7 @@ export const useCartStore = defineStore("cart", () => {
   );
 
   const grandExtraDiscount = computed<number>(() =>
-    items.value.reduce((sum, item) => sum + item.extraDiscount, 0)
+    getExtraPromoDiscountAmount(totalBoxes.value)
   );
 
   const grandTierDiscount = computed<number>(
@@ -63,6 +84,33 @@ export const useCartStore = defineStore("cart", () => {
 
   const isEmpty = computed<boolean>(() => items.value.length === 0);
 
+  function syncItemTotals(): void {
+    const boxes = totalBoxes.value;
+    const tierTotal = getTierTotal(boxes);
+    const finalTotal = getFinalTotal(boxes);
+    let allocatedTierTotal = 0;
+    let allocatedFinalTotal = 0;
+
+    items.value.forEach((item, index) => {
+      const isLastItem = index === items.value.length - 1;
+      const itemCompareTotal = BASE_BOX_COMPARE_PRICE * item.boxes;
+      const itemTierTotal = isLastItem
+        ? tierTotal - allocatedTierTotal
+        : Math.round((tierTotal * item.boxes) / boxes);
+      const itemFinalTotal = isLastItem
+        ? finalTotal - allocatedFinalTotal
+        : Math.round((finalTotal * item.boxes) / boxes);
+
+      item.compareTotal = BASE_BOX_COMPARE_PRICE * item.boxes;
+      item.tierTotal = itemTierTotal;
+      item.finalTotal = itemFinalTotal;
+      item.extraDiscount = item.tierTotal - item.finalTotal;
+      allocatedTierTotal += itemTierTotal;
+      allocatedFinalTotal += itemFinalTotal;
+      item.compareTotal = itemCompareTotal;
+    });
+  }
+
   // ── Actions ───────────────────────────────────────────────────────
   function addItem(
     item: Omit<
@@ -74,30 +122,48 @@ export const useCartStore = defineStore("cart", () => {
     items.value.push({
       ...item,
       id,
-      compareTotal: getCompareTotal(item.boxes),
-      tierTotal: getTierTotal(item.boxes),
-      extraDiscount: getExtraPromoDiscountAmount(item.boxes),
-      finalTotal: getFinalTotal(item.boxes),
+      compareTotal: 0,
+      tierTotal: 0,
+      extraDiscount: 0,
+      finalTotal: 0,
     });
+    syncItemTotals();
   }
 
   function removeItem(id: string): void {
     items.value = items.value.filter((item) => item.id !== id);
+    syncItemTotals();
   }
 
   function updateItemBoxes(id: string, boxes: number): void {
     const item = items.value.find((i) => i.id === id);
     if (!item) return;
     item.boxes = boxes;
-    item.compareTotal = getCompareTotal(boxes);
-    item.tierTotal = getTierTotal(boxes);
-    item.extraDiscount = getExtraPromoDiscountAmount(boxes);
-    item.finalTotal = getFinalTotal(boxes);
+    syncItemTotals();
   }
 
   function clear(): void {
     items.value = [];
   }
+
+  watch(
+    () =>
+      items.value.map(
+        ({ id, sku, skuLabel, boxes, size, color, colorLabel }) => ({
+          id,
+          sku,
+          skuLabel,
+          boxes,
+          size,
+          color,
+          colorLabel,
+        })
+      ),
+    (snapshot) => {
+      cartCookie.value = snapshot.length ? snapshot : null;
+    },
+    { deep: true }
+  );
 
   return {
     items,

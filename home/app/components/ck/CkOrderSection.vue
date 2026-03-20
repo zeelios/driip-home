@@ -334,7 +334,7 @@
               :disabled="!step2Valid"
               @click="currentStep = 3"
             >
-              XEM LẠI ĐƠN HÀNG →
+              {{ t("ck.order.reviewOrder") || "XÁC NHẬN ĐƠN HÀNG" }} →
             </button>
           </div>
         </div>
@@ -765,6 +765,8 @@ function scrollToProducts(): void {
   gap: 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .os-cart-item {
@@ -773,6 +775,7 @@ function scrollToProducts(): void {
   gap: 12px;
   padding: 18px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 560px;
 }
 
 .os-cart-item:last-child {

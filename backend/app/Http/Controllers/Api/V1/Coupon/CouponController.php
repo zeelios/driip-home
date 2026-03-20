@@ -1,0 +1,183 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1\Coupon;
+
+use App\Domain\Coupon\Actions\ValidateCouponAction;
+use App\Domain\Coupon\Models\Coupon;
+use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Requests\Coupon\CreateCouponRequest;
+use App\Http\Requests\Coupon\ValidateCouponRequest;
+use App\Http\Resources\Coupon\CouponResource;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
+
+/**
+ * Controller for coupon management and real-time validation.
+ *
+ * Provides standard CRUD for the back-office, and a dedicated /validate
+ * endpoint used by the checkout flow to check eligibility before order
+ * confirmation.
+ */
+class CouponController extends BaseApiController
+{
+    /**
+     * List all coupons with optional filtering and pagination.
+     *
+     * Allowed filters: code, type, is_active, is_public, applies_to.
+     *
+     * @param  Request  $request
+     * @return AnonymousResourceCollection|JsonResponse
+     */
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
+    {
+        try {
+            $coupons = QueryBuilder::for(Coupon::class)
+                ->allowedFilters([
+                    AllowedFilter::partial('code'),
+                    AllowedFilter::partial('name'),
+                    AllowedFilter::exact('type'),
+                    AllowedFilter::exact('is_active'),
+                    AllowedFilter::exact('is_public'),
+                    AllowedFilter::exact('applies_to'),
+                ])
+                ->allowedSorts(['code', 'name', 'used_count', 'expires_at', 'created_at'])
+                ->paginate(20);
+
+            return CouponResource::collection($coupons);
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'LIST_COUPONS');
+        }
+    }
+
+    /**
+     * Create a new coupon.
+     *
+     * @param  CreateCouponRequest  $request
+     * @return CouponResource|JsonResponse
+     */
+    public function store(CreateCouponRequest $request): CouponResource|JsonResponse
+    {
+        try {
+            $data = $request->validated();
+            $data['created_by'] = $request->user()?->id;
+
+            $coupon = Coupon::create($data);
+
+            return new CouponResource($coupon);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e, 'CREATE_COUPON');
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'CREATE_COUPON');
+        }
+    }
+
+    /**
+     * Retrieve a single coupon by UUID.
+     *
+     * @param  Coupon  $coupon
+     * @return CouponResource|JsonResponse
+     */
+    public function show(Coupon $coupon): CouponResource|JsonResponse
+    {
+        try {
+            return new CouponResource($coupon);
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'SHOW_COUPON');
+        }
+    }
+
+    /**
+     * Update an existing coupon.
+     *
+     * @param  Request  $request
+     * @param  Coupon   $coupon
+     * @return CouponResource|JsonResponse
+     */
+    public function update(Request $request, Coupon $coupon): CouponResource|JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'code'                  => ['sometimes', 'string', 'max:50', 'unique:coupons,code,' . $coupon->id],
+                'name'                  => ['sometimes', 'string', 'max:255'],
+                'description'           => ['nullable', 'string'],
+                'type'                  => ['sometimes', 'in:percent,fixed_amount,free_shipping'],
+                'value'                 => ['sometimes', 'numeric', 'min:0'],
+                'min_order_amount'      => ['nullable', 'integer', 'min:0'],
+                'min_items'             => ['nullable', 'integer', 'min:1'],
+                'max_discount_amount'   => ['nullable', 'integer', 'min:0'],
+                'applies_to'            => ['nullable', 'in:all,category,product,brand'],
+                'applies_to_ids'        => ['nullable', 'array'],
+                'applies_to_ids.*'      => ['uuid'],
+                'max_uses'              => ['nullable', 'integer', 'min:1'],
+                'max_uses_per_customer' => ['nullable', 'integer', 'min:1'],
+                'is_public'             => ['nullable', 'boolean'],
+                'is_active'             => ['nullable', 'boolean'],
+                'starts_at'             => ['nullable', 'date'],
+                'expires_at'            => ['nullable', 'date'],
+            ]);
+
+            $coupon->update($validated);
+
+            return new CouponResource($coupon->fresh());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e, 'UPDATE_COUPON');
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'UPDATE_COUPON');
+        }
+    }
+
+    /**
+     * Soft-delete a coupon.
+     *
+     * @param  Coupon  $coupon
+     * @return JsonResponse
+     */
+    public function destroy(Coupon $coupon): JsonResponse
+    {
+        try {
+            $coupon->delete();
+
+            return response()->json(['success' => true, 'message' => 'Coupon deleted.']);
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'DELETE_COUPON');
+        }
+    }
+
+    /**
+     * Validate a coupon code against the provided order context.
+     *
+     * Returns whether the coupon is valid, the applicable discount amount,
+     * and a human-readable message explaining the result.
+     *
+     * @param  ValidateCouponRequest  $request
+     * @param  ValidateCouponAction   $action
+     * @return JsonResponse
+     */
+    public function validate(ValidateCouponRequest $request, ValidateCouponAction $action): JsonResponse
+    {
+        try {
+            $result = $action->execute($request->dto());
+
+            return response()->json([
+                'success' => true,
+                'data'    => [
+                    'valid'           => $result['valid'],
+                    'discount_amount' => $result['discount_amount'],
+                    'message'         => $result['message'],
+                    'coupon'          => $result['coupon'] !== null
+                        ? new CouponResource($result['coupon'])
+                        : null,
+                ],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationError($e, 'VALIDATE_COUPON');
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'VALIDATE_COUPON');
+        }
+    }
+}

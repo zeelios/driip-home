@@ -18,7 +18,9 @@
           <div class="hero-stats" aria-label="Product details">
             <div class="hero-stat">
               <span class="stat-label">{{ t("ck.hero.priceLabel") }}</span>
-              <strong class="stat-value">{{ formattedSkuPrice["ck-brief"] }}</strong>
+              <strong class="stat-value">{{
+                formattedSkuPrice["ck-brief"]
+              }}</strong>
             </div>
             <span class="stat-rule" aria-hidden="true" />
             <div class="hero-stat">
@@ -61,10 +63,14 @@
                     fit="cover"
                     class="visual-img"
                     :class="{ 'is-loaded': briefPreviewLoaded }"
-                    @load="briefPreviewLoaded = true"
-                    @error="briefPreviewLoaded = true"
+                    @load="settleBriefPreviewLoad"
+                    @error="settleBriefPreviewLoad"
                   />
-                  <div v-if="!briefPreviewLoaded" class="img-placeholder" aria-hidden="true">
+                  <div
+                    v-if="!briefPreviewLoaded"
+                    class="img-placeholder"
+                    aria-hidden="true"
+                  >
                     <NuxtImg
                       src="/logo.png"
                       alt=""
@@ -91,10 +97,14 @@
                     fit="cover"
                     class="visual-img"
                     :class="{ 'is-loaded': boxerPreviewLoaded }"
-                    @load="boxerPreviewLoaded = true"
-                    @error="boxerPreviewLoaded = true"
+                    @load="settleBoxerPreviewLoad"
+                    @error="settleBoxerPreviewLoad"
                   />
-                  <div v-if="!boxerPreviewLoaded" class="img-placeholder" aria-hidden="true">
+                  <div
+                    v-if="!boxerPreviewLoaded"
+                    class="img-placeholder"
+                    aria-hidden="true"
+                  >
                     <NuxtImg
                       src="/logo.png"
                       alt=""
@@ -134,24 +144,39 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
-import { ref, watch } from "vue";
-import { useCkUnderwearStore } from "~/stores/ck-underwear";
+import { watch } from "vue";
+import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 defineEmits<{ "hero-cta": []; "scroll-to": [id: string] }>();
 const { t } = useI18n();
 const ckStore = useCkUnderwearStore();
 const { boxerColor, briefColor, formattedSkuPrice } = storeToRefs(ckStore);
-const briefPreviewLoaded = ref(false);
-const boxerPreviewLoaded = ref(false);
+const {
+  arm: armBriefPreviewLoad,
+  isLoaded: briefPreviewLoaded,
+  settle: settleBriefPreviewLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 5000 });
+const {
+  arm: armBoxerPreviewLoad,
+  isLoaded: boxerPreviewLoaded,
+  settle: settleBoxerPreviewLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 5000 });
 
-watch(briefColor, () => {
-  briefPreviewLoaded.value = false;
-});
+watch(
+  briefColor,
+  () => {
+    armBriefPreviewLoad();
+  },
+  { immediate: true }
+);
 
-watch(boxerColor, () => {
-  boxerPreviewLoaded.value = false;
-});
+watch(
+  boxerColor,
+  () => {
+    armBoxerPreviewLoad();
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>

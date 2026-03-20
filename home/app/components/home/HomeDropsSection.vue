@@ -20,8 +20,8 @@
               loading="eager"
               class="drop-img-main"
               :class="{ 'is-loaded': briefLoaded }"
-              @load="briefLoaded = true"
-              @error="briefLoaded = true"
+              @load="settleBriefLoad"
+              @error="settleBriefLoad"
             />
             <div v-if="!briefLoaded" class="image-loader" aria-hidden="true">
               <NuxtImg
@@ -45,8 +45,8 @@
               loading="lazy"
               class="drop-img-secondary"
               :class="{ 'is-loaded': boxerLoaded }"
-              @load="boxerLoaded = true"
-              @error="boxerLoaded = true"
+              @load="settleBoxerLoad"
+              @error="settleBoxerLoad"
             />
             <div
               v-if="!boxerLoaded"
@@ -109,8 +109,8 @@
               loading="lazy"
               class="lacoste-preview-image"
               :class="{ 'is-loaded': lacosteLoaded }"
-              @load="lacosteLoaded = true"
-              @error="lacosteLoaded = true"
+              @load="settleLacosteLoad"
+              @error="settleLacosteLoad"
             />
             <div v-if="!lacosteLoaded" class="image-loader" aria-hidden="true">
               <NuxtImg
@@ -144,22 +144,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
 import { formatVndCurrency, getTierTotal } from "~/composables/usePricing";
+import { useStableImageLoad } from "~/composables/use-stable-image-load";
 const { t } = useI18n();
 const launchPrice = formatVndCurrency(getTierTotal(1));
-const briefLoaded = ref(false);
-const boxerLoaded = ref(false);
-const lacosteLoaded = ref(false);
+const {
+  arm: armBriefLoad,
+  isLoaded: briefLoaded,
+  settle: settleBriefLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
+const {
+  arm: armBoxerLoad,
+  isLoaded: boxerLoaded,
+  settle: settleBoxerLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
+const {
+  arm: armLacosteLoad,
+  isLoaded: lacosteLoaded,
+  settle: settleLacosteLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
 
-watch(
-  () => launchPrice,
-  () => {
-    briefLoaded.value = false;
-    boxerLoaded.value = false;
-    lacosteLoaded.value = false;
-  }
-);
+onMounted(() => {
+  armBriefLoad();
+  armBoxerLoad();
+  armLacosteLoad();
+});
 </script>
 
 <style scoped>

@@ -9,10 +9,11 @@
           height="38"
           quality="70"
           format="webp"
+          loading="eager"
           class="footer-logo-img"
           :class="{ 'is-loaded': logoLoaded }"
-          @load="logoLoaded = true"
-          @error="logoLoaded = true"
+          @load="settleLogoLoad"
+          @error="settleLogoLoad"
         />
         <div v-if="!logoLoaded" class="image-loader" aria-hidden="true">
           <NuxtImg
@@ -41,10 +42,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted } from "vue";
+import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 const { t } = useI18n();
-const logoLoaded = ref(false);
+const {
+  arm: armLogoLoad,
+  isLoaded: logoLoaded,
+  settle: settleLogoLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 5000 });
+
+onMounted(() => {
+  armLogoLoad();
+});
 </script>
 
 <style scoped>

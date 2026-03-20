@@ -61,8 +61,8 @@
                 format="webp"
                 class="lp-visual-img"
                 :class="{ 'is-loaded': imgLoaded }"
-                @load="imgLoaded = true"
-                @error="imgLoaded = true"
+                @load="settleImgLoad"
+                @error="settleImgLoad"
               />
               <div
                 v-if="!imgLoaded"
@@ -148,11 +148,20 @@
 definePageMeta({ layout: "default" });
 
 import { useSiteNavStore } from "~/stores/site-nav";
+import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 const { locale, t } = useI18n();
 const { setupScrollDepth } = useMetaEvents();
 const siteNavStore = useSiteNavStore();
-const imgLoaded = ref(false);
+const {
+  arm: armImgLoad,
+  isLoaded: imgLoaded,
+  settle: settleImgLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
+
+onMounted(() => {
+  armImgLoad();
+});
 
 watchEffect(() => {
   siteNavStore.setNav({

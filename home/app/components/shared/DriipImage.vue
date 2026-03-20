@@ -1,6 +1,5 @@
 <template>
   <div
-    ref="rootRef"
     :class="[
       'driip-image',
       {
@@ -48,7 +47,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, useAttrs, watch } from "vue";
+import { computed, useAttrs, watch } from "vue";
+import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 defineOptions({ inheritAttrs: false });
 
@@ -91,8 +91,11 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
-const rootRef = ref<HTMLElement | null>(null);
-const isLoaded = ref(false);
+const {
+  arm: armImageLoad,
+  isLoaded,
+  settle: settleImageLoad,
+} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
 
 const wrapperStyle = computed(() => {
   if (!props.intrinsic) return undefined;
@@ -120,42 +123,18 @@ const imageAttrs = computed(() => {
 watch(
   () => props.src,
   () => {
-    isLoaded.value = false;
-    queueImageLoadCheck();
+    armImageLoad();
   },
   { immediate: true }
 );
 
-onMounted(() => {
-  queueImageLoadCheck();
-});
-
-function queueImageLoadCheck(): void {
-  if (typeof window === "undefined") return;
-
-  window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => {
-      const img = rootRef.value?.querySelector(
-        ".driip-image-img"
-      ) as HTMLImageElement | null;
-      if (
-        img instanceof HTMLImageElement &&
-        img.complete &&
-        img.naturalWidth > 0
-      ) {
-        isLoaded.value = true;
-      }
-    });
-  });
-}
-
 function onLoad(event: string | Event): void {
-  isLoaded.value = true;
+  settleImageLoad();
   emit("load", event);
 }
 
 function onError(event: string | Event): void {
-  isLoaded.value = true;
+  settleImageLoad();
   emit("error", event);
 }
 </script>
