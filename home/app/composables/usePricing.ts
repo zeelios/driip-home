@@ -7,8 +7,9 @@ export const BASE_BOX_COMPARE_PRICE = 2300000;
 export const EXTRA_PROMO_RATE = 0.2;
 export const BOX_TIERS: BoxTier[] = [
   { boxes: 1, total: 980000 },
-  { boxes: 2, total: 1580000 },
-  { boxes: 5, total: 3430000 },
+  { boxes: 2, total: 1760000 },
+  { boxes: 3, total: 2355000 },
+  { boxes: 5, total: 3700000 },
 ];
 
 const priceFormatter = new Intl.NumberFormat("vi-VN");

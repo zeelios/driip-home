@@ -40,7 +40,7 @@
       "sub": "ĐƯỢC THIẾT KẾ CHO NGƯỜI ĐÀN ÔNG\nKHÔNG CHẤP NHẬN THỎA HIỆP",
       "cta": "MUA ONLINE — GIẢM THÊM 20%",
       "priceLabel": "GIÁ",
-      "priceValue": "TỪ 699K VND",
+      "priceValue": "TỪ 740K VND",
       "configLabel": "CẤU HÌNH",
       "configValue": "BRIEF / BOXER",
       "previewLabel": "XEM TRƯỚC",
@@ -164,7 +164,17 @@
       },
       "reviewOrder": "XÁC NHẬN ĐƠN HÀNG",
       "successTitle": "Đã nhận đơn hàng",
-      "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}."
+      "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}.",
+      "step1": "GIỎ HÀNG",
+      "step2": "THÔNG TIN",
+      "step3": "XÁC NHẬN",
+      "emptyTitle": "Giỏ hàng trống",
+      "emptySub": "Quay lại phần sản phẩm để thêm Brief hoặc Boxer vào giỏ hàng của bạn.",
+      "goProducts": "← XEM SẢN PHẨM",
+      "next": "TIẾP THEO",
+      "shippingInfo": "THÔNG TIN GIAO HÀNG",
+      "back": "← QUAY LẠI",
+      "editInfo": "← SỬA THÔNG TIN",
     }
   },
   "tee": {

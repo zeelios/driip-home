@@ -40,7 +40,7 @@
               <span v-if="currentStep > n">✓</span>
               <span v-else>{{ n }}</span>
             </div>
-            <span class="os-progress-label">{{ stepLabels[n - 1] }}</span>
+            <span class="os-progress-label">{{ t(`ck.order.step${n}`) }}</span>
           </div>
           <div class="os-progress-track">
             <div class="os-progress-fill" :style="{ width: progressWidth }" />
@@ -54,17 +54,16 @@
           <!-- Empty cart -->
           <div v-if="cart.isEmpty" class="os-empty-cart">
             <p class="os-empty-icon">🛒</p>
-            <p class="os-empty-title">Giỏ hàng trống</p>
+            <p class="os-empty-title">{{ t("ck.order.emptyTitle") }}</p>
             <p class="os-empty-sub">
-              Quay lại phần sản phẩm để thêm Brief hoặc Boxer vào giỏ hàng của
-              bạn.
+              {{ t("ck.order.emptySub") }}
             </p>
             <button
               type="button"
               class="os-go-products-btn"
               @click="scrollToProducts"
             >
-              ← XEM SẢN PHẨM
+              {{ t("ck.order.goProducts") }}
             </button>
           </div>
 
@@ -180,7 +179,7 @@
                 trackInitiateCheckout(1, cart.grandFinalTotal);
               "
             >
-              TIẾP THEO — THÔNG TIN GIAO HÀNG
+              {{ t("ck.order.next") }} — {{ t("ck.order.shippingInfo") }}
               <span class="os-next-arrow">→</span>
             </button>
           </template>
@@ -493,7 +492,11 @@ const extraPromoPercent = `${Math.round(EXTRA_PROMO_RATE * 100)}%`;
 
 /* ── Step wizard ──────────────────────────────────────────────── */
 const currentStep = ref(1);
-const stepLabels = ["GIỎ HÀNG", "THÔNG TIN", "XÁC NHẬN"];
+const stepLabels = computed(() => [
+  t("ck.order.step1"),
+  t("ck.order.step2"),
+  t("ck.order.step3"),
+]);
 
 const step2Valid = computed(
   () =>
