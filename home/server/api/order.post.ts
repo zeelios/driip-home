@@ -1,4 +1,8 @@
 import { queueOrderRows, reserveOrderId } from "../utils/order-queue";
+import {
+  BASE_BOX_COMPARE_PRICE,
+  getFinalTotal,
+} from "~/composables/usePricing";
 
 interface CartItemPayload {
   sku: string;
@@ -80,9 +84,8 @@ export default defineEventHandler(async (event) => {
 
     for (const item of items) {
       const quantity = Number(item.boxes) || 1;
-      const itemFinalTotal =
-        quantity > 0 ? item.finalTotal / quantity : item.finalTotal;
-      const itemOriginalPrice = 2300000;
+      const itemFinalTotal = getFinalTotal(quantity);
+      const itemOriginalPrice = BASE_BOX_COMPARE_PRICE * quantity;
       const itemDiscount = itemOriginalPrice - itemFinalTotal;
 
       const formattedSku = item.sku
@@ -119,7 +122,7 @@ export default defineEventHandler(async (event) => {
           "Website", // P: Sales
           "", // Q: Comestic Tracking
           "", // R: Global Tracking
-          isFirstRow ? body.dob ?? "" : "", // Q: DoB
+          isFirstRow ? body.dob ?? "" : "", // S: DoB
         ]);
 
         if (i === 0) isFirstCustomerRow = false;

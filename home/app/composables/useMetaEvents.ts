@@ -230,12 +230,12 @@ export function useMetaEvents() {
    * Purchase — fires on successful order form submit.
    * Customer info: city, client_user_agent, firstName, lastName, phone.
    */
-  function trackPurchase(order: OrderData) {
+  async function trackPurchase(order: OrderData): Promise<void> {
     const event_id = genEventId();
     const value = order.value ?? (order.sku ? SKU_PRICES[order.sku] ?? 89 : 89);
     const custom_data = buildMetaPurchaseCustomData({ sku: order.sku, value });
     pixel("track", "Purchase", custom_data, event_id);
-    capi(
+    await capi(
       "Purchase",
       {
         ...getFbCookies(),

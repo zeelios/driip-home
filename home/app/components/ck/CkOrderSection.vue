@@ -552,7 +552,7 @@ async function handleSubmit(): Promise<void> {
       },
     });
 
-    trackPurchase({
+    const purchasePayload = {
       firstName: order.value.firstName,
       lastName: order.value.lastName,
       phone: order.value.phone,
@@ -562,10 +562,15 @@ async function handleSubmit(): Promise<void> {
       country: "VN",
       street: order.value.fullAddress,
       value: cart.grandFinalTotal,
-    });
+    };
 
     orderState.value = "success";
     cart.clear();
+
+    const trackPromise = trackPurchase(purchasePayload).catch(() => {
+      /* ignore tracking failures so cart cleanup is not reverted */
+    });
+    void trackPromise;
   } catch {
     orderState.value = "error";
     window.setTimeout(() => {
