@@ -26,9 +26,18 @@ function sha256(value: string) {
     .digest("hex");
 }
 
-function normalizePhone(raw: string) {
-  // Meta expects digits only in E.164 format (no leading +)
-  return raw.replace(/\D/g, "");
+function normalizePhone(raw: string): string {
+  // Strip all non-digit characters first
+  const digits = raw.replace(/\D/g, "");
+
+  // Convert Vietnamese local format (0xxx) to E.164 digits (84xxx)
+  // e.g. 0901234567 → 84901234567
+  if (digits.startsWith("0")) {
+    return "84" + digits.slice(1);
+  }
+
+  // Already in international format (84xxx), return as-is
+  return digits;
 }
 
 function getClientIpAddress(event: Parameters<typeof getRequestIP>[0]) {
