@@ -69,7 +69,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const fullName = `${lastName} ${firstName}`.trim();
-  const address = `${fullAddress || street}, ${province} ${zipCode}`;
+  const addressParts = [fullAddress || street, province].filter(Boolean);
+  const address = `${addressParts.join(", ")}${zipCode ? ` ${zipCode}` : ""}`;
   const cleanPhone = `'${phone}`;
 
   try {
