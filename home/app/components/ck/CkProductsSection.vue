@@ -5,42 +5,6 @@
         <p class="label reveal">{{ t("ck.products.label") }}</p>
         <h2 class="products-title reveal">{{ t("ck.products.title") }}</h2>
 
-        <!-- ── Cart summary bar ──────────────────────────────────── -->
-        <Transition name="cart-bar">
-          <div v-if="!cart.isEmpty" class="cart-bar reveal">
-            <div class="cart-bar-left">
-              <span class="cart-bar-count">{{ cart.itemCount }} sản phẩm</span>
-              <span class="cart-bar-items">
-                <span
-                  v-for="(item, i) in cart.items"
-                  :key="item.id"
-                  class="cart-bar-pill"
-                >
-                  {{ item.skuLabel }} · {{ item.size }} · {{ item.colorLabel }}
-                  <button
-                    class="cart-bar-remove"
-                    @click="cart.removeItem(item.id)"
-                    aria-label="Xóa"
-                  >
-                    ✕
-                  </button>
-                </span>
-              </span>
-            </div>
-            <div class="cart-bar-pricing">
-              <span class="cart-bar-compare">{{
-                cart.formattedGrandCompareTotal
-              }}</span>
-              <span class="cart-bar-final">{{
-                cart.formattedGrandFinalTotal
-              }}</span>
-            </div>
-            <button class="cart-bar-cta" @click="$emit('go-to-order')">
-              ĐẶT HÀNG →
-            </button>
-          </div>
-        </Transition>
-
         <!-- ── Mobile tab switcher (hidden on desktop via CSS) ──── -->
         <div class="product-tabs">
           <button

@@ -118,15 +118,22 @@ export const useCartStore = defineStore("cart", () => {
       "id" | "compareTotal" | "tierTotal" | "extraDiscount" | "finalTotal"
     >
   ): void {
-    const id = `${item.sku}-${item.size}-${item.color}-${Date.now()}`;
-    items.value.push({
-      ...item,
-      id,
-      compareTotal: 0,
-      tierTotal: 0,
-      extraDiscount: 0,
-      finalTotal: 0,
-    });
+    const existing = items.value.find(
+      (i) => i.sku === item.sku && i.size === item.size && i.color === item.color
+    );
+    if (existing) {
+      existing.boxes += item.boxes;
+    } else {
+      const id = `${item.sku}-${item.size}-${item.color}-${Date.now()}`;
+      items.value.push({
+        ...item,
+        id,
+        compareTotal: 0,
+        tierTotal: 0,
+        extraDiscount: 0,
+        finalTotal: 0,
+      });
+    }
     syncItemTotals();
   }
 
