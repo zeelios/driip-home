@@ -25,6 +25,7 @@
           :height="loaderSize"
           quality="70"
           format="webp"
+          fit="contain"
         />
       </div>
     </Transition>
@@ -201,6 +202,11 @@ function onError(event: string | Event): void {
 .driip-image-loader-logo {
   width: 64px;
   height: auto;
+  max-width: min(84px, 34%);
+  max-height: min(84px, 34%);
+  object-fit: contain;
+  object-position: center;
+  display: block;
   opacity: 0.9;
   animation: driip-logo-pulse 1.2s ease-in-out infinite;
   filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));

@@ -94,6 +94,7 @@
                   height="64"
                   quality="70"
                   format="webp"
+                  fit="contain"
                 />
               </div>
               <div class="color-overlay">
@@ -260,6 +261,7 @@
                   height="64"
                   quality="70"
                   format="webp"
+                  fit="contain"
                 />
               </div>
               <div class="color-overlay">
@@ -435,8 +437,7 @@ import { storeToRefs } from "pinia";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
 import { useCartStore } from "~/stores/cart";
 import { useMetaEvents } from "~/composables/useMetaEvents";
-import { getFinalTotal } from "~/composables/usePricing";
-import { formatVndCurrency } from "~/composables/usePricing";
+import { formatVndCurrency, getTierTotal } from "~/utils/pricing";
 import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 defineEmits<{ "go-to-order": [] }>();
@@ -750,6 +751,11 @@ function applySizeGuide(size: string): void {
 .image-loader-logo {
   width: 56px;
   height: auto;
+  max-width: min(76px, 28%);
+  max-height: min(76px, 28%);
+  object-fit: contain;
+  object-position: center;
+  display: block;
   opacity: 0.9;
   animation: pulse 1.2s ease-in-out infinite;
   filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));

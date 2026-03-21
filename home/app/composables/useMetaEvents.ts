@@ -4,8 +4,8 @@ import {
   META_ORDER_PROFILE_COOKIE_KEY,
   type MetaOrderProfileCookie,
 } from "~/utils/meta-conversions";
-import { getFinalTotal } from "~/composables/usePricing";
 import { useTrackingDebug } from "~/composables/useTrackingDebug";
+import { getFinalTotal } from "~/utils/pricing";
 
 /**
  * Meta Pixel + CAPI event composable.
@@ -75,6 +75,10 @@ function getQueryStringValue(value: unknown): string | undefined {
 
 function buildFbcValue(clickId: string, timestamp = Date.now()) {
   return `fb.1.${timestamp}.${clickId}`;
+}
+
+interface CapiOptions {
+  mergeStoredProfile?: boolean;
 }
 
 export function useMetaEvents() {
@@ -163,11 +167,14 @@ export function useMetaEvents() {
     event_name: string,
     user_data: Record<string, unknown>,
     custom_data: Record<string, unknown>,
-    event_id: string
+    event_id: string,
+    options: CapiOptions = {}
   ) {
     if (!import.meta.client) return;
     const user_agent = navigator.userAgent;
-    const enrichedUserData = mergeOrderProfileIntoUserData(user_data);
+    const enrichedUserData = options.mergeStoredProfile
+      ? mergeOrderProfileIntoUserData(user_data)
+      : compactMetaObject(user_data);
     const response = await $fetch<{
       debug?: {
         client_ip?: string;
@@ -254,7 +261,8 @@ export function useMetaEvents() {
         gender: order.gender ?? undefined,
       },
       custom_data,
-      event_id
+      event_id,
+      { mergeStoredProfile: true }
     );
   }
 
@@ -266,7 +274,9 @@ export function useMetaEvents() {
     const v = value ?? SKU_PRICES[sku] ?? 89;
     const custom_data = buildMetaPurchaseCustomData({ sku, value: v });
     pixel("track", "AddToCart", custom_data, event_id);
-    capi("AddToCart", getFbCookies(), custom_data, event_id);
+    capi("AddToCart", getFbCookies(), custom_data, event_id, {
+      mergeStoredProfile: true,
+    });
   }
 
   /**
@@ -284,7 +294,9 @@ export function useMetaEvents() {
     const value = explicitValue ?? getFinalTotal(boxesOrValue);
     const custom_data = buildMetaPurchaseCustomData({ value });
     pixel("track", "InitiateCheckout", custom_data, event_id);
-    capi("InitiateCheckout", getFbCookies(), custom_data, event_id);
+    capi("InitiateCheckout", getFbCookies(), custom_data, event_id, {
+      mergeStoredProfile: true,
+    });
   }
 
   /**
@@ -305,7 +317,8 @@ export function useMetaEvents() {
         ...(lastName ? { lastName } : {}),
       },
       {},
-      event_id
+      event_id,
+      { mergeStoredProfile: true }
     );
   }
 
@@ -332,7 +345,8 @@ export function useMetaEvents() {
         ...(lastName ? { lastName } : {}),
       },
       { content_name: "Early Access" },
-      event_id
+      event_id,
+      { mergeStoredProfile: true }
     );
   }
 

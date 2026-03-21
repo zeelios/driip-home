@@ -24,6 +24,7 @@
             height="56"
             quality="70"
             format="webp"
+            fit="contain"
           />
         </div>
       </div>
@@ -109,7 +110,11 @@ onMounted(() => {
 .image-loader-logo {
   width: 72px;
   height: 72px;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+  object-position: center;
+  display: block;
   opacity: 0.9;
   animation: pulse 1.2s ease-in-out infinite;
   filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));

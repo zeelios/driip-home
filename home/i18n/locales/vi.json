@@ -144,10 +144,10 @@
       "colorPack": "Gói màu",
       "colorPackSub": "Bộ 3 chiếc",
       "colors": {
-        "black": "3× Đen thuần túy",
-        "white": "3× Trắng tinh khôi",
-        "grey": "3× Xám thanh lịch",
-        "mix": "Gói phối màu đa dạng"
+        "black": "3× Đen",
+        "white": "3× Trắng",
+        "grey": "3× Xám",
+        "mix": "Mix"
       },
       "submit": "XÁC NHẬN ĐƠN HÀNG — {price}đ",
       "fine": "Thanh toán khi nhận · Vận chuyển miễn phí toàn quốc · Mỗi hộp bao gồm 3 sản phẩm",
@@ -157,6 +157,10 @@
       "extraDiscount": "Giảm thêm từ website",
       "finalPerBox": "Giá cuối cùng mỗi hộp",
       "validate": {
+        "firstName": "Vui lòng nhập tên người nhận.",
+        "lastName": "Vui lòng nhập họ người nhận.",
+        "phone": "Vui lòng nhập số điện thoại.",
+        "fullAddress": "Vui lòng nhập địa chỉ giao hàng cụ thể.",
         "province": "Vui lòng chọn tỉnh hoặc thành phố.",
         "sku": "Vui lòng chọn sản phẩm.",
         "size": "Vui lòng chọn size.",

@@ -32,6 +32,7 @@
                 height="64"
                 quality="70"
                 format="webp"
+                fit="contain"
               />
             </div>
             <NuxtImg
@@ -61,6 +62,7 @@
                 height="56"
                 quality="70"
                 format="webp"
+                fit="contain"
               />
             </div>
             <div class="drop-badge">{{ t("home.drops.live") }}</div>
@@ -121,6 +123,7 @@
                 height="56"
                 quality="70"
                 format="webp"
+                fit="contain"
               />
             </div>
             <div class="drop-badge">{{ t("home.drops.comingSoon") }}</div>
@@ -144,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { formatVndCurrency, getTierTotal } from "~/composables/usePricing";
+import { formatVndCurrency, getTierTotal } from "~/utils/pricing";
 import { useStableImageLoad } from "~/composables/use-stable-image-load";
 const { t } = useI18n();
 const launchPrice = formatVndCurrency(getTierTotal(1));
@@ -260,6 +263,11 @@ onMounted(() => {
 .image-loader-logo {
   width: 56px;
   height: auto;
+  max-width: min(72px, 32%);
+  max-height: min(72px, 32%);
+  object-fit: contain;
+  object-position: center;
+  display: block;
   opacity: 0.9;
   animation: pulse 1.2s ease-in-out infinite;
   filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));

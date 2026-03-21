@@ -17,7 +17,7 @@ import {
   getFinalUnitPrice,
   getTierTotal,
   getTierUnitPrice,
-} from "~/composables/usePricing";
+} from "~/utils/pricing";
 import { getProvinceZipCode } from "~/data/vietnam-addresses";
 
 export interface SkuOption {
@@ -92,6 +92,29 @@ const colorToImage: Record<string, string> = {
 
 const idleDelayMs = 3000;
 const couponCode = "DRIIP20";
+const VIETNAM_PHONE_REGEX = /^0\d{9}$/;
+
+function normalizeVietnamPhoneInput(input: string): string {
+  const sanitized = input.replace(/[^\d+]/g, "");
+  if (!sanitized) return "";
+
+  if (sanitized.startsWith("+84")) {
+    return `0${sanitized.slice(3).replace(/\D/g, "").slice(0, 9)}`;
+  }
+
+  if (sanitized.startsWith("84")) {
+    return `0${sanitized.slice(2).replace(/\D/g, "").slice(0, 9)}`;
+  }
+
+  const digits = sanitized.replace(/\D/g, "");
+  if (!digits) return "";
+
+  if (digits.startsWith("0")) {
+    return digits.slice(0, 10);
+  }
+
+  return `0${digits.slice(0, 9)}`;
+}
 
 export const useCkUnderwearStore = defineStore("ck-underwear", () => {
   const { t, locale, setLocale } = useI18n();
@@ -257,29 +280,10 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
     const phone = order.value.phone.trim();
     if (!phone) return "";
 
-    if (!/^\+?\d+$/.test(phone)) {
+    if (!VIETNAM_PHONE_REGEX.test(phone)) {
       return locale.value === "vi"
-        ? "Số điện thoại chỉ được chứa số và dấu + ở đầu."
-        : "Phone number can only contain digits and an optional leading +.";
-    }
-
-    if (phone.includes("+") && !phone.startsWith("+")) {
-      return locale.value === "vi"
-        ? "Dấu + chỉ được đặt ở đầu số điện thoại."
-        : "The + sign is only allowed at the beginning of the phone number.";
-    }
-
-    const digits = phone.startsWith("+") ? phone.slice(1) : phone;
-    const maxLength = phone.startsWith("+")
-      ? 12
-      : phone.startsWith("0")
-      ? 11
-      : 12;
-
-    if (digits.length > maxLength) {
-      return locale.value === "vi"
-        ? `Số điện thoại tối đa ${maxLength} chữ số.`
-        : `Phone number can be at most ${maxLength} digits.`;
+        ? "Số điện thoại Việt Nam phải đủ 10 số và bắt đầu bằng 0."
+        : "Vietnam phone numbers must contain 10 digits and start with 0.";
     }
 
     return "";
@@ -313,24 +317,7 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
   function onProvinceChange(): void {}
 
   function normalizePhoneInput(input: string): void {
-    let sanitized = input.replace(/[^\d+]/g, "");
-    if (sanitized.includes("+")) {
-      sanitized = sanitized.startsWith("+")
-        ? `+${sanitized.slice(1).replace(/\+/g, "")}`
-        : sanitized.replace(/\+/g, "");
-    }
-
-    const digits = sanitized.startsWith("+") ? sanitized.slice(1) : sanitized;
-    const maxLength = sanitized.startsWith("+")
-      ? 12
-      : sanitized.startsWith("0")
-      ? 11
-      : 12;
-    const trimmedDigits = digits.slice(0, maxLength);
-
-    order.value.phone = sanitized.startsWith("+")
-      ? `+${trimmedDigits}`
-      : trimmedDigits;
+    order.value.phone = normalizeVietnamPhoneInput(input);
   }
 
   function prefillOrder(sku: string): void {

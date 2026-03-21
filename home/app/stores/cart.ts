@@ -6,7 +6,7 @@ import {
   getExtraPromoDiscountAmount,
   getFinalTotal,
   getTierTotal,
-} from "~/composables/usePricing";
+} from "~/utils/pricing";
 
 export interface CartItem {
   id: string;

@@ -94,7 +94,7 @@
       "phonePlaceholder": "+84 9XX XXX XXX",
       "optional": "(OPTIONAL)",
       "submit": "NOTIFY ME + LOCK MY CODE",
-      "fine": "By submitting you agree to receive updates and web-only offers from driip-", 
+      "fine": "By submitting you agree to receive updates and web-only offers from driip-",
       "successTitle": "YOU'RE ON THE LIST",
       "successBody": "Code {code} is locked in. We'll message you when it goes live."
     },
@@ -151,6 +151,10 @@
       "extraDiscount": "EXTRA WEBSITE OFF",
       "finalPerBox": "FINAL PRICE / BOX",
       "validate": {
+        "firstName": "Please enter the recipient's first name.",
+        "lastName": "Please enter the recipient's last name.",
+        "phone": "Please enter a phone number.",
+        "fullAddress": "Please enter the full delivery address.",
         "province": "Please select a province or city.",
         "sku": "Please select a product.",
         "size": "Please select a size.",

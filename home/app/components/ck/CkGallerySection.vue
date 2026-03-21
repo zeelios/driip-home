@@ -55,6 +55,7 @@
               class="image-loader-logo"
               width="72"
               height="72"
+              fit="contain"
             />
           </div>
           <div class="masonry-overlay">
@@ -105,6 +106,7 @@
                 class="image-loader-logo"
                 width="96"
                 height="96"
+                fit="contain"
               />
             </div>
             <p class="lb-caption">{{ activeLightboxItem.alt }}</p>
@@ -431,6 +433,11 @@ onUnmounted(() => {
 .image-loader-logo {
   width: 72px;
   height: auto;
+  max-width: min(96px, 30%);
+  max-height: min(96px, 30%);
+  object-fit: contain;
+  object-position: center;
+  display: block;
   opacity: 0.85;
   animation: pulse 1.2s ease-in-out infinite;
   filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));

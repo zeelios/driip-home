@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('avatar', 500)->nullable();
             $table->string('source', 100)->nullable(); // facebook, instagram, zalo, web, manual
             $table->uuid('referrer_id')->nullable();
-            $table->foreign('referrer_id')->references('id')->on('customers')->nullOnDelete();
             $table->string('referral_code', 20)->unique()->nullable();
             $table->jsonb('tags')->default('[]');
             $table->boolean('is_blocked')->default(false);
@@ -33,6 +32,13 @@ return new class extends Migration
             $table->string('zalo_id', 100)->nullable();
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::table('customers', function (Blueprint $table) {
+            $table->foreign('referrer_id')
+                ->references('id')
+                ->on('customers')
+                ->nullOnDelete();
         });
     }
 

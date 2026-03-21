@@ -8,6 +8,13 @@ declare global {
   }
 }
 
+type FbqArgs = [
+  eventType: string,
+  eventName: string,
+  params?: Record<string, unknown>,
+  options?: Record<string, unknown>
+];
+
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const pixelId = config.public.metaPixelId as string;
@@ -18,6 +25,25 @@ export default defineNuxtPlugin(() => {
         "[Meta Pixel] No NUXT_PUBLIC_META_PIXEL_ID set — pixel disabled"
       );
     return;
+  }
+
+  const pendingEvents: FbqArgs[] = [];
+  let flushTimer: ReturnType<typeof window.setInterval> | null = null;
+
+  function flushPendingEvents(): void {
+    if (typeof window === "undefined" || typeof window.fbq !== "function")
+      return;
+
+    while (pendingEvents.length > 0) {
+      const args = pendingEvents.shift();
+      if (!args) break;
+      window.fbq(...args);
+    }
+
+    if (flushTimer) {
+      window.clearInterval(flushTimer);
+      flushTimer = null;
+    }
   }
 
   // Inject the Meta Pixel base snippet + noscript fallback
@@ -52,8 +78,20 @@ export default defineNuxtPlugin(() => {
         params?: Record<string, unknown>,
         options?: Record<string, unknown>
       ) => {
-        if (typeof window !== "undefined" && typeof window.fbq === "function") {
-          window.fbq(eventType, eventName, params, options);
+        if (typeof window === "undefined") return;
+
+        const args: FbqArgs = [eventType, eventName, params, options];
+
+        if (typeof window.fbq === "function") {
+          window.fbq(...args);
+          return;
+        }
+
+        pendingEvents.push(args);
+
+        if (!flushTimer) {
+          flushTimer = window.setInterval(flushPendingEvents, 250);
+          window.setTimeout(flushPendingEvents, 0);
         }
       },
     },

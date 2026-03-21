@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 # Set working directory
 WORKDIR /app
@@ -11,23 +11,25 @@ RUN apt-get update && apt-get install -y \
     unzip \
     supervisor \
     postgresql-client \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
     libpq-dev \
+    libzip-dev \
     libonig-dev \
     libxml2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+# Install PHP extensions required by the app.
+# Several modules that used to be listed here are built into modern PHP already.
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-    pdo \
-    pdo_pgsql \
     bcmath \
-    ctype \
-    fileinfo \
-    json \
+    gd \
     mbstring \
-    openssl \
-    tokenizer \
+    pdo_pgsql \
+    pgsql \
+    zip \
     xml
 
 # Install Composer

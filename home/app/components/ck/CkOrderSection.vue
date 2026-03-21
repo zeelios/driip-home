@@ -26,7 +26,7 @@
       </div>
 
       <!-- ── FORM ────────────────────────────────────────────── -->
-      <form v-else class="os-form" @submit.prevent="handleSubmit">
+      <form v-else class="os-form" novalidate @submit.prevent="handleSubmit">
         <!-- Step progress bar -->
         <div class="os-progress" aria-label="Các bước đặt hàng">
           <div
@@ -46,6 +46,12 @@
             <div class="os-progress-fill" :style="{ width: progressWidth }" />
           </div>
         </div>
+
+        <Transition name="os-hint">
+          <p v-if="stepHint" class="os-step-hint">
+            {{ stepHint }}
+          </p>
+        </Transition>
 
         <!-- ═══════════════════════════════════════════════════
              STEP 1 — GIỎ HÀNG
@@ -190,34 +196,72 @@
         ════════════════════════════════════════════════════ -->
         <div v-show="currentStep === 2" class="os-panel">
           <div class="os-field-row">
-            <div class="os-field">
+            <div
+              class="os-field"
+              :class="{ 'is-invalid': isStep2FieldInvalid('firstName') }"
+            >
               <label>{{ t("ck.order.firstName") }}</label>
               <input
+                ref="firstNameField"
                 v-model="order.firstName"
                 type="text"
                 :placeholder="t('ck.order.firstNamePlaceholder')"
                 required
                 autocomplete="given-name"
+                :aria-invalid="isStep2FieldInvalid('firstName')"
+                :aria-describedby="
+                  isStep2FieldInvalid('firstName')
+                    ? 'os-first-name-error'
+                    : undefined
+                "
               />
+              <p
+                v-if="isStep2FieldInvalid('firstName')"
+                id="os-first-name-error"
+                class="os-field-err"
+              >
+                {{ step2FieldMessages.firstName }}
+              </p>
             </div>
-            <div class="os-field">
+            <div
+              class="os-field"
+              :class="{ 'is-invalid': isStep2FieldInvalid('lastName') }"
+            >
               <label>{{ t("ck.order.lastName") }}</label>
               <input
+                ref="lastNameField"
                 v-model="order.lastName"
                 type="text"
                 :placeholder="t('ck.order.lastNamePlaceholder')"
                 required
                 autocomplete="family-name"
+                :aria-invalid="isStep2FieldInvalid('lastName')"
+                :aria-describedby="
+                  isStep2FieldInvalid('lastName')
+                    ? 'os-last-name-error'
+                    : undefined
+                "
               />
+              <p
+                v-if="isStep2FieldInvalid('lastName')"
+                id="os-last-name-error"
+                class="os-field-err"
+              >
+                {{ step2FieldMessages.lastName }}
+              </p>
             </div>
           </div>
 
-          <div class="os-field">
+          <div
+            class="os-field"
+            :class="{ 'is-invalid': isStep2FieldInvalid('phone') }"
+          >
             <label>
               {{ t("ck.order.phone") }}
               <span class="os-required">*</span>
             </label>
             <input
+              ref="phoneField"
               v-model="order.phone"
               type="tel"
               :placeholder="t('ck.order.phonePlaceholder')"
@@ -225,12 +269,20 @@
               maxlength="13"
               required
               autocomplete="tel"
+              :aria-invalid="isStep2FieldInvalid('phone')"
+              :aria-describedby="
+                isStep2FieldInvalid('phone') ? 'os-phone-error' : undefined
+              "
               @input="
                 normalizePhoneInput(($event.target as HTMLInputElement).value)
               "
             />
-            <p v-if="phoneValidationMsg" class="os-field-err">
-              {{ phoneValidationMsg }}
+            <p
+              v-if="isStep2FieldInvalid('phone')"
+              id="os-phone-error"
+              class="os-field-err"
+            >
+              {{ step2FieldMessages.phone }}
             </p>
           </div>
 
@@ -249,25 +301,55 @@
 
           <div class="os-field">
             <label>{{ t("ck.order.province") }}</label>
-            <ZSelect
-              v-model="order.province"
-              embedded
-              :placeholder="t('ck.order.provincePlaceholder')"
-              :search-placeholder="t('ck.order.provincePlaceholder')"
-              :empty-state="t('ck.order.validate.province')"
-              :options="provinceOptions"
-            />
+            <div
+              ref="provinceField"
+              class="os-select-shell"
+              :class="{ 'is-invalid': isStep2FieldInvalid('province') }"
+            >
+              <ZSelect
+                v-model="order.province"
+                embedded
+                :placeholder="t('ck.order.provincePlaceholder')"
+                :search-placeholder="t('ck.order.provincePlaceholder')"
+                :empty-state="t('ck.order.validate.province')"
+                :options="provinceOptions"
+              />
+            </div>
+            <p
+              v-if="isStep2FieldInvalid('province')"
+              id="os-province-error"
+              class="os-field-err"
+            >
+              {{ step2FieldMessages.province }}
+            </p>
           </div>
 
-          <div class="os-field">
+          <div
+            class="os-field"
+            :class="{ 'is-invalid': isStep2FieldInvalid('fullAddress') }"
+          >
             <label>{{ t("ck.order.street") }}</label>
             <input
+              ref="fullAddressField"
               v-model="order.fullAddress"
               type="text"
               :placeholder="t('ck.order.streetPlaceholder')"
               required
               autocomplete="street-address"
+              :aria-invalid="isStep2FieldInvalid('fullAddress')"
+              :aria-describedby="
+                isStep2FieldInvalid('fullAddress')
+                  ? 'os-full-address-error'
+                  : undefined
+              "
             />
+            <p
+              v-if="isStep2FieldInvalid('fullAddress')"
+              id="os-full-address-error"
+              class="os-field-err"
+            >
+              {{ step2FieldMessages.fullAddress }}
+            </p>
           </div>
 
           <!-- Optional: DoB + Gender row -->
@@ -330,8 +412,7 @@
             <button
               type="button"
               class="os-next-btn os-next-btn--grow"
-              :disabled="!step2Valid"
-              @click="currentStep = 3"
+              @click="goToReviewStep"
             >
               {{ t("ck.order.reviewOrder") || "XÁC NHẬN ĐƠN HÀNG" }} →
             </button>
@@ -450,7 +531,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, nextTick, ref, watch, type Ref } from "vue";
 import { storeToRefs } from "pinia";
 import { vietnamProvinces } from "~/data/vietnam-addresses";
 import { useMetaEvents } from "~/composables/useMetaEvents";
@@ -460,7 +541,7 @@ import {
   EXTRA_PROMO_RATE,
   formatVnd,
   formatVndCurrency,
-} from "~/composables/usePricing";
+} from "~/utils/pricing";
 
 const { t } = useI18n();
 const store = useCkUnderwearStore();
@@ -492,20 +573,65 @@ const extraPromoPercent = `${Math.round(EXTRA_PROMO_RATE * 100)}%`;
 
 /* ── Step wizard ──────────────────────────────────────────────── */
 const currentStep = ref(1);
-const stepLabels = computed(() => [
-  t("ck.order.step1"),
-  t("ck.order.step2"),
-  t("ck.order.step3"),
-]);
+const stepHint = ref("");
+const step2Attempted = ref(false);
+const firstNameField = ref<HTMLInputElement | null>(null);
+const lastNameField = ref<HTMLInputElement | null>(null);
+const phoneField = ref<HTMLInputElement | null>(null);
+const provinceField = ref<HTMLElement | null>(null);
+const fullAddressField = ref<HTMLInputElement | null>(null);
+
+type Step2FieldKey =
+  | "firstName"
+  | "lastName"
+  | "phone"
+  | "province"
+  | "fullAddress";
+
+const step2FieldOrder: Step2FieldKey[] = [
+  "firstName",
+  "lastName",
+  "phone",
+  "province",
+  "fullAddress",
+];
+
+const step2FieldRefs: Record<Step2FieldKey, Ref<HTMLElement | null>> = {
+  firstName: firstNameField,
+  lastName: lastNameField,
+  phone: phoneField,
+  province: provinceField,
+  fullAddress: fullAddressField,
+};
+
+const step2FieldMessages = computed<Record<Step2FieldKey, string>>(() => ({
+  firstName:
+    order.value.firstName.trim() !== ""
+      ? ""
+      : t("ck.order.validate.firstName"),
+  lastName:
+    order.value.lastName.trim() !== ""
+      ? ""
+      : t("ck.order.validate.lastName"),
+  phone:
+    order.value.phone.trim() === ""
+      ? t("ck.order.validate.phone")
+      : phoneValidationMsg.value,
+  province: order.value.province ? "" : t("ck.order.validate.province"),
+  fullAddress:
+    order.value.fullAddress.trim() !== ""
+      ? ""
+      : t("ck.order.validate.fullAddress"),
+}));
 
 const step2Valid = computed(
   () =>
-    !!order.value.firstName &&
-    !!order.value.lastName &&
-    !!order.value.phone &&
+    !!order.value.firstName.trim() &&
+    !!order.value.lastName.trim() &&
+    !!order.value.phone.trim() &&
     !phoneValidationMsg.value &&
     !!order.value.province &&
-    !!order.value.fullAddress
+    !!order.value.fullAddress.trim()
 );
 
 const progressWidth = computed(() => {
@@ -523,9 +649,117 @@ const cartItemsSummary = computed(() =>
     .join(" + ")
 );
 
+function getFirstInvalidStep2Field(): Step2FieldKey | null {
+  return (
+    step2FieldOrder.find((field) => step2FieldMessages.value[field] !== "") ??
+    null
+  );
+}
+
+function isStep2FieldInvalid(field: Step2FieldKey): boolean {
+  return step2Attempted.value && step2FieldMessages.value[field] !== "";
+}
+
+function scrollOrderSectionIntoView(): void {
+  document.getElementById("order")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
+async function scrollToStep2Field(field: Step2FieldKey): Promise<void> {
+  await nextTick();
+  const el = step2FieldRefs[field].value;
+  if (!el) {
+    scrollOrderSectionIntoView();
+    return;
+  }
+
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    window.setTimeout(() => el.focus({ preventScroll: true }), 180);
+    return;
+  }
+
+  const focusable = el.querySelector<HTMLElement>(
+    "input, button, [tabindex]:not([tabindex='-1'])"
+  );
+  window.setTimeout(() => focusable?.focus?.({ preventScroll: true }), 180);
+}
+
+async function showStep2ValidationState(): Promise<void> {
+  step2Attempted.value = true;
+  const firstInvalidField = getFirstInvalidStep2Field();
+
+  if (!firstInvalidField) {
+    stepHint.value = "";
+    return;
+  }
+
+  stepHint.value =
+    "Thong tin giao hang chua day du. Vui long kiem tra cac truong duoc danh dau.";
+  currentStep.value = 2;
+  await scrollToStep2Field(firstInvalidField);
+}
+
+async function goToReviewStep(): Promise<void> {
+  if (cart.isEmpty) {
+    currentStep.value = 1;
+    stepHint.value = t("ck.order.emptySub");
+    scrollOrderSectionIntoView();
+    return;
+  }
+
+  if (!step2Valid.value) {
+    await showStep2ValidationState();
+    return;
+  }
+
+  stepHint.value = "";
+  currentStep.value = 3;
+  scrollOrderSectionIntoView();
+}
+
+watch(
+  () => currentStep.value,
+  (step) => {
+    if (step !== 2) {
+      stepHint.value = "";
+      if (step === 1) {
+        step2Attempted.value = false;
+      }
+    }
+  }
+);
+
+watch(
+  () => [
+    order.value.firstName,
+    order.value.lastName,
+    order.value.phone,
+    order.value.province,
+    order.value.fullAddress,
+  ],
+  () => {
+    if (step2Attempted.value && step2Valid.value) {
+      stepHint.value = "";
+    }
+  }
+);
+
 /* ── Submit ───────────────────────────────────────────────────── */
 async function handleSubmit(): Promise<void> {
   if (cart.isEmpty || orderState.value === "loading") return;
+  if (!step2Valid.value) {
+    await showStep2ValidationState();
+    return;
+  }
+  if (currentStep.value !== 3) {
+    currentStep.value = 3;
+    scrollOrderSectionIntoView();
+    return;
+  }
 
   orderState.value = "loading";
   try {
@@ -569,6 +803,9 @@ async function handleSubmit(): Promise<void> {
     void trackPromise;
   } catch {
     orderState.value = "error";
+    stepHint.value =
+      "Khong the gui don hang luc nay. Vui long kiem tra lai thong tin va thu lai.";
+    scrollOrderSectionIntoView();
     window.setTimeout(() => {
       orderState.value = "idle";
     }, 3000);
@@ -1107,6 +1344,32 @@ function scrollToProducts(): void {
 
 .os-field input::placeholder {
   color: rgba(255, 255, 255, 0.18);
+}
+
+.os-step-hint {
+  margin: -20px 0 28px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 140, 107, 0.3);
+  background: rgba(255, 140, 107, 0.08);
+  color: #ffb69f;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
+
+.os-field.is-invalid label,
+.os-select-shell.is-invalid + .os-field-err,
+.os-field.is-invalid .os-field-err {
+  color: #ffb69f;
+}
+
+.os-field.is-invalid {
+  border-bottom-color: rgba(255, 140, 107, 0.35);
+}
+
+.os-field.is-invalid input,
+.os-select-shell.is-invalid {
+  box-shadow: inset 0 -1px 0 rgba(255, 140, 107, 0.75);
 }
 
 .os-field-err {
