@@ -18,7 +18,7 @@ export interface CartItem {
   colorLabel: string;
   compareTotal: number; // original price (BASE × boxes)
   tierTotal: number; // after bundle/tier deal
-  extraDiscount: number; // extra 20% off (DRIIP20)
+  extraDiscount: number; // extra 10% website discount
   finalTotal: number; // tierTotal − extraDiscount
 }
 

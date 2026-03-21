@@ -17,6 +17,7 @@ import { getRequestHeader, getRequestIP } from "h3";
 import {
   buildMetaCapiEventPayload,
   buildMetaUserData,
+  compactMetaObject,
 } from "~/utils/meta-conversions";
 
 function sha256(value: string) {
@@ -106,8 +107,51 @@ export default defineEventHandler(async (event) => {
   try {
     const userAgent = getRequestHeader(event, "user-agent") ?? undefined;
     const debugMeta = {
-      clientIp,
-      userAgent,
+      client_ip: clientIp,
+      user_agent: userAgent,
+      normalized_user_data: compactMetaObject({
+        email:
+          typeof user_data?.email === "string"
+            ? user_data.email.trim().toLowerCase()
+            : undefined,
+        phone:
+          typeof user_data?.phone === "string"
+            ? normalizePhone(user_data.phone)
+            : undefined,
+        firstName:
+          typeof user_data?.firstName === "string"
+            ? user_data.firstName.trim().toLowerCase()
+            : undefined,
+        lastName:
+          typeof user_data?.lastName === "string"
+            ? user_data.lastName.trim().toLowerCase()
+            : undefined,
+        city:
+          typeof user_data?.city === "string"
+            ? user_data.city.trim().toLowerCase()
+            : undefined,
+        state:
+          typeof user_data?.state === "string"
+            ? user_data.state.trim().toLowerCase()
+            : undefined,
+        country:
+          typeof user_data?.country === "string"
+            ? user_data.country.trim().toLowerCase()
+            : undefined,
+        zip:
+          typeof user_data?.zip === "string"
+            ? user_data.zip.trim().toLowerCase()
+            : undefined,
+        dob:
+          typeof user_data?.dob === "string"
+            ? user_data.dob.trim()
+            : undefined,
+        gender:
+          typeof user_data?.gender === "string"
+            ? user_data.gender.trim().toLowerCase()
+            : undefined,
+      }),
+      hashed_user_data: hashedUser,
     };
     const debugPayload = {
       event_name,

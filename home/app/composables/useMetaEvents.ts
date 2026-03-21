@@ -179,6 +179,8 @@ export function useMetaEvents() {
       debug?: {
         client_ip?: string;
         user_agent?: string;
+        normalized_user_data?: Record<string, unknown>;
+        hashed_user_data?: Record<string, unknown>;
       };
     }>("/api/meta-capi", {
       method: "POST",
@@ -196,7 +198,9 @@ export function useMetaEvents() {
     dbg("capi", event_name, {
       event_id,
       ...custom_data,
-      _userData: enrichedUserData,
+      _userData:
+        response?.debug?.normalized_user_data ?? enrichedUserData,
+      _hashedUserData: response?.debug?.hashed_user_data,
       _request: {
         event_id,
         clientIp: response?.debug?.client_ip,

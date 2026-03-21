@@ -159,11 +159,11 @@
                       class="atc-box"
                       :class="{
                         active: briefDraft.boxes === opt.boxes,
-                        best: opt.boxes === 3,
+                        best: opt.boxes === 5,
                       }"
                       @click="briefDraft.boxes = opt.boxes"
                     >
-                      <span v-if="opt.boxes === 3" class="atc-best"
+                      <span v-if="opt.boxes === 5" class="atc-best"
                         >TIẾT KIỆM</span
                       >
                       <span class="atc-box-count">{{ opt.boxes }} hộp</span>
@@ -323,11 +323,11 @@
                       class="atc-box"
                       :class="{
                         active: boxerDraft.boxes === opt.boxes,
-                        best: opt.boxes === 3,
+                        best: opt.boxes === 5,
                       }"
                       @click="boxerDraft.boxes = opt.boxes"
                     >
-                      <span v-if="opt.boxes === 3" class="atc-best"
+                      <span v-if="opt.boxes === 5" class="atc-best"
                         >TIẾT KIỆM</span
                       >
                       <span class="atc-box-count">{{ opt.boxes }} hộp</span>

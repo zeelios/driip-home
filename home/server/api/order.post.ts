@@ -12,6 +12,16 @@ interface CartItemPayload {
   boxes: number;
 }
 
+function allocateEvenly(total: number, parts: number): number[] {
+  if (parts <= 0) return [];
+  const base = Math.floor(total / parts);
+  const remainder = total - base * parts;
+
+  return Array.from({ length: parts }, (_, index) =>
+    index < remainder ? base + 1 : base
+  );
+}
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
@@ -76,19 +86,24 @@ export default defineEventHandler(async (event) => {
     const orderId = await reserveOrderId();
     const rows: (string | number)[][] = [];
     let isFirstCustomerRow = true;
-    let totalCompare = 0;
-    let totalTier = 0;
-    let totalFinal = 0;
+
+    const totalBoxes = items.reduce(
+      (sum, item) => sum + (Number(item.boxes) || 1),
+      0
+    );
+    const totalCompare = BASE_BOX_COMPARE_PRICE * totalBoxes;
+    const totalTier = getTierTotal(totalBoxes);
+    const totalFinal = getFinalTotal(totalBoxes);
+    const totalDiscount = totalCompare - totalFinal;
+
+    const comparePerBox = allocateEvenly(totalCompare, totalBoxes);
+    const discountPerBox = allocateEvenly(totalDiscount, totalBoxes);
+    const finalPerBox = allocateEvenly(totalFinal, totalBoxes);
+
+    let boxCursor = 0;
 
     for (const item of items) {
       const quantity = Number(item.boxes) || 1;
-      const itemFinalTotal = getFinalTotal(quantity);
-      const itemTierTotal = getTierTotal(quantity);
-      const itemOriginalPrice = BASE_BOX_COMPARE_PRICE * quantity;
-      const itemDiscount = itemOriginalPrice - itemFinalTotal;
-      totalCompare += itemOriginalPrice;
-      totalTier += itemTierTotal;
-      totalFinal += itemFinalTotal;
 
       const formattedSku = item.sku
         .replace("ck-", "cK ")
@@ -104,6 +119,9 @@ export default defineEventHandler(async (event) => {
 
       for (let i = 0; i < quantity; i++) {
         const isFirstRow = isFirstCustomerRow && i === 0;
+        const rowCompare = comparePerBox[boxCursor] ?? 0;
+        const rowDiscount = discountPerBox[boxCursor] ?? 0;
+        const rowFinal = finalPerBox[boxCursor] ?? 0;
 
         rows.push([
           orderId, // A: Mã Đơn
@@ -116,16 +134,18 @@ export default defineEventHandler(async (event) => {
           isFirstRow ? cleanPhone : "", // H: SĐT
           isFirstRow ? fullName : "", // I: Tên
           isFirstRow ? address : "", // J: Địa Chỉ
-          itemOriginalPrice, // K: Tổng Tiền
-          itemDiscount, // L: Chiết Khấu
+          rowCompare, // K: Tổng Tiền
+          rowDiscount, // L: Chiết Khấu
           "0", // M: Đặt Cọc
-          itemFinalTotal, // N: Dư Nợ
+          rowFinal, // N: Dư Nợ
           isFirstRow ? note ?? "" : "", // O: Note
           "Website", // P: Sales
           "", // Q: Comestic Tracking
           "", // R: Global Tracking
           isFirstRow ? body.dob ?? "" : "", // S: DoB
         ]);
+
+        boxCursor += 1;
 
         if (i === 0) isFirstCustomerRow = false;
       }

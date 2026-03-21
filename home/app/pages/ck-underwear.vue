@@ -56,13 +56,14 @@ useHead({
       name: "description",
       content:
         locale.value === "vi"
-          ? "Calvin Klein Boxer & Brief SS26 — Đặt hàng sớm với mã DRIIP20 giảm 20%. Bộ 3 sản phẩm chất liệu modal cao cấp."
-          : "Calvin Klein Boxer & Brief — SS26 first drop. Order now with 20% off. Use code DRIIP20. Premium modal-cotton 3-piece sets.",
+          ? "Calvin Klein Boxer & Brief SS26 — Giá website với ưu đãi thêm 10%. Giá từ 882.000đ/hộp, ưu đãi tốt hơn khi mua nhiều hộp."
+          : "Calvin Klein Boxer & Brief — SS26 first drop. Website pricing includes an extra 10% off. Prices start from 882,000đ per box with better rates on multi-box orders.",
     },
     { property: "og:title", content: "driip- | CK Boxer & Brief" },
     {
       property: "og:description",
-      content: "Two fits. One standard. Order now with 20% off.",
+      content:
+        "Two fits. One standard. Website pricing includes an extra 10% off, starting from 882,000đ per box.",
     },
   ],
 });

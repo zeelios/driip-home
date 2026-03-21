@@ -160,14 +160,7 @@
                   >−{{ formatVndCurrency(cart.grandExtraDiscount) }}</span
                 >
               </div>
-              <!-- Level 4: Website coupon (DRIIP20 = extra×2 effectively) -->
-              <div class="os-cart-total-row">
-                <span class="os-total-label">
-                  Mã website x2
-                  <span class="os-total-badge white">DRIIP20</span>
-                </span>
-                <span class="os-total-val white">đã áp dụng ✓</span>
-              </div>
+
               <div class="os-cart-divider" />
               <div class="os-cart-total-row total">
                 <span class="os-total-label">TỔNG CỘNG</span>
@@ -486,13 +479,7 @@
                 >−{{ formatVndCurrency(cart.grandExtraDiscount) }}</span
               >
             </div>
-            <div class="os-price-row">
-              <span class="os-total-label">
-                Mã website x2
-                <span class="os-total-badge white">DRIIP20</span>
-              </span>
-              <span class="os-total-val white">đã áp dụng ✓</span>
-            </div>
+
             <div class="os-price-divider" />
             <div class="os-price-row total">
               <span>TỔNG CỘNG</span>

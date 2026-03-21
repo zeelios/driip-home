@@ -32,11 +32,11 @@ export default {
     hero: {
       pre: "CALVIN KLEIN ESSENTIALS · SS26",
       sub: "ENGINEERED FOR THE MAN\nWHO REFUSES TO COMPROMISE",
-      cta: "ORDER EARLY — 20% OFF",
+      cta: "ORDER NOW — WEBSITE 10% OFF",
     },
     strip: {
       shipping: "FREE SHIPPING",
-      offer: "20% OFF — CODE DRIIP20",
+      offer: "WEBSITE PRICING — EXTRA 10% OFF",
       stock: "LIMITED STOCK",
     },
     products: {
@@ -69,8 +69,8 @@ export default {
     },
     offer: {
       label: "EXCLUSIVE OFFER",
-      title: "20% OFF\nYOUR FIRST ORDER",
-      body: "Reserved for early access members only. One code per customer. Applied automatically at checkout on launch day.",
+      title: "WEBSITE PRICING\nEXTRA 10% OFF",
+      body: "Website pricing already includes the extra 10% discount. Better rates apply automatically on higher box quantities.",
       yourCode: "YOUR CODE",
       validity: "Valid until launch day · Single use · CK Boxer & Brief",
       copy: "COPY",
@@ -80,7 +80,7 @@ export default {
     access: {
       label: "GET NOTIFIED",
       title: "FIRST TO KNOW.\nFIRST TO OWN.",
-      sub: "Drop your details and we'll notify you the moment stock goes live — with your 20% off code locked in.",
+      sub: "Drop your details and we'll notify you the moment stock goes live with the latest website pricing and availability updates.",
       name: "FULL NAME",
       namePlaceholder: "Your name",
       email: "EMAIL ADDRESS",
@@ -88,10 +88,10 @@ export default {
       phone: "PHONE",
       phonePlaceholder: "+84 9XX XXX XXX",
       optional: "(OPTIONAL)",
-      submit: "NOTIFY ME + LOCK MY CODE",
+      submit: "NOTIFY ME WHEN IT GOES LIVE",
       fine: "By submitting you agree to receive launch communications from driip-",
       successTitle: "YOU'RE ON THE LIST",
-      successBody: "Code {code} is locked in. We'll message you when it goes live.",
+      successBody: "You're on the list. We'll message you when it goes live.",
     },
     order: {
       label: "LIMITED STOCK — ORDER NOW",
@@ -125,8 +125,8 @@ export default {
         mix: "MIX PACK",
       },
       submit: "PLACE MY ORDER → RM {price}",
-      fine: "Payment on delivery · Free shipping Vietnam-wide · 3-piece set per order",
-      codeApplied: "CODE DRIIP20 APPLIED — 20% OFF",
+      fine: "Payment on delivery · Free shipping Vietnam-wide · Website pricing applied automatically",
+      codeApplied: "WEBSITE PRICING APPLIED — EXTRA 10% OFF",
       validate: {
         sku: "Please select a product.",
         size: "Please select a size.",
