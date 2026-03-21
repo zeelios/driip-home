@@ -7,62 +7,62 @@
   },
   "home": {
     "hero": {
-      "pre": "SS26 — DROP đầu tiên",
-      "tagline": "Khác biệt ngay từ nền tảng.",
-      "sub": "Phong cách chỉn chu.\nBắt đầu từ những điều cơ bản nhất.",
+      "pre": "SS26 — DROP ĐẦU TIÊN",
+      "tagline": "Nổi bật từ những nền tảng cốt lõi.",
+      "sub": "Sự tinh tế, khởi nguồn từ chi tiết cơ bản.",
       "cta": "Khám phá bộ sưu tập ↓"
     },
     "drops": {
-      "label": "Bộ sưu tập SS26",
-      "title": "Bộ sưu tập",
-      "live": "Đang mở bán",
-      "comingSoon": "DROP tiếp theo",
-      "from": "Từ",
-      "shopNow": "Mua ngay →",
-      "notify": "Xem DROP",
+      "label": "BỘ SƯU TẬP SS26",
+      "title": "BỘ SƯU TẬP",
+      "live": "ĐANG MỞ BÁN",
+      "comingSoon": "DROP TIẾP THEO",
+      "from": "TỪ",
+      "shopNow": "MUA NGAY →",
+      "notify": "XEM DROP",
       "lacoste": {
-        "alt": "Ảnh xem trước tạm thời cho Lacoste Polo",
+        "alt": "Hình ảnh xem trước cho Lacoste Polo",
         "collection": "SS26 · POLO",
-        "name": "LACOSTE\nPOLO"
+        "name": "LACOSTE POLO"
       }
     },
     "upcoming": {
-      "label": "Các DROP DROP tiếp theo",
-      "title": "Sắp có thêm nhiều điều đáng chờ đợi.",
+      "label": "CÁC DROP TIẾP THEO",
+      "title": "Còn nhiều điều đáng mong đợi phía trước.",
       "q3": "Q3 2026",
       "q4": "Q4 2026"
     },
-    "manifesto": "\"Không chỉ là sản phẩm.\nĐó là cam kết về chất lượng.\""
+    "manifesto": "Không chỉ là sản phẩm, mà là cam kết về sự tinh xảo."
   },
   "ck": {
     "hero": {
       "pre": "CALVIN KLEIN ESSENTIALS · SS26",
-      "sub": "ĐƯỢC THIẾT KẾ CHO NGƯỜI ĐÀN ÔNG\nKHÔNG CHẤP NHẬN THỎA HIỆP",
-      "cta": "MUA ONLINE — GIẢM THÊM 20%",
-      "priceLabel": "GIÁ",
-      "priceValue": "TỪ 740K VND",
-      "configLabel": "CẤU HÌNH",
-      "configValue": "BRIEF / BOXER",
+      "sub": "DÀNH RIÊNG CHO NGƯỜI ĐÀN ÔNG THEO ĐUỔI SỰ HOÀN HẢO",
+      "cta": "MUA TRỰC TUYẾN VÀ GIẢM THÊM 20%",
+      "priceLabel": "GIÁ BÁN",
+      "priceValue": "TỪ 740.000 VNĐ",
+      "configLabel": "TÙY CHỈNH",
+      "configValue": "BRIEF HOẶC BOXER",
       "previewLabel": "XEM TRƯỚC",
-      "previewTitle": "XEM DÁNG MẶC TRƯỚC KHI MUA",
-      "previewBody": "Một khối preview gọn hơn giúp landing page có nhiều bằng chứng hơn, rõ hơn, và có lý do mạnh hơn để người dùng tiếp tục cuộn xuống."
+      "previewTitle": "KHÁM PHÁ HÌNH DÁNG TRƯỚC KHI MUA",
+      "previewBody": "Một khối preview tinh gọn giúp trang landing trở nên thuyết phục hơn, với nhiều bằng chứng rõ ràng."
     },
     "strip": {
       "shipping": "MIỄN PHÍ VẬN CHUYỂN",
-      "offer": "MUA QUA WEB — GIẢM THÊM 20%",
-      "stock": "SỐ LƯỢNG CÓ HẠN"
+      "offer": "MUA TRÊN WEBSITE — GIẢM THÊM 20%",
+      "stock": "SỐ LƯỢNG GIỚI HẠN"
     },
     "products": {
-      "label": "CK Calvin Klein",
-      "title": "Số lượng có hạn — đặt ngay",
-      "from": "Từ",
+      "label": "CALVIN KLEIN",
+      "title": "SỐ LƯỢNG CÓ HẠN — ĐẶT NGAY",
+      "from": "TỪ",
       "brief": {
-        "desc": "Phiên bản nguyên bản, tối giản và cần thiết nhất. Dáng lưng thấp cổ điển, thoải mái suốt cả ngày.",
-        "specs": ["Dáng lưng thấp", "Chất liệu cotton modal", "Dây lưng CK đặc trưng"]
+        "desc": "Phiên bản kinh điển, tối giản và thiết yếu. Dáng lưng thấp mang lại sự thoải mái suốt cả ngày, với đường nét thanh lịch.",
+        "specs": ["Dáng lưng thấp", "Chất liệu cotton modal cao cấp", "Dây lưng CK biểu tượng"]
       },
       "boxer": {
-        "desc": "Độ che phủ tốt hơn, form ôm gọn và hạn chế xê dịch tối đa trong ngày.",
-        "specs": ["Ống chân dài", "Ít xê dịch", "Thiết kế hỗ trợ theo đường cong cơ thể"]
+        "desc": "Che phủ tối ưu, form ôm vừa vặn và hạn chế di chuyển, lý tưởng cho lối sống năng động.",
+        "specs": ["Ống chân dài", "Hỗ trợ tối đa", "Thiết kế theo đường cong cơ thể"]
       },
       "orderThis": "ĐẶT NGAY →"
     },
@@ -73,115 +73,114 @@
       "waistband": "Dây lưng đặc trưng"
     },
     "offer": {
-      "label": "Ưu đãi trên web",
-      "title": "Giảm thêm 20%\ncho đơn hàng của bạn",
-      "body": "Ưu đãi áp dụng trực tiếp trên website. Mỗi khách hàng có một mã duy nhất và sẽ tự động được áp dụng khi thanh toán.",
+      "label": "ƯU ĐÃI TRỰC TUYẾN",
+      "title": "Giảm thêm 20% cho đơn hàng của bạn",
+      "body": "Ưu đãi độc quyền trên website, với mã giảm giá cá nhân hóa được áp dụng tự động khi thanh toán.",
       "yourCode": "Mã của bạn",
-      "validity": "Áp dụng ngay · Dùng một lần · CK Boxer & Brief",
+      "validity": "Áp dụng ngay · Dùng một lần · Dành cho Boxer & Brief",
       "copy": "Sao chép",
       "copied": "Đã sao chép ✓"
     },
-    "manifesto": "\"Nền tảng của mọi bộ trang phục\nlà thứ không ai nhìn thấy.\nHãy làm đúng ngay từ đầu.\"",
+    "manifesto": "Nền tảng của phong cách đích thực nằm ở những gì không ai thấy. Hãy chọn sự hoàn hảo từ đầu.",
     "sizechart": {
-      "label": "Bảng size",
-      "note": "Dựa trên vòng hông và cân nặng của bạn",
-      "measurement": "Cách đo: đo vòng hông tại vị trí rộng nhất của vòng mông và giữ thước đo song song với mặt đất.",
+      "label": "BẢNG SIZE",
+      "note": "Dựa trên vòng hông và cân nặng",
+      "measurement": "Cách đo: Đo vòng hông tại vị trí rộng nhất, giữ thước song song với mặt đất.",
       "modalButton": "Tìm size theo cân nặng"
     },
     "access": {
-      "label": "Cập nhật mới nhất",
-      "title": "Mẫu kinh điển.\nĐã có trên web.",
-      "sub": "Để lại thông tin của bạn, chúng tôi sẽ gửi cập nhật khi có hàng bổ sung, tin mới và ưu đãi chỉ dành riêng cho website.",
+      "label": "CẬP NHẬT MỚI NHẤT",
+      "title": "Phong cách kinh điển, nay có trên nền tảng kỹ thuật số.",
+      "sub": "Để lại thông tin để nhận cập nhật về hàng mới, tin tức và ưu đãi dành riêng cho cộng đồng trực tuyến.",
       "name": "Họ và tên",
-      "namePlaceholder": "Tên của bạn",
+      "namePlaceholder": "Nhập họ và tên",
       "email": "Địa chỉ email",
-      "emailPlaceholder": "email example com",
+      "emailPlaceholder": "email@example.com",
       "phone": "Số điện thoại",
-      "phonePlaceholder": "+84 9XX XXX XXX | 09x xxx xxxx",
+      "phonePlaceholder": "+84 9XX XXX XXX hoặc 09x xxx xxxx",
       "optional": "(Tùy chọn)",
-      "submit": "Nhận thông báo + giữ mã giảm giá",
-      "fine": "Bằng việc gửi thông tin, bạn đồng ý nhận cập nhật và ưu đãi chỉ dành cho web từ driip-.",
-      "successTitle": "Bạn đã đăng ký",
-      "successBody": "Mã {code} của bạn đã được giữ. Chúng tôi sẽ liên hệ khi sản phẩm sẵn sàng."
+      "submit": "ĐĂNG KÝ VÀ GIỮ MÃ GIẢM GIÁ",
+      "fine": "Bằng cách gửi thông tin, bạn đồng ý nhận bản tin và ưu đãi từ driip-. Chúng tôi cam kết bảo mật dữ liệu.",
+      "successTitle": "Đăng ký thành công",
+      "successBody": "Cảm ơn {name}. Mã giảm giá của bạn đã được bảo lưu. Chúng tôi sẽ gửi thông tin khi sản phẩm sẵn sàng."
     },
     "gallery": {
-      "pre": "Lookbook — SS26",
-      "title": "Bộ sưu tập",
-      "sub": "Boxer & Brief · Ba phối màu"
+      "pre": "LOOKBOOK — SS26",
+      "title": "BỘ SƯU TẬP",
+      "sub": "Boxer & Brief trong ba tông màu tinh tế"
     },
     "order": {
-      "label": "Số lượng có hạn — đặt ngay",
-      "title": "Đặt hàng",
-      "sub": "Vui lòng điền thông tin giao hàng. Chúng tôi sẽ xác nhận đơn trong vòng 24 giờ và gửi thông tin theo dõi sau khi xuất hàng.",
-      "details": "Thông tin của bạn",
+      "label": "SỐ LƯỢNG GIỚI HẠN — ĐẶT NGAY",
+      "title": "ĐẶT HÀNG",
+      "sub": "Vui lòng cung cấp thông tin giao hàng. Đội ngũ chúng tôi sẽ xác nhận đơn trong 24 giờ và cập nhật tình trạng sau khi xử lý.",
+      "details": "THÔNG TIN CÁ NHÂN",
       "firstName": "Họ",
-      "firstNamePlaceholder": "Họ",
+      "firstNamePlaceholder": "Nhập họ",
       "lastName": "Tên",
-      "lastNamePlaceholder": "Tên",
+      "lastNamePlaceholder": "Nhập tên",
       "phone": "Số điện thoại",
       "phonePlaceholder": "+84 9XX XXX XXX / 09x xxx xxxx",
       "province": "Tỉnh / thành phố",
-      "provincePlaceholder": "Tìm tỉnh / thành phố",
+      "provincePlaceholder": "Tìm kiếm tỉnh / thành phố",
       "district": "Quận / huyện",
       "districtPlaceholder": "Chọn quận / huyện",
       "districtTextPlaceholder": "Nhập quận / huyện",
       "ward": "Phường / xã",
-      "wardPlaceholder": "Tên phường / xã",
-      "street": "Địa chỉ (số nhà, tên đường)",
-      "streetPlaceholder": "Ví dụ: 123 Nguyễn Trãi, phường A, quận B",
+      "wardPlaceholder": "Nhập phường / xã",
+      "street": "Địa chỉ chi tiết",
+      "streetPlaceholder": "Số nhà, tên đường, ví dụ: 123 Nguyễn Trãi",
       "dob": "Ngày sinh",
       "dobPlaceholder": "DD/MM/YYYY",
       "gender": "Giới tính",
       "genderMale": "Nam",
       "genderFemale": "Nữ",
       "optionalTag": "(Tùy chọn)",
-      "selection": "Lựa chọn sản phẩm",
+      "selection": "LỰA CHỌN SẢN PHẨM",
       "product": "Sản phẩm",
       "boxes": "Số hộp",
       "boxCount": "{count} hộp",
-      "perBox": "{price} / hộp",
+      "perBox": "{price} mỗi hộp",
       "size": "Size",
-      "colorPack": "Gói màu sắc",
+      "colorPack": "Gói màu",
       "colorPackSub": "Bộ 3 chiếc",
       "colors": {
-        "black": "3× đen",
-        "white": "3× trắng",
-        "grey": "3× xám",
-        "mix": "Gói phối màu"
+        "black": "3× Đen thuần túy",
+        "white": "3× Trắng tinh khôi",
+        "grey": "3× Xám thanh lịch",
+        "mix": "Gói phối màu đa dạng"
       },
-      "submit": "Đặt hàng → {price}đ",
-      "fine": "Thanh toán khi nhận hàng · Miễn phí vận chuyển toàn quốc · Mỗi hộp gồm 3 chiếc",
-      "codeApplied": "Đã áp dụng mã DRIIP20 — giảm 20%",
+      "submit": "XÁC NHẬN ĐƠN HÀNG — {price}đ",
+      "fine": "Thanh toán khi nhận · Vận chuyển miễn phí toàn quốc · Mỗi hộp bao gồm 3 sản phẩm",
+      "codeApplied": "Đã áp dụng mã giảm giá — giảm 20%",
       "originalTotal": "Giá gốc",
-      "salePrice": "Giá ưu đãi",
+      "salePrice": "Giá khuyến mãi",
       "extraDiscount": "Giảm thêm từ website",
-      "finalPerBox": "Giá cuối / hộp",
+      "finalPerBox": "Giá cuối cùng mỗi hộp",
       "validate": {
         "province": "Vui lòng chọn tỉnh hoặc thành phố.",
         "sku": "Vui lòng chọn sản phẩm.",
         "size": "Vui lòng chọn size.",
         "color": "Vui lòng chọn phối màu."
       },
-      "reviewOrder": "XÁC NHẬN ĐƠN HÀNG",
-      "successTitle": "Đã nhận đơn hàng",
-      "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua {phone}.",
+      "reviewOrder": "XÁC NHẬN ĐƠN",
+      "successTitle": "Đơn hàng đã được ghi nhận",
       "step1": "GIỎ HÀNG",
       "step2": "THÔNG TIN",
       "step3": "XÁC NHẬN",
-      "emptyTitle": "Giỏ hàng trống",
-      "emptySub": "Quay lại phần sản phẩm để thêm Brief hoặc Boxer vào giỏ hàng của bạn.",
-      "goProducts": "← XEM SẢN PHẨM",
-      "next": "TIẾP THEO",
+      "emptyTitle": "Giỏ hàng chưa có sản phẩm",
+      "emptySub": "Quay lại phần sản phẩm để thêm Brief hoặc Boxer.",
+      "goProducts": "← TRỞ VỀ SẢN PHẨM",
+      "next": "TIẾP TỤC",
       "shippingInfo": "THÔNG TIN GIAO HÀNG",
       "back": "← QUAY LẠI",
-      "editInfo": "← SỬA THÔNG TIN"
+      "editInfo": "← CHỈNH SỬA THÔNG TIN"
     }
   },
   "tee": {
     "nav": {
       "lang": "EN",
       "cta": "KHÁM PHÁ",
-      "details": "CÂU CHUYỆN",
+      "details": "CHI TIẾT",
       "craft": "CRAFT",
       "origin": "NGUỒN GỐC",
       "top": "ĐẦU TRANG"
@@ -189,15 +188,15 @@
     "hero": {
       "pre": "DRIIP ORIGINAL — SS26",
       "eyebrow": "SẢN PHẨM CHÍNH THỨC CỦA DRIIP",
-      "title": "KHÔNG CHỈ LÀ\nMỘT CHIẾC ÁO.",
-      "sub": "Sợi Sorona từ Mỹ. Sản xuất tại Pháp. Thiết kế tại Việt Nam. Cực kỳ thoải mái. Thời trang cao cấp không thỏa hiệp.",
-      "cta": "KHÁM PHÁ QUÁ TRÌNH LÀM RA",
+      "title": "HƠN CẢ MỘT CHIẾC ÁO THUN.",
+      "sub": "Sợi Sorona™ từ Mỹ, sản xuất tại Pháp, thiết kế tại Việt Nam — sự kết hợp hoàn hảo giữa thoải mái và phong cách cao cấp.",
+      "cta": "KHÁM PHÁ QUÁ TRÌNH TẠO RA",
       "secondary": "VỀ TRANG CHỦ",
       "metrics": {
-        "fabric": "SỢI VẢI",
+        "fabric": "CHẤT LIỆU",
         "fabricValue": "SORONA™",
         "origin": "NGUỒN GỐC",
-        "originValue": "USA · FR · VN",
+        "originValue": "MỸ · PHÁP · VIỆT NAM",
         "run": "SẢN XUẤT",
         "runValue": "SỐ LƯỢNG GIỚI HẠN"
       }
@@ -210,41 +209,39 @@
     },
     "origin": {
       "label": "CÂU CHUYỆN NGUỒN GỐC",
-      "title": "BA QUỐC GIA.\nMỘT CHIẾC ÁO.",
-      "body": "Chúng tôi không thỏa hiệp ở bất kỳ khâu nào. Sợi vải là Sorona™ — một loại sợi sinh học được DuPont nghiên cứu tại Mỹ, nổi tiếng với độ mềm mại phi thường và hồ sơ bền vững. Sản phẩm được cắt may tại Pháp, nơi trăm năm thủ công atelier gặp gỡ độ chính xác sản xuất hiện đại. Thiết kế hoàn toàn là của chúng tôi — được hình thành tại Việt Nam, bắt nguồn từ tầm nhìn editorial của driip-."
+      "title": "BA QUỐC GIA, MỘT SẢN PHẨM.",
+      "body": "Chúng tôi không chấp nhận sự thỏa hiệp. Sợi vải Sorona™ được phát triển bởi DuPont tại Mỹ, nổi tiếng với độ mềm mại và bền vững. Sản phẩm được chế tác tại Pháp, nơi nghệ thuật thủ công gặp gỡ công nghệ hiện đại. Thiết kế hoàn toàn từ Việt Nam, phản ánh tầm nhìn thời trang đương đại."
     },
     "sorona": {
       "label": "CHẤT LIỆU",
       "chapter": "01",
-      "title": "SỢI\nSORONA™",
-      "origin": "DuPont · Mỹ",
-      "body": "Sorona™ là loại sợi polymer sinh học một phần được DuPont phát triển. Mềm hơn polyester thông thường, ấm hơn cotton thuần túy và được thiết kế để chuyển động cùng cơ thể. Rủ như lụa, thoáng khí như không có gì sánh được, và duy trì sự thoải mái từ sáng đến tối.",
+      "title": "SỢI SORONA™",
+      "origin": "DuPont · MỸ",
+      "body": "Sorona™ là sợi polymer sinh học một phần từ DuPont, mềm mại hơn polyester, ấm áp hơn cotton, và linh hoạt theo mọi chuyển động. Lý tưởng cho phong cách sống tinh tế, với khả năng kiểm soát độ ẩm vượt trội.",
       "specs": ["37% thành phần sinh học", "Độ mềm mại đặc biệt", "Co giãn & phục hồi", "Kiểm soát độ ẩm"]
     },
     "france": {
       "label": "SẢN XUẤT",
       "chapter": "02",
-      "title": "LÀM TẠI\nPHÁP",
+      "title": "SẢN XUẤT TẠI PHÁP",
       "origin": "Atelier · Paris",
-      "body": "Mỗi sản phẩm Driip Tee được cắt và lắp ráp tại Pháp — nơi sự chính xác không phải là khẩu hiệu marketing mà là kỳ vọng. Sản xuất tại Pháp ở cấp độ này có nghĩa là đường may được đo lường cẩn thận, mép hoàn thiện nằm hoàn toàn phẳng, và sản phẩm giữ được form dáng qua từng lần giặt.",
-      "specs": ["Sản xuất atelier Pháp", "Cắt may chính xác", "Đường may phẳng", "Bền vững qua giặt giũ"]
+      "body": "Mỗi chiếc Driip Tee được cắt may tại Pháp, nơi sự chính xác là truyền thống. Đường may tinh tế, mép hoàn thiện phẳng lì, đảm bảo sản phẩm giữ form dáng qua thời gian sử dụng."
     },
     "design": {
       "label": "THIẾT KẾ",
       "chapter": "03",
-      "title": "THIẾT KẾ TẠI\nVIỆT NAM",
-      "origin": "driip- Studio · Việt Nam",
-      "body": "Phương hướng sáng tạo, hình học form dáng và bản sắc thẩm mỹ hoàn toàn là của Việt Nam — được sinh ra trong studio driip-. Đây không phải sản phẩm được cấp phép hay thương hiệu lại. Đây là tác phẩm nguyên bản: một chiếc áo được thiết kế từ tờ giấy trắng bởi những người tin rằng thời trang Việt Nam có thể đặt ra tiêu chuẩn toàn cầu.",
-      "specs": ["Thiết kế driip- nguyên bản", "Form oversized tinh chỉnh", "Dáng editorial", "Tư duy sáng tạo Việt Nam"]
+      "title": "THIẾT KẾ TẠI VIỆT NAM",
+      "origin": "driip- Studio · VIỆT NAM",
+      "body": "Phong cách và thiết kế hoàn toàn nguyên bản từ driip-, được hình thành tại Việt Nam. Đây không phải sản phẩm nhượng quyền; đây là sáng tạo thuần túy, đặt nền tảng cho thời trang Việt Nam vươn ra thế giới."
     },
     "feel": {
       "label": "TRẢI NGHIỆM",
-      "title": "CỰC KỲ\nTHOẢI MÁI.",
-      "body": "Không có ngôn từ nào diễn tả đủ cho đến khi bạn mặc vào. Trọng lượng có mà không nặng. Cảm giác cầm vải mát và mượt. Form dáng rủ sạch từ vai mà không có điểm nào bị kéo. Mặc đi gallery, đi sân bay, hay chỉ đơn giản ở nhà — nó đáp ứng mọi tình huống."
+      "title": "SỰ THOẢI MÁI TUYỆT VỜI.",
+      "body": "Không lời nào tả hết cho đến khi bạn thử. Trọng lượng nhẹ nhàng, cảm giác mịn mượt, form dáng rủ tự nhiên. Lý tưởng cho mọi dịp, từ dạo phố đến sự kiện trang trọng."
     },
-    "manifesto": "Thiết kế tại Việt Nam.\nLàm tại Pháp.\nSợi vải từ Mỹ.\nMặc ở khắp nơi.",
+    "manifesto": "Thiết kế Việt Nam, sản xuất Pháp, sợi vải Mỹ — phong cách toàn cầu.",
     "manifestoLabel": "TIÊU CHUẨN DRIIP",
-    "footerText": "Driip Tee là sản phẩm nguyên bản của chúng tôi — biểu hiện rõ ràng nhất của những gì thương hiệu này tin rằng quần áo nên là.",
+    "footerText": "Driip Tee đại diện cho triết lý thương hiệu: thời trang cao cấp, bền vững và cá nhân hóa.",
     "backToDrops": "QUAY LẠI BỘ SƯU TẬP"
   },
   "lacostePolo": {
@@ -256,65 +253,65 @@
     "hero": {
       "pre": "DROP MỚI — LACOSTE POLO",
       "status": "ẢNH TẠM THỜI",
-      "title": "CHIẾC POLO SẴN SÀNG CHO BƯỚC TIẾP THEO.",
-      "sub": "Trang này đã được chuẩn bị cho DROP Lacoste Polo. Tạm thời đang dùng một hình ảnh placeholder để bạn có thể thay ảnh sản phẩm sau mà không cần làm lại bố cục.",
+      "title": "CHIẾC POLO SẴN SÀNG CHO HÀNH TRÌNH TIẾP THEO.",
+      "sub": "Trang này được thiết kế linh hoạt, sử dụng placeholder để dễ dàng cập nhật khi sản phẩm chính thức ra mắt.",
       "cta": "XEM DROP MỚI",
       "secondary": "VỀ TRANG CHỦ",
       "metrics": {
         "fabric": "CHẤT LIỆU",
         "fabricValue": "POLO KNIT",
         "finish": "HOÀN THIỆN",
-        "finishValue": "CỔ ÁO GỌN",
+        "finishValue": "CỔ ÁO GỌN GÀNG",
         "run": "SẢN LƯỢNG",
         "runValue": "BẢN XEM TRƯỚC"
       }
     },
     "visual": {
-      "alt": "Ảnh xem trước tạm thời cho Lacoste Polo",
+      "alt": "Hình ảnh xem trước cho Lacoste Polo",
       "label": "HÌNH ẢNH TẠM",
-      "body": "Hãy thay ảnh này bằng visual Lacoste Polo chính thức khi asset cuối cùng sẵn sàng."
+      "body": "Thay thế ảnh này bằng phiên bản chính thức khi asset sẵn sàng, giữ nguyên bố cục tinh tế."
     },
     "strip": {
       "fabric": "POLO KNIT",
       "finish": "ARTWORK TẠM THỜI",
-      "detail": "THAY ẢNH SAU",
+      "detail": "DỄ DÀNG CẬP NHẬT",
       "run": "TRANG XEM TRƯỚC"
     },
     "material": {
       "label": "CHẤT LIỆU",
-      "title": "ĐƯỢC DỰNG CHO DROP POLO",
-      "body": "Phần này tạo khung trình bày cao cấp trong lúc ảnh sản phẩm cuối cùng vẫn đang được chuẩn bị."
+      "title": "DÀNH RIÊNG CHO DROP POLO",
+      "body": "Cấu trúc này đảm bảo tính thẩm mỹ cao trong quá trình chuẩn bị, sẵn sàng cho sản phẩm thực tế."
     },
     "fit": {
       "label": "PHOM DÁNG",
-      "title": "GỌN, TỐI GIẢN, DỄ CHỈNH SỬA",
-      "body": "Bố cục được giữ tối giản để việc thay ảnh trong tương lai thật đơn giản mà trang vẫn giữ được cảm giác sang."
+      "title": "GỌN GÀNG, TỐI GIẢN VÀ LINH HOẠT",
+      "body": "Thiết kế giữ sự tối giản để dễ chỉnh sửa, đồng thơi duy trì vẻ ngoài thanh lịch."
     },
     "drop": {
       "label": "TRẠNG THÁI DROP",
-      "title": "TRANG MẪU TẠM THỜI",
-      "body": "Khi có asset thật, bạn chỉ cần thay đường dẫn ảnh tạm ở phần visual phía trên."
+      "title": "TRANG MẪU SẴN SÀNG",
+      "body": "Khi asset thật có, chỉ cần cập nhật đường dẫn ảnh để kích hoạt phiên bản đầy đủ."
     },
-    "footerText": "Trang Lacoste Polo đã sẵn sàng với ảnh placeholder tạm thời.",
+    "footerText": "Trang Lacoste Polo được tối ưu hóa cho các bản cập nhật nhanh chóng với placeholder tạm thởi.",
     "backToDrops": "QUAY LẠI BỘ SƯU TẬP"
   },
   "sizechart": {
-    "label": "Bảng size",
-    "note": "Dựa trên vòng hông và cân nặng của bạn",
-    "measurement": "Cách đo: đo vòng hông tại vị trí rộng nhất của vòng mông và giữ thước đo song song với mặt đất.",
+    "label": "BẢNG SIZE",
+    "note": "Dựa trên vòng hông và cân nặng",
+    "measurement": "Cách đo: Đo vòng hông tại vị trí rộng nhất, giữ thước song song với mặt đất.",
     "modalButton": "Tìm size theo cân nặng"
   },
   "footer": {
-    "copyright": "© 2026 DRIIP. Thiết kế bởi Zeelios. Bảo lưu mọi quyền.",
+    "copyright": "2026 DRIIP. Thiết kế bởi Zeelios. Bảo lưu mọi quyền.",
     "facebook": "FACEBOOK"
   },
   "common": {
-    "error": "Đã xảy ra lỗi. Vui lòng thử lại."
+    "error": "Đã xảy ra lỗi. Vui lòng thử lại sau."
   },
   "sg": {
     "weightLabel": "Nhập cân nặng",
     "weightPlaceholder": "Ví dụ: 72",
-    "recommended": "Phù hợp",
+    "recommended": "Kích cỡ phù hợp",
     "hip": "Vòng hông (cm)",
     "weight": "Cân nặng (kg)"
   }

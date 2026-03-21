@@ -381,7 +381,13 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
 
     orderState.value = "loading";
     try {
-      await $fetch("/api/order", {
+      const response = await $fetch<{
+        totals?: {
+          compareTotal?: number;
+          tierTotal?: number;
+          finalTotal?: number;
+        };
+      }>("/api/order", {
         method: "POST",
         body: {
           firstName: order.value.firstName,
@@ -391,9 +397,6 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
           province: order.value.province,
           fullAddress: order.value.fullAddress,
           boxes: order.value.boxes,
-          compareTotal: compareTotal.value,
-          tierTotal: tierTotal.value,
-          finalTotal: orderPrice.value,
           sku: order.value.sku,
           size: order.value.size,
           color: order.value.color,
@@ -405,6 +408,8 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
         },
       });
 
+      const serverFinalTotal = response.totals?.finalTotal ?? orderPrice.value;
+
       const purchasePayload: OrderData = {
         firstName: order.value.firstName,
         lastName: order.value.lastName,
@@ -415,7 +420,7 @@ export const useCkUnderwearStore = defineStore("ck-underwear", () => {
         country: "VN",
         street: order.value.fullAddress,
         sku: order.value.sku,
-        value: orderPrice.value,
+        value: serverFinalTotal,
       };
 
       trackPurchase(purchasePayload);

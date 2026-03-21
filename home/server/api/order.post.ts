@@ -2,15 +2,14 @@ import { queueOrderRows, reserveOrderId } from "../utils/order-queue";
 import {
   BASE_BOX_COMPARE_PRICE,
   getFinalTotal,
-} from "~/composables/usePricing";
+  getTierTotal,
+} from "../utils/pricing";
 
 interface CartItemPayload {
   sku: string;
   size: string;
   color: string;
   boxes: number;
-  finalTotal: number;
-  compareTotal: number;
 }
 
 export default defineEventHandler(async (event) => {
@@ -28,10 +27,8 @@ export default defineEventHandler(async (event) => {
     note,
     // Cart-based payload (new)
     cartItems,
-    grandFinalTotal,
     // Legacy single-item payload (kept for backwards compat)
     boxes,
-    finalTotal,
     sku,
     size,
     color,
@@ -60,8 +57,6 @@ export default defineEventHandler(async (event) => {
             size,
             color,
             boxes: Number(boxes) || 1,
-            finalTotal: finalTotal || 0,
-            compareTotal: 0,
           },
         ];
 
@@ -81,12 +76,19 @@ export default defineEventHandler(async (event) => {
     const orderId = await reserveOrderId();
     const rows: (string | number)[][] = [];
     let isFirstCustomerRow = true;
+    let totalCompare = 0;
+    let totalTier = 0;
+    let totalFinal = 0;
 
     for (const item of items) {
       const quantity = Number(item.boxes) || 1;
       const itemFinalTotal = getFinalTotal(quantity);
+      const itemTierTotal = getTierTotal(quantity);
       const itemOriginalPrice = BASE_BOX_COMPARE_PRICE * quantity;
       const itemDiscount = itemOriginalPrice - itemFinalTotal;
+      totalCompare += itemOriginalPrice;
+      totalTier += itemTierTotal;
+      totalFinal += itemFinalTotal;
 
       const formattedSku = item.sku
         .replace("ck-", "cK ")
@@ -131,7 +133,16 @@ export default defineEventHandler(async (event) => {
 
     queueOrderRows(rows);
 
-    return { ok: true, queued: true, orderId };
+    return {
+      ok: true,
+      queued: true,
+      orderId,
+      totals: {
+        compareTotal: totalCompare,
+        tierTotal: totalTier,
+        finalTotal: totalFinal,
+      },
+    };
   } catch (error: unknown) {
     console.error("[Order Queue Error]", error);
     throw createError({

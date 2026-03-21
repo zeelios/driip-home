@@ -100,6 +100,14 @@ export default defineEventHandler(async (event) => {
       clientIp,
       userAgent,
     };
+    const debugPayload = {
+      event_name,
+      event_id,
+      event_source_url,
+      user_data: hashedUser,
+      custom_data,
+      testEventCode: config.metaTestEventCode || "none",
+    };
 
     const result = await $fetch(
       `https://graph.facebook.com/v20.0/${pixelId}/events`,
@@ -112,8 +120,7 @@ export default defineEventHandler(async (event) => {
 
     // Debug logging for CAPI events
     console.log(`[CAPI] Successfully sent ${event_name} event:`, {
-      event_id,
-      testEventCode: config.metaTestEventCode || "none",
+      ...debugPayload,
       debugMeta,
       graphResponse: result,
     });

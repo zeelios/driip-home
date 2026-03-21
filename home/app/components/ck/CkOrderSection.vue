@@ -543,11 +543,7 @@ async function handleSubmit(): Promise<void> {
           size: item.size,
           color: item.color,
           boxes: item.boxes,
-          finalTotal: item.finalTotal,
-          compareTotal: item.compareTotal,
         })),
-        grandFinalTotal: cart.grandFinalTotal,
-        grandCompareTotal: cart.grandCompareTotal,
         timestamp: new Date().toISOString(),
       },
     });
