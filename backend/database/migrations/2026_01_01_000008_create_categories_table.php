@@ -8,10 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Main table
         Schema::create('categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('parent_id')->nullable();
-            $table->foreign('parent_id')->references('id')->on('categories')->nullOnDelete();
             $table->string('name', 255);
             $table->string('slug', 255)->unique();
             $table->text('description')->nullable();
@@ -20,6 +19,11 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        // Self-relation
+        Schema::table('categories', function(Blueprint $table){
+            $table->foreignUuid('parent_id')->constrained('categories')->nullOnDelete()->nullOnUpdate();
         });
     }
 

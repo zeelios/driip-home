@@ -27,31 +27,31 @@ class TaxConfigSeeder extends Seeder
     {
         $configs = [
             [
-                'name'            => 'Thuế GTGT 10%',
-                'rate'            => '10.00',
-                'applies_to'      => null,
-                'applies_to_ids'  => [],
-                'effective_from'  => '2024-01-01',
-                'effective_to'    => null,
-                'is_active'       => true,
-                'created_at'      => now(),
+                'name' => 'Thuế GTGT 10%',
+                'rate' => '10.00',
+                'applies_to' => 'all',
+                'applies_to_ids' => [],
+                'effective_from' => '2024-01-01',
+                'effective_to' => null,
+                'is_active' => true,
+                'created_at' => now(),
             ],
             [
-                'name'            => 'Thuế GTGT 8% (Giảm thuế kích cầu)',
-                'rate'            => '8.00',
-                'applies_to'      => null,
-                'applies_to_ids'  => [],
-                'effective_from'  => '2023-01-01',
-                'effective_to'    => '2023-12-31',
-                'is_active'       => false,
-                'created_at'      => '2023-01-01 00:00:00',
+                'name' => 'Thuế GTGT 8% (Giảm thuế kích cầu)',
+                'rate' => '8.00',
+                'applies_to' => 'all',
+                'applies_to_ids' => [],
+                'effective_from' => '2023-01-01',
+                'effective_to' => '2023-12-31',
+                'is_active' => false,
+                'created_at' => '2023-01-01 00:00:00',
             ],
         ];
 
         foreach ($configs as $config) {
             TaxConfig::updateOrCreate(
                 [
-                    'name'           => $config['name'],
+                    'name' => $config['name'],
                     'effective_from' => $config['effective_from'],
                 ],
                 $config,
