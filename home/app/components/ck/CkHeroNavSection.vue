@@ -62,25 +62,7 @@
                     quality="80"
                     fit="cover"
                     class="visual-img"
-                    :class="{ 'is-loaded': briefPreviewLoaded }"
-                    @load="settleBriefPreviewLoad"
-                    @error="settleBriefPreviewLoad"
                   />
-                  <div
-                    v-if="!briefPreviewLoaded"
-                    class="img-placeholder"
-                    aria-hidden="true"
-                  >
-                    <NuxtImg
-                      src="/logo.png"
-                      alt=""
-                      class="img-placeholder-logo"
-                      width="48"
-                      height="48"
-                      quality="70"
-                      format="webp"
-                    />
-                  </div>
                 </div>
                 <p class="visual-item-name">CK BRIEF</p>
               </article>
@@ -96,25 +78,7 @@
                     quality="80"
                     fit="cover"
                     class="visual-img"
-                    :class="{ 'is-loaded': boxerPreviewLoaded }"
-                    @load="settleBoxerPreviewLoad"
-                    @error="settleBoxerPreviewLoad"
                   />
-                  <div
-                    v-if="!boxerPreviewLoaded"
-                    class="img-placeholder"
-                    aria-hidden="true"
-                  >
-                    <NuxtImg
-                      src="/logo.png"
-                      alt=""
-                      class="img-placeholder-logo"
-                      width="48"
-                      height="48"
-                      quality="70"
-                      format="webp"
-                    />
-                  </div>
                 </div>
                 <p class="visual-item-name">CK BOXER</p>
               </article>
@@ -144,39 +108,10 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from "vue";
-import { useStableImageLoad } from "~/composables/use-stable-image-load";
-
 defineEmits<{ "hero-cta": []; "scroll-to": [id: string] }>();
 const { t } = useI18n();
 const ckStore = useCkUnderwearStore();
 const { boxerColor, briefColor, formattedSkuPrice } = storeToRefs(ckStore);
-const {
-  arm: armBriefPreviewLoad,
-  isLoaded: briefPreviewLoaded,
-  settle: settleBriefPreviewLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 5000 });
-const {
-  arm: armBoxerPreviewLoad,
-  isLoaded: boxerPreviewLoaded,
-  settle: settleBoxerPreviewLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 5000 });
-
-watch(
-  briefColor,
-  () => {
-    armBriefPreviewLoad();
-  },
-  { immediate: true }
-);
-
-watch(
-  boxerColor,
-  () => {
-    armBoxerPreviewLoad();
-  },
-  { immediate: true }
-);
 </script>
 
 <style scoped>
@@ -431,25 +366,9 @@ watch(
   height: 100%;
   object-fit: cover;
   object-position: center top;
-  opacity: 0;
+  opacity: 0.95;
   transition: opacity 0.3s ease;
-}
-.visual-img.is-loaded {
-  opacity: 1;
-}
-
-.img-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.img-placeholder-logo {
-  width: 36px;
-  height: auto;
-  opacity: 0.35;
-  animation: pulse 1.2s ease-in-out infinite;
+  animation: fade-in 0.4s ease forwards;
 }
 
 .visual-item-name {
@@ -568,6 +487,15 @@ watch(
 @media (min-width: 1280px) {
   .hero-inner {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.95;
   }
 }
 </style>

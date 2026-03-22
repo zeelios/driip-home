@@ -1,18 +1,5 @@
 <template>
   <div class="page">
-    <Transition name="logo-loader" appear>
-      <div v-if="showLogoLoader" class="home-loader" aria-hidden="true">
-        <NuxtImg
-          src="/logo.png"
-          alt=""
-          class="home-loader-logo"
-          width="72"
-          height="72"
-          quality="70"
-          format="webp"
-        />
-      </div>
-    </Transition>
     <HomeHeroSection @scroll-to-drops="scrollTo('drops')" />
     <HomeDropsSection />
     <HomeManifestoSection />
@@ -30,9 +17,6 @@ const siteNavStore = useSiteNavStore();
 watchEffect(() => {
   siteNavStore.setNav({ title: "", links: [], ctaLabel: "", ctaTarget: "" });
 });
-const showLogoLoader = ref(true);
-
-let loaderTimer: number | null = null;
 
 useHead({
   title: "driip- | SS26",
@@ -82,10 +66,6 @@ function scrollTo(id: string): void {
 onMounted(() => {
   setupScrollDepth();
 
-  loaderTimer = window.setTimeout(() => {
-    showLogoLoader.value = false;
-  }, 450);
-
   const root = document.documentElement;
   const onScroll = (): void =>
     root.style.setProperty("--scroll-y", window.scrollY.toString());
@@ -105,9 +85,6 @@ onMounted(() => {
   onUnmounted(() => {
     window.removeEventListener("scroll", onScroll);
     observer.disconnect();
-    if (loaderTimer !== null) {
-      window.clearTimeout(loaderTimer);
-    }
   });
 });
 </script>
@@ -116,48 +93,5 @@ onMounted(() => {
 .page {
   position: relative;
   min-height: 100dvh;
-}
-
-.home-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 1001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--black);
-  pointer-events: none;
-}
-
-.home-loader-logo {
-  width: 72px;
-  height: 72px;
-  object-fit: contain;
-  opacity: 0.92;
-  animation: logo-pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.14));
-}
-
-.logo-loader-enter-active,
-.logo-loader-leave-active {
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-.logo-loader-enter-from,
-.logo-loader-leave-to {
-  opacity: 0;
-  transform: scale(0.96);
-}
-
-@keyframes logo-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.75;
-  }
-  50% {
-    transform: scale(1.06);
-    opacity: 1;
-  }
 }
 </style>

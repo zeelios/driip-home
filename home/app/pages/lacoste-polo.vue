@@ -60,25 +60,7 @@
                 quality="80"
                 format="webp"
                 class="lp-visual-img"
-                :class="{ 'is-loaded': imgLoaded }"
-                @load="settleImgLoad"
-                @error="settleImgLoad"
               />
-              <div
-                v-if="!imgLoaded"
-                class="lp-img-placeholder"
-                aria-hidden="true"
-              >
-                <NuxtImg
-                  src="/logo.png"
-                  alt=""
-                  class="lp-img-placeholder-logo"
-                  width="48"
-                  height="48"
-                  quality="70"
-                  format="webp"
-                />
-              </div>
             </div>
             <p class="lp-visual-body">{{ t("lacostePolo.visual.body") }}</p>
           </div>
@@ -148,20 +130,10 @@
 definePageMeta({ layout: "default" });
 
 import { useSiteNavStore } from "~/stores/site-nav";
-import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 const { locale, t } = useI18n();
 const { setupScrollDepth } = useMetaEvents();
 const siteNavStore = useSiteNavStore();
-const {
-  arm: armImgLoad,
-  isLoaded: imgLoaded,
-  settle: settleImgLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
-
-onMounted(() => {
-  armImgLoad();
-});
 
 watchEffect(() => {
   siteNavStore.setNav({
@@ -506,35 +478,12 @@ onMounted(() => {
   height: 100%;
   object-fit: cover;
   display: block;
-  opacity: 0;
+  opacity: 0.95;
   transition: opacity 0.3s ease, transform 0.6s ease;
+  animation: fade-in 0.4s ease forwards;
 }
-.lp-visual-img.is-loaded {
-  opacity: 1;
-}
-.lp-visual:hover .lp-visual-img.is-loaded {
+.lp-visual:hover .lp-visual-img {
   transform: scale(1.02);
-}
-.lp-img-placeholder {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
-  );
-  pointer-events: none;
-}
-.lp-img-placeholder-logo {
-  width: 48px;
-  height: auto;
-  opacity: 0.9;
-  animation: lp-pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
 }
 .lp-visual-body {
   font-size: 13px;
@@ -709,15 +658,12 @@ onMounted(() => {
   }
 }
 
-@keyframes lp-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.72;
+@keyframes fade-in {
+  from {
+    opacity: 0;
   }
-  50% {
-    transform: scale(1.06);
-    opacity: 1;
+  to {
+    opacity: 0.95;
   }
 }
 </style>

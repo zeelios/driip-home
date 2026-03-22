@@ -3,7 +3,8 @@
     "comingSoon": "COMING SOON",
     "firstDrop": "FIRST DROP — SS26",
     "langSwitch": "VI",
-    "home": "HOME"
+    "home": "HOME",
+    "policies": "POLICIES"
   },
   "home": {
     "hero": {
@@ -56,6 +57,8 @@
       "label": "THE COLLECTION",
       "title": "TWO FITS.\nONE STANDARD.",
       "from": "FROM",
+      "policyLabel": "POLICIES",
+      "policyCopy": "30-day returns, plus 90-180 day warranty coverage depending on the line.",
       "orderThis": "ORDER THIS →",
       "brief": {
         "desc": "The original. The essential. Classic low-rise cut for all-day comfort.",
@@ -299,9 +302,93 @@
     "footerText": "Lacoste Polo page is ready with a temporary visual placeholder.",
     "backToDrops": "BACK TO DROPS"
   },
+  "policies": {
+    "hero": {
+      "eyebrow": "DRIIP — QUALITY COMMITMENT",
+      "title": "RETURN &\nWARRANTY\nPOLICIES",
+      "sub": "We stand behind every product we carry. Every policy is designed so you can buy with complete confidence."
+    },
+    "returns": {
+      "eyebrow": "RETURN POLICY",
+      "title": "30 DAYS.\nNO QUESTIONS\nASKED.",
+      "lead": "No explanations needed. No complicated forms. If you're not satisfied within 30 days, we're here to make it right.",
+      "items": {
+        "window": {
+          "title": "30 DAYS FROM DELIVERY",
+          "text": "Your return window starts from the day you receive your order. No exceptions — 30 days is plenty of time to try, decide, and act."
+        },
+        "noReason": {
+          "title": "NO REASON REQUIRED",
+          "text": "Wrong size, not the right colour, or simply changed your mind — all valid. No explanation needed, no judgment passed."
+        },
+        "shipping": {
+          "title": "RETURN SHIPPING COST",
+          "text": "The cost of shipping the product back to our warehouse is covered by the customer. We cover the cost of sending your replacement or refund."
+        },
+        "condition": {
+          "title": "PRODUCT CONDITION",
+          "text": "Items must be returned unworn, with original tags attached, and in original packaging. Washed or used items cannot be accepted for return."
+        }
+      },
+      "note": "To initiate a return, contact our support team via Facebook Messenger or the phone number provided at checkout. Processing takes 3–5 business days after we receive the item."
+    },
+    "warranty": {
+      "eyebrow": "WARRANTY POLICY",
+      "title": "CLEAR.\nHONEST.\nWARRANTY.",
+      "lead": "Driip offers two tiers of warranty: 90 days on all distributed products, and 180 days on products made by driip.",
+      "unit": "DAY WARRANTY",
+      "standard": {
+        "badge": "DISTRIBUTED PRODUCTS",
+        "name": "STANDARD WARRANTY",
+        "desc": "Applies to all authentic products distributed by driip, including Calvin Klein, Lacoste, and brand partners.",
+        "points": {
+          "p1": "Manufacturing defects",
+          "p2": "Stitching or seam failures not caused by use",
+          "p3": "Colour or product description discrepancies"
+        }
+      },
+      "driip": {
+        "badge": "DRIIP ORIGINALS",
+        "name": "EXTENDED WARRANTY",
+        "desc": "Applies exclusively to products manufactured by driip — including the Driip Tee and future in-house products.",
+        "points": {
+          "p1": "All standard warranty conditions",
+          "p2": "Sorona™ fabric structural defects under normal use",
+          "p3": "Seam and edge finishing quality issues",
+          "p4": "Priority support through direct channel"
+        }
+      },
+      "note": "Warranty does not cover damage from misuse, accidents, or self-repair. To claim warranty, proof of purchase is required (order number or receipt)."
+    },
+    "exchange": {
+      "eyebrow": "EXCHANGE POLICY",
+      "title": "EXCHANGES.\nALWAYS\nAVAILABLE.",
+      "lead": "Even if you bought during a sale — your right to exchange is fully protected, no conditions attached.",
+      "items": {
+        "always": {
+          "title": "EXCHANGE ANY TIME",
+          "text": "Within the warranty window, you can request an exchange for a different size, colour, or style. We'll do everything we can to accommodate you."
+        },
+        "sale": {
+          "title": "INCLUDING SALE ITEMS",
+          "text": "Products purchased during promotions, flash sales, or drop events are fully covered by our exchange and return policy. No distinction between full price and sale price."
+        },
+        "process": {
+          "title": "SIMPLE PROCESS",
+          "text": "Contact support, confirm what you'd like to swap to, and ship the original back. Your replacement will be dispatched within 3–5 business days of receiving your return."
+        }
+      }
+    },
+    "manifesto": {
+      "label": "THE DRIIP COMMITMENT",
+      "quote": "We only carry what we would wear ourselves. Nothing reaches you without meeting driip's quality standard.",
+      "sub": "Every product in the driip catalogue is carefully selected — from raw material origin to final finishing. This is not a marketing promise. It is an operating standard."
+    }
+  },
   "footer": {
     "copyright": "© 2026 DRIIP. ALL RIGHTS RESERVED.",
-    "facebook": "FACEBOOK"
+    "facebook": "FACEBOOK",
+    "policies": "POLICIES"
   },
   "common": {
     "error": "Something went wrong. Please try again."

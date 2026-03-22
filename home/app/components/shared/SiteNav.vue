@@ -21,9 +21,6 @@
             format="webp"
             loading="eager"
             class="snav-logo"
-            :class="{ 'is-loaded': logoLoaded }"
-            @load="settleLogoLoad"
-            @error="settleLogoLoad"
           />
         </NuxtLinkLocale>
         <template v-if="navStore.title">
@@ -47,6 +44,9 @@
 
       <!-- Right: lang switch + optional CTA -->
       <div class="snav-right">
+        <NuxtLinkLocale to="/policies" class="snav-policy">
+          {{ t("nav.policies") }}
+        </NuxtLinkLocale>
         <button class="snav-lang" @click="switchLang">
           {{ t("nav.langSwitch") }}
         </button>
@@ -63,22 +63,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import { useSiteNavStore } from "~/stores/site-nav";
-import { useStableImageLoad } from "~/composables/use-stable-image-load";
 
 const { t, locale, setLocale } = useI18n();
 const route = useRoute();
 const navStore = useSiteNavStore();
-const {
-  arm: armLogoLoad,
-  isLoaded: logoLoaded,
-  settle: settleLogoLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 5000 });
-
-onMounted(() => {
-  armLogoLoad();
-});
 
 const showBack = computed(() => {
   const p = route.path;
@@ -167,11 +157,8 @@ function switchLang(): void {
   height: 18px;
   width: auto;
   object-fit: contain;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-.snav-logo.is-loaded {
   opacity: 0.85;
+  transition: opacity 0.15s ease;
 }
 .snav-logo-link:hover .snav-logo {
   opacity: 1;
@@ -250,6 +237,29 @@ function switchLang(): void {
   flex-shrink: 0;
 }
 
+.snav-policy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 29px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.46);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.snav-policy:hover {
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .snav-lang {
   font-family: var(--font-body);
   font-size: 9px;
@@ -297,6 +307,9 @@ function switchLang(): void {
     display: none;
   }
   .snav-cta {
+    display: none;
+  }
+  .snav-policy {
     display: none;
   }
 }

@@ -19,22 +19,7 @@
               alt="CK Brief"
               loading="eager"
               class="drop-img-main"
-              :class="{ 'is-loaded': briefLoaded }"
-              @load="settleBriefLoad"
-              @error="settleBriefLoad"
             />
-            <div v-if="!briefLoaded" class="image-loader" aria-hidden="true">
-              <NuxtImg
-                src="/logo.png"
-                alt=""
-                class="image-loader-logo"
-                width="64"
-                height="64"
-                quality="70"
-                format="webp"
-                fit="contain"
-              />
-            </div>
             <NuxtImg
               src="/products/Boxer/Black.png"
               :width="280"
@@ -45,26 +30,7 @@
               alt="CK Boxer Black"
               loading="lazy"
               class="drop-img-secondary"
-              :class="{ 'is-loaded': boxerLoaded }"
-              @load="settleBoxerLoad"
-              @error="settleBoxerLoad"
             />
-            <div
-              v-if="!boxerLoaded"
-              class="image-loader image-loader--secondary"
-              aria-hidden="true"
-            >
-              <NuxtImg
-                src="/logo.png"
-                alt=""
-                class="image-loader-logo"
-                width="56"
-                height="56"
-                quality="70"
-                format="webp"
-                fit="contain"
-              />
-            </div>
             <div class="drop-badge">{{ t("home.drops.live") }}</div>
           </div>
           <div class="drop-body">
@@ -110,22 +76,7 @@
               :alt="t('home.drops.lacoste.alt')"
               loading="lazy"
               class="lacoste-preview-image"
-              :class="{ 'is-loaded': lacosteLoaded }"
-              @load="settleLacosteLoad"
-              @error="settleLacosteLoad"
             />
-            <div v-if="!lacosteLoaded" class="image-loader" aria-hidden="true">
-              <NuxtImg
-                src="/logo.png"
-                alt=""
-                class="image-loader-logo"
-                width="56"
-                height="56"
-                quality="70"
-                format="webp"
-                fit="contain"
-              />
-            </div>
             <div class="drop-badge">{{ t("home.drops.comingSoon") }}</div>
           </div>
           <div class="drop-body">
@@ -148,30 +99,8 @@
 
 <script setup lang="ts">
 import { formatVndCurrency, getTierTotal } from "~/utils/pricing";
-import { useStableImageLoad } from "~/composables/use-stable-image-load";
 const { t } = useI18n();
 const launchPrice = formatVndCurrency(getTierTotal(1));
-const {
-  arm: armBriefLoad,
-  isLoaded: briefLoaded,
-  settle: settleBriefLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
-const {
-  arm: armBoxerLoad,
-  isLoaded: boxerLoaded,
-  settle: settleBoxerLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
-const {
-  arm: armLacosteLoad,
-  isLoaded: lacosteLoaded,
-  settle: settleLacosteLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
-
-onMounted(() => {
-  armBriefLoad();
-  armBoxerLoad();
-  armLacosteLoad();
-});
 </script>
 
 <style scoped>
@@ -211,10 +140,8 @@ onMounted(() => {
   object-fit: cover;
   transition: transform 0.6s ease;
   display: block;
-  opacity: 0;
-}
-.drop-card--live .drop-img-main.is-loaded {
-  opacity: 1;
+  opacity: 0.95;
+  animation: fade-in 0.6s ease forwards;
 }
 .drop-card--live:hover .drop-img-main {
   transform: scale(1.03);
@@ -234,43 +161,9 @@ onMounted(() => {
   height: auto;
   border: 2px solid var(--white);
   display: block;
-  opacity: 0;
+  opacity: 0.95;
   transition: opacity 0.25s ease;
-}
-.drop-img-secondary.is-loaded {
-  opacity: 1;
-}
-.image-loader {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
-  );
-  pointer-events: none;
-}
-.image-loader--secondary {
-  inset: auto 16px 16px auto;
-  width: 28%;
-  height: auto;
-  aspect-ratio: 4 / 5;
-}
-.image-loader-logo {
-  width: 56px;
-  height: auto;
-  max-width: min(72px, 32%);
-  max-height: min(72px, 32%);
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  opacity: 0.9;
-  animation: pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
+  animation: fade-in 0.4s ease forwards;
 }
 .drop-badge {
   position: absolute;
@@ -307,12 +200,10 @@ onMounted(() => {
   height: 100%;
   object-fit: cover;
   display: block;
-  opacity: 0;
+  opacity: 0.95;
   filter: grayscale(1) saturate(0.55);
   transition: opacity 0.25s ease, transform 0.6s ease;
-}
-.lacoste-preview-image.is-loaded {
-  opacity: 1;
+  animation: fade-in 0.4s ease forwards;
 }
 .drop-card--preview:hover .lacoste-preview-image {
   transform: scale(1.03);
@@ -464,6 +355,15 @@ onMounted(() => {
   }
   .drop-card--live .drop-body {
     padding: 24px 24px 32px;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.95;
   }
 }
 </style>

@@ -3,7 +3,8 @@
     "comingSoon": "SẮP RA MẮT",
     "firstDrop": "FIRST DROP — SS26",
     "langSwitch": "EN",
-    "home": "TRANG CHỦ"
+    "home": "TRANG CHỦ",
+    "policies": "CHÍNH SÁCH"
   },
   "home": {
     "hero": {
@@ -56,6 +57,8 @@
       "label": "CALVIN KLEIN",
       "title": "SỐ LƯỢNG CÓ HẠN — ĐẶT NGAY",
       "from": "TỪ",
+      "policyLabel": "CHÍNH SÁCH",
+      "policyCopy": "Đổi trả 30 ngày, bảo hành 90-180 ngày cho từng dòng sản phẩm.",
       "brief": {
         "desc": "Phiên bản kinh điển, tối giản và thiết yếu. Dáng lưng thấp mang lại sự thoải mái suốt cả ngày, với đường nét thanh lịch.",
         "specs": ["Dáng lưng thấp", "Chất liệu cotton modal cao cấp", "Dây lưng CK biểu tượng"]
@@ -308,9 +311,93 @@
     "measurement": "Cách đo: Đo vòng hông tại vị trí rộng nhất, giữ thước song song với mặt đất.",
     "modalButton": "Tìm size theo cân nặng"
   },
+  "policies": {
+    "hero": {
+      "eyebrow": "DRIIP — CAM KẾT CHẤT LƯỢNG",
+      "title": "CHÍNH SÁCH\nĐỔI TRẢ &\nBẢO HÀNH",
+      "sub": "Chúng tôi đứng đằng sau từng sản phẩm. Mọi chính sách được thiết kế để bạn mua hàng với sự an tâm hoàn toàn."
+    },
+    "returns": {
+      "eyebrow": "CHÍNH SÁCH ĐỔI TRẢ",
+      "title": "30 NGÀY\nĐỔI TRẢ DỄ DÀNG.",
+      "lead": "Không cần giải thích lý do. Không cần điền form phức tạp. Nếu bạn không hài lòng trong vòng 30 ngày, chúng tôi sẵn sàng hỗ trợ.",
+      "items": {
+        "window": {
+          "title": "30 NGÀY KỂ TỪ NGÀY NHẬN HÀNG",
+          "text": "Thời gian đổi trả tính từ ngày bạn nhận được sản phẩm. Không có ngoại lệ — 30 ngày là đủ để bạn trải nghiệm và quyết định."
+        },
+        "noReason": {
+          "title": "KHÔNG CẦN LÝ DO",
+          "text": "Không vừa size, không ưng màu, hay đơn giản là thay đổi ý định — tất cả đều được chấp nhận mà không cần giải trình."
+        },
+        "shipping": {
+          "title": "PHÍ VẬN CHUYỂN HOÀN TRẢ",
+          "text": "Phí vận chuyển hoàn hàng về kho driip sẽ do khách hàng chịu. Chúng tôi chịu phí gửi sản phẩm mới đến bạn sau khi xử lý."
+        },
+        "condition": {
+          "title": "ĐIỀU KIỆN SẢN PHẨM",
+          "text": "Sản phẩm hoàn trả cần còn nguyên tem, chưa qua sử dụng, còn nguyên bao bì gốc. Sản phẩm đã qua giặt sẽ không được chấp nhận đổi trả."
+        }
+      },
+      "note": "Để khởi tạo yêu cầu đổi trả, liên hệ đội ngũ hỗ trợ qua Facebook Messenger hoặc số điện thoại được cung cấp khi đặt hàng. Thời gian xử lý từ 3–5 ngày làm việc sau khi kho nhận được hàng."
+    },
+    "warranty": {
+      "eyebrow": "CHÍNH SÁCH BẢO HÀNH",
+      "title": "BẢO HÀNH\nRÕ RÀNG,\nMINH BẠCH.",
+      "lead": "Driip phân biệt rõ hai mức bảo hành: sản phẩm phân phối được bảo hành 90 ngày, sản phẩm do driip sản xuất được bảo hành 180 ngày.",
+      "unit": "NGÀY BẢO HÀNH",
+      "standard": {
+        "badge": "SẢN PHẨM PHÂN PHỐI",
+        "name": "BẢO HÀNH TIÊU CHUẨN",
+        "desc": "Áp dụng cho tất cả sản phẩm chính hãng driip phân phối, bao gồm Calvin Klein, Lacoste và các thương hiệu đối tác.",
+        "points": {
+          "p1": "Lỗi kỹ thuật từ nhà sản xuất",
+          "p2": "Đứt chỉ, bung mex không do sử dụng",
+          "p3": "Màu sắc sai lệch so với mô tả sản phẩm"
+        }
+      },
+      "driip": {
+        "badge": "SẢN PHẨM DRIIP ORIGINAL",
+        "name": "BẢO HÀNH NÂNG CAO",
+        "desc": "Áp dụng riêng cho các sản phẩm do driip trực tiếp sản xuất — điển hình là Driip Tee và các sản phẩm in-house tương lai.",
+        "points": {
+          "p1": "Tất cả điều kiện bảo hành tiêu chuẩn",
+          "p2": "Lỗi kết cấu vải Sorona™ trong điều kiện sử dụng bình thường",
+          "p3": "Đường may, mép hoàn thiện không đạt tiêu chuẩn",
+          "p4": "Hỗ trợ ưu tiên qua kênh trực tiếp"
+        }
+      },
+      "note": "Bảo hành không áp dụng cho hư hỏng do sử dụng sai cách, tai nạn, hoặc tự sửa chữa. Để được hỗ trợ bảo hành, cần cung cấp bằng chứng mua hàng (mã đơn hàng hoặc biên lai)."
+    },
+    "exchange": {
+      "eyebrow": "ĐỔI SẢN PHẨM",
+      "title": "ĐỔI HÀNG\nLUÔN LUÔN\nSẴN SÀNG.",
+      "lead": "Kể cả khi bạn mua hàng trong đợt sale — quyền đổi sản phẩm vẫn được đảm bảo đầy đủ, không điều kiện.",
+      "items": {
+        "always": {
+          "title": "ĐỔI BẤT KỲ LÚC NÀO",
+          "text": "Trong thời gian bảo hành, bạn có thể yêu cầu đổi sang size, màu hoặc kiểu dáng khác. Chúng tôi sẽ hỗ trợ hết mức có thể."
+        },
+        "sale": {
+          "title": "KỂ CẢ SẢN PHẨM SALE",
+          "text": "Sản phẩm mua trong các đợt khuyến mãi, flash sale, hay sale event vẫn được áp dụng chính sách đổi trả và đổi hàng đầy đủ. Không phân biệt giá gốc hay giá sale."
+        },
+        "process": {
+          "title": "QUY TRÌNH ĐƠN GIẢN",
+          "text": "Liên hệ đội hỗ trợ, xác nhận sản phẩm muốn đổi, gửi hàng cũ về kho. Sản phẩm mới sẽ được giao trong 3–5 ngày làm việc sau khi nhận."
+        }
+      }
+    },
+    "manifesto": {
+      "label": "CAM KẾT DRIIP",
+      "quote": "Mỗi sản phẩm chạm tay bạn đều phải vượt qua bài kiểm tra khắt khe nhất: Tiêu chuẩn của driip",
+      "sub": "Từ cấu trúc sợi vải đến từng đường kim mũi chỉ, mọi món đồ đều được tuyển chọn và kiểm thử cực đoan. Với driip, chất lượng không phải là một lời hứa — đó là bản ngã."
+    }
+  },
   "footer": {
     "copyright": "2026 DRIIP. Thiết kế bởi Zeelios. Bảo lưu mọi quyền.",
-    "facebook": "FACEBOOK"
+    "facebook": "FACEBOOK",
+    "policies": "CHÍNH SÁCH"
   },
   "common": {
     "error": "Đã xảy ra lỗi. Vui lòng thử lại sau."

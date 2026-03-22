@@ -25,6 +25,16 @@
           </button>
         </div>
 
+        <NuxtLinkLocale to="/policies" class="products-policy reveal">
+          <span class="products-policy-label">
+            {{ t("ck.products.policyLabel") }}
+          </span>
+          <span class="products-policy-copy">
+            {{ t("ck.products.policyCopy") }}
+          </span>
+          <span class="products-policy-arrow" aria-hidden="true">→</span>
+        </NuxtLinkLocale>
+
         <div class="product-grid">
           <!-- ═══════════ BRIEF ═══════════ -->
           <div
@@ -41,26 +51,7 @@
                 :alt="`CK Brief ${briefColor}`"
                 loading="lazy"
                 class="product-img-el"
-                :class="{ 'is-loaded': briefImageLoaded }"
-                @load="settleBriefImageLoad"
-                @error="settleBriefImageLoad"
               />
-              <div
-                v-if="!briefImageLoaded"
-                class="image-loader"
-                aria-hidden="true"
-              >
-                <NuxtImg
-                  src="/logo.png"
-                  alt=""
-                  class="image-loader-logo"
-                  width="64"
-                  height="64"
-                  quality="70"
-                  format="webp"
-                  fit="contain"
-                />
-              </div>
               <div class="color-overlay">
                 <span class="color-name">{{ briefColor }}</span>
                 <div class="color-dots">
@@ -208,26 +199,7 @@
                 :alt="`CK Boxer ${boxerColor}`"
                 loading="lazy"
                 class="product-img-el"
-                :class="{ 'is-loaded': boxerImageLoaded }"
-                @load="settleBoxerImageLoad"
-                @error="settleBoxerImageLoad"
               />
-              <div
-                v-if="!boxerImageLoaded"
-                class="image-loader"
-                aria-hidden="true"
-              >
-                <NuxtImg
-                  src="/logo.png"
-                  alt=""
-                  class="image-loader-logo"
-                  width="64"
-                  height="64"
-                  quality="70"
-                  format="webp"
-                  fit="contain"
-                />
-              </div>
               <div class="color-overlay">
                 <span class="color-name">{{ boxerColor }}</span>
                 <div class="color-dots">
@@ -370,7 +342,7 @@
               }}</span>
             </div>
             <button class="quick-order-btn" @click="$emit('go-to-order')">
-              $t('ck.products.goToCart')
+              {{$t('ck.products.goToCart')}}
             </button>
           </div>
         </Transition>
@@ -402,8 +374,6 @@ import { useCkUnderwearStore } from "~/stores/ck-underwear";
 import { useCartStore } from "~/stores/cart";
 import { useMetaEvents } from "~/composables/useMetaEvents";
 import { formatVndCurrency, getTierTotal } from "~/utils/pricing";
-import { useStableImageLoad } from "~/composables/use-stable-image-load";
-
 defineEmits<{ "go-to-order": [] }>();
 
 const { t } = useI18n();
@@ -422,32 +392,6 @@ const {
   boxOptions,
 } = storeToRefs(store);
 const { boxerColors, sizes } = store;
-
-const {
-  arm: armBriefImageLoad,
-  isLoaded: briefImageLoaded,
-  settle: settleBriefImageLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
-const {
-  arm: armBoxerImageLoad,
-  isLoaded: boxerImageLoaded,
-  settle: settleBoxerImageLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
-
-watch(
-  briefColor,
-  () => {
-    armBriefImageLoad();
-  },
-  { immediate: true }
-);
-watch(
-  boxerColor,
-  () => {
-    armBoxerImageLoad();
-  },
-  { immediate: true }
-);
 
 // ── Mobile tab state ─────────────────────────────────────────────
 const mobileTab = ref<"brief" | "boxer">("boxer");
@@ -689,41 +633,13 @@ function applySizeGuide(size: string): void {
   object-position: center top;
   display: block;
   transition: transform 0.6s ease;
-  opacity: 0;
-}
-.product-img-el.is-loaded {
-  opacity: 1;
+  opacity: 0.95;
+  animation: fade-in 0.4s ease forwards;
 }
 .product-card:hover .product-img-el {
   transform: scale(1.04);
 }
 
-.image-loader {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
-  );
-  pointer-events: none;
-}
-.image-loader-logo {
-  width: 56px;
-  height: auto;
-  max-width: min(76px, 28%);
-  max-height: min(76px, 28%);
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  opacity: 0.9;
-  animation: pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
-}
 
 /* ── COLOR OVERLAY ───────────────────────────────────────────────── */
 .color-overlay {
@@ -1161,6 +1077,45 @@ function applySizeGuide(size: string): void {
   background: var(--white);
 }
 
+.products-policy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s;
+}
+.products-policy:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+.products-policy-label {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.44);
+}
+.products-policy-copy {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.8);
+}
+.products-policy-arrow {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.56);
+}
+
 /* On mobile: hide the non-active card */
 .tab-hidden {
   display: none;
@@ -1170,6 +1125,11 @@ function applySizeGuide(size: string): void {
   /* Tabs irrelevant on desktop — hide them */
   .product-tabs {
     display: none;
+  }
+
+  .products-policy {
+    margin-bottom: 24px;
+    padding: 16px 20px;
   }
 
   /* Both cards always visible on desktop */
@@ -1248,6 +1208,15 @@ function applySizeGuide(size: string): void {
     flex-wrap: nowrap;
     padding: 20px 64px;
     gap: 28px;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.95;
   }
 }
 </style>

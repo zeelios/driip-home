@@ -11,30 +11,11 @@
     ]"
     :style="wrapperStyle"
   >
-    <Transition name="driip-image-loader" appear>
-      <div
-        v-if="!isLoaded"
-        :class="['driip-image-loader', loaderClass]"
-        aria-hidden="true"
-      >
-        <NuxtImg
-          src="/logo.png"
-          alt=""
-          class="driip-image-loader-logo"
-          :width="loaderSize"
-          :height="loaderSize"
-          quality="70"
-          format="webp"
-          fit="contain"
-        />
-      </div>
-    </Transition>
-
     <NuxtImg
       v-bind="imageAttrs"
       :src="src"
       :alt="alt"
-      :class="['driip-image-img', { 'is-loaded': isLoaded }, imgClass]"
+      :class="['driip-image-img', imgClass]"
       :width="width"
       :height="height"
       :loading="loading"
@@ -48,8 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs, watch } from "vue";
-import { useStableImageLoad } from "~/composables/use-stable-image-load";
+import { computed, useAttrs } from "vue";
 
 defineOptions({ inheritAttrs: false });
 
@@ -92,11 +72,6 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
-const {
-  arm: armImageLoad,
-  isLoaded,
-  settle: settleImageLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 6000 });
 
 const wrapperStyle = computed(() => {
   if (!props.intrinsic) return undefined;
@@ -121,21 +96,11 @@ const imageAttrs = computed(() => {
   return rest;
 });
 
-watch(
-  () => props.src,
-  () => {
-    armImageLoad();
-  },
-  { immediate: true }
-);
-
 function onLoad(event: string | Event): void {
-  settleImageLoad();
   emit("load", event);
 }
 
 function onError(event: string | Event): void {
-  settleImageLoad();
   emit("error", event);
 }
 </script>
@@ -170,68 +135,21 @@ function onError(event: string | Event): void {
   max-height: 100%;
   object-fit: contain;
   object-position: center;
-  opacity: 0;
+  opacity: 0.95;
   transition: opacity 0.28s ease, transform 0.28s ease;
-}
-
-.driip-image-img.is-loaded {
-  opacity: 1;
+  animation: fade-in 0.4s ease forwards;
 }
 
 .driip-image :deep(img) {
   display: block;
 }
 
-.driip-image-loader {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
-  );
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  pointer-events: none;
-}
-
-.driip-image-loader-logo {
-  width: 64px;
-  height: auto;
-  max-width: min(84px, 34%);
-  max-height: min(84px, 34%);
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  opacity: 0.9;
-  animation: driip-logo-pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
-}
-
-.driip-image-loader-enter-active,
-.driip-image-loader-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.driip-image-loader-enter-from,
-.driip-image-loader-leave-to {
-  opacity: 0;
-  transform: scale(0.98);
-}
-
-@keyframes driip-logo-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.72;
+@keyframes fade-in {
+  from {
+    opacity: 0;
   }
-  50% {
-    transform: scale(1.06);
-    opacity: 1;
+  to {
+    opacity: 0.95;
   }
 }
 </style>

@@ -11,22 +11,7 @@
           format="webp"
           loading="eager"
           class="footer-logo-img"
-          :class="{ 'is-loaded': logoLoaded }"
-          @load="settleLogoLoad"
-          @error="settleLogoLoad"
         />
-        <div v-if="!logoLoaded" class="image-loader" aria-hidden="true">
-          <NuxtImg
-            src="/logo.png"
-            alt=""
-            class="image-loader-logo"
-            width="56"
-            height="56"
-            quality="70"
-            format="webp"
-            fit="contain"
-          />
-        </div>
       </div>
       <div class="footer-links">
         <a
@@ -36,6 +21,9 @@
         >
           {{ t("footer.facebook") }}
         </a>
+        <NuxtLinkLocale to="/policies">
+          {{ t("footer.policies") }}
+        </NuxtLinkLocale>
       </div>
       <span class="footer-copy">{{ t("footer.copyright") }}</span>
     </div>
@@ -43,19 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
-import { useStableImageLoad } from "~/composables/use-stable-image-load";
-
 const { t } = useI18n();
-const {
-  arm: armLogoLoad,
-  isLoaded: logoLoaded,
-  settle: settleLogoLoad,
-} = useStableImageLoad({ minDelayMs: 250, maxWaitMs: 5000 });
-
-onMounted(() => {
-  armLogoLoad();
-});
 </script>
 
 <style scoped>
@@ -74,50 +50,22 @@ onMounted(() => {
   text-align: center;
 }
 .footer-logo-wrap {
-  position: relative;
-  width: 96px;
-  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  overflow: visible;
 }
 .footer-logo-img {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: 38px;
   object-fit: contain;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-.footer-logo-img.is-loaded {
   opacity: 0.92;
+  transition: opacity 0.15s ease;
   filter: invert(1) brightness(1.08);
 }
-.footer-logo-img.is-loaded:hover {
+.footer-logo-img:hover {
   opacity: 1;
-}
-.image-loader {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-.image-loader-logo {
-  width: 72px;
-  height: 72px;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  opacity: 0.9;
-  animation: pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
 }
 .footer-links {
   display: flex;

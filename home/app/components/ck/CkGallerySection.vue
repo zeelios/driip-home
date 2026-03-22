@@ -38,26 +38,9 @@
             :width="item.w"
             :height="item.h"
             class="masonry-img"
-            :class="{ 'is-loaded': isImageLoaded(item.src) }"
             loading="lazy"
             format="webp"
-            @load="onImageLoaded(item.src)"
-            @error="onImageLoaded(item.src)"
           />
-          <div
-            v-if="!isImageLoaded(item.src)"
-            class="image-loader"
-            aria-hidden="true"
-          >
-            <NuxtImg
-              src="/logo.png"
-              alt=""
-              class="image-loader-logo"
-              width="72"
-              height="72"
-              fit="contain"
-            />
-          </div>
           <div class="masonry-overlay">
             <span class="masonry-label">{{ item.color }}</span>
           </div>
@@ -90,25 +73,8 @@
               :alt="activeLightboxItem.alt"
               width="1200"
               class="lb-img"
-              :class="{ 'is-loaded': isImageLoaded(activeLightboxItem.src) }"
               format="webp"
-              @load="onImageLoaded(activeLightboxItem.src)"
-              @error="onImageLoaded(activeLightboxItem.src)"
             />
-            <div
-              v-if="!isImageLoaded(activeLightboxItem.src)"
-              class="image-loader image-loader--lightbox"
-              aria-hidden="true"
-            >
-              <NuxtImg
-                src="/logo.png"
-                alt=""
-                class="image-loader-logo"
-                width="96"
-                height="96"
-                fit="contain"
-              />
-            </div>
             <p class="lb-caption">{{ activeLightboxItem.alt }}</p>
           </div>
           <button class="lb-next" aria-label="Next" @click="lightboxNext">
@@ -121,8 +87,6 @@
 </template>
 
 <script setup lang="ts">
-import { useStableImageLoadMap } from "~/composables/use-stable-image-load";
-
 const { t } = useI18n();
 
 type GalleryItem = {
@@ -203,21 +167,6 @@ const touchStartX = ref<number | null>(null);
 const touchStartY = ref<number | null>(null);
 const touchLastX = ref<number | null>(null);
 const touchLastY = ref<number | null>(null);
-const {
-  arm: armImageLoad,
-  isLoaded: isImageLoaded,
-  settle: onImageLoaded,
-} = useStableImageLoadMap({ minDelayMs: 250, maxWaitMs: 6000 });
-
-watch(
-  currentItems,
-  (items) => {
-    items.forEach((item) => {
-      if (!isImageLoaded(item.src)) armImageLoad(item.src);
-    });
-  },
-  { immediate: true }
-);
 
 function openLightbox(i: number): void {
   lightboxIndex.value = i;
@@ -401,47 +350,15 @@ onUnmounted(() => {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  opacity: 0;
+  opacity: 0.95;
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     opacity 0.25s ease;
+  animation: fade-in 0.4s ease forwards;
 }
 .masonry-item:hover .masonry-img {
   transform: scale(1.04);
 }
-.masonry-img.is-loaded {
-  opacity: 1;
-}
 
-.image-loader {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.04),
-    rgba(255, 255, 255, 0.01)
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-.image-loader--lightbox {
-  background: rgba(0, 0, 0, 0.2);
-}
-.image-loader-logo {
-  width: 72px;
-  height: auto;
-  max-width: min(96px, 30%);
-  max-height: min(96px, 30%);
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  opacity: 0.85;
-  animation: pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.16));
-}
 
 .masonry-overlay {
   position: absolute;
@@ -492,11 +409,9 @@ onUnmounted(() => {
   max-height: 80dvh;
   object-fit: contain;
   display: block;
-  opacity: 0;
+  opacity: 0.95;
   transition: opacity 0.25s ease;
-}
-.lb-img.is-loaded {
-  opacity: 1;
+  animation: fade-in 0.4s ease forwards;
 }
 .lb-caption {
   font-size: 10px;
@@ -648,15 +563,12 @@ onUnmounted(() => {
   }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.72;
+@keyframes fade-in {
+  from {
+    opacity: 0;
   }
-  50% {
-    transform: scale(1.06);
-    opacity: 1;
+  to {
+    opacity: 0.95;
   }
 }
 </style>
