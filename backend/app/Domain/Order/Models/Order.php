@@ -147,6 +147,11 @@ class Order extends Model
         'cost_total'    => 'integer',
     ];
 
+    /** @var array<string> Eager load relationships. */
+    protected $with = [
+
+    ];
+
     /**
      * Get the customer who placed this order.
      *
