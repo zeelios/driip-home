@@ -24,6 +24,7 @@ export interface OrderData {
   dob?: string;
   gender?: string;
   fb_login_id?: string;
+  event_id?: string;
 }
 
 interface MetaDebugResponse {
@@ -72,32 +73,13 @@ const SKU_PRICES: Record<string, number> = {
   "ck-boxer": getFinalTotal(1),
 };
 
-const INITIATE_CHECKOUT_STORAGE_KEY = "driip_meta_initiate_checkout_event_id";
 const FB_LOGIN_ID_COOKIE_KEY = "driip_meta_fb_login_id";
 const FB_CLICK_COOKIE_KEY = "_fbc";
 const FB_BROWSER_COOKIE_KEY = "_fbp";
 const COOKIE_MAX_AGE_90_DAYS = 60 * 60 * 24 * 90;
 
-let initiateCheckoutSent = false;
-let initiateCheckoutEventId: string | null = null;
-
-function genEventId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-function getSessionEventId(storageKey: string): string {
-  if (!import.meta.client) return genEventId();
-
-  try {
-    const existing = window.sessionStorage.getItem(storageKey);
-    if (existing) return existing;
-
-    const next = genEventId();
-    window.sessionStorage.setItem(storageKey, next);
-    return next;
-  } catch {
-    return genEventId();
-  }
+function genEventId(prefix = "meta"): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 function getQueryStringValue(value: unknown): string | undefined {
@@ -224,15 +206,13 @@ function enrichMetaUserData(
   );
 }
 
-async function sendMetaCapiEvent(
-  payload: {
-    event_name: string;
-    event_id: string;
-    user_data: MetaUserData;
-    custom_data: Record<string, unknown>;
-    event_source_url: string;
-  }
-): Promise<MetaDebugResponse | undefined> {
+async function sendMetaCapiEvent(payload: {
+  event_name: string;
+  event_id: string;
+  user_data: MetaUserData;
+  custom_data: Record<string, unknown>;
+  event_source_url: string;
+}): Promise<MetaDebugResponse | undefined> {
   return await $fetch<MetaDebugResponse>("/api/meta-capi", {
     method: "POST",
     body: payload,
@@ -297,6 +277,12 @@ function buildLeadLikeUserData(
   }) as MetaUserData;
 }
 
+function buildTrackingParams(
+  input: Record<string, unknown>
+): Record<string, unknown> {
+  return compactMetaObject(input);
+}
+
 export function useMetaEvents() {
   const { $fbq } = useNuxtApp() as MetaPixelApi;
   const route = useRoute();
@@ -309,7 +295,13 @@ export function useMetaEvents() {
     eventId?: string
   ): void {
     $fbq?.(type, name, params, eventId ? { eventID: eventId } : undefined);
-    dbg("pixel", name, params);
+
+    dbg("pixel", name, {
+      ...params,
+      _request: {
+        event_id: eventId,
+      },
+    });
   }
 
   async function capi(
@@ -344,21 +336,21 @@ export function useMetaEvents() {
   }
 
   function trackPageView(): void {
-    const eventId = genEventId();
+    const eventId = genEventId("pageview");
     pixel("track", "PageView", {}, eventId);
     void capi("PageView", getMetaBrowserIdentifiers(), {}, eventId);
   }
 
   function trackScrollDepth(depth: number): void {
-    const eventId = genEventId();
-    const customData = { depth, page: route.path };
+    const eventId = genEventId("scroll-depth");
+    const customData = buildTrackingParams({ depth, page: route.path });
 
     pixel("trackCustom", "ScrollDepth", customData, eventId);
     void capi("ScrollDepth", getMetaBrowserIdentifiers(), customData, eventId);
   }
 
   function trackViewContent(sku?: string): void {
-    const eventId = genEventId();
+    const eventId = genEventId("view-content");
     const value = sku ? SKU_PRICES[sku] ?? 89 : 89;
     const customData = buildMetaPurchaseCustomData({ sku, value });
 
@@ -367,7 +359,7 @@ export function useMetaEvents() {
   }
 
   async function trackPurchase(order: OrderData): Promise<void> {
-    const eventId = genEventId();
+    const eventId = order.event_id ?? genEventId("purchase");
     const value = order.value ?? (order.sku ? SKU_PRICES[order.sku] ?? 89 : 89);
     const customData = buildMetaPurchaseCustomData({
       sku: order.sku,
@@ -385,7 +377,7 @@ export function useMetaEvents() {
   }
 
   function trackAddToCart(sku: string, value?: number): void {
-    const eventId = genEventId();
+    const eventId = genEventId("add-to-cart");
     const resolvedValue = value ?? SKU_PRICES[sku] ?? 89;
     const customData = buildMetaPurchaseCustomData({
       sku,
@@ -406,14 +398,7 @@ export function useMetaEvents() {
     boxesOrValue = 1,
     explicitValue?: number
   ): void {
-    if (initiateCheckoutSent) return;
-
-    initiateCheckoutSent = true;
-    initiateCheckoutEventId ??= getSessionEventId(
-      INITIATE_CHECKOUT_STORAGE_KEY
-    );
-
-    const eventId = initiateCheckoutEventId;
+    const eventId = genEventId("initiate-checkout");
     const value = explicitValue ?? getFinalTotal(boxesOrValue);
     const customData = buildMetaPurchaseCustomData({ value });
 
@@ -428,7 +413,7 @@ export function useMetaEvents() {
   }
 
   function trackLead(email: string, phone?: string, name?: string): void {
-    const eventId = genEventId();
+    const eventId = genEventId("lead");
 
     pixel("track", "Lead", {}, eventId);
     void capi(
@@ -441,7 +426,7 @@ export function useMetaEvents() {
   }
 
   function trackSubscribe(email: string, phone?: string, name?: string): void {
-    const eventId = genEventId();
+    const eventId = genEventId("subscribe");
     const customData = { content_name: "Early Access" };
 
     pixel("trackCustom", "Subscribe", customData, eventId);
@@ -455,8 +440,8 @@ export function useMetaEvents() {
   }
 
   function trackSearch(query?: string): void {
-    const eventId = genEventId();
-    const customData = { search_string: query };
+    const eventId = genEventId("search");
+    const customData = buildTrackingParams({ search_string: query });
 
     pixel("track", "Search", customData, eventId);
     void capi("Search", getMetaBrowserIdentifiers(), customData, eventId);

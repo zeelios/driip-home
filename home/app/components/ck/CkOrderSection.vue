@@ -748,6 +748,10 @@ async function handleSubmit(): Promise<void> {
     return;
   }
 
+  const purchaseEventId = `purchase-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2, 9)}`;
+
   orderState.value = "loading";
   try {
     await $fetch("/api/order", {
@@ -765,6 +769,7 @@ async function handleSubmit(): Promise<void> {
           color: item.color,
           boxes: item.boxes,
         })),
+        purchaseEventId,
         timestamp: new Date().toISOString(),
       },
     });
@@ -779,6 +784,7 @@ async function handleSubmit(): Promise<void> {
       country: "VN",
       street: order.value.fullAddress,
       value: cart.grandFinalTotal,
+      event_id: purchaseEventId,
     };
 
     orderState.value = "success";

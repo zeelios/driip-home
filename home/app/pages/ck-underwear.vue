@@ -65,6 +65,33 @@ useHead({
       content:
         "Two fits. One standard. Website pricing includes an extra 10% off, starting from 882,000đ per box.",
     },
+    { property: "og:type", content: "website" },
+    { property: "og:site_name", content: "driip-" },
+    { property: "og:locale", content: "vi_VN" },
+    { property: "og:url", content: "https://driip.com/ck-underwear" },
+    {
+      property: "og:image",
+      content: "https://driip.com/driip-cover.jpg",
+    },
+    {
+      property: "og:image:secure_url",
+      content: "https://driip.com/driip-cover.jpg",
+    },
+    { property: "og:image:type", content: "image/jpeg" },
+    { property: "og:image:width", content: "8484" },
+    { property: "og:image:height", content: "4512" },
+    { property: "og:image:alt", content: "driip- brand cover image" },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: "driip- | CK Boxer & Brief" },
+    {
+      name: "twitter:description",
+      content:
+        "Two fits. One standard. Website pricing includes an extra 10% off, starting from 882,000đ per box.",
+    },
+    {
+      name: "twitter:image",
+      content: "https://driip.com/driip-cover.jpg",
+    },
   ],
 });
 

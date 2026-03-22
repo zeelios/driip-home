@@ -35,6 +35,7 @@ export default defineEventHandler(async (event) => {
     street,
     zipCode,
     note,
+    purchaseEventId,
     // Cart-based payload (new)
     cartItems,
     // Legacy single-item payload (kept for backwards compat)
@@ -157,6 +158,7 @@ export default defineEventHandler(async (event) => {
       ok: true,
       queued: true,
       orderId,
+      purchaseEventId: purchaseEventId || null,
       totals: {
         compareTotal: totalCompare,
         tierTotal: totalTier,

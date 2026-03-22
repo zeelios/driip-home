@@ -74,19 +74,36 @@ export default defineNuxtConfig({
         {
           property: "og:description",
           content:
-            "driip- SS26 drop. Limited CK Boxer & Brief packs with 20% off early access.",
+            "driip- SS26 drop — premium essentials, website pricing, and Calvin Klein tech.",
         },
         { property: "og:locale", content: "vi_VN" },
+        { property: "og:url", content: "https://driip.com/" },
         {
           property: "og:image",
-          content: "https://driip.com/products/Brief/Black.png",
+          content: "https://driip.com/driip-cover.jpg",
         },
+        { property: "og:image:secure_url", content: "https://driip.com/driip-cover.jpg" },
+        { property: "og:image:type", content: "image/jpeg" },
+        { property: "og:image:width", content: "8484" },
+        { property: "og:image:height", content: "4512" },
+        { property: "og:image:alt", content: "driip- brand cover image" },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:site", content: "@zeelios" },
         { name: "twitter:creator", content: "@zeelios" },
+        { name: "twitter:title", content: "driip- | CK Boxer & Brief" },
+        {
+          name: "twitter:description",
+          content:
+            "driip- SS26 drop — premium essentials, website pricing, and Calvin Klein tech.",
+        },
+        {
+          name: "twitter:image",
+          content: "https://driip.com/driip-cover.jpg",
+        },
         {
           name: "description",
           content:
-            "driip- SS26 drop — premium essentials, early access notification, and Calvin Klein tech. Zeelios.",
+            "driip- SS26 drop — premium essentials, website pricing, and Calvin Klein tech.",
         },
       ],
       link: [

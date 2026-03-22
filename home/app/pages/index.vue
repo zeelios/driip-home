@@ -42,17 +42,36 @@ useHead({
       name: "description",
       content:
         locale.value === "vi"
-          ? "driip- SS26 — Thương hiệu thời trang cao cấp. Bộ sưu tập CK Boxer & Brief. Mua qua web và giảm thêm 20% với mã DRIIP20."
-          : "driip- SS26 — Premium fashion drops. CK Boxer & Brief collection. Buy through the web and get an extra 20% off with code DRIIP20.",
+          ? "driip- SS26 — Thương hiệu thời trang cao cấp. Bộ sưu tập CK Boxer & Brief với giá website và ưu đãi tốt hơn khi mua nhiều hộp."
+          : "driip- SS26 — Premium fashion drops. CK Boxer & Brief collection with website pricing and better rates on multi-box orders.",
     },
     { property: "og:title", content: "driip- | SS26 First Drop" },
     {
       property: "og:description",
       content:
         locale.value === "vi"
-          ? "Mua qua web và giảm thêm 20% cho bộ CK Boxer & Brief."
-          : "Buy through the web and get an extra 20% off on CK Boxer & Brief.",
+          ? "Bộ sưu tập CK Boxer & Brief với giá website và ưu đãi tốt hơn khi mua nhiều hộp."
+          : "CK Boxer & Brief collection with website pricing and better rates on multi-box orders.",
     },
+    { property: "og:image", content: "https://driip.com/driip-cover.jpg" },
+    {
+      property: "og:image:secure_url",
+      content: "https://driip.com/driip-cover.jpg",
+    },
+    { property: "og:image:type", content: "image/jpeg" },
+    { property: "og:image:width", content: "8484" },
+    { property: "og:image:height", content: "4512" },
+    { property: "og:image:alt", content: "driip- brand cover image" },
+    { property: "og:url", content: "https://driip.com/" },
+    { name: "twitter:title", content: "driip- | SS26 First Drop" },
+    {
+      name: "twitter:description",
+      content:
+        locale.value === "vi"
+          ? "Bộ sưu tập CK Boxer & Brief với giá website và ưu đãi tốt hơn khi mua nhiều hộp."
+          : "CK Boxer & Brief collection with website pricing and better rates on multi-box orders.",
+    },
+    { name: "twitter:image", content: "https://driip.com/driip-cover.jpg" },
   ],
 });
 
