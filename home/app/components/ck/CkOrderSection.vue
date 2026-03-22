@@ -770,8 +770,8 @@ async function handleSubmit(): Promise<void> {
     });
 
     const purchasePayload = {
-      firstName: order.value.firstName,
-      lastName: order.value.lastName,
+      first_name: order.value.firstName,
+      last_name: order.value.lastName,
       phone: order.value.phone,
       email: order.value.email,
       city: order.value.province,

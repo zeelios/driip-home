@@ -7,28 +7,15 @@ import {
 import { useTrackingDebug } from "~/composables/useTrackingDebug";
 import { getFinalTotal } from "~/utils/pricing";
 
-/**
- * Meta Pixel + CAPI event composable.
- *
- * Matches the exact parameter config in Meta Events Manager:
- *   PageView    — browser + CAPI pair with shared event_id
- *   Purchase    — value, currency + firstName, lastName, phone, city
- *   ViewContent — client_user_agent only (added server-side)
- *   Search      — client_user_agent only (added server-side)
- *
- * Every method fires both browser Pixel and server CAPI with the same
- * event_id for automatic Facebook deduplication.
- */
-
 export interface OrderData {
-  firstName?: string;
-  lastName?: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
-  city?: string; // extracted from address if available
+  city?: string;
   state?: string;
   country?: string;
   email?: string;
-  sku?: string; // 'ck-brief' | 'ck-boxer'
+  sku?: string;
   value?: number;
   district?: string;
   ward?: string;
@@ -36,6 +23,48 @@ export interface OrderData {
   zip?: string;
   dob?: string;
   gender?: string;
+  fb_login_id?: string;
+}
+
+interface MetaDebugResponse {
+  debug?: {
+    client_ip?: string;
+    user_agent?: string;
+    normalized_user_data?: Record<string, unknown>;
+    hashed_user_data?: Record<string, unknown>;
+  };
+}
+
+interface MetaEventOptions {
+  merge_stored_profile?: boolean;
+}
+
+interface MetaUserData {
+  email?: string;
+  phone?: string;
+  first_name?: string;
+  last_name?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zip?: string;
+  dob?: string;
+  gender?: string;
+  fb_login_id?: string;
+  fbc?: string;
+  fbp?: string;
+  district?: string;
+  ward?: string;
+  street?: string;
+}
+
+interface MetaPixelApi {
+  $fbq?: (
+    type: string,
+    name: string,
+    params?: Record<string, unknown>,
+    options?: Record<string, unknown>
+  ) => void;
 }
 
 const SKU_PRICES: Record<string, number> = {
@@ -44,11 +73,15 @@ const SKU_PRICES: Record<string, number> = {
 };
 
 const INITIATE_CHECKOUT_STORAGE_KEY = "driip_meta_initiate_checkout_event_id";
+const FB_LOGIN_ID_COOKIE_KEY = "driip_meta_fb_login_id";
+const FB_CLICK_COOKIE_KEY = "_fbc";
+const FB_BROWSER_COOKIE_KEY = "_fbp";
+const COOKIE_MAX_AGE_90_DAYS = 60 * 60 * 24 * 90;
 
 let initiateCheckoutSent = false;
 let initiateCheckoutEventId: string | null = null;
 
-function genEventId() {
+function genEventId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
@@ -73,23 +106,199 @@ function getQueryStringValue(value: unknown): string | undefined {
   return undefined;
 }
 
-function buildFbcValue(clickId: string, timestamp = Date.now()) {
+function buildFbcValue(clickId: string, timestamp = Date.now()): string {
   return `fb.1.${timestamp}.${clickId}`;
 }
 
-interface CapiOptions {
-  mergeStoredProfile?: boolean;
+function splitNameParts(name?: string): {
+  first_name?: string;
+  last_name?: string;
+} {
+  const [firstName, ...rest] = (name ?? "").trim().split(/\s+/);
+  const lastName = rest.join(" ");
+
+  return compactMetaObject({
+    first_name: firstName || undefined,
+    last_name: lastName || undefined,
+  }) as {
+    first_name?: string;
+    last_name?: string;
+  };
+}
+
+function getTrackingCookie(name: string) {
+  return useCookie<string | null>(name, {
+    maxAge: COOKIE_MAX_AGE_90_DAYS,
+    path: "/",
+    sameSite: "lax",
+  });
+}
+
+function getStoredOrderProfile(): MetaOrderProfileCookie | null {
+  return useCookie<MetaOrderProfileCookie | null>(
+    META_ORDER_PROFILE_COOKIE_KEY
+  ).value;
+}
+
+function getStoredFacebookLoginId(): string | undefined {
+  return getTrackingCookie(FB_LOGIN_ID_COOKIE_KEY).value?.trim() || undefined;
+}
+
+function setFacebookLoginId(fbLoginId?: string | null): void {
+  const cookie = getTrackingCookie(FB_LOGIN_ID_COOKIE_KEY);
+  const normalized = fbLoginId?.trim();
+
+  cookie.value = normalized ? normalized : null;
+}
+
+function getMetaBrowserIdentifiers(): Pick<MetaUserData, "fbc" | "fbp"> {
+  return {
+    fbc: getTrackingCookie(FB_CLICK_COOKIE_KEY).value ?? undefined,
+    fbp: getTrackingCookie(FB_BROWSER_COOKIE_KEY).value ?? undefined,
+  };
+}
+
+function syncMetaRouteIdentifiers(route = useRoute()): void {
+  if (!import.meta.client) return;
+
+  const clickId =
+    getQueryStringValue(route.query.fbclid) ??
+    getQueryStringValue(route.query.click_id);
+
+  const fbLoginId =
+    getQueryStringValue(route.query.fb_login_id) ??
+    getQueryStringValue(route.query.fbLoginId) ??
+    getQueryStringValue(route.query.facebook_login_id);
+
+  if (fbLoginId) {
+    setFacebookLoginId(fbLoginId);
+  }
+
+  if (!clickId) return;
+
+  const cookie = getTrackingCookie(FB_CLICK_COOKIE_KEY);
+  const fbc = buildFbcValue(clickId);
+
+  if (cookie.value !== fbc) {
+    cookie.value = fbc;
+  }
+}
+
+function mergeStoredProfile(
+  userData: MetaUserData,
+  profile: MetaOrderProfileCookie | null,
+  fbLoginId?: string
+): MetaUserData {
+  return compactMetaObject({
+    ...userData,
+    email: userData.email ?? profile?.email,
+    phone: userData.phone ?? profile?.phone,
+    first_name: userData.first_name ?? profile?.firstName,
+    last_name: userData.last_name ?? profile?.lastName,
+    city: userData.city ?? profile?.province,
+    state: userData.state ?? profile?.province,
+    zip: userData.zip ?? profile?.zipCode,
+    dob: userData.dob ?? profile?.dob,
+    gender: userData.gender ?? profile?.gender,
+    fb_login_id: userData.fb_login_id ?? fbLoginId,
+  }) as MetaUserData;
+}
+
+function enrichMetaUserData(
+  userData: MetaUserData,
+  options: MetaEventOptions = {}
+): MetaUserData {
+  const withIdentifiers: MetaUserData = compactMetaObject({
+    ...userData,
+    fb_login_id: userData.fb_login_id ?? getStoredFacebookLoginId(),
+  }) as MetaUserData;
+
+  if (!options.merge_stored_profile) {
+    return withIdentifiers;
+  }
+
+  return mergeStoredProfile(
+    withIdentifiers,
+    getStoredOrderProfile(),
+    getStoredFacebookLoginId()
+  );
+}
+
+async function sendMetaCapiEvent(
+  payload: {
+    event_name: string;
+    event_id: string;
+    user_data: MetaUserData;
+    custom_data: Record<string, unknown>;
+    event_source_url: string;
+  }
+): Promise<MetaDebugResponse | undefined> {
+  return await $fetch<MetaDebugResponse>("/api/meta-capi", {
+    method: "POST",
+    body: payload,
+  }).catch((err) => {
+    if (import.meta.dev) console.warn("[CAPI]", err);
+    return undefined;
+  });
+}
+
+function logMetaCapiDebug(
+  dbg: ReturnType<typeof useTrackingDebug>["log"],
+  eventName: string,
+  eventId: string,
+  customData: Record<string, unknown>,
+  requestUserData: MetaUserData,
+  response: MetaDebugResponse | undefined,
+  fallbackUserAgent: string
+): void {
+  dbg("capi", eventName, {
+    event_id: eventId,
+    ...customData,
+    _user_data: response?.debug?.normalized_user_data ?? requestUserData,
+    _hashed_user_data: response?.debug?.hashed_user_data,
+    _request: {
+      event_id: eventId,
+      client_ip: response?.debug?.client_ip,
+      user_agent: response?.debug?.user_agent ?? fallbackUserAgent,
+    },
+  });
+}
+
+function buildPurchaseUserData(order: OrderData): MetaUserData {
+  return compactMetaObject({
+    ...getMetaBrowserIdentifiers(),
+    email: order.email ?? undefined,
+    phone: order.phone ?? undefined,
+    first_name: order.first_name ?? undefined,
+    last_name: order.last_name ?? undefined,
+    city: order.city ?? undefined,
+    state: order.state ?? order.city ?? undefined,
+    country: order.country ?? "VN",
+    district: order.district ?? undefined,
+    ward: order.ward ?? undefined,
+    street: order.street ?? undefined,
+    zip: order.zip ?? undefined,
+    dob: order.dob ?? undefined,
+    gender: order.gender ?? undefined,
+    fb_login_id: order.fb_login_id ?? undefined,
+  }) as MetaUserData;
+}
+
+function buildLeadLikeUserData(
+  email: string,
+  phone?: string,
+  name?: string
+): MetaUserData {
+  return compactMetaObject({
+    ...getMetaBrowserIdentifiers(),
+    email,
+    phone,
+    ...splitNameParts(name),
+  }) as MetaUserData;
 }
 
 export function useMetaEvents() {
-  const { $fbq } = useNuxtApp() as {
-    $fbq?: (
-      type: string,
-      name: string,
-      params?: Record<string, unknown>,
-      options?: Record<string, unknown>
-    ) => void;
-  };
+  const { $fbq } = useNuxtApp() as MetaPixelApi;
   const route = useRoute();
   const { log: dbg } = useTrackingDebug();
 
@@ -97,196 +306,106 @@ export function useMetaEvents() {
     type: string,
     name: string,
     params: Record<string, unknown> = {},
-    event_id?: string
-  ) {
-    $fbq?.(type, name, params, event_id ? { eventID: event_id } : undefined);
+    eventId?: string
+  ): void {
+    $fbq?.(type, name, params, eventId ? { eventID: eventId } : undefined);
     dbg("pixel", name, params);
   }
 
-  function getFbCookies() {
-    const fbcCookie = useCookie("_fbc");
-
-    return {
-      fbc: fbcCookie.value ?? undefined,
-      fbp: useCookie("_fbp").value ?? undefined,
-    };
-  }
-
-  function getStoredOrderProfile(): MetaOrderProfileCookie | null {
-    return useCookie<MetaOrderProfileCookie | null>(
-      META_ORDER_PROFILE_COOKIE_KEY
-    ).value;
-  }
-
-  function mergeOrderProfileIntoUserData(
-    userData: Record<string, unknown>
-  ): Record<string, unknown> {
-    const profile = getStoredOrderProfile();
-    if (!profile) return userData;
-
-    return compactMetaObject({
-      ...userData,
-      email: userData.email ?? profile.email,
-      phone: userData.phone ?? profile.phone,
-      firstName: userData.firstName ?? profile.firstName,
-      lastName: userData.lastName ?? profile.lastName,
-      city: userData.city ?? profile.province,
-      state: userData.state ?? profile.province,
-      zip: userData.zip ?? profile.zipCode,
-      dob: userData.dob ?? profile.dob,
-      gender: userData.gender ?? profile.gender,
-    });
-  }
-
-  function syncClickIdFromRoute(): void {
-    if (!import.meta.client) return;
-
-    const route = useRoute();
-    const clickId =
-      getQueryStringValue(route.query.fbclid) ??
-      getQueryStringValue(route.query.click_id);
-
-    if (!clickId) return;
-
-    const existingCookie = useCookie<string | null>("_fbc");
-    if (existingCookie.value) return;
-
-    const cookie = useCookie<string | null>("_fbc", {
-      maxAge: 60 * 60 * 24 * 90,
-      path: "/",
-      sameSite: "lax",
-    });
-    const fbc = buildFbcValue(clickId);
-
-    if (cookie.value !== fbc) {
-      cookie.value = fbc;
-    }
-  }
-
   async function capi(
-    event_name: string,
-    user_data: Record<string, unknown>,
-    custom_data: Record<string, unknown>,
-    event_id: string,
-    options: CapiOptions = {}
-  ) {
+    eventName: string,
+    userData: MetaUserData,
+    customData: Record<string, unknown>,
+    eventId: string,
+    options: MetaEventOptions = {}
+  ): Promise<void> {
     if (!import.meta.client) return;
-    const user_agent = navigator.userAgent;
-    const enrichedUserData = options.mergeStoredProfile
-      ? mergeOrderProfileIntoUserData(user_data)
-      : compactMetaObject(user_data);
-    const response = await $fetch<{
-      debug?: {
-        client_ip?: string;
-        user_agent?: string;
-        normalized_user_data?: Record<string, unknown>;
-        hashed_user_data?: Record<string, unknown>;
-      };
-    }>("/api/meta-capi", {
-      method: "POST",
-      body: {
-        event_name,
-        event_id,
-        user_data: enrichedUserData,
-        custom_data,
-        event_source_url: window.location.href,
-      },
-    }).catch((err) => {
-      if (import.meta.dev) console.warn("[CAPI]", err);
+
+    const userAgent = navigator.userAgent;
+    const enrichedUserData = enrichMetaUserData(userData, options);
+
+    const response = await sendMetaCapiEvent({
+      event_name: eventName,
+      event_id: eventId,
+      user_data: enrichedUserData,
+      custom_data: customData,
+      event_source_url: window.location.href,
     });
 
-    dbg("capi", event_name, {
-      event_id,
-      ...custom_data,
-      _userData:
-        response?.debug?.normalized_user_data ?? enrichedUserData,
-      _hashedUserData: response?.debug?.hashed_user_data,
-      _request: {
-        event_id,
-        clientIp: response?.debug?.client_ip,
-        userAgent: response?.debug?.user_agent ?? user_agent,
-      },
-    });
-  }
-
-  function trackPageView(): void {
-    const event_id = genEventId();
-    pixel("track", "PageView", {}, event_id);
-    capi("PageView", getFbCookies(), {}, event_id);
-  }
-
-  function trackScrollDepth(depth: number): void {
-    const event_id = genEventId();
-    const custom_data = { depth, page: route.path };
-    pixel("trackCustom", "ScrollDepth", custom_data, event_id);
-    capi("ScrollDepth", getFbCookies(), custom_data, event_id);
-  }
-
-  // ─── EVENTS ───────────────────────────────────────────────────────
-
-  /**
-   * ViewContent — fires when product section enters viewport.
-   * Customer info: client_user_agent (server-side only, no hash).
-   */
-  function trackViewContent(sku?: string) {
-    const event_id = genEventId();
-    const value = sku ? SKU_PRICES[sku] ?? 89 : 89;
-    const custom_data = buildMetaPurchaseCustomData({ sku, value });
-    pixel("track", "ViewContent", custom_data, event_id);
-    // Only client_user_agent needed — added server-side
-    capi("ViewContent", getFbCookies(), custom_data, event_id);
-  }
-
-  /**
-   * Purchase — fires on successful order form submit.
-   * Customer info: city, client_user_agent, firstName, lastName, phone.
-   */
-  async function trackPurchase(order: OrderData): Promise<void> {
-    const event_id = genEventId();
-    const value = order.value ?? (order.sku ? SKU_PRICES[order.sku] ?? 89 : 89);
-    const custom_data = buildMetaPurchaseCustomData({ sku: order.sku, value });
-    pixel("track", "Purchase", custom_data, event_id);
-    await capi(
-      "Purchase",
-      {
-        ...getFbCookies(),
-        email: order.email ?? undefined,
-        phone: order.phone ?? undefined,
-        firstName: order.firstName ?? undefined,
-        lastName: order.lastName ?? undefined,
-        city: order.city ?? undefined,
-        state: order.state ?? order.city ?? undefined,
-        country: order.country ?? "VN",
-        district: order.district ?? undefined,
-        ward: order.ward ?? undefined,
-        street: order.street ?? undefined,
-        zip: order.zip ?? undefined,
-        dob: order.dob ?? undefined,
-        gender: order.gender ?? undefined,
-      },
-      custom_data,
-      event_id,
-      { mergeStoredProfile: true }
+    logMetaCapiDebug(
+      dbg,
+      eventName,
+      eventId,
+      customData,
+      enrichedUserData,
+      response,
+      userAgent
     );
   }
 
-  /**
-   * AddToCart — fires when user clicks the "Order This" button on a product card.
-   */
-  function trackAddToCart(sku: string, value?: number) {
-    const event_id = genEventId();
-    const v = value ?? SKU_PRICES[sku] ?? 89;
-    const custom_data = buildMetaPurchaseCustomData({ sku, value: v });
-    pixel("track", "AddToCart", custom_data, event_id);
-    capi("AddToCart", getFbCookies(), custom_data, event_id, {
-      mergeStoredProfile: true,
-    });
+  function trackPageView(): void {
+    const eventId = genEventId();
+    pixel("track", "PageView", {}, eventId);
+    void capi("PageView", getMetaBrowserIdentifiers(), {}, eventId);
   }
 
-  /**
-   * InitiateCheckout — fires when hero CTA is clicked.
-   */
-  function trackInitiateCheckout(boxesOrValue = 1, explicitValue?: number) {
+  function trackScrollDepth(depth: number): void {
+    const eventId = genEventId();
+    const customData = { depth, page: route.path };
+
+    pixel("trackCustom", "ScrollDepth", customData, eventId);
+    void capi("ScrollDepth", getMetaBrowserIdentifiers(), customData, eventId);
+  }
+
+  function trackViewContent(sku?: string): void {
+    const eventId = genEventId();
+    const value = sku ? SKU_PRICES[sku] ?? 89 : 89;
+    const customData = buildMetaPurchaseCustomData({ sku, value });
+
+    pixel("track", "ViewContent", customData, eventId);
+    void capi("ViewContent", getMetaBrowserIdentifiers(), customData, eventId);
+  }
+
+  async function trackPurchase(order: OrderData): Promise<void> {
+    const eventId = genEventId();
+    const value = order.value ?? (order.sku ? SKU_PRICES[order.sku] ?? 89 : 89);
+    const customData = buildMetaPurchaseCustomData({
+      sku: order.sku,
+      value,
+    });
+
+    pixel("track", "Purchase", customData, eventId);
+    await capi(
+      "Purchase",
+      buildPurchaseUserData(order),
+      customData,
+      eventId,
+      { merge_stored_profile: true }
+    );
+  }
+
+  function trackAddToCart(sku: string, value?: number): void {
+    const eventId = genEventId();
+    const resolvedValue = value ?? SKU_PRICES[sku] ?? 89;
+    const customData = buildMetaPurchaseCustomData({
+      sku,
+      value: resolvedValue,
+    });
+
+    pixel("track", "AddToCart", customData, eventId);
+    void capi(
+      "AddToCart",
+      getMetaBrowserIdentifiers(),
+      customData,
+      eventId,
+      { merge_stored_profile: true }
+    );
+  }
+
+  function trackInitiateCheckout(
+    boxesOrValue = 1,
+    explicitValue?: number
+  ): void {
     if (initiateCheckoutSent) return;
 
     initiateCheckoutSent = true;
@@ -294,91 +413,71 @@ export function useMetaEvents() {
       INITIATE_CHECKOUT_STORAGE_KEY
     );
 
-    const event_id = initiateCheckoutEventId;
+    const eventId = initiateCheckoutEventId;
     const value = explicitValue ?? getFinalTotal(boxesOrValue);
-    const custom_data = buildMetaPurchaseCustomData({ value });
-    pixel("track", "InitiateCheckout", custom_data, event_id);
-    capi("InitiateCheckout", getFbCookies(), custom_data, event_id, {
-      mergeStoredProfile: true,
-    });
+    const customData = buildMetaPurchaseCustomData({ value });
+
+    pixel("track", "InitiateCheckout", customData, eventId);
+    void capi(
+      "InitiateCheckout",
+      getMetaBrowserIdentifiers(),
+      customData,
+      eventId,
+      { merge_stored_profile: true }
+    );
   }
 
-  /**
-   * Lead — fires on early-access form submit.
-   */
-  function trackLead(email: string, phone?: string, name?: string) {
-    const event_id = genEventId();
-    const [firstName, ...rest] = (name ?? "").trim().split(/\s+/);
-    const lastName = rest.join(" ");
-    pixel("track", "Lead", {}, event_id);
-    capi(
+  function trackLead(email: string, phone?: string, name?: string): void {
+    const eventId = genEventId();
+
+    pixel("track", "Lead", {}, eventId);
+    void capi(
       "Lead",
-      {
-        ...getFbCookies(),
-        email,
-        phone,
-        ...(firstName ? { firstName } : {}),
-        ...(lastName ? { lastName } : {}),
-      },
+      buildLeadLikeUserData(email, phone, name),
       {},
-      event_id,
-      { mergeStoredProfile: true }
+      eventId,
+      { merge_stored_profile: true }
     );
   }
 
-  /**
-   * Subscribe — fires on early-access form submit (alongside Lead).
-   */
-  function trackSubscribe(email: string, phone?: string, name?: string) {
-    const event_id = genEventId();
-    const [firstName, ...rest] = (name ?? "").trim().split(/\s+/);
-    const lastName = rest.join(" ");
-    pixel(
-      "trackCustom",
+  function trackSubscribe(email: string, phone?: string, name?: string): void {
+    const eventId = genEventId();
+    const customData = { content_name: "Early Access" };
+
+    pixel("trackCustom", "Subscribe", customData, eventId);
+    void capi(
       "Subscribe",
-      { content_name: "Early Access" },
-      event_id
-    );
-    capi(
-      "Subscribe",
-      {
-        ...getFbCookies(),
-        email,
-        phone,
-        ...(firstName ? { firstName } : {}),
-        ...(lastName ? { lastName } : {}),
-      },
-      { content_name: "Early Access" },
-      event_id,
-      { mergeStoredProfile: true }
+      buildLeadLikeUserData(email, phone, name),
+      customData,
+      eventId,
+      { merge_stored_profile: true }
     );
   }
 
-  /**
-   * Search — required per CAPI setup. Fire when user searches/filters.
-   * Customer info: client_user_agent only (server-side).
-   */
-  function trackSearch(query?: string) {
-    const event_id = genEventId();
-    pixel("track", "Search", { search_string: query }, event_id);
-    capi("Search", getFbCookies(), { search_string: query }, event_id);
+  function trackSearch(query?: string): void {
+    const eventId = genEventId();
+    const customData = { search_string: query };
+
+    pixel("track", "Search", customData, eventId);
+    void capi("Search", getMetaBrowserIdentifiers(), customData, eventId);
   }
 
-  // ─── SCROLL DEPTH ────────────────────────────────────────────────
-
-  function setupScrollDepth() {
+  function setupScrollDepth(): void {
     if (!import.meta.client) return;
+
     const milestones = [25, 50, 75, 90];
     const fired = new Set<number>();
 
-    function onScroll() {
+    function onScroll(): void {
       const total = document.documentElement.scrollHeight - window.innerHeight;
       if (total <= 0) return;
+
       const pct = Math.round((window.scrollY / total) * 100);
-      for (const m of milestones) {
-        if (pct >= m && !fired.has(m)) {
-          fired.add(m);
-          trackScrollDepth(m);
+
+      for (const milestone of milestones) {
+        if (pct >= milestone && !fired.has(milestone)) {
+          fired.add(milestone);
+          trackScrollDepth(milestone);
         }
       }
     }
@@ -388,7 +487,8 @@ export function useMetaEvents() {
   }
 
   return {
-    syncClickIdFromRoute,
+    syncClickIdFromRoute: () => syncMetaRouteIdentifiers(route),
+    setFacebookLoginId,
     trackPageView,
     trackViewContent,
     trackAddToCart,

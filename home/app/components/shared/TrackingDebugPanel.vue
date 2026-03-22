@@ -35,18 +35,18 @@
               {{ expanded.has(e.id) ? "▲" : "▼" }}
             </button>
             <div v-if="getRequestMeta(e.params)" class="dbg-request-meta">
-              <span v-if="getRequestMeta(e.params)?.clientIp"
-                >IP: {{ getRequestMeta(e.params)?.clientIp }}</span
+              <span v-if="getRequestMeta(e.params)?.client_ip"
+                >IP: {{ getRequestMeta(e.params)?.client_ip }}</span
               >
               <span
                 v-if="
-                  getRequestMeta(e.params)?.clientIp &&
-                  getRequestMeta(e.params)?.userAgent
+                  getRequestMeta(e.params)?.client_ip &&
+                  getRequestMeta(e.params)?.user_agent
                 "
                 >·</span
               >
-              <span v-if="getRequestMeta(e.params)?.userAgent" class="dbg-ua">
-                UA: {{ getRequestMeta(e.params)?.userAgent }}
+              <span v-if="getRequestMeta(e.params)?.user_agent" class="dbg-ua">
+                UA: {{ getRequestMeta(e.params)?.user_agent }}
               </span>
             </div>
             <pre v-if="expanded.has(e.id)" class="dbg-params">{{
@@ -68,6 +68,8 @@ const open = ref(false);
 const expanded = reactive(new Set<string>());
 
 type RequestMeta = {
+  client_ip?: string;
+  user_agent?: string;
   clientIp?: string;
   userAgent?: string;
 };
@@ -83,9 +85,19 @@ function getRequestMeta(params?: Record<string, unknown>): RequestMeta | null {
   if (!meta || typeof meta !== "object") return null;
 
   const request = meta as RequestMeta;
-  if (!request.clientIp && !request.userAgent) return null;
+  if (
+    !request.client_ip &&
+    !request.user_agent &&
+    !request.clientIp &&
+    !request.userAgent
+  ) {
+    return null;
+  }
 
-  return request;
+  return {
+    client_ip: request.client_ip ?? request.clientIp,
+    user_agent: request.user_agent ?? request.userAgent,
+  };
 }
 </script>
 

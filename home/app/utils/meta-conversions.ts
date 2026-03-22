@@ -1,8 +1,8 @@
 export interface MetaPurchaseData {
   email?: string;
   phone?: string;
-  firstName?: string;
-  lastName?: string;
+  first_name?: string;
+  last_name?: string;
   city?: string;
   state?: string;
   country?: string;
@@ -12,8 +12,38 @@ export interface MetaPurchaseData {
   zip?: string;
   dob?: string;
   gender?: string;
+  fb_login_id?: string;
   sku?: string;
   value?: number;
+}
+
+function normalizeMetaEmail(raw: string): string {
+  return raw.trim().toLowerCase();
+}
+
+function normalizeMetaName(raw: string): string {
+  return raw.trim().toLowerCase();
+}
+
+function normalizeMetaLocation(raw: string): string {
+  return raw.trim().toLowerCase().replace(/[\s\p{P}]+/gu, "");
+}
+
+function normalizeMetaCountry(raw: string): string {
+  return raw.trim().toLowerCase().replace(/[^a-z]/g, "").slice(0, 2);
+}
+
+function normalizeMetaZip(raw: string): string {
+  return raw.trim().toLowerCase().replace(/[\s-]+/g, "");
+}
+
+function normalizeMetaGender(raw: string): string {
+  const normalized = raw.trim().toLowerCase();
+
+  if (normalized === "male") return "m";
+  if (normalized === "female") return "f";
+
+  return normalized.slice(0, 1);
 }
 
 export interface MetaUserDataInput
@@ -122,25 +152,32 @@ export function buildMetaUserData(
     ...(options.clientIp ? { client_ip_address: options.clientIp } : {}),
   };
 
-  if (input.email) userData.em = [options.hash(input.email)];
-  if (input.email) userData.external_id = [options.hash(input.email)];
+  if (input.email) userData.em = [options.hash(normalizeMetaEmail(input.email))];
+  if (input.email)
+    userData.external_id = [options.hash(normalizeMetaEmail(input.email))];
   if (input.phone)
     userData.ph = [
       options.hash(
         options.normalizePhone?.(input.phone) ?? normalizeMetaPhone(input.phone)
       ),
     ];
-  if (input.firstName) userData.fn = [options.hash(input.firstName)];
-  if (input.lastName) userData.ln = [options.hash(input.lastName)];
-  if (input.city) userData.ct = [options.hash(input.city)];
-  if (input.state) userData.st = [options.hash(input.state)];
-  if (input.country) userData.country = [options.hash(input.country)];
-  if (input.zip) userData.zp = [options.hash(input.zip)];
+  if (input.first_name)
+    userData.fn = [options.hash(normalizeMetaName(input.first_name))];
+  if (input.last_name)
+    userData.ln = [options.hash(normalizeMetaName(input.last_name))];
+  if (input.city) userData.ct = [options.hash(normalizeMetaLocation(input.city))];
+  if (input.state)
+    userData.st = [options.hash(normalizeMetaLocation(input.state))];
+  if (input.country)
+    userData.country = [options.hash(normalizeMetaCountry(input.country))];
+  if (input.zip) userData.zp = [options.hash(normalizeMetaZip(input.zip))];
   if (input.dob) userData.db = [options.hash(normalizeMetaDob(input.dob))];
-  if (input.gender) userData.ge = [options.hash(input.gender)];
+  if (input.gender)
+    userData.ge = [options.hash(normalizeMetaGender(input.gender))];
 
   if (input.fbc) userData.fbc = input.fbc;
   if (input.fbp) userData.fbp = input.fbp;
+  if (input.fb_login_id) userData.fb_login_id = input.fb_login_id;
 
   return compactMetaObject(userData);
 }

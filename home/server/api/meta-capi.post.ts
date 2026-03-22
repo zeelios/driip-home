@@ -13,6 +13,7 @@
  * Deduplication is handled by the shared event_id between Pixel and CAPI.
  */
 import crypto from "node:crypto";
+import { isIP } from "node:net";
 import { getRequestHeader, getRequestIP } from "h3";
 import {
   buildMetaCapiEventPayload,
@@ -41,20 +42,46 @@ function normalizePhone(raw: string): string {
   return digits;
 }
 
+function sanitizeIpCandidate(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  if (trimmed.startsWith("[") && trimmed.includes("]")) {
+    const bracketEnd = trimmed.indexOf("]");
+    const bracketValue = trimmed.slice(1, bracketEnd).trim();
+    return isIP(bracketValue) ? bracketValue : undefined;
+  }
+
+  if (isIP(trimmed)) {
+    return trimmed;
+  }
+
+  const ipv4WithoutPortMatch = trimmed.match(/^(\d{1,3}(?:\.\d{1,3}){3}):\d+$/);
+  if (ipv4WithoutPortMatch?.[1] && isIP(ipv4WithoutPortMatch[1])) {
+    return ipv4WithoutPortMatch[1];
+  }
+
+  return undefined;
+}
+
 function getClientIpAddress(event: Parameters<typeof getRequestIP>[0]) {
   const cloudflareIp = getRequestHeader(event, "cf-connecting-ip");
   const realIp = getRequestHeader(event, "x-real-ip");
   const forwardedFor = getRequestHeader(event, "x-forwarded-for");
+  const requestIp = getRequestIP(event, { xForwardedFor: true });
 
-  const forwardedCandidate = forwardedFor?.split(",")[0]?.trim();
+  const candidates = [
+    cloudflareIp,
+    realIp,
+    ...(forwardedFor?.split(",") ?? []),
+    requestIp,
+  ]
+    .map((value) =>
+      typeof value === "string" ? sanitizeIpCandidate(value) : undefined
+    )
+    .filter((value): value is string => Boolean(value));
 
-  return (
-    cloudflareIp?.trim() ||
-    realIp?.trim() ||
-    forwardedCandidate ||
-    getRequestIP(event, { xForwardedFor: true }) ||
-    undefined
-  );
+  return candidates.find((value) => isIP(value) === 6) ?? candidates[0];
 }
 
 export default defineEventHandler(async (event) => {
@@ -118,13 +145,13 @@ export default defineEventHandler(async (event) => {
           typeof user_data?.phone === "string"
             ? normalizePhone(user_data.phone)
             : undefined,
-        firstName:
-          typeof user_data?.firstName === "string"
-            ? user_data.firstName.trim().toLowerCase()
+        first_name:
+          typeof user_data?.first_name === "string"
+            ? user_data.first_name.trim().toLowerCase()
             : undefined,
-        lastName:
-          typeof user_data?.lastName === "string"
-            ? user_data.lastName.trim().toLowerCase()
+        last_name:
+          typeof user_data?.last_name === "string"
+            ? user_data.last_name.trim().toLowerCase()
             : undefined,
         city:
           typeof user_data?.city === "string"
@@ -149,6 +176,10 @@ export default defineEventHandler(async (event) => {
         gender:
           typeof user_data?.gender === "string"
             ? user_data.gender.trim().toLowerCase()
+            : undefined,
+        fb_login_id:
+          typeof user_data?.fb_login_id === "string"
+            ? user_data.fb_login_id.trim()
             : undefined,
       }),
       hashed_user_data: hashedUser,
