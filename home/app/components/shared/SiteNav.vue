@@ -1,67 +1,65 @@
 <template>
-  <Teleport to="body">
-    <nav class="snav">
-      <div class="snav-inner">
-        <!-- Left: back + logo + page title -->
-        <div class="snav-left">
-          <NuxtLinkLocale
-            v-if="showBack"
-            to="/"
-            class="snav-back"
-            :title="t('nav.home')"
-          >
-            ‹
-          </NuxtLinkLocale>
-          <NuxtLinkLocale to="/" class="snav-logo-link">
-            <NuxtImg
-              src="/logo.png"
-              alt="driip"
-              width="48"
-              height="22"
-              quality="70"
-              format="webp"
-              loading="eager"
-              class="snav-logo"
-              :class="{ 'is-loaded': logoLoaded }"
-              @load="settleLogoLoad"
-              @error="settleLogoLoad"
-            />
-          </NuxtLinkLocale>
-          <template v-if="navStore.title">
-            <span class="snav-sep" aria-hidden="true" />
-            <span class="snav-drop">{{ navStore.title }}</span>
-          </template>
-        </div>
-
-        <!-- Center: optional section links -->
-        <div v-if="navStore.links.length > 0" class="snav-center">
-          <button
-            v-for="link in navStore.links"
-            :key="link.id"
-            class="snav-link"
-            :class="{ active: navStore.activeSection === link.id }"
-            @click="navStore.requestScroll(link.id)"
-          >
-            {{ link.label }}
-          </button>
-        </div>
-
-        <!-- Right: lang switch + optional CTA -->
-        <div class="snav-right">
-          <button class="snav-lang" @click="switchLang">
-            {{ t("nav.langSwitch") }}
-          </button>
-          <button
-            v-if="navStore.ctaLabel"
-            class="snav-cta"
-            @click="navStore.requestScroll(navStore.ctaTarget)"
-          >
-            {{ navStore.ctaLabel }}
-          </button>
-        </div>
+  <nav class="snav">
+    <div class="snav-inner">
+      <!-- Left: back + logo + page title -->
+      <div class="snav-left">
+        <NuxtLinkLocale
+          v-if="showBack"
+          to="/"
+          class="snav-back"
+          :title="t('nav.home')"
+        >
+          ‹
+        </NuxtLinkLocale>
+        <NuxtLinkLocale to="/" class="snav-logo-link">
+          <NuxtImg
+            src="/logo.png"
+            alt="driip"
+            width="48"
+            height="22"
+            quality="70"
+            format="webp"
+            loading="eager"
+            class="snav-logo"
+            :class="{ 'is-loaded': logoLoaded }"
+            @load="settleLogoLoad"
+            @error="settleLogoLoad"
+          />
+        </NuxtLinkLocale>
+        <template v-if="navStore.title">
+          <span class="snav-sep" aria-hidden="true" />
+          <span class="snav-drop">{{ navStore.title }}</span>
+        </template>
       </div>
-    </nav>
-  </Teleport>
+
+      <!-- Center: optional section links -->
+      <div v-if="navStore.links.length > 0" class="snav-center">
+        <button
+          v-for="link in navStore.links"
+          :key="link.id"
+          class="snav-link"
+          :class="{ active: navStore.activeSection === link.id }"
+          @click="navStore.requestScroll(link.id)"
+        >
+          {{ link.label }}
+        </button>
+      </div>
+
+      <!-- Right: lang switch + optional CTA -->
+      <div class="snav-right">
+        <button class="snav-lang" @click="switchLang">
+          {{ t("nav.langSwitch") }}
+        </button>
+        <button
+          v-if="navStore.ctaLabel"
+          class="snav-cta"
+          @click="navStore.requestScroll(navStore.ctaTarget)"
+        >
+          {{ navStore.ctaLabel }}
+        </button>
+      </div>
+    </div>
+  </nav>
 </template>
 
 <script setup lang="ts">

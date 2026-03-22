@@ -10,18 +10,18 @@
           <button
             type="button"
             class="product-tab"
-            :class="{ active: mobileTab === 'brief' }"
-            @click="mobileTab = 'brief'"
-          >
-            CK BRIEF
-          </button>
-          <button
-            type="button"
-            class="product-tab"
             :class="{ active: mobileTab === 'boxer' }"
             @click="mobileTab = 'boxer'"
           >
             CK BOXER
+          </button>
+          <button
+            type="button"
+            class="product-tab"
+            :class="{ active: mobileTab === 'brief' }"
+            @click="mobileTab = 'brief'"
+          >
+            CK BRIEF
           </button>
         </div>
 
@@ -350,8 +350,8 @@
                   :disabled="!boxerDraftValid"
                   @click="addBoxerToCart"
                 >
-                  <span v-if="boxerDraftValid">THÊM VÀO GIỎ HÀNG +</span>
-                  <span v-else>CHỌN SIZE & MÀU ĐỂ THÊM</span>
+                  <span v-if="boxerDraftValid">{{ $t('ck.products.addToCart') }} +</span>
+                  <span v-else>{{ $t('ck.products.chooseSizeColor') }}</span>
                 </button>
               </div>
             </div>
@@ -370,7 +370,7 @@
               }}</span>
             </div>
             <button class="quick-order-btn" @click="$emit('go-to-order')">
-              ĐẶT HÀNG NGAY →
+              $t('ck.products.goToCart')
             </button>
           </div>
         </Transition>
@@ -450,7 +450,7 @@ watch(
 );
 
 // ── Mobile tab state ─────────────────────────────────────────────
-const mobileTab = ref<"brief" | "boxer">("brief");
+const mobileTab = ref<"brief" | "boxer">("boxer");
 
 // ── Per-product draft selections ──────────────────────────────────
 const briefDraft = reactive({ size: "", color: "", boxes: 1 });
@@ -749,7 +749,7 @@ function applySizeGuide(size: string): void {
 }
 @media (min-width: 768px) {
   .color-overlay {
-    padding: 48px 18px 18px;
+    padding: 32px 18px 18px;
   }
 }
 .color-name {
@@ -1128,6 +1128,21 @@ function applySizeGuide(size: string): void {
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
   position: relative;
+}
+.product-tab.active {
+  box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 639px) {
+  .product-tab {
+    font-size: 13px;
+    padding: 16px 20px;
+    letter-spacing: 0.18em;
+  }
+  .product-tabs {
+    border-width: 2px;
+    border-radius: 12px;
+  }
 }
 .product-tab + .product-tab {
   border-left: 1px solid rgba(255, 255, 255, 0.12);

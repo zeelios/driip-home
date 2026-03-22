@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isDev" class="dbg-wrap">
+  <div v-if="isDev && isMounted" class="dbg-wrap">
     <!-- Toggle button -->
     <button class="dbg-toggle" @click="open = !open">
       <span class="dbg-icon">◉</span>
@@ -66,6 +66,11 @@ const isDev = import.meta.dev;
 const { events, clear } = useTrackingDebug();
 const open = ref(false);
 const expanded = reactive(new Set<string>());
+const isMounted = ref(false);
+
+onMounted(() => {
+  isMounted.value = true;
+});
 
 type RequestMeta = {
   client_ip?: string;

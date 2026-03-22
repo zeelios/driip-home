@@ -64,7 +64,10 @@
         "desc": "Che phủ tối ưu, form ôm vừa vặn và hạn chế di chuyển, lý tưởng cho lối sống năng động.",
         "specs": ["Ống chân dài", "Hỗ trợ tối đa", "Thiết kế theo đường cong cơ thể"]
       },
-      "orderThis": "ĐẶT NGAY →"
+      "orderThis": "ĐẶT NGAY →",
+      "addToCart": "THÊM VÀO GIỎ HÀNG +",
+      "chooseSizeColor": "CHỌN SIZE & MÀU ĐỂ THÊM",
+      "goToCart": "XEM GIỎ HÀNG →"
     },
     "fabric": {
       "modal": "95% cotton modal",

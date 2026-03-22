@@ -3,7 +3,9 @@
     <SharedSiteNav />
     <slot />
     <SharedMessengerChat />
-    <SharedTrackingDebugPanel />
+    <ClientOnly>
+      <SharedTrackingDebugPanel />
+    </ClientOnly>
   </div>
 </template>
 

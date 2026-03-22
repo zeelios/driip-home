@@ -64,7 +64,10 @@
       "boxer": {
         "desc": "Full coverage. Anatomical fit. Zero ride-up guarantee.",
         "specs": ["Extended leg coverage", "Anti-ride-up hem", "Contoured support"]
-      }
+      },
+      "addToCart": "Add To Cart +",
+      "chooseSizeColor": "Select Size & Color",
+      "goToCart": "View Cart →"
     },
     "fabric": {
       "modal": "95% MODAL COTTON",
