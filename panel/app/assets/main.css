@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+input::placeholder {
+  color: rgba(163, 163, 163, 0.8)
+}

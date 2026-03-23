@@ -33,11 +33,13 @@ use App\Http\Controllers\Api\V1\SaleEvent\SaleEventController;
 use App\Http\Controllers\Api\V1\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Dashboard\DashboardController;
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1/panel')->group(function () {
 
     // Auth (rate limited: 5/min per IP)
     Route::prefix('auth')->middleware('throttle:5,1')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('reset-password', [AuthController::class, 'resetPassword']);
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me', [AuthController::class, 'me']);

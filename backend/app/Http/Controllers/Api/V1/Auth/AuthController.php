@@ -11,6 +11,7 @@ use App\Http\Resources\Staff\StaffResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -64,6 +65,68 @@ class AuthController extends BaseApiController
             return $this->validationError($e, 'AUTH_LOGIN');
         } catch (\Throwable $e) {
             return $this->serverError($e, 'AUTH_LOGIN');
+        }
+    }
+
+    /**
+     * Send a password reset link to the given email address.
+     */
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'email' => ['required', 'email'],
+            ]);
+
+            Password::sendResetLink(['email' => $data['email']]);
+
+            // Always return success to avoid email enumeration.
+            return response()->json([
+                'success' => true,
+                'message' => 'If that email exists, a reset link has been sent.',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e, 'AUTH_FORGOT_PASSWORD');
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'AUTH_FORGOT_PASSWORD');
+        }
+    }
+
+    /**
+     * Reset a user's password using a valid reset token.
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'email'                 => ['required', 'email'],
+                'token'                 => ['required', 'string'],
+                'password'              => ['required', 'string', 'min:8', 'confirmed'],
+                'password_confirmation' => ['required', 'string'],
+            ]);
+
+            $status = Password::reset(
+                $data,
+                function (User $user, string $password) {
+                    $user->forceFill(['password' => Hash::make($password)])->save();
+                    $user->tokens()->delete();
+                }
+            );
+
+            if ($status !== Password::PASSWORD_RESET) {
+                return ErrorResource::fromException(__($status), 'AUTH_RESET_PASSWORD')
+                    ->response()
+                    ->setStatusCode(422);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password has been reset.',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e, 'AUTH_RESET_PASSWORD');
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'AUTH_RESET_PASSWORD');
         }
     }
 

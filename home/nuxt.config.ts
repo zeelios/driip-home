@@ -122,6 +122,7 @@ export default defineNuxtConfig({
         { rel: "canonical", href: "https://driip.com/" },
       ],
     },
+    rootId: "__zeelios",
   },
 
   // ── Runtime config ────────────────────────────────────────────────

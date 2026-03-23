@@ -101,6 +101,9 @@ class DatabaseSeeder extends Seeder
 
         // 16. Sample orders
         $this->seedOrders();
+
+        // 16. User accounts
+        $this->seedUsers();
     }
 
     /**
@@ -833,6 +836,28 @@ class DatabaseSeeder extends Seeder
                     'total_price' => $unitPrice * $quantity,
                 ],
             );
+        }
+
+        /**
+         * Create default user
+         *
+         * @@return void
+         */
+        private function seedUsers()
+        {
+            // Create user
+            User::updateOrCreate(
+                ['email' => 'admin@driip.vn'],
+                [
+                    'name' => 'Admin',
+                    'email' => 'admin@driip.io',
+                    'password' => Hash::make('password'),
+                ],
+            );
+
+            // assign the highest role
+            $user = User::where('email', 'admin@driip.io')->first();
+            $user->assignRole('super-admin');
         }
     }
 }
