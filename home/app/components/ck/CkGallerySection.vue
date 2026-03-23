@@ -4,6 +4,13 @@
       <p class="gallery-pre">{{ t("ck.gallery.pre") }}</p>
       <h2 class="gallery-title">{{ t("ck.gallery.title") }}</h2>
       <p class="gallery-sub">{{ t("ck.gallery.sub") }}</p>
+      <button
+        class="gallery-cta"
+        type="button"
+        @click="$emit('go-to-products')"
+      >
+        {{ t("ck.order.goProducts") }}
+      </button>
     </div>
 
     <div class="gallery-tabs">
@@ -87,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+defineEmits<{ "go-to-products": [] }>();
 const { t } = useI18n();
 
 type GalleryItem = {
@@ -288,6 +296,23 @@ onUnmounted(() => {
   color: var(--grey-500);
   text-transform: uppercase;
 }
+.gallery-cta {
+  margin-top: 18px;
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.gallery-cta:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.08);
+}
 
 /* ─── TABS ─────────────────────────────────────────────────────── */
 .gallery-tabs {
@@ -358,7 +383,6 @@ onUnmounted(() => {
 .masonry-item:hover .masonry-img {
   transform: scale(1.04);
 }
-
 
 .masonry-overlay {
   position: absolute;

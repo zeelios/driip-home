@@ -35,7 +35,7 @@
           </div>
 
           <div class="hero-actions">
-            <button class="btn-primary" @click="$emit('scroll-to', 'order')">
+            <button class="btn-primary" @click="$emit('hero-cta')">
               {{ t("ck.hero.cta") }}
               <span aria-hidden="true">→</span>
             </button>

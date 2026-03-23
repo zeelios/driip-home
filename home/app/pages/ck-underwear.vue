@@ -2,7 +2,7 @@
   <div class="page">
     <CkHeroNavSection @hero-cta="onHeroCTA" @scroll-to="scrollToSection" />
     <CkProductsSection @go-to-order="scrollToSection('order')" />
-    <CkGallerySection />
+    <CkGallerySection @go-to-products="scrollToSection('products')" />
     <CkManifestoSection />
     <!-- <CkAccessSection /> -->
     <CkOrderSection />
@@ -29,8 +29,8 @@ watchEffect(() => {
       { id: "gallery", label: "LOOKBOOK" },
       { id: "order", label: t("ck.hero.cta") },
     ],
-    ctaLabel: t("ck.hero.cta"),
-    ctaTarget: "order",
+    ctaLabel: t("ck.gallery.title"),
+    ctaTarget: "gallery",
   });
 });
 
@@ -166,6 +166,6 @@ function scrollToSection(id: string): void {
 }
 
 function onHeroCTA(): void {
-  scrollToSection("order");
+  scrollToSection("gallery");
 }
 </script>

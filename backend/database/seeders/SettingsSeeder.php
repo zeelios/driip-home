@@ -33,101 +33,101 @@ class SettingsSeeder extends Seeder
             // Loyalty
             [
                 'group' => 'loyalty',
-                'key'   => 'points_per_vnd',
+                'key' => 'points_per_vnd',
                 'value' => '1000',
-                'type'  => 'integer',
+                'type' => 'integer',
                 'label' => 'Điểm trên mỗi 1000 VND',
             ],
             [
                 'group' => 'loyalty',
-                'key'   => 'redeem_rate',
+                'key' => 'redeem_rate',
                 'value' => '1000',
-                'type'  => 'integer',
+                'type' => 'integer',
                 'label' => 'Giá trị quy đổi điểm (VND)',
             ],
             [
                 'group' => 'loyalty',
-                'key'   => 'min_redeem_points',
+                'key' => 'min_redeem_points',
                 'value' => '100',
-                'type'  => 'integer',
+                'type' => 'integer',
                 'label' => 'Điểm tối thiểu để đổi',
             ],
 
             // Tax
             [
                 'group' => 'tax',
-                'key'   => 'default_vat_rate',
+                'key' => 'default_vat_rate',
                 'value' => '10',
-                'type'  => 'integer',
+                'type' => 'integer',
                 'label' => 'Thuế GTGT mặc định (%)',
             ],
             [
                 'group' => 'tax',
-                'key'   => 'vat_invoice_prefix',
+                'key' => 'vat_invoice_prefix',
                 'value' => 'INV',
-                'type'  => 'string',
+                'type' => 'string',
                 'label' => 'Tiền tố số hóa đơn VAT',
             ],
 
             // Shipping
             [
                 'group' => 'shipping',
-                'key'   => 'free_shipping_threshold',
+                'key' => 'free_shipping_threshold',
                 'value' => '500000',
-                'type'  => 'integer',
+                'type' => 'integer',
                 'label' => 'Đơn hàng miễn phí vận chuyển (VND)',
             ],
             [
                 'group' => 'shipping',
-                'key'   => 'default_courier',
+                'key' => 'default_courier',
                 'value' => 'ghn',
-                'type'  => 'string',
+                'type' => 'string',
                 'label' => 'Đơn vị vận chuyển mặc định',
             ],
 
             // Order
             [
                 'group' => 'order',
-                'key'   => 'auto_cancel_unpaid_after_hours',
+                'key' => 'auto_cancel_unpaid_after_hours',
                 'value' => '24',
-                'type'  => 'integer',
+                'type' => 'integer',
                 'label' => 'Tự hủy đơn chưa thanh toán sau (giờ)',
             ],
             [
                 'group' => 'order',
-                'key'   => 'max_cod_amount',
+                'key' => 'max_cod_amount',
                 'value' => '5000000',
-                'type'  => 'integer',
+                'type' => 'integer',
                 'label' => 'COD tối đa (VND)',
             ],
 
             // Invoice
             [
                 'group' => 'invoice',
-                'key'   => 'invoice_number_prefix',
+                'key' => 'invoice_number_prefix',
                 'value' => 'INV',
-                'type'  => 'string',
+                'type' => 'string',
                 'label' => 'Tiền tố số hóa đơn',
             ],
             [
                 'group' => 'invoice',
-                'key'   => 'company_name',
+                'key' => 'company_name',
                 'value' => 'Driip Brand',
-                'type'  => 'string',
+                'type' => 'string',
                 'label' => 'Tên công ty',
             ],
             [
                 'group' => 'invoice',
-                'key'   => 'company_tax_code',
+                'key' => 'company_tax_code',
                 'value' => '0123456789',
-                'type'  => 'string',
+                'type' => 'string',
                 'label' => 'Mã số thuế công ty',
             ],
             [
                 'group' => 'invoice',
-                'key'   => 'company_address',
+                'key' => 'company_address',
                 'value' => '123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
-                'type'  => 'string',
+                'type' => 'string',
                 'label' => 'Địa chỉ công ty',
             ],
         ];
@@ -136,9 +136,9 @@ class SettingsSeeder extends Seeder
             Setting::updateOrInsert(
                 ['group' => $row['group'], 'key' => $row['key']],
                 [
-                    'id'    => (string) Str::uuid(),
+                    'id' => (string) Str::uuid(),
                     'value' => $row['value'],
-                    'type'  => $row['type'],
+                    'type' => $row['type'],
                     'label' => $row['label'],
                 ],
             );
