@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Inventory;
 
+use App\Domain\Inventory\Data\CreatePurchaseOrderDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -41,4 +43,12 @@ class CreatePurchaseOrderRequest extends FormRequest
             'items.*.unit_cost'              => ['required', 'integer', 'min:0'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreatePurchaseOrderDto
+    {
+        return CreatePurchaseOrderDto::fromArray($this->validated());
+    }
+
 }

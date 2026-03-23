@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Order;
 
+use App\Domain\Order\Data\UpdateClaimDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -39,4 +41,12 @@ class UpdateClaimRequest extends FormRequest
             'assigned_to'      => ['nullable', 'uuid'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateClaimDto
+    {
+        return UpdateClaimDto::fromArray($this->validated());
+    }
+
 }

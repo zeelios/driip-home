@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Warehouse;
 
+use App\Domain\Warehouse\Data\CreateWarehouseDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -43,4 +45,12 @@ class CreateWarehouseRequest extends FormRequest
             'notes'      => ['nullable', 'string'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreateWarehouseDto
+    {
+        return CreateWarehouseDto::fromArray($this->validated());
+    }
+
 }

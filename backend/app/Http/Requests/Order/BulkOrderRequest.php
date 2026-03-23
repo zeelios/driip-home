@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Order;
 
+use App\Domain\Order\Data\BulkOrderDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -37,4 +39,12 @@ class BulkOrderRequest extends FormRequest
             'order_ids.*' => ['required', 'uuid'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): BulkOrderDto
+    {
+        return BulkOrderDto::fromArray($this->validated());
+    }
+
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Inventory;
 
+use App\Domain\Inventory\Data\CountStockItemDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -33,4 +35,12 @@ class CountStockItemRequest extends FormRequest
             'notes'            => ['nullable', 'string', 'max:500'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CountStockItemDto
+    {
+        return CountStockItemDto::fromArray($this->validated());
+    }
+
 }

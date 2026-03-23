@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Loyalty;
 
+use App\Domain\Loyalty\Data\UpdateTierDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -45,4 +47,12 @@ class UpdateTierRequest extends FormRequest
             'sort_order'          => ['sometimes', 'integer', 'min:0'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateTierDto
+    {
+        return UpdateTierDto::fromArray($this->validated());
+    }
+
 }

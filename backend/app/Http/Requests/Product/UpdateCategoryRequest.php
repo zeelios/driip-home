@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Product;
 
+use App\Domain\Product\Data\UpdateCategoryDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -43,4 +45,12 @@ class UpdateCategoryRequest extends FormRequest
             'sort_order'  => ['nullable', 'integer', 'min:0'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateCategoryDto
+    {
+        return UpdateCategoryDto::fromArray($this->validated());
+    }
+
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Tax;
 
+use App\Domain\Tax\Data\UpdateTaxConfigDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -41,4 +43,12 @@ class UpdateTaxConfigRequest extends FormRequest
             'is_active'      => ['sometimes', 'boolean'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateTaxConfigDto
+    {
+        return UpdateTaxConfigDto::fromArray($this->validated());
+    }
+
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Loyalty;
 
+use App\Domain\Loyalty\Data\RedeemPointsDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -34,4 +36,12 @@ class RedeemPointsRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:500'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): RedeemPointsDto
+    {
+        return RedeemPointsDto::fromArray($this->validated());
+    }
+
 }

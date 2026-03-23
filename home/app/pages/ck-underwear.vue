@@ -166,6 +166,6 @@ function scrollToSection(id: string): void {
 }
 
 function onHeroCTA(): void {
-  scrollToSection("gallery");
+  scrollToSection("products");
 }
 </script>

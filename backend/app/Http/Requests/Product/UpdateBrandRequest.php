@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Product;
 
+use App\Domain\Product\Data\UpdateBrandDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -44,4 +46,12 @@ class UpdateBrandRequest extends FormRequest
             'sort_order'  => ['nullable', 'integer', 'min:0'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateBrandDto
+    {
+        return UpdateBrandDto::fromArray($this->validated());
+    }
+
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Warehouse;
 
+use App\Domain\Warehouse\Data\AssignStaffDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -33,4 +35,12 @@ class AssignStaffRequest extends FormRequest
             'role'    => ['required', 'string', 'max:50'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): AssignStaffDto
+    {
+        return AssignStaffDto::fromArray($this->validated());
+    }
+
 }

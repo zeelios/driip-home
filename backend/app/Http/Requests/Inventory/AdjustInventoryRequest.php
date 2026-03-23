@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Inventory;
 
+use App\Domain\Inventory\Data\AdjustInventoryDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -39,4 +41,12 @@ class AdjustInventoryRequest extends FormRequest
             'reason'       => ['required', 'string', 'max:500'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): AdjustInventoryDto
+    {
+        return AdjustInventoryDto::fromArray($this->validated());
+    }
+
 }

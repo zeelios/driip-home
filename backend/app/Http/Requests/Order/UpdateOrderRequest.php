@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Order;
 
+use App\Domain\Order\Data\UpdateOrderDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -39,4 +41,12 @@ class UpdateOrderRequest extends FormRequest
             'tags.*'         => ['string'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateOrderDto
+    {
+        return UpdateOrderDto::fromArray($this->validated());
+    }
+
 }

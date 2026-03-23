@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Staff;
 
+use App\Domain\Staff\Data\CreateSalaryDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -47,4 +49,12 @@ class CreateSalaryRequest extends FormRequest
             'notes'              => ['nullable', 'string'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreateSalaryDto
+    {
+        return CreateSalaryDto::fromArray($this->validated());
+    }
+
 }

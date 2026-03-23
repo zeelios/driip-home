@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Loyalty;
 
+use App\Domain\Loyalty\Data\UpdateCampaignDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -41,4 +43,12 @@ class UpdateCampaignRequest extends FormRequest
             'is_active'    => ['sometimes', 'boolean'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateCampaignDto
+    {
+        return UpdateCampaignDto::fromArray($this->validated());
+    }
+
 }

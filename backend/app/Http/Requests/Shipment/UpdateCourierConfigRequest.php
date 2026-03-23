@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Shipment;
 
+use App\Domain\Shipment\Data\UpdateCourierConfigDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -43,4 +45,12 @@ class UpdateCourierConfigRequest extends FormRequest
             'settings'         => ['sometimes', 'nullable', 'array'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateCourierConfigDto
+    {
+        return UpdateCourierConfigDto::fromArray($this->validated());
+    }
+
 }

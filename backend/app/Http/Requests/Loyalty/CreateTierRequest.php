@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Loyalty;
 
+use App\Domain\Loyalty\Data\CreateTierDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -41,4 +43,12 @@ class CreateTierRequest extends FormRequest
             'sort_order'          => ['integer', 'min:0'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreateTierDto
+    {
+        return CreateTierDto::fromArray($this->validated());
+    }
+
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Product;
 
+use App\Domain\Product\Data\UpdateVariantDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -46,4 +48,12 @@ class UpdateVariantRequest extends FormRequest
             'reason'           => ['nullable', 'string', 'max:500'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): UpdateVariantDto
+    {
+        return UpdateVariantDto::fromArray($this->validated());
+    }
+
 }

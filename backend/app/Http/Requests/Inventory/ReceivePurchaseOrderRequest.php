@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Inventory;
 
+use App\Domain\Inventory\Data\ReceivePurchaseOrderDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -38,4 +40,12 @@ class ReceivePurchaseOrderRequest extends FormRequest
             'receipt_items.*.qty_received'   => ['required', 'integer', 'min:0'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): ReceivePurchaseOrderDto
+    {
+        return ReceivePurchaseOrderDto::fromArray($this->validated());
+    }
+
 }

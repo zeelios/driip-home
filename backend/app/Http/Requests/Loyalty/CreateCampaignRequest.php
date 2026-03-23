@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Loyalty;
 
+use App\Domain\Loyalty\Data\CreateCampaignDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -39,4 +41,12 @@ class CreateCampaignRequest extends FormRequest
             'is_active'    => ['boolean'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreateCampaignDto
+    {
+        return CreateCampaignDto::fromArray($this->validated());
+    }
+
 }

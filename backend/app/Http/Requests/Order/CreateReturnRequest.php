@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Order;
 
+use App\Domain\Order\Data\CreateReturnDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -40,4 +42,12 @@ class CreateReturnRequest extends FormRequest
             'notes'                     => ['nullable', 'string'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreateReturnDto
+    {
+        return CreateReturnDto::fromArray($this->validated());
+    }
+
 }

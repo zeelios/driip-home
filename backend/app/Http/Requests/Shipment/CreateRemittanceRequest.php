@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Shipment;
 
+use App\Domain\Shipment\Data\CreateRemittanceDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -39,4 +41,12 @@ class CreateRemittanceRequest extends FormRequest
             'notes'                 => ['nullable', 'string'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreateRemittanceDto
+    {
+        return CreateRemittanceDto::fromArray($this->validated());
+    }
+
 }

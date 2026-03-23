@@ -108,8 +108,6 @@ function scheduleFlush(delayMs = 0): void {
       scheduleFlush(ORDER_FLUSH_RETRY_MS);
     });
   }, delayMs);
-
-  flushTimer.unref?.();
 }
 
 export function queueOrderRows(rows: SheetRow[]): void {

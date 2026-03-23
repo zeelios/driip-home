@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Order;
 
+use App\Domain\Order\Data\CreateClaimDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -41,4 +43,12 @@ class CreateClaimRequest extends FormRequest
             'order_item_id' => ['nullable', 'uuid'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreateClaimDto
+    {
+        return CreateClaimDto::fromArray($this->validated());
+    }
+
 }

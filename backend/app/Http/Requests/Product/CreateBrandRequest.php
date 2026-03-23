@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Product;
 
+use App\Domain\Product\Data\CreateBrandDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -41,4 +43,12 @@ class CreateBrandRequest extends FormRequest
             'sort_order'  => ['nullable', 'integer', 'min:0'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): CreateBrandDto
+    {
+        return CreateBrandDto::fromArray($this->validated());
+    }
+
 }

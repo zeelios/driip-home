@@ -39,7 +39,7 @@
               {{ t("ck.hero.cta") }}
               <span aria-hidden="true">→</span>
             </button>
-            <button class="btn-ghost" @click="$emit('scroll-to', 'products')">
+            <button class="btn-ghost" @click="$emit('scroll-to', 'gallery')">
               {{ t("ck.hero.previewLabel") }}
             </button>
           </div>

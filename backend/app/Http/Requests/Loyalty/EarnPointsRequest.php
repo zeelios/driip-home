@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Loyalty;
 
+use App\Domain\Loyalty\Data\EarnPointsDto;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -35,4 +37,12 @@ class EarnPointsRequest extends FormRequest
             'description'    => ['nullable', 'string', 'max:500'],
         ];
     }
+    /**
+     * Build the DTO from validated request data.
+     */
+    public function dto(): EarnPointsDto
+    {
+        return EarnPointsDto::fromArray($this->validated());
+    }
+
 }
