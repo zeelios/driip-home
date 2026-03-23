@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // Main table
@@ -22,8 +21,8 @@ return new class extends Migration
         });
 
         // Self-relation
-        Schema::table('categories', function(Blueprint $table){
-            $table->foreignUuid('parent_id')->constrained('categories')->nullOnDelete()->nullOnUpdate();
+        Schema::table('categories', function (Blueprint $table) {
+            $table->foreignUuid('parent_id')->nullable()->constrained('categories')->nullOnDelete()->nullOnUpdate();
         });
     }
 

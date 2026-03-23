@@ -2,11 +2,12 @@ import { appendGoogleSheetRow, readGoogleSheetValues } from "./google-sheets";
 
 type SheetRow = (string | number)[];
 
-const ORDER_FLUSH_INTERVAL_MS = 60_000;
-const SHEET_RANGE = "Web!A:R";
+const ORDER_FLUSH_MAX_WAIT_MS = 60_000;
+const ORDER_FLUSH_RETRY_MS = 60_000;
+const SHEET_RANGE = "Web!A:T";
 
 const pendingRows: SheetRow[] = [];
-let flushTimer: ReturnType<typeof setInterval> | null = null;
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let flushPromise: Promise<void> | null = null;
 let allocationChain: Promise<void> = Promise.resolve();
 
@@ -90,14 +91,23 @@ export async function reserveOrderId(date = new Date()): Promise<string> {
   return reserved;
 }
 
-function ensureFlushTimer(): void {
+function clearFlushTimer(): void {
+  if (!flushTimer) return;
+
+  clearTimeout(flushTimer);
+  flushTimer = null;
+}
+
+function scheduleFlush(delayMs = 0): void {
   if (flushTimer) return;
 
-  flushTimer = setInterval(() => {
+  flushTimer = setTimeout(() => {
+    flushTimer = null;
     void flushOrderQueue().catch((error) => {
       console.error("[Google Sheets] Failed to flush queued orders.", error);
+      scheduleFlush(ORDER_FLUSH_RETRY_MS);
     });
-  }, ORDER_FLUSH_INTERVAL_MS);
+  }, delayMs);
 
   flushTimer.unref?.();
 }
@@ -105,19 +115,26 @@ function ensureFlushTimer(): void {
 export function queueOrderRows(rows: SheetRow[]): void {
   if (!rows.length) return;
 
+  const firstRow = rows[0] ?? [];
+  console.info("[Google Sheets] Queueing order row(s)", {
+    range: SHEET_RANGE,
+    rowCount: rows.length,
+    dob: String(firstRow[18] ?? ""),
+    gender: String(firstRow[19] ?? ""),
+  });
+
   pendingRows.push(...rows);
-  ensureFlushTimer();
+  scheduleFlush(ORDER_FLUSH_MAX_WAIT_MS);
 }
 
 export async function flushOrderQueue(): Promise<void> {
   if (flushPromise) return flushPromise;
   if (!pendingRows.length) {
-    if (flushTimer) {
-      clearInterval(flushTimer);
-      flushTimer = null;
-    }
+    clearFlushTimer();
     return;
   }
+
+  clearFlushTimer();
 
   const batch = pendingRows.splice(0, pendingRows.length);
 
@@ -128,13 +145,16 @@ export async function flushOrderQueue(): Promise<void> {
       pendingRows.unshift(...batch);
       throw error;
     } finally {
-      if (!pendingRows.length && flushTimer) {
-        clearInterval(flushTimer);
-        flushTimer = null;
+      if (!pendingRows.length) {
+        clearFlushTimer();
       }
     }
   })().finally(() => {
     flushPromise = null;
+
+    if (pendingRows.length) {
+      scheduleFlush();
+    }
   });
 
   return flushPromise;

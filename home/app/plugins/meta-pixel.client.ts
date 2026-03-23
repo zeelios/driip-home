@@ -28,7 +28,7 @@ export default defineNuxtPlugin(() => {
   }
 
   const pendingEvents: FbqArgs[] = [];
-  let flushTimer: number | null = null;
+  let flushTimer: ReturnType<typeof window.setInterval> | null = null;
 
   function flushPendingEvents(): void {
     if (typeof window === "undefined" || typeof window.fbq !== "function")
@@ -90,7 +90,10 @@ export default defineNuxtPlugin(() => {
         pendingEvents.push(args);
 
         if (!flushTimer) {
-          flushTimer = window.setInterval(flushPendingEvents, 250);
+          flushTimer = window.setInterval(
+            flushPendingEvents,
+            250
+          ) as unknown as ReturnType<typeof window.setInterval>;
           window.setTimeout(flushPendingEvents, 0);
         }
       },

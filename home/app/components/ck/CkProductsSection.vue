@@ -322,8 +322,10 @@
                   :disabled="!boxerDraftValid"
                   @click="addBoxerToCart"
                 >
-                  <span v-if="boxerDraftValid">{{ $t('ck.products.addToCart') }} +</span>
-                  <span v-else>{{ $t('ck.products.chooseSizeColor') }}</span>
+                  <span v-if="boxerDraftValid"
+                    >{{ $t("ck.products.addToCart") }} +</span
+                  >
+                  <span v-else>{{ $t("ck.products.chooseSizeColor") }}</span>
                 </button>
               </div>
             </div>
@@ -342,7 +344,7 @@
               }}</span>
             </div>
             <button class="quick-order-btn" @click="$emit('go-to-order')">
-              {{$t('ck.products.goToCart')}}
+              {{ $t("ck.products.goToCart") }}
             </button>
           </div>
         </Transition>
@@ -640,7 +642,6 @@ function applySizeGuide(size: string): void {
   transform: scale(1.04);
 }
 
-
 /* ── COLOR OVERLAY ───────────────────────────────────────────────── */
 .color-overlay {
   position: absolute;
@@ -905,6 +906,19 @@ function applySizeGuide(size: string): void {
 }
 .atc-box.best {
   border-color: rgba(255, 255, 255, 0.25);
+}
+.atc-box.active.best {
+  border-color: var(--white);
+  background: rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.atc-box.active .atc-box-count,
+.atc-box.active .atc-box-price {
+  color: var(--white);
+}
+.atc-box.active .atc-best {
+  background: var(--white);
+  color: var(--black);
 }
 .atc-best {
   position: absolute;

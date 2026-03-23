@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Domain\Tax\Models\TaxConfig;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Seeds the tax configuration records for the Driip platform.
@@ -49,12 +50,29 @@ class TaxConfigSeeder extends Seeder
         ];
 
         foreach ($configs as $config) {
-            TaxConfig::updateOrCreate(
-                [
-                    'name' => $config['name'],
-                    'effective_from' => $config['effective_from'],
-                ],
-                $config,
+            $attributes = [
+                'name' => $config['name'],
+                'effective_from' => $config['effective_from'],
+            ];
+
+            $values = [
+                'rate' => $config['rate'],
+                'applies_to' => $config['applies_to'] ?: 'all',
+                'applies_to_ids' => json_encode($config['applies_to_ids'] ?? [], JSON_THROW_ON_ERROR),
+                'effective_to' => $config['effective_to'],
+                'is_active' => $config['is_active'],
+                'created_at' => $config['created_at'],
+            ];
+
+            $existing = DB::table('tax_configs')
+                ->where($attributes)
+                ->value('id');
+
+            DB::table('tax_configs')->updateOrInsert(
+                $attributes,
+                $existing === null
+                ? ['id' => (string) Str::uuid(), ...$values]
+                : $values,
             );
         }
     }

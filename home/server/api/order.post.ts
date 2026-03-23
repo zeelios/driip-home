@@ -12,6 +12,22 @@ interface CartItemPayload {
   boxes: number;
 }
 
+function normalizeVietnamSheetPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+
+  if (!digits) return "";
+
+  if (digits.startsWith("84")) {
+    return `0${digits.slice(2)}`;
+  }
+
+  if (digits.startsWith("0")) {
+    return digits;
+  }
+
+  return `0${digits}`;
+}
+
 function allocateEvenly(total: number, parts: number): number[] {
   if (parts <= 0) return [];
   const base = Math.floor(total / parts);
@@ -30,6 +46,8 @@ export default defineEventHandler(async (event) => {
     lastName,
     phone,
     email,
+    dob,
+    gender,
     province,
     fullAddress,
     street,
@@ -81,7 +99,7 @@ export default defineEventHandler(async (event) => {
   const fullName = `${lastName} ${firstName}`.trim();
   const addressParts = [fullAddress || street, province].filter(Boolean);
   const address = `${addressParts.join(", ")}${zipCode ? ` ${zipCode}` : ""}`;
-  const cleanPhone = `'${phone}`;
+  const cleanPhone = `'${normalizeVietnamSheetPhone(String(phone))}`;
 
   try {
     const orderId = await reserveOrderId();
@@ -143,7 +161,8 @@ export default defineEventHandler(async (event) => {
           "Website", // P: Sales
           "", // Q: Comestic Tracking
           "", // R: Global Tracking
-          isFirstRow ? body.dob ?? "" : "", // S: DoB
+          isFirstRow ? dob ?? "" : "", // S: DoB
+          isFirstRow ? gender ?? "" : "", // T: Gender
         ]);
 
         boxCursor += 1;
