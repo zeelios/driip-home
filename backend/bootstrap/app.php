@@ -20,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->statefulApi();
+
         $middleware->alias([
             'verify.courier.webhook' => \App\Http\Middleware\VerifyCourierWebhookSignature::class,
         ]);

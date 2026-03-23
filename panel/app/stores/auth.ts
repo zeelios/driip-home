@@ -1,3 +1,4 @@
+import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type { RouteLocationNormalized } from "vue-router";
 import type {
@@ -9,10 +10,17 @@ import type {
   ForgotPasswordResponseDto,
   ResetPasswordRequestDto,
   ResetPasswordResponseDto,
-} from "#types/dto/auth.dto";
-import type { StaffUserModel } from "#types/generated/backend-models.generated";
+} from "~~/types/dto/auth.dto";
+import type { PublicStaffUserModel } from "~~/types/generated/backend-models.generated";
+import { useApi } from "~/composables/useApi";
+import { useToast } from "~/composables/useToast";
 
-type AuthStatus = "idle" | "bootstrapping" | "authenticated" | "guest" | "error";
+type AuthStatus =
+  | "idle"
+  | "bootstrapping"
+  | "authenticated"
+  | "guest"
+  | "error";
 
 interface RedirectInstruction {
   path: string;
@@ -21,12 +29,11 @@ interface RedirectInstruction {
 
 interface ApiRequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  body?: BodyInit | Record<string, unknown>;
+  body?: BodyInit | object | null;
   headers?: Record<string, string>;
   auth?: boolean;
 }
 
-const TOKEN_STORAGE_KEY = "panel_auth_token";
 const LOGIN_ROUTE = "/login";
 const DEFAULT_AUTHENTICATED_ROUTE = "/";
 const FORGOT_PASSWORD_ROUTE = "/forgot-password";
@@ -37,7 +44,13 @@ const PUBLIC_ROUTES = new Set<string>([
   RESET_PASSWORD_ROUTE,
 ]);
 
-function normalizeUser(payload: unknown): StaffUserModel | null {
+function normalizeInternalPath(path: string | null | undefined): string | null {
+  if (!path || !path.startsWith("/")) return null;
+  if (path.startsWith("/api/")) return null;
+  return path;
+}
+
+function normalizeUser(payload: unknown): PublicStaffUserModel | null {
   if (!payload || typeof payload !== "object") return null;
 
   const maybeWrapped = payload as { data?: unknown };
@@ -52,21 +65,15 @@ function normalizeUser(payload: unknown): StaffUserModel | null {
     name: typeof raw.name === "string" ? raw.name : "",
     email: typeof raw.email === "string" ? raw.email : "",
     phone: typeof raw.phone === "string" ? raw.phone : null,
-    password: typeof raw.password === "string" ? raw.password : "",
     department: typeof raw.department === "string" ? raw.department : null,
     position: typeof raw.position === "string" ? raw.position : null,
     status: typeof raw.status === "string" ? raw.status : "",
     avatar: typeof raw.avatar === "string" ? raw.avatar : null,
     hired_at: typeof raw.hired_at === "string" ? raw.hired_at : null,
-    terminated_at:
-      typeof raw.terminated_at === "string" ? raw.terminated_at : null,
-    notes: typeof raw.notes === "string" ? raw.notes : null,
     roles: Array.isArray(raw.roles)
       ? raw.roles.filter((value): value is string => typeof value === "string")
       : undefined,
     created_at: typeof raw.created_at === "string" ? raw.created_at : null,
-    updated_at: typeof raw.updated_at === "string" ? raw.updated_at : null,
-    deleted_at: typeof raw.deleted_at === "string" ? raw.deleted_at : null,
   };
 }
 
@@ -86,279 +93,312 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-export const useAuthStore = defineStore("auth", {
-  state: () => ({
-    status: "idle" as AuthStatus,
-    token: null as string | null,
-    user: null as StaffUserModel | null,
-    initialized: false,
-    bootstrapping: false,
-    loginPending: false,
-    logoutPending: false,
-    redirectAfterLogin: null as string | null,
-    error: null as string | null,
-  }),
+export const useAuthStore = defineStore("auth", () => {
+  const status = ref<AuthStatus>("idle");
+  const user = ref<PublicStaffUserModel | null>(null);
+  const initialized = ref(false);
+  const bootstrapping = ref(false);
+  const sessionProbeDone = ref(false);
+  const loginPending = ref(false);
+  const logoutPending = ref(false);
+  const redirectAfterLogin = ref<string | null>(null);
+  const error = ref<string | null>(null);
 
-  getters: {
-    isAuthenticated: (state) => Boolean(state.token && state.user),
-    isGuest: (state) => !state.token || !state.user,
-  },
+  const isAuthenticated = computed(() => Boolean(user.value));
+  const isGuest = computed(() => !user.value);
 
-  actions: {
-    getApiBase(): string {
-      const config = useRuntimeConfig();
-      return String(config.public.apiBaseUrl || "/api/v1/panel");
-    },
+  const api = useApi();
+  const toast = useToast();
+  const authHint = useCookie<string | null>("panel-auth-hint");
 
-    isPublicRoute(path: string): boolean {
-      return PUBLIC_ROUTES.has(path);
-    },
+  function isPublicRoute(path: string): boolean {
+    return PUBLIC_ROUTES.has(path);
+  }
 
-    shouldProtectRoute(path: string): boolean {
-      return !this.isPublicRoute(path);
-    },
+  function shouldProtectRoute(path: string): boolean {
+    return !isPublicRoute(path);
+  }
 
-    setError(message: string | null): void {
-      this.error = message;
-    },
+  function setError(message: string | null): void {
+    error.value = message;
+  }
 
-    setRedirectAfterLogin(path: string | null): void {
-      this.redirectAfterLogin = path;
-    },
+  function setAuthHint(enabled: boolean): void {
+    authHint.value = enabled ? "1" : null;
+  }
 
-    consumeRedirectAfterLogin(): string {
-      const target = this.redirectAfterLogin || DEFAULT_AUTHENTICATED_ROUTE;
-      this.redirectAfterLogin = null;
-      return target;
-    },
+  function setRedirectAfterLogin(path: string | null): void {
+    redirectAfterLogin.value = normalizeInternalPath(path);
+  }
 
-    persistToken(token: string | null): void {
-      this.token = token;
+  function consumeRedirectAfterLogin(): string {
+    const target =
+      normalizeInternalPath(redirectAfterLogin.value) ||
+      DEFAULT_AUTHENTICATED_ROUTE;
+    redirectAfterLogin.value = null;
+    return target;
+  }
 
-      if (!import.meta.client) return;
+  function clearSession(reason: string | null = null): void {
+    user.value = null;
+    status.value = "guest";
+    setError(reason);
+  }
 
-      if (token) {
-        localStorage.setItem(TOKEN_STORAGE_KEY, token);
-        return;
+  async function handleExpiredSession(
+    message = "Session expired. Please log in again."
+  ): Promise<RedirectInstruction | null> {
+    clearSession(message);
+    setAuthHint(false);
+    toast.warning("Phiên đăng nhập đã hết hạn", message);
+    return null;
+  }
+
+  async function apiFetch<T>(
+    path: string,
+    options: ApiRequestOptions = {}
+  ): Promise<T> {
+    try {
+      return await api.request<T>(path, {
+        method: options.method ?? "GET",
+        body: options.body,
+        headers: options.headers,
+        auth: options.auth,
+      });
+    } catch (error) {
+      const maybe = error as { statusCode?: number; status?: number };
+      const statusCode = maybe.statusCode ?? maybe.status;
+
+      if (statusCode === 401 && options.auth !== false) {
+        await handleExpiredSession();
       }
 
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-    },
+      throw error;
+    }
+  }
 
-    restoreToken(): void {
-      if (!import.meta.client) return;
-      this.token = localStorage.getItem(TOKEN_STORAGE_KEY) || null;
-    },
+  async function login(payload: LoginRequestDto): Promise<boolean> {
+    loginPending.value = true;
+    status.value = "bootstrapping";
+    setError(null);
 
-    authHeaders(): Record<string, string> {
-      return this.token ? { Authorization: `Bearer ${this.token}` } : {};
-    },
+    try {
+      const response = await apiFetch<LoginResponseDto>("/auth/login", {
+        method: "POST",
+        body: payload as object,
+        auth: false,
+      });
 
-    clearSession(reason: string | null = null): void {
-      this.persistToken(null);
-      this.user = null;
-      this.status = "guest";
-      this.setError(reason);
-    },
+      const nextUser = normalizeUser(response.data);
+      if (!nextUser) {
+        throw new Error("Invalid user payload from login response.");
+      }
 
-    async handleExpiredSession(
-      message = "Session expired. Please log in again."
-    ): Promise<RedirectInstruction | null> {
-      this.clearSession(message);
+      user.value = nextUser;
+      status.value = "authenticated";
+      initialized.value = true;
+      sessionProbeDone.value = true;
+      setAuthHint(true);
+      toast.success("Đăng nhập thành công", "Chào mừng trở lại.");
+      return true;
+    } catch (error) {
+      const message = getErrorMessage(error, "Login failed.");
+      clearSession(message);
+      toast.error("Đăng nhập thất bại", message);
+      initialized.value = true;
+      return false;
+    } finally {
+      loginPending.value = false;
+    }
+  }
+
+  async function fetchMe(): Promise<PublicStaffUserModel | null> {
+    try {
+      const response = await apiFetch<MeResponseDto>("/auth/me");
+      const nextUser = normalizeUser(response);
+
+      if (!nextUser) {
+        throw new Error("Invalid user payload from /auth/me.");
+      }
+
+      user.value = nextUser;
+      status.value = "authenticated";
+      setError(null);
+      setAuthHint(true);
+      return nextUser;
+    } catch (error) {
+      const maybe = error as { statusCode?: number; status?: number };
+      const statusCode = maybe.statusCode ?? maybe.status;
+
+      if (statusCode !== 401) {
+        const message = getErrorMessage(error, "Failed to restore session.");
+        clearSession(message);
+        toast.error("Không thể khôi phục phiên", message);
+      }
+
       return null;
-    },
+    }
+  }
 
-    async apiFetch<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-      const headers = {
-        ...(options.auth === false ? {} : this.authHeaders()),
-        ...(options.headers ?? {}),
+  async function logout(): Promise<RedirectInstruction> {
+    logoutPending.value = true;
+
+    try {
+      await apiFetch<LogoutResponseDto>("/auth/logout", {
+        method: "POST",
+      });
+    } catch {
+      // Ignore logout transport errors, local session must still be cleared.
+    } finally {
+      clearSession(null);
+      setAuthHint(false);
+      toast.success("Đã đăng xuất", "Phiên làm việc đã được xóa.");
+      initialized.value = true;
+      sessionProbeDone.value = true;
+      logoutPending.value = false;
+    }
+
+    return { path: LOGIN_ROUTE };
+  }
+
+  async function bootstrap(): Promise<void> {
+    if (sessionProbeDone.value || bootstrapping.value) return;
+
+    bootstrapping.value = true;
+    status.value = "bootstrapping";
+    setError(null);
+
+    try {
+      await fetchMe();
+    } finally {
+      sessionProbeDone.value = true;
+      initialized.value = true;
+      bootstrapping.value = false;
+
+      if (!user.value) {
+        status.value = "guest";
+      }
+    }
+  }
+
+  async function handleRouteAccess(
+    to: RouteLocationNormalized
+  ): Promise<RedirectInstruction | null> {
+    const routeRequiresAuthRestore =
+      shouldProtectRoute(to.path) || to.path === LOGIN_ROUTE;
+
+    if (routeRequiresAuthRestore || authHint.value === "1") {
+      await bootstrap();
+    } else if (!initialized.value) {
+      initialized.value = true;
+      status.value = "guest";
+    }
+
+    const redirectQuery =
+      typeof to.query.redirect === "string"
+        ? normalizeInternalPath(to.query.redirect)
+        : null;
+    const requiresAuth = shouldProtectRoute(to.path);
+
+    if (requiresAuth && !isAuthenticated.value) {
+      setRedirectAfterLogin(to.fullPath);
+      return {
+        path: LOGIN_ROUTE,
+        query: { redirect: to.fullPath },
       };
+    }
 
-      try {
-        return await $fetch<T>(`${this.getApiBase()}${path}`, {
-          method: options.method ?? "GET",
-          body: options.body,
-          headers,
-        });
-      } catch (error) {
-        const maybe = error as { statusCode?: number; status?: number };
-        const statusCode = maybe.statusCode ?? maybe.status;
+    if (to.path === LOGIN_ROUTE && isAuthenticated.value) {
+      return { path: redirectQuery || consumeRedirectAfterLogin() };
+    }
 
-        if (statusCode === 401 && options.auth !== false) {
-          await this.handleExpiredSession();
-        }
+    return null;
+  }
 
-        throw error;
-      }
-    },
+  function completeLoginRedirect(): string {
+    return consumeRedirectAfterLogin();
+  }
 
-    async login(payload: LoginRequestDto): Promise<boolean> {
-      this.loginPending = true;
-      this.status = "bootstrapping";
-      this.setError(null);
+  async function forgotPassword(
+    email: string
+  ): Promise<{ ok: true } | { ok: false; error: string }> {
+    try {
+      await apiFetch<ForgotPasswordResponseDto>("/auth/forgot-password", {
+        method: "POST",
+        body: { email } satisfies ForgotPasswordRequestDto,
+        auth: false,
+      });
+      toast.success(
+        "Đã gửi liên kết đặt lại mật khẩu",
+        "Vui lòng kiểm tra hộp thư của bạn."
+      );
+      return { ok: true };
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Khong the gui email. Vui long thu lai."
+      );
+      toast.error("Không thể gửi liên kết đặt lại mật khẩu", message);
+      return {
+        ok: false,
+        error: message,
+      };
+    }
+  }
 
-      try {
-        const response = await this.apiFetch<LoginResponseDto>("/auth/login", {
-          method: "POST",
-          body: payload,
-          auth: false,
-        });
+  async function resetPassword(
+    payload: ResetPasswordRequestDto
+  ): Promise<{ ok: true } | { ok: false; error: string }> {
+    try {
+      await apiFetch<ResetPasswordResponseDto>("/auth/reset-password", {
+        method: "POST",
+        body: payload as object,
+        auth: false,
+      });
+      toast.success(
+        "Mật khẩu đã được cập nhật",
+        "Bạn có thể đăng nhập ngay bây giờ."
+      );
+      return { ok: true };
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Khong the dat lai mat khau. Link co the da het han."
+      );
+      toast.error("Không thể đặt lại mật khẩu", message);
+      return {
+        ok: false,
+        error: message,
+      };
+    }
+  }
 
-        if (!response?.token) {
-          throw new Error("Missing auth token in login response.");
-        }
-
-        const user = normalizeUser(response.data);
-        if (!user) {
-          throw new Error("Invalid user payload from login response.");
-        }
-
-        this.persistToken(response.token);
-        this.user = user;
-        this.status = "authenticated";
-        this.initialized = true;
-
-        return true;
-      } catch (error) {
-        this.clearSession(getErrorMessage(error, "Login failed."));
-        this.initialized = true;
-        return false;
-      } finally {
-        this.loginPending = false;
-      }
-    },
-
-    async fetchMe(): Promise<StaffUserModel | null> {
-      if (!this.token) {
-        this.clearSession(null);
-        return null;
-      }
-
-      try {
-        const response = await this.apiFetch<MeResponseDto>("/auth/me");
-        const user = normalizeUser(response);
-
-        if (!user) {
-          throw new Error("Invalid user payload from /auth/me.");
-        }
-
-        this.user = user;
-        this.status = "authenticated";
-        this.setError(null);
-        return user;
-      } catch (error) {
-        const maybe = error as { statusCode?: number; status?: number };
-        const statusCode = maybe.statusCode ?? maybe.status;
-
-        if (statusCode !== 401) {
-          this.clearSession(getErrorMessage(error, "Failed to restore session."));
-        }
-
-        return null;
-      }
-    },
-
-    async logout(): Promise<RedirectInstruction> {
-      this.logoutPending = true;
-
-      try {
-        if (this.token) {
-          await this.apiFetch<LogoutResponseDto>("/auth/logout", {
-            method: "POST",
-          });
-        }
-      } catch {
-        // Ignore logout transport errors, local session must still be cleared.
-      } finally {
-        this.clearSession(null);
-        this.initialized = true;
-        this.logoutPending = false;
-      }
-      return { path: LOGIN_ROUTE };
-    },
-
-    async bootstrap(): Promise<void> {
-      if (this.initialized || this.bootstrapping) return;
-
-      this.bootstrapping = true;
-      this.status = "bootstrapping";
-      this.setError(null);
-
-      try {
-        this.restoreToken();
-
-        if (!this.token) {
-          this.status = "guest";
-          return;
-        }
-
-        await this.fetchMe();
-      } finally {
-        this.initialized = true;
-        this.bootstrapping = false;
-
-        if (!this.user && this.token) {
-          this.status = "guest";
-        }
-
-        if (!this.user && !this.token) {
-          this.status = "guest";
-        }
-      }
-    },
-
-    async handleRouteAccess(
-      to: RouteLocationNormalized
-    ): Promise<RedirectInstruction | null> {
-      await this.bootstrap();
-
-      const redirectQuery =
-        typeof to.query.redirect === "string" ? to.query.redirect : null;
-      const requiresAuth = this.shouldProtectRoute(to.path);
-
-      if (requiresAuth && !this.isAuthenticated) {
-        this.setRedirectAfterLogin(to.fullPath);
-        return {
-          path: LOGIN_ROUTE,
-          query: { redirect: to.fullPath },
-        };
-      }
-
-      if (to.path === LOGIN_ROUTE && this.isAuthenticated) {
-        return { path: redirectQuery || this.consumeRedirectAfterLogin() };
-      }
-
-      return null;
-    },
-
-    completeLoginRedirect(): string {
-      return this.consumeRedirectAfterLogin();
-    },
-
-    async forgotPassword(email: string): Promise<{ ok: true } | { ok: false; error: string }> {
-      try {
-        await this.apiFetch<ForgotPasswordResponseDto>("/auth/forgot-password", {
-          method: "POST",
-          body: { email } satisfies ForgotPasswordRequestDto,
-          auth: false,
-        });
-        return { ok: true };
-      } catch (error) {
-        return { ok: false, error: getErrorMessage(error, "Không thể gửi email. Vui lòng thử lại.") };
-      }
-    },
-
-    async resetPassword(payload: ResetPasswordRequestDto): Promise<{ ok: true } | { ok: false; error: string }> {
-      try {
-        await this.apiFetch<ResetPasswordResponseDto>("/auth/reset-password", {
-          method: "POST",
-          body: payload,
-          auth: false,
-        });
-        return { ok: true };
-      } catch (error) {
-        return { ok: false, error: getErrorMessage(error, "Không thể đặt lại mật khẩu. Link có thể đã hết hạn.") };
-      }
-    },
-  },
+  return {
+    status,
+    user,
+    initialized,
+    bootstrapping,
+    loginPending,
+    logoutPending,
+    redirectAfterLogin,
+    error,
+    isAuthenticated,
+    isGuest,
+    isPublicRoute,
+    shouldProtectRoute,
+    setError,
+    setRedirectAfterLogin,
+    consumeRedirectAfterLogin,
+    clearSession,
+    handleExpiredSession,
+    apiFetch,
+    login,
+    fetchMe,
+    logout,
+    bootstrap,
+    handleRouteAccess,
+    completeLoginRedirect,
+    forgotPassword,
+    resetPassword,
+  };
 });

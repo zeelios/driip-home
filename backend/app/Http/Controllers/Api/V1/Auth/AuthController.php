@@ -8,6 +8,7 @@ use App\Domain\Staff\Models\User;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Resources\ErrorResource;
 use App\Http\Resources\Staff\StaffResource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,27 +18,22 @@ use Illuminate\Validation\ValidationException;
 /**
  * Handle authentication for staff accounts.
  *
- * Uses Laravel Sanctum personal access tokens.
- * All tokens are named by device/context for auditability.
+ * Uses Laravel Sanctum SPA session authentication.
  */
 class AuthController extends BaseApiController
 {
     /**
-     * Authenticate a staff member and issue a Sanctum token.
-     *
-     * Validates credentials, checks account status, and returns a
-     * plain-text token alongside the authenticated staff resource.
+     * Authenticate a staff member using the session guard.
      *
      * @param  Request  $request
-     * @return JsonResponse  Contains token + staff resource on success.
+     * @return JsonResponse  Contains the authenticated staff resource on success.
      */
     public function login(Request $request): JsonResponse
     {
         try {
             $data = $request->validate([
-                'email'    => ['required', 'email'],
+                'email' => ['required', 'email'],
                 'password' => ['required', 'string'],
-                'device'   => ['nullable', 'string', 'max:100'],
             ]);
 
             $user = User::where('email', $data['email'])->first();
@@ -54,12 +50,13 @@ class AuthController extends BaseApiController
                     ->setStatusCode(403);
             }
 
-            $token = $user->createToken($data['device'] ?? 'api')->plainTextToken;
+            Auth::guard('web')->login($user);
+            $request->session()->regenerate();
+            $request->session()->regenerateToken();
 
             return response()->json([
                 'success' => true,
-                'token'   => $token,
-                'data'    => StaffResource::make($user->load('roles')),
+                'data' => StaffResource::make($user->load('roles')),
             ]);
         } catch (ValidationException $e) {
             return $this->validationError($e, 'AUTH_LOGIN');
@@ -99,9 +96,9 @@ class AuthController extends BaseApiController
     {
         try {
             $data = $request->validate([
-                'email'                 => ['required', 'email'],
-                'token'                 => ['required', 'string'],
-                'password'              => ['required', 'string', 'min:8', 'confirmed'],
+                'email' => ['required', 'email'],
+                'token' => ['required', 'string'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
                 'password_confirmation' => ['required', 'string'],
             ]);
 
@@ -131,16 +128,16 @@ class AuthController extends BaseApiController
     }
 
     /**
-     * Revoke the current access token (logout).
-     *
-     * Deletes the token used for this request, effectively ending the session.
+     * Invalidate the current authenticated session.
      *
      * @param  Request  $request
      * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json(['success' => true, 'message' => 'Logged out.']);
     }

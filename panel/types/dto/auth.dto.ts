@@ -1,15 +1,13 @@
-import type { StaffUserModel } from "~~/types/generated/backend-models.generated";
+import type { PublicStaffUserModel } from "../generated/backend-models.generated";
 
 export interface LoginRequestDto {
   email: string;
   password: string;
-  device?: string;
 }
 
 export interface LoginResponseDto {
   success: boolean;
-  token: string;
-  data: StaffUserModel | { data: StaffUserModel };
+  data: PublicStaffUserModel | { data: PublicStaffUserModel };
 }
 
 export interface LogoutResponseDto {
@@ -17,7 +15,9 @@ export interface LogoutResponseDto {
   message: string;
 }
 
-export type MeResponseDto = StaffUserModel | { data: StaffUserModel };
+export type MeResponseDto =
+  | PublicStaffUserModel
+  | { data: PublicStaffUserModel };
 
 export interface ForgotPasswordRequestDto {
   email: string;

@@ -1,6 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from "@tailwindcss/vite";
 
+const nodeEnv =
+  (
+    globalThis as typeof globalThis & {
+      process?: { env?: Record<string, string | undefined> };
+    }
+  ).process?.env ?? {};
+
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
@@ -16,13 +23,16 @@ export default defineNuxtConfig({
   ],
 
   fonts: {
-    families: [{ name: "Inter", provider: "google", weights: [300, 400, 500, 600, 700] }],
+    families: [
+      { name: "Inter", provider: "google", weights: [300, 400, 500, 600, 700] },
+    ],
   },
 
   runtimeConfig: {
     public: {
-      apiUrl: '',
-    }
+      apiUrl: nodeEnv.NUXT_PUBLIC_API_URL ?? "http://localhost/api/v1/panel",
+      csrfUrl: nodeEnv.NUXT_PUBLIC_CSRF_URL ?? "http://localhost",
+    },
   },
 
   vite: {
@@ -30,6 +40,6 @@ export default defineNuxtConfig({
   },
 
   app: {
-    rootId: '__zeelios'
-  }
+    rootId: "__zeelios",
+  },
 });

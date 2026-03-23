@@ -22,6 +22,7 @@ use App\Domain\Coupon\Models\Coupon;
 use App\Domain\SaleEvent\Models\SaleEvent;
 use App\Domain\Staff\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
@@ -837,27 +838,26 @@ class DatabaseSeeder extends Seeder
                 ],
             );
         }
+    }
 
-        /**
-         * Create default user
-         *
-         * @@return void
-         */
-        private function seedUsers()
-        {
-            // Create user
-            User::updateOrCreate(
-                ['email' => 'admin@driip.vn'],
-                [
-                    'name' => 'Admin',
-                    'email' => 'admin@driip.io',
-                    'password' => Hash::make('password'),
-                ],
-            );
+    /**
+     * Create default user
+     *
+     * @@return void
+     */
+    private function seedUsers(): void
+    {
+        // Create user
+        $user = User::updateOrCreate(
+            ['email' => 'admin@driip.io'],
+            [
+                'name' => 'admin',
+                'email' => 'admin@driip.io',
+                'password' => Hash::make('password'),
+            ],
+        );
 
-            // assign the highest role
-            $user = User::where('email', 'admin@driip.io')->first();
-            $user->assignRole('super-admin');
-        }
+        // assign the highest role
+        $user->syncRoles(['super-admin']);
     }
 }

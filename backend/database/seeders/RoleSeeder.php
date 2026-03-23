@@ -31,7 +31,7 @@ class RoleSeeder extends Seeder
         ];
 
         foreach ($roles as $roleName) {
-            Role::firstOrCreate(
+            Role::create(
                 ['name' => $roleName, 'guard_name' => 'web'],
             );
         }

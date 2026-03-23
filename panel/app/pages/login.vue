@@ -16,7 +16,7 @@
       </div>
 
       <!-- Form -->
-      <form @submit.prevent="submit" class="space-y-5">
+      <form class="space-y-5" @submit.prevent="submit">
 
         <div>
           <label class="block text-[11px] font-semibold tracking-widest uppercase text-neutral-400 mb-2">

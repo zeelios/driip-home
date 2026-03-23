@@ -1,7 +1,21 @@
 /**
  * Auto-generated from backend model PHPDoc property annotations.
- * Source: backend/app/Models and backend/app/Domain/*/Models
+ * Source: backend/app/Models and backend/app/Domain/[domain]/Models
  */
+
+export interface RoleModel {
+  id?: string;
+  name?: string;
+  guard_name?: string;
+  [key: string]: unknown;
+}
+
+export interface PermissionModel {
+  id?: string;
+  name?: string;
+  guard_name?: string;
+  [key: string]: unknown;
+}
 
 export interface CouponModel {
   id: string;
@@ -26,6 +40,9 @@ export interface CouponModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  usages?: CouponUsageModel[];
 }
 
 export interface CouponUsageModel {
@@ -35,6 +52,10 @@ export interface CouponUsageModel {
   order_id: string;
   discount_amount: number;
   used_at: string;
+
+  // relations
+  coupon?: CouponModel | null;
+  customer?: CustomerModel | null;
 }
 
 export interface CustomerModel {
@@ -62,6 +83,13 @@ export interface CustomerModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  addresses?: CustomerAddressModel[];
+  interactions?: CustomerInteractionModel[];
+  referrer?: CustomerModel | null;
+  referrals?: CustomerModel[];
+  loyaltyAccount?: LoyaltyAccountModel | null;
 }
 
 export interface CustomerAddressModel {
@@ -76,6 +104,9 @@ export interface CustomerAddressModel {
   address: string | null;
   zip_code: string | null;
   is_default: boolean;
+
+  // relations
+  customer?: CustomerModel | null;
 }
 
 export interface CustomerInteractionModel {
@@ -88,6 +119,10 @@ export interface CustomerInteractionModel {
   follow_up_at: string | null;
   created_by: string | null;
   created_at: string;
+
+  // relations
+  customer?: CustomerModel | null;
+  createdBy?: StaffUserModel | null;
 }
 
 export interface InventoryModel {
@@ -102,6 +137,10 @@ export interface InventoryModel {
   reorder_quantity: number | null;
   last_counted_at: string | null;
   updated_at: string | null;
+
+  // relations
+  variant?: ProductVariantModel | null;
+  warehouse?: WarehouseModel | null;
 }
 
 export interface InventoryTransactionModel {
@@ -119,6 +158,11 @@ export interface InventoryTransactionModel {
   notes: string | null;
   created_by: string | null;
   created_at: string;
+
+  // relations
+  variant?: ProductVariantModel | null;
+  warehouse?: WarehouseModel | null;
+  createdByUser?: StaffUserModel | null;
 }
 
 export interface PurchaseOrderModel {
@@ -139,6 +183,14 @@ export interface PurchaseOrderModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  supplier?: SupplierModel | null;
+  warehouse?: WarehouseModel | null;
+  items?: PurchaseOrderItemModel[];
+  receipts?: PurchaseOrderReceiptModel[];
+  createdBy?: StaffUserModel | null;
+  approvedBy?: StaffUserModel | null;
 }
 
 export interface PurchaseOrderItemModel {
@@ -153,6 +205,10 @@ export interface PurchaseOrderItemModel {
   notes: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  purchaseOrder?: PurchaseOrderModel | null;
+  variant?: ProductVariantModel | null;
 }
 
 export interface PurchaseOrderReceiptModel {
@@ -166,6 +222,10 @@ export interface PurchaseOrderReceiptModel {
   receipt_items: unknown[];
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  purchaseOrder?: PurchaseOrderModel | null;
+  receivedByUser?: StaffUserModel | null;
 }
 
 export interface StockCountModel {
@@ -185,6 +245,12 @@ export interface StockCountModel {
   created_by: string;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  warehouse?: WarehouseModel | null;
+  items?: StockCountItemModel[];
+  createdBy?: StaffUserModel | null;
+  approvedBy?: StaffUserModel | null;
 }
 
 export interface StockCountItemModel {
@@ -200,6 +266,11 @@ export interface StockCountItemModel {
   counted_at: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  stockCount?: StockCountModel | null;
+  variant?: ProductVariantModel | null;
+  countedBy?: StaffUserModel | null;
 }
 
 export interface StockTransferModel {
@@ -217,6 +288,13 @@ export interface StockTransferModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  fromWarehouse?: WarehouseModel | null;
+  toWarehouse?: WarehouseModel | null;
+  items?: StockTransferItemModel[];
+  requestedBy?: StaffUserModel | null;
+  approvedBy?: StaffUserModel | null;
 }
 
 export interface StockTransferItemModel {
@@ -229,6 +307,10 @@ export interface StockTransferItemModel {
   notes: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  transfer?: StockTransferModel | null;
+  variant?: ProductVariantModel | null;
 }
 
 export interface SupplierModel {
@@ -247,6 +329,9 @@ export interface SupplierModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  purchaseOrders?: PurchaseOrderModel[];
 }
 
 export interface LoyaltyAccountModel {
@@ -258,6 +343,11 @@ export interface LoyaltyAccountModel {
   lifetime_spending: number;
   tier_achieved_at: string | null;
   tier_expires_at: string | null;
+
+  // relations
+  customer?: CustomerModel | null;
+  tier?: LoyaltyTierModel | null;
+  transactions?: LoyaltyTransactionModel[];
 }
 
 export interface LoyaltyCampaignModel {
@@ -285,6 +375,9 @@ export interface LoyaltyTierModel {
   perks: unknown[];
   color: string | null;
   sort_order: number;
+
+  // relations
+  accounts?: LoyaltyAccountModel[];
 }
 
 export interface LoyaltyTransactionModel {
@@ -299,6 +392,10 @@ export interface LoyaltyTransactionModel {
   expires_at: string | null;
   created_by: string | null;
   created_at: string;
+
+  // relations
+  account?: LoyaltyAccountModel | null;
+  createdByUser?: StaffUserModel | null;
 }
 
 export interface NotificationLogModel {
@@ -316,6 +413,9 @@ export interface NotificationLogModel {
   notifiable_type: string | null;
   notifiable_id: string | null;
   created_at: string | null;
+
+  // relations
+  template?: NotificationTemplateModel | null;
 }
 
 export interface NotificationTemplateModel {
@@ -382,6 +482,18 @@ export interface OrderModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  customer?: CustomerModel | null;
+  items?: OrderItemModel[];
+  statusHistory?: OrderStatusHistoryModel[];
+  claims?: OrderClaimModel[];
+  returns?: OrderReturnModel[];
+  shipments?: ShipmentModel[];
+  warehouse?: WarehouseModel | null;
+  assignedTo?: StaffUserModel | null;
+  coupon?: CouponModel | null;
+  taxInvoice?: TaxInvoiceModel | null;
 }
 
 export interface OrderClaimModel {
@@ -402,6 +514,12 @@ export interface OrderClaimModel {
   resolved_at: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  order?: OrderModel | null;
+  orderItem?: OrderItemModel | null;
+  assignedTo?: StaffUserModel | null;
+  createdByUser?: StaffUserModel | null;
 }
 
 export interface OrderItemModel {
@@ -418,6 +536,10 @@ export interface OrderItemModel {
   quantity_returned: number;
   discount_amount: number;
   total_price: number;
+
+  // relations
+  order?: OrderModel | null;
+  variant?: ProductVariantModel | null;
 }
 
 export interface OrderReturnModel {
@@ -438,6 +560,11 @@ export interface OrderReturnModel {
   notes: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  order?: OrderModel | null;
+  claim?: OrderClaimModel | null;
+  processedBy?: StaffUserModel | null;
 }
 
 export interface OrderStatusHistoryModel {
@@ -449,6 +576,10 @@ export interface OrderStatusHistoryModel {
   is_customer_visible: boolean;
   created_by: string | null;
   created_at: string | null;
+
+  // relations
+  order?: OrderModel | null;
+  createdByUser?: StaffUserModel | null;
 }
 
 export interface BrandModel {
@@ -462,6 +593,9 @@ export interface BrandModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  products?: ProductModel[];
 }
 
 export interface CategoryModel {
@@ -476,6 +610,11 @@ export interface CategoryModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  parent?: CategoryModel | null;
+  children?: CategoryModel[];
+  products?: ProductModel[];
 }
 
 export interface ProductModel {
@@ -498,6 +637,11 @@ export interface ProductModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  brand?: BrandModel | null;
+  category?: CategoryModel | null;
+  variants?: ProductVariantModel[];
 }
 
 export interface ProductAttributeModel {
@@ -506,6 +650,9 @@ export interface ProductAttributeModel {
   sort_order: number;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  values?: ProductAttributeValueModel[];
 }
 
 export interface ProductAttributeValueModel {
@@ -516,6 +663,9 @@ export interface ProductAttributeValueModel {
   sort_order: number;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  attribute?: ProductAttributeModel | null;
 }
 
 export interface ProductPriceHistoryModel {
@@ -527,6 +677,10 @@ export interface ProductPriceHistoryModel {
   changed_by: string | null;
   reason: string | null;
   changed_at: string;
+
+  // relations
+  variant?: ProductVariantModel | null;
+  changedBy?: StaffUserModel | null;
 }
 
 export interface ProductVariantModel {
@@ -546,6 +700,11 @@ export interface ProductVariantModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  product?: ProductModel | null;
+  inventory?: InventoryModel[];
+  priceHistory?: ProductPriceHistoryModel[];
 }
 
 export interface SaleEventModel {
@@ -564,6 +723,10 @@ export interface SaleEventModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  items?: SaleEventItemModel[];
+  createdBy?: StaffUserModel | null;
 }
 
 export interface SaleEventItemModel {
@@ -578,6 +741,10 @@ export interface SaleEventItemModel {
   is_active: boolean;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  saleEvent?: SaleEventModel | null;
+  variant?: ProductVariantModel | null;
 }
 
 export interface WaitlistEntryModel {
@@ -617,6 +784,9 @@ export interface CourierCODRemittanceModel {
   notes: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  items?: CourierCODRemittanceItemModel[];
 }
 
 export interface CourierCODRemittanceItemModel {
@@ -630,6 +800,11 @@ export interface CourierCODRemittanceItemModel {
   net_amount: number;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  remittance?: CourierCODRemittanceModel | null;
+  shipment?: ShipmentModel | null;
+  order?: OrderModel | null;
 }
 
 export interface CourierConfigModel {
@@ -670,6 +845,11 @@ export interface ShipmentModel {
   created_by: string;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  order?: OrderModel | null;
+  createdBy?: StaffUserModel | null;
+  trackingEvents?: ShipmentTrackingEventModel[];
 }
 
 export interface ShipmentTrackingEventModel {
@@ -682,6 +862,9 @@ export interface ShipmentTrackingEventModel {
   occurred_at: string;
   synced_at: string;
   raw_data: unknown[] | null;
+
+  // relations
+  shipment?: ShipmentModel | null;
 }
 
 export interface SalaryRecordModel {
@@ -703,6 +886,10 @@ export interface SalaryRecordModel {
   created_by: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  user?: StaffUserModel | null;
+  createdByUser?: StaffUserModel | null;
 }
 
 export interface StaffProfileModel {
@@ -722,6 +909,9 @@ export interface StaffProfileModel {
   emergency_contact_phone: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  user?: StaffUserModel | null;
 }
 
 export interface StaffUserModel {
@@ -741,7 +931,30 @@ export interface StaffUserModel {
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
+
+  // relations
+  profile?: StaffProfileModel | null;
+  salaryRecords?: SalaryRecordModel[];
+  roles?: RoleModel[];
+  permissions?: PermissionModel[];
 }
+
+export type PublicStaffUserModel = Pick<
+  StaffUserModel,
+  | "id"
+  | "employee_code"
+  | "name"
+  | "email"
+  | "phone"
+  | "department"
+  | "position"
+  | "status"
+  | "avatar"
+  | "hired_at"
+  | "created_at"
+> & {
+  roles?: string[];
+};
 
 export interface TaxConfigModel {
   id: string;
@@ -767,6 +980,9 @@ export interface TaxInvoiceModel {
   file_url: string | null;
   created_by: string | null;
   created_at: string;
+
+  // relations
+  createdBy?: StaffUserModel | null;
 }
 
 export interface WarehouseModel {
@@ -783,6 +999,11 @@ export interface WarehouseModel {
   notes: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  manager?: StaffUserModel | null;
+  staffAssignments?: WarehouseStaffModel[];
+  inventory?: InventoryModel[];
 }
 
 export interface WarehouseStaffModel {
@@ -794,7 +1015,10 @@ export interface WarehouseStaffModel {
   unassigned_at: string | null;
   created_at: string | null;
   updated_at: string | null;
+
+  // relations
+  warehouse?: WarehouseModel | null;
+  user?: StaffUserModel | null;
 }
 
-export interface AppUserModel {
-}
+export interface AppUserModel extends StaffUserModel {}

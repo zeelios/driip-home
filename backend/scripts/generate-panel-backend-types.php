@@ -22,18 +22,44 @@ $requestFiles = findPhpFiles($backendApp . '/Http/Requests');
 sort($requestFiles);
 
 $classCounts = [];
+$modelInterfaceByFqcn = [];
+$modelMetaByFile = [];
 foreach ($modelFiles as $file) {
     $meta = parsePhpClassMeta($file);
+    $modelMetaByFile[$file] = $meta;
     $classCounts[$meta['class']] = ($classCounts[$meta['class']] ?? 0) + 1;
+}
+
+foreach ($modelFiles as $file) {
+    $meta = $modelMetaByFile[$file];
+    $modelInterfaceByFqcn[$meta['namespace'] . '\\' . $meta['class']] = modelInterfaceName($file, $meta['class'], $classCounts);
 }
 
 $modelDefinitions = [];
 foreach ($modelFiles as $file) {
-    $meta = parsePhpClassMeta($file);
+    $meta = $modelMetaByFile[$file];
+    $interfaceName = modelInterfaceName($file, $meta['class'], $classCounts);
+    $parentInterface = null;
+
+    if (!empty($meta['parent'])) {
+        $parentFqcn = resolveClassReference(
+            $meta['parent'],
+            $meta['namespace'],
+            parseUseStatements($meta['source'])
+        );
+        $parentInterface = $modelInterfaceByFqcn[$parentFqcn] ?? null;
+    }
+
     $modelDefinitions[] = [
-        'name' => modelInterfaceName($file, $meta['class'], $classCounts),
+        'name' => $interfaceName,
         'source' => $file,
         'properties' => parseModelProperties($meta['source']),
+        'relations' => parseModelRelations(
+            $meta['source'],
+            $meta['namespace'],
+            $modelInterfaceByFqcn
+        ),
+        'extends' => $parentInterface,
     ];
 }
 
@@ -97,10 +123,12 @@ function parsePhpClassMeta(string $file): array
     $source = file_get_contents($file) ?: '';
     preg_match('/namespace\s+([^;]+);/m', $source, $namespaceMatch);
     preg_match('/class\s+(\w+)/m', $source, $classMatch);
+    preg_match('/class\s+\w+\s+extends\s+([^\s{]+)/m', $source, $parentMatch);
 
     return [
         'namespace' => $namespaceMatch[1] ?? '',
         'class' => $classMatch[1] ?? basename($file, '.php'),
+        'parent' => $parentMatch[1] ?? null,
         'source' => $source,
     ];
 }
@@ -131,6 +159,94 @@ function parseModelProperties(string $source): array
     }
 
     return $properties;
+}
+
+function parseModelRelations(string $source, string $namespace, array $modelInterfaceByFqcn): array
+{
+    $imports = parseUseStatements($source);
+    $relations = [];
+
+    preg_match_all(
+        '/public\s+function\s+([a-zA-Z0-9_]+)\s*\([^)]*\)\s*:\s*[^{]+\{(?:(?!public\s+function).)*?return\s+\$this->(belongsTo|hasOne|hasMany|belongsToMany|morphOne|morphMany|morphToMany|morphedByMany)\(\s*(?:([A-Za-z_\\\\][A-Za-z0-9_\\\\]*)::class|\'([^\']+)\'|"([^"]+)")/s',
+        $source,
+        $matches,
+        PREG_SET_ORDER
+    );
+
+    foreach ($matches as $match) {
+        $relationName = $match[1];
+        $relationKind = $match[2];
+        $classReference = $match[3] ?: ($match[4] ?: $match[5]);
+        $fqcn = resolveClassReference($classReference, $namespace, $imports);
+        $targetType = modelTsTypeForClass($fqcn, $modelInterfaceByFqcn);
+
+        $relations[$relationName] = [
+            'name' => $relationName,
+            'type' => isCollectionRelation($relationKind)
+                ? ($targetType . '[]')
+                : ($targetType . ' | null'),
+        ];
+    }
+
+    if (str_contains($source, 'HasRoles')) {
+        $relations['roles'] = [
+            'name' => 'roles',
+            'type' => 'RoleModel[]',
+        ];
+        $relations['permissions'] = [
+            'name' => 'permissions',
+            'type' => 'PermissionModel[]',
+        ];
+    }
+
+    return array_values($relations);
+}
+
+function parseUseStatements(string $source): array
+{
+    preg_match_all('/^use\s+([^;]+);/m', $source, $matches, PREG_SET_ORDER);
+
+    $imports = [];
+    foreach ($matches as $match) {
+        $fqcn = trim($match[1]);
+        $alias = basename(str_replace('\\', '/', $fqcn));
+        $imports[$alias] = $fqcn;
+    }
+
+    return $imports;
+}
+
+function resolveClassReference(string $classReference, string $namespace, array $imports): string
+{
+    $normalized = trim($classReference, " \t\n\r\0\x0B\\");
+
+    if ($normalized === '') {
+        return '';
+    }
+
+    if (str_contains($normalized, '\\')) {
+        return ltrim($normalized, '\\');
+    }
+
+    if (isset($imports[$normalized])) {
+        return $imports[$normalized];
+    }
+
+    return $namespace . '\\' . $normalized;
+}
+
+function modelTsTypeForClass(string $fqcn, array $modelInterfaceByFqcn): string
+{
+    if (isset($modelInterfaceByFqcn[$fqcn])) {
+        return $modelInterfaceByFqcn[$fqcn];
+    }
+
+    return basename(str_replace('\\', '/', $fqcn)) . 'Model';
+}
+
+function isCollectionRelation(string $relationKind): bool
+{
+    return in_array($relationKind, ['hasMany', 'belongsToMany', 'morphMany', 'morphToMany', 'morphedByMany'], true);
 }
 
 function phpDocTypeToTs(string $type): string
@@ -256,15 +372,37 @@ function buildModelsTs(array $models): string
     $lines = [
         '/**',
         ' * Auto-generated from backend model PHPDoc property annotations.',
-        ' * Source: backend/app/Models and backend/app/Domain/*/Models',
+        ' * Source: backend/app/Models and backend/app/Domain/[domain]/Models',
         ' */',
+        '',
+        'export interface RoleModel {',
+        '  id?: string;',
+        '  name?: string;',
+        '  guard_name?: string;',
+        '  [key: string]: unknown;',
+        '}',
+        '',
+        'export interface PermissionModel {',
+        '  id?: string;',
+        '  name?: string;',
+        '  guard_name?: string;',
+        '  [key: string]: unknown;',
+        '}',
         '',
     ];
 
     foreach ($models as $model) {
-        $lines[] = 'export interface ' . $model['name'] . ' {';
+        $extends = !empty($model['extends']) ? ' extends ' . $model['extends'] : '';
+        $lines[] = 'export interface ' . $model['name'] . $extends . ' {';
         foreach ($model['properties'] as $property) {
             $lines[] = '  ' . $property['name'] . ': ' . $property['type'] . ';';
+        }
+        if (!empty($model['relations'])) {
+            $lines[] = '';
+            $lines[] = '  // relations';
+            foreach ($model['relations'] as $relation) {
+                $lines[] = '  ' . $relation['name'] . '?: ' . $relation['type'] . ';';
+            }
         }
         $lines[] = '}';
         $lines[] = '';

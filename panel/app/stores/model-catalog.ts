@@ -8,31 +8,8 @@ import {
   type ModelCategory,
   type ModelColor,
 } from "~~/types/models";
-import type {
-  GetModelCatalogResponseDto,
-  ModelAssetDto,
-} from "~~/types/dto/model-catalog.dto";
 
 type LoadState = "idle" | "loading" | "loaded" | "error";
-
-function mapDtoToAsset(dto: ModelAssetDto): ModelAsset {
-  return {
-    category: dto.category,
-    color: dto.color,
-    filename: dto.filename,
-    publicPath: dto.public_path,
-  };
-}
-
-function buildCatalogFromItems(items: ModelAsset[]): ModelCatalog {
-  const catalog: ModelCatalog = structuredClone(DEFAULT_MODEL_CATALOG);
-
-  for (const item of items) {
-    catalog[item.category][item.color] = item;
-  }
-
-  return catalog;
-}
 
 export const useModelCatalogStore = defineStore("model-catalog", {
   state: () => ({
@@ -83,26 +60,17 @@ export const useModelCatalogStore = defineStore("model-catalog", {
       this.error = null;
 
       try {
-        const response = await $fetch<GetModelCatalogResponseDto>("/api/models");
-        const items = (response.items ?? []).map(mapDtoToAsset);
-
-        if (items.length > 0) {
-          this.catalog = buildCatalogFromItems(items);
-          this.hydratedFromApi = true;
-        } else {
-          this.catalog = structuredClone(DEFAULT_MODEL_CATALOG);
-          this.hydratedFromApi = false;
-        }
-
+        this.catalog = structuredClone(DEFAULT_MODEL_CATALOG);
+        this.hydratedFromApi = false;
         this.status = "loaded";
       } catch (error) {
         this.catalog = structuredClone(DEFAULT_MODEL_CATALOG);
         this.hydratedFromApi = false;
-        this.status = "loaded";
+        this.status = "error";
         this.error =
           error instanceof Error
             ? error.message
-            : "Failed to fetch model catalog, using local fallback.";
+            : "Failed to load model catalog.";
       }
     },
   },
