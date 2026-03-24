@@ -98,9 +98,9 @@
 </template>
 
 <script setup lang="ts">
-import { formatVndCurrency, getTierTotal } from "~/utils/pricing";
+import { formatVndCurrency, getFinalUnitPrice } from "~/utils/pricing";
 const { t } = useI18n();
-const launchPrice = formatVndCurrency(getTierTotal(1));
+const launchPrice = formatVndCurrency(getFinalUnitPrice(5));
 </script>
 
 <style scoped>
