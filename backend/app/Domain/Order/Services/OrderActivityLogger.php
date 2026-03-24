@@ -39,15 +39,15 @@ class OrderActivityLogger
     ): OrderActivity {
         /** @var OrderActivity $activity */
         $activity = OrderActivity::create([
-            'order_id'       => $order->id,
-            'actor_type'     => $actor ? 'staff' : $actorType,
-            'actor_id'       => $actor?->id,
-            'activity_type'  => $activityType,
-            'description'    => $description,
-            'metadata'       => $metadata,
-            'ip_address'     => Request::ip(),
-            'user_agent'     => Request::userAgent(),
-            'created_at'     => now(),
+            'order_id' => $order->id,
+            'actor_type' => $actor ? 'staff' : $actorType,
+            'actor_id' => $actor?->id,
+            'activity_type' => $activityType,
+            'description' => $description,
+            'metadata' => $metadata,
+            'ip_address' => Request::ip(),
+            'user_agent' => Request::userAgent(),
+            'created_at' => now(),
         ]);
 
         return $activity;
@@ -63,10 +63,10 @@ class OrderActivityLogger
             'order_created',
             "Order {$order->order_number} created with status {$order->status}",
             [
-                'order_number'   => $order->order_number,
-                'status'         => $order->status,
-                'total_after_tax'=> $order->total_after_tax,
-                'customer_id'    => $order->customer_id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'total_after_tax' => $order->total_after_tax,
+                'customer_id' => $order->customer_id,
             ],
             $by,
             $by ? 'staff' : 'system'
@@ -89,8 +89,8 @@ class OrderActivityLogger
             $notes ?? "Status changed from {$fromStatus} to {$toStatus}",
             [
                 'from_status' => $fromStatus,
-                'to_status'   => $toStatus,
-                'notes'       => $notes,
+                'to_status' => $toStatus,
+                'notes' => $notes,
             ],
             $by,
             $by ? 'staff' : 'system'
@@ -112,10 +112,10 @@ class OrderActivityLogger
             'deposit_recorded',
             "Deposit of {$amount} recorded. Balance due: {$newBalanceDue}",
             [
-                'amount'       => $amount,
-                'balance_due'  => $newBalanceDue,
-                'proof_count'  => count($proofUrls),
-                'proof_urls'   => $proofUrls,
+                'amount' => $amount,
+                'balance_due' => $newBalanceDue,
+                'proof_count' => count($proofUrls),
+                'proof_urls' => $proofUrls,
             ],
             $by
         );
@@ -136,11 +136,36 @@ class OrderActivityLogger
             'payment',
             "Payment of {$amount} received via {$method}",
             [
-                'amount'    => $amount,
-                'method'    => $method,
+                'amount' => $amount,
+                'method' => $method,
                 'reference' => $reference,
             ],
             $by
+        );
+    }
+
+    /**
+     * Log a payment recorded event.
+     */
+    public function logPaymentRecorded(
+        Order $order,
+        int $amount,
+        string $paymentMethod,
+        string $paymentType,
+        ?string $recordedBy = null
+    ): OrderActivity {
+        return $this->log(
+            $order,
+            'payment_recorded',
+            "Payment of {$amount} recorded ({$paymentType}) via {$paymentMethod}",
+            [
+                'amount' => $amount,
+                'payment_method' => $paymentMethod,
+                'payment_type' => $paymentType,
+                'recorded_by' => $recordedBy,
+            ],
+            null,
+            $recordedBy ? 'staff' : 'system'
         );
     }
 
@@ -158,8 +183,8 @@ class OrderActivityLogger
             'note_added',
             $isCustomerVisible ? 'Customer-visible note added' : 'Internal note added',
             [
-                'note'               => $note,
-                'is_customer_visible'=> $isCustomerVisible,
+                'note' => $note,
+                'is_customer_visible' => $isCustomerVisible,
             ],
             $by
         );
@@ -180,7 +205,7 @@ class OrderActivityLogger
             "{$fileType} uploaded",
             [
                 'file_type' => $fileType,
-                'url'       => $url,
+                'url' => $url,
             ],
             $by
         );
@@ -199,10 +224,10 @@ class OrderActivityLogger
             'claim_created',
             "Claim {$claim->claim_number} created: {$claim->type}",
             [
-                'claim_id'     => $claim->id,
+                'claim_id' => $claim->id,
                 'claim_number' => $claim->claim_number,
-                'type'         => $claim->type,
-                'status'       => $claim->status,
+                'type' => $claim->type,
+                'status' => $claim->status,
             ],
             $by,
             $by ? 'staff' : 'customer'
@@ -220,8 +245,8 @@ class OrderActivityLogger
         ?User $by = null
     ): OrderActivity {
         $metadata = [
-            'claim_id'    => $claim->id,
-            'resolution'  => $resolution,
+            'claim_id' => $claim->id,
+            'resolution' => $resolution,
         ];
 
         if ($refundAmount !== null) {
@@ -252,8 +277,8 @@ class OrderActivityLogger
             'return_shipped',
             "Return {$returnNumber} shipped via {$courier}",
             [
-                'return_number'   => $returnNumber,
-                'courier'         => $courier,
+                'return_number' => $returnNumber,
+                'courier' => $courier,
                 'tracking_number' => $tracking,
             ],
             $by,
@@ -295,8 +320,8 @@ class OrderActivityLogger
             'refund_processed',
             "Refund of {$amount} processed via {$method}",
             [
-                'amount'    => $amount,
-                'method'    => $method,
+                'amount' => $amount,
+                'method' => $method,
                 'reference' => $reference,
             ],
             $by
@@ -318,10 +343,10 @@ class OrderActivityLogger
             'commission_calculated',
             "Commission calculated: {$amount} at {$rate}% rate",
             [
-                'amount'        => $amount,
-                'rate'          => $rate,
+                'amount' => $amount,
+                'rate' => $rate,
                 'referral_code' => $referralCode,
-                'sales_rep_id'  => $order->sales_rep_id,
+                'sales_rep_id' => $order->sales_rep_id,
             ],
             $by
         );
@@ -341,7 +366,7 @@ class OrderActivityLogger
             'commission_paid',
             "Commission of {$amount} paid",
             [
-                'amount'    => $amount,
+                'amount' => $amount,
                 'reference' => $reference,
             ],
             $by

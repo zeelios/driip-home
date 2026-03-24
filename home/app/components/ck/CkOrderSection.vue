@@ -75,59 +75,74 @@
 
           <!-- Cart items -->
           <template v-else>
-            <div class="os-cart-list">
-              <div
-                v-for="item in cart.items"
-                :key="item.id"
-                class="os-cart-item"
-              >
-                <div class="os-cart-item-info">
-                  <p class="os-cart-item-name">CK {{ item.skuLabel }}</p>
-                  <p class="os-cart-item-meta">
-                    Size {{ item.size }} · {{ item.colorLabel }} ·
-                    {{ item.boxes }} hộp
-                  </p>
-                </div>
+            <!-- Mobile cart (≤639px) -->
+            <div class="os-cart-mobile">
+              <CkCartMobile
+                :items="cart.items"
+                @remove="removeCartItem"
+                @increase="increaseItemBoxes"
+                @decrease="decreaseItemBoxes"
+              />
+            </div>
 
-                <!-- Inline box qty adjuster -->
-                <div class="os-cart-item-qty">
-                  <button
-                    type="button"
-                    class="os-qty-btn"
-                    :disabled="item.boxes <= 1"
-                    @click="
-                      cart.updateItemBoxes(item.id, Math.max(1, item.boxes - 1))
-                    "
-                  >
-                    −
-                  </button>
-                  <span class="os-qty-val">{{ item.boxes }}</span>
-                  <button
-                    type="button"
-                    class="os-qty-btn"
-                    @click="cart.updateItemBoxes(item.id, item.boxes + 1)"
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div class="os-cart-item-price">
-                  <span class="os-cart-item-final">{{
-                    formatVndCurrency(item.finalTotal)
-                  }}</span>
-                  <span class="os-cart-item-compare">{{
-                    formatVndCurrency(item.compareTotal)
-                  }}</span>
-                </div>
-
-                <button
-                  type="button"
-                  class="os-cart-remove"
-                  aria-label="Xóa"
-                  @click="cart.removeItem(item.id)"
+            <!-- Desktop cart (≥640px) -->
+            <div class="os-cart-desktop">
+              <div class="os-cart-list">
+                <div
+                  v-for="item in cart.items"
+                  :key="item.id"
+                  class="os-cart-item-shell"
                 >
-                  ✕
-                </button>
+                  <div class="os-cart-item">
+                    <div class="os-cart-item-info">
+                      <p class="os-cart-item-name">CK {{ item.skuLabel }}</p>
+                      <p class="os-cart-item-meta">
+                        Size {{ item.size }} · {{ item.colorLabel }} ·
+                        {{ item.boxes }} hộp
+                      </p>
+                    </div>
+
+                    <!-- Inline box qty adjuster -->
+                    <div class="os-cart-item-qty">
+                      <button
+                        type="button"
+                        class="os-qty-btn"
+                        :disabled="item.boxes <= 1"
+                        aria-label="Giảm số hộp"
+                        @click="decreaseItemBoxes(item.id, item.boxes)"
+                      >
+                        −
+                      </button>
+                      <span class="os-qty-val">{{ item.boxes }}</span>
+                      <button
+                        type="button"
+                        class="os-qty-btn"
+                        aria-label="Tăng số hộp"
+                        @click="increaseItemBoxes(item.id, item.boxes)"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <div class="os-cart-item-price">
+                      <span class="os-cart-item-final">{{
+                        formatVndCurrency(item.finalTotal)
+                      }}</span>
+                      <span class="os-cart-item-compare">{{
+                        formatVndCurrency(item.compareTotal)
+                      }}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="os-cart-remove"
+                      aria-label="Xóa"
+                      @click="removeCartItem(item.id)"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -559,6 +574,19 @@ function formatDobInput(input: string): void {
 }
 
 const extraPromoPercent = `${Math.round(EXTRA_PROMO_RATE * 100)}%`;
+
+function removeCartItem(id: string): void {
+  cart.removeItem(id);
+}
+
+function increaseItemBoxes(id: string, boxes: number): void {
+  cart.updateItemBoxes(id, boxes + 1);
+}
+
+function decreaseItemBoxes(id: string, boxes: number): void {
+  if (boxes <= 1) return;
+  cart.updateItemBoxes(id, boxes - 1);
+}
 
 /* ── Step wizard ──────────────────────────────────────────────── */
 const currentStep = ref(1);
@@ -993,6 +1021,25 @@ function scrollToProducts(): void {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+/* ── CART RESPONSIVE VISIBILITY ─────────────────────────────────── */
+.os-cart-mobile {
+  display: block;
+}
+
+.os-cart-desktop {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .os-cart-mobile {
+    display: none;
+  }
+
+  .os-cart-desktop {
+    display: block;
+  }
+}
+
 /* ── CART ITEMS ──────────────────────────────────────────────────── */
 .os-cart-list {
   display: flex;
@@ -1001,7 +1048,15 @@ function scrollToProducts(): void {
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 16px;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+}
+
+.os-cart-item-shell {
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.os-cart-item-shell:last-child {
+  border-bottom: none;
 }
 
 .os-cart-item {
@@ -1009,12 +1064,12 @@ function scrollToProducts(): void {
   align-items: center;
   gap: 12px;
   padding: 18px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   min-width: 560px;
-}
-
-.os-cart-item:last-child {
-  border-bottom: none;
+  background: var(--black);
+  position: relative;
+  z-index: 1;
+  transition: transform 0.18s ease;
+  will-change: transform;
 }
 
 .os-cart-item-info {
@@ -1041,11 +1096,15 @@ function scrollToProducts(): void {
 
 /* Qty adjuster */
 .os-cart-item-qty {
-  display: flex;
+  display: grid;
+  grid-template-columns: 32px 34px 32px;
   align-items: center;
-  gap: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
+  width: 98px;
+  min-width: 98px;
+  max-width: 98px;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .os-qty-btn {
@@ -1060,6 +1119,31 @@ function scrollToProducts(): void {
   font-size: 16px;
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
+}
+
+.os-qty-btn:first-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.os-qty-btn:last-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.os-qty-val {
+  width: 34px;
+  min-width: 34px;
+  max-width: 34px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
 }
 
 .os-qty-btn:hover:not(:disabled) {

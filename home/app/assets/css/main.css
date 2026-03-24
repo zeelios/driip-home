@@ -76,3 +76,19 @@ body {
     opacity: 1;
   }
 }
+
+html,
+body {
+  /* Chặn mọi thao tác zoom/pan không mong muốn */
+  touch-action: pan-x pan-y;
+  /* Ngăn chặn double-tap zoom trên Safari/Chrome Mobile */
+  -webkit-text-size-adjust: 100%;
+}
+
+button,
+a,
+input,
+select {
+  /* Đảm bảo các element tương tác không kích hoạt zoom */
+  touch-action: manipulation;
+}

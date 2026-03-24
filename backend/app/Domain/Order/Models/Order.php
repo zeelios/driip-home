@@ -374,6 +374,157 @@ class Order extends Model
     }
 
     /**
+     * Scope: filter orders by payment method.
+     *
+     * @param  Builder<Order>  $query
+     * @param  string          $method
+     * @return Builder<Order>
+     */
+    public function scopeWherePaymentMethod(Builder $query, string $method): Builder
+    {
+        return $query->where('payment_method', $method);
+    }
+
+    /**
+     * Scope: filter prepaid orders (non-COD).
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWherePrepaid(Builder $query): Builder
+    {
+        return $query->whereIn('payment_method', ['bank_transfer', 'momo', 'zalopay', 'vnpay', 'credit_card', 'cash']);
+    }
+
+    /**
+     * Scope: filter COD orders.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWhereCOD(Builder $query): Builder
+    {
+        return $query->where('payment_method', 'cod');
+    }
+
+    /**
+     * Scope: filter by payment status.
+     *
+     * @param  Builder<Order>  $query
+     * @param  string          $status
+     * @return Builder<Order>
+     */
+    public function scopeWherePaymentStatus(Builder $query, string $status): Builder
+    {
+        return $query->where('payment_status', $status);
+    }
+
+    /**
+     * Scope: filter unpaid orders.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWhereUnpaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', 'unpaid');
+    }
+
+    /**
+     * Scope: filter partially paid orders.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWherePartiallyPaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', 'partial');
+    }
+
+    /**
+     * Scope: filter fully paid orders.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWhereFullyPaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', 'paid');
+    }
+
+    /**
+     * Scope: filter COD orders pending collection.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWhereCODPendingCollection(Builder $query): Builder
+    {
+        return $query->where('payment_method', 'cod')
+            ->where('status', 'delivered')
+            ->whereNull('cod_collected_at');
+    }
+
+    /**
+     * Scope: filter COD orders with collected payment.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWhereCODCollected(Builder $query): Builder
+    {
+        return $query->where('payment_method', 'cod')
+            ->whereNotNull('cod_collected_at');
+    }
+
+    /**
+     * Scope: filter COD orders with discrepancies.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWhereCODDiscrepancy(Builder $query): Builder
+    {
+        return $query->where('payment_method', 'cod')
+            ->where('cod_reconciliation_status', 'disputed')
+            ->whereNotNull('cod_discrepancy_amount');
+    }
+
+    /**
+     * Scope: filter orders with balance due.
+     *
+     * @param  Builder<Order>  $query
+     * @return Builder<Order>
+     */
+    public function scopeWhereHasBalanceDue(Builder $query): Builder
+    {
+        return $query->whereRaw('(total_after_tax - COALESCE(deposit_amount, 0)) > 0');
+    }
+
+    /**
+     * Scope: filter orders with overdue balance.
+     *
+     * @param  Builder<Order>  $query
+     * @param  int             $days
+     * @return Builder<Order>
+     */
+    public function scopeWhereBalanceOverdue(Builder $query, int $days): Builder
+    {
+        return $query->whereHasBalanceDue()
+            ->where('created_at', '<=', now()->subDays($days));
+    }
+
+    /**
+     * Get all payments for this order.
+     *
+     * @return HasMany<OrderPayment>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(OrderPayment::class, 'order_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Scope: filter orders in the pending status.
      *
      * @param  Builder<Order>  $query

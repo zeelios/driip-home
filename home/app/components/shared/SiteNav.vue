@@ -94,6 +94,7 @@ function switchLang(): void {
   top: 0;
   left: 0;
   right: 0;
+  width: 100%;
   z-index: 1000;
   /* No padding-top here — handled by snav-inner so ::before can fill the gap */
   background: rgba(5, 5, 5, 0.96);
@@ -296,21 +297,40 @@ function switchLang(): void {
   background: var(--grey-100);
 }
 
+/* ── MOBILE (≤639px) ────────────────────────────────────────────── */
+@media (max-width: 639px) {
+  .snav {
+    overflow: hidden;
+  }
+
+  .snav-inner {
+    justify-content: flex-end;
+    padding-left: calc(12px + env(safe-area-inset-left, 0px));
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
+    gap: 0;
+  }
+
+  .snav-left,
+  .snav-center,
+  .snav-policy,
+  .snav-cta {
+    display: none;
+  }
+
+  .snav-right {
+    margin-left: auto;
+  }
+
+  .snav-lang {
+    min-height: 30px;
+    padding-inline: 12px;
+  }
+}
+
 /* ── MOBILE SMALL (≤420px) ──────────────────────────────────────── */
 @media (max-width: 420px) {
   .snav-inner {
     height: 52px;
-    padding-left: calc(16px + env(safe-area-inset-left, 0px));
-    padding-right: calc(16px + env(safe-area-inset-right, 0px));
-  }
-  .snav-drop {
-    display: none;
-  }
-  .snav-cta {
-    display: none;
-  }
-  .snav-policy {
-    display: none;
   }
 }
 
