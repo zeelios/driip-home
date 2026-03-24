@@ -49,9 +49,24 @@
                 UA: {{ getRequestMeta(e.params)?.user_agent }}
               </span>
             </div>
-            <pre v-if="expanded.has(e.id)" class="dbg-params">{{
-              JSON.stringify(e.params, null, 2)
-            }}</pre>
+            <div v-if="expanded.has(e.id) && e.params" class="dbg-params">
+              <div v-if="e.params._original_data" class="dbg-section">
+                <strong class="dbg-section-title">Original Data:</strong>
+                <pre>{{
+                  JSON.stringify(e.params._original_data, null, 2)
+                }}</pre>
+              </div>
+              <div v-if="e.params._payload_sent" class="dbg-section">
+                <strong class="dbg-section-title">Payload to Meta:</strong>
+                <pre>{{ JSON.stringify(e.params._payload_sent, null, 2) }}</pre>
+              </div>
+              <div v-if="e.params._meta_normalized" class="dbg-section">
+                <strong class="dbg-section-title">Meta Normalized:</strong>
+                <pre>{{
+                  JSON.stringify(e.params._meta_normalized, null, 2)
+                }}</pre>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -287,18 +302,22 @@ function getRequestMeta(params?: Record<string, unknown>): RequestMeta | null {
   color: #e5e5e5;
 }
 
-.dbg-params {
-  width: 100%;
-  margin-top: 4px;
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
-  padding: 8px 10px;
-  color: #aaa;
-  font-size: 10px;
-  line-height: 1.6;
-  overflow-x: auto;
-  white-space: pre;
+.dbg-section {
+  margin-bottom: 12px;
+}
+.dbg-section:last-child {
+  margin-bottom: 0;
+}
+.dbg-section-title {
+  color: #e5e5e5;
+  display: block;
+  margin-bottom: 4px;
+}
+.dbg-section pre {
+  margin: 0;
+  background: #0a0a0a;
+  padding: 6px 8px;
+  border-radius: 3px;
 }
 
 .dbg-empty {

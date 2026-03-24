@@ -138,27 +138,39 @@ export default defineEventHandler(async (event) => {
       user_agent: userAgent,
       normalized_user_data: compactMetaObject({
         email:
-          typeof user_data?.email === "string"
+          typeof user_data?.em?.[0] === "string"
+            ? user_data.em[0].trim().toLowerCase()
+            : typeof user_data?.email === "string"
             ? user_data.email.trim().toLowerCase()
             : undefined,
         phone:
-          typeof user_data?.phone === "string"
+          typeof user_data?.ph?.[0] === "string"
+            ? normalizePhone(user_data.ph[0])
+            : typeof user_data?.phone === "string"
             ? normalizePhone(user_data.phone)
             : undefined,
         first_name:
-          typeof user_data?.first_name === "string"
+          typeof user_data?.fn?.[0] === "string"
+            ? user_data.fn[0].trim().toLowerCase()
+            : typeof user_data?.first_name === "string"
             ? user_data.first_name.trim().toLowerCase()
             : undefined,
         last_name:
-          typeof user_data?.last_name === "string"
+          typeof user_data?.ln?.[0] === "string"
+            ? user_data.ln[0].trim().toLowerCase()
+            : typeof user_data?.last_name === "string"
             ? user_data.last_name.trim().toLowerCase()
             : undefined,
         city:
-          typeof user_data?.city === "string"
+          typeof user_data?.ct?.[0] === "string"
+            ? user_data.ct[0].trim().toLowerCase()
+            : typeof user_data?.city === "string"
             ? user_data.city.trim().toLowerCase()
             : undefined,
         state:
-          typeof user_data?.state === "string"
+          typeof user_data?.st?.[0] === "string"
+            ? user_data.st[0].trim().toLowerCase()
+            : typeof user_data?.state === "string"
             ? user_data.state.trim().toLowerCase()
             : undefined,
         country:
@@ -166,15 +178,21 @@ export default defineEventHandler(async (event) => {
             ? user_data.country.trim().toLowerCase()
             : undefined,
         zip:
-          typeof user_data?.zip === "string"
+          typeof user_data?.zp?.[0] === "string"
+            ? user_data.zp[0].trim().toLowerCase()
+            : typeof user_data?.zip === "string"
             ? user_data.zip.trim().toLowerCase()
             : undefined,
-        dob:
-          typeof user_data?.dob === "string"
+        db:
+          typeof user_data?.db?.[0] === "string"
+            ? user_data.db[0].trim()
+            : typeof user_data?.dob === "string"
             ? user_data.dob.trim()
             : undefined,
-        gender:
-          typeof user_data?.gender === "string"
+        ge:
+          typeof user_data?.ge?.[0] === "string"
+            ? user_data.ge[0].trim().toLowerCase()
+            : typeof user_data?.gender === "string"
             ? user_data.gender.trim().toLowerCase()
             : undefined,
         fb_login_id:
@@ -202,22 +220,59 @@ export default defineEventHandler(async (event) => {
       }
     );
 
+    // Check if Meta returned any errors in the result
+    const metaResult = result as {
+      events_received?: number;
+      messages?: Array<{ event_name: string; errors: string[] }>;
+      fbtrace_id?: string;
+    };
+    const hasErrors = metaResult.messages && metaResult.messages.length > 0;
+
     // Debug logging for CAPI events
-    console.log(`[CAPI] Successfully sent ${event_name} event:`, {
-      ...debugPayload,
-      debugMeta,
-      graphResponse: result,
-    });
+    console.log(
+      `[CAPI] ${
+        hasErrors ? "Partially sent" : "Successfully sent"
+      } ${event_name} event:`,
+      {
+        ...debugPayload,
+        debugMeta,
+        graphResponse: result,
+      }
+    );
 
     return {
       ...(result as Record<string, unknown>),
       debug: debugMeta,
+      _metaResponse: metaResult,
     };
   } catch (err: any) {
-    console.error(
-      `[CAPI] Failed to send ${event_name} event:`,
-      err.data || err.message
-    );
-    throw err;
+    // Capture full error details from Meta
+    const errorData = err.data || {};
+    const errorMessage = err.message || "Unknown error";
+    const errorStatus = err.statusCode || err.status || 500;
+
+    console.error(`[CAPI] Failed to send ${event_name} event:`, {
+      status: errorStatus,
+      message: errorMessage,
+      data: errorData,
+      payload_sent: payload,
+    });
+
+    // Return error details to frontend for debugging
+    throw createError({
+      statusCode: errorStatus,
+      statusMessage: `[Meta CAPI Error] ${errorMessage}`,
+      data: {
+        meta_error: errorData,
+        event_name,
+        event_id,
+        payload_preview: {
+          event_name: payload.event_name,
+          event_time: payload.event_time,
+          user_data_keys: Object.keys(payload.user_data || {}),
+          custom_data_keys: Object.keys(payload.custom_data || {}),
+        },
+      },
+    });
   }
 });

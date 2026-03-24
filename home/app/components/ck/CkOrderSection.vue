@@ -767,8 +767,8 @@ async function handleSubmit(): Promise<void> {
           color: item.color,
           boxes: item.boxes,
         })),
-        purchaseEventId,
-        timestamp: new Date().toISOString(),
+        dob: order.value.dob,
+        gender: order.value.gender,
         referal: referralCode.value ?? undefined,
       },
     });
@@ -784,6 +784,8 @@ async function handleSubmit(): Promise<void> {
       street: order.value.fullAddress,
       value: cart.grandFinalTotal,
       event_id: purchaseEventId,
+      dob: order.value.dob,
+      gender: order.value.gender,
     };
 
     orderState.value = "success";

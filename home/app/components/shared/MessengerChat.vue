@@ -7,7 +7,9 @@
         :target="isMobile ? '_self' : '_blank'"
         :rel="isMobile ? undefined : 'noopener noreferrer'"
         class="mc-fab"
+        :class="{ 'mc-fab--tracking': isTracking }"
         aria-label="Chat hỗ trợ qua Messenger"
+        @click="handleClick"
       >
         <svg
           v-if="isMobile"
@@ -40,28 +42,61 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useMetaEvents } from "~/composables/useMetaEvents";
 
 const config = useRuntimeConfig();
+const { trackContact } = useMetaEvents();
 const pageId = computed(() => config.public.fbPageId as string | undefined);
 const isMobile = ref(false);
 const messengerHref = computed(() => {
   if (!pageId.value) return "https://m.me";
-
   return `https://m.me/${pageId.value}`;
 });
 
 const showBadge = ref(true);
+const isTracking = ref(false);
 
 function detectMobileDevice(): boolean {
   if (!process.client) return false;
-
   const ua = navigator.userAgent || navigator.vendor || "";
   return /android|iphone|ipad|ipod|mobile/i.test(ua);
 }
 
+async function handleClick(event: MouseEvent): Promise<void> {
+  // Prevent default navigation
+  event.preventDefault();
+
+  if (isTracking.value) return;
+  isTracking.value = true;
+
+  // Hide badge on first click
+  if (showBadge.value) {
+    showBadge.value = false;
+  }
+
+  try {
+    // Send contact event and wait for it
+    await trackContact();
+
+    // Small delay to ensure tracking is sent
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  } catch (err) {
+    console.warn("[MessengerChat] Tracking failed:", err);
+  } finally {
+    isTracking.value = false;
+
+    // Navigate to messenger
+    const href = messengerHref.value;
+    if (isMobile.value) {
+      window.location.href = href;
+    } else {
+      window.open(href, "_blank", "noopener,noreferrer");
+    }
+  }
+}
+
 onMounted(() => {
   if (!process.client) return;
-
   isMobile.value = detectMobileDevice();
 });
 </script>
