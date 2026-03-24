@@ -60,6 +60,17 @@ export interface MetaUserDataInput
   extends Omit<MetaPurchaseData, "sku" | "value"> {
   fbc?: string;
   fbp?: string;
+  em?: string | string[];
+  ph?: string | string[];
+  fn?: string | string[];
+  ln?: string | string[];
+  ct?: string | string[];
+  st?: string | string[];
+  zp?: string | string[];
+  db?: string | string[];
+  ge?: string | string[];
+  client_user_agent?: string;
+  client_ip_address?: string;
 }
 
 export const META_ORDER_PROFILE_COOKIE_KEY = "driip_ck_order_profile";
@@ -158,35 +169,90 @@ export function buildMetaUserData(
   input: MetaUserDataInput,
   options: MetaUserDataBuilderOptions
 ): Record<string, unknown> {
-  const userData: Record<string, unknown> = {
-    client_user_agent: options.userAgent?.trim(),
-    ...(options.clientIp ? { client_ip_address: options.clientIp } : {}),
+  const normalizeListValue = (
+    value?: string | string[]
+  ): string[] | undefined => {
+    if (Array.isArray(value)) {
+      const filtered = value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      return filtered.length > 0 ? filtered : undefined;
+    }
+
+    if (typeof value === "string" && value.trim()) {
+      return [value.trim()];
+    }
+
+    return undefined;
   };
 
-  if (input.email)
-    userData.em = [options.hash(normalizeMetaEmail(input.email))];
-  if (input.email)
-    userData.external_id = [options.hash(normalizeMetaEmail(input.email))];
-  if (input.phone)
+  const firstString = (value?: string | string[]): string | undefined => {
+    if (Array.isArray(value)) {
+      return typeof value[0] === "string" ? value[0] : undefined;
+    }
+
+    return typeof value === "string" ? value : undefined;
+  };
+
+  const rawEmail = input.email ?? firstString(input.em);
+  const rawPhone = input.phone ?? firstString(input.ph);
+  const rawFirstName = input.first_name ?? firstString(input.fn);
+  const rawLastName = input.last_name ?? firstString(input.ln);
+  const rawCity = input.city ?? firstString(input.ct);
+  const rawState = input.state ?? firstString(input.st);
+  const rawZip = input.zip ?? firstString(input.zp);
+  const rawDob = input.dob ?? firstString(input.db);
+  const rawGender = input.gender ?? firstString(input.ge);
+  const metaEmail = normalizeListValue(input.em);
+  const metaPhone = normalizeListValue(input.ph);
+  const metaFirstName = normalizeListValue(input.fn);
+  const metaLastName = normalizeListValue(input.ln);
+  const metaCity = normalizeListValue(input.ct);
+  const metaState = normalizeListValue(input.st);
+  const metaZip = normalizeListValue(input.zp);
+  const metaDob = normalizeListValue(input.db);
+  const metaGender = normalizeListValue(input.ge);
+
+  const userData: Record<string, unknown> = {
+    client_user_agent:
+      input.client_user_agent?.trim() ?? options.userAgent?.trim(),
+    client_ip_address: input.client_ip_address?.trim() ?? options.clientIp,
+  };
+
+  if (metaEmail) userData.em = metaEmail;
+  else if (rawEmail) userData.em = [options.hash(normalizeMetaEmail(rawEmail))];
+  if (metaEmail) userData.external_id = metaEmail;
+  else if (rawEmail)
+    userData.external_id = [options.hash(normalizeMetaEmail(rawEmail))];
+  if (metaPhone) userData.ph = metaPhone;
+  else if (rawPhone)
     userData.ph = [
       options.hash(
-        options.normalizePhone?.(input.phone) ?? normalizeMetaPhone(input.phone)
+        options.normalizePhone?.(rawPhone) ?? normalizeMetaPhone(rawPhone)
       ),
     ];
-  if (input.first_name)
-    userData.fn = [options.hash(normalizeMetaName(input.first_name))];
-  if (input.last_name)
-    userData.ln = [options.hash(normalizeMetaName(input.last_name))];
-  if (input.city)
-    userData.ct = [options.hash(normalizeMetaLocation(input.city))];
-  if (input.state)
-    userData.st = [options.hash(normalizeMetaLocation(input.state))];
+  if (metaFirstName) userData.fn = metaFirstName;
+  else if (rawFirstName)
+    userData.fn = [options.hash(normalizeMetaName(rawFirstName))];
+  if (metaLastName) userData.ln = metaLastName;
+  else if (rawLastName)
+    userData.ln = [options.hash(normalizeMetaName(rawLastName))];
+  if (metaCity) userData.ct = metaCity;
+  else if (rawCity)
+    userData.ct = [options.hash(normalizeMetaLocation(rawCity))];
+  if (metaState) userData.st = metaState;
+  else if (rawState)
+    userData.st = [options.hash(normalizeMetaLocation(rawState))];
   if (input.country)
     userData.country = [options.hash(normalizeMetaCountry(input.country))];
-  if (input.zip) userData.zp = [options.hash(normalizeMetaZip(input.zip))];
-  if (input.dob) userData.db = [options.hash(normalizeMetaDob(input.dob))];
-  if (input.gender)
-    userData.ge = [options.hash(normalizeMetaGender(input.gender))];
+  if (metaZip) userData.zp = metaZip;
+  else if (rawZip) userData.zp = [options.hash(normalizeMetaZip(rawZip))];
+  if (metaDob) userData.db = metaDob;
+  else if (rawDob) userData.db = [options.hash(normalizeMetaDob(rawDob))];
+  if (metaGender) userData.ge = metaGender;
+  else if (rawGender)
+    userData.ge = [options.hash(normalizeMetaGender(rawGender))];
 
   if (input.fbc) userData.fbc = input.fbc;
   if (input.fbp) userData.fbp = input.fbp;

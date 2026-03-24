@@ -95,6 +95,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event);
+  const bodyTestEventCode =
+    typeof body?.test_event_code === "string" && body.test_event_code.trim()
+      ? body.test_event_code.trim()
+      : undefined;
   const requestPayload =
     Array.isArray(body?.data) && body.data.length > 0
       ? body.data[0]
@@ -109,6 +113,7 @@ export default defineEventHandler(async (event) => {
     event_source_url,
     test_event_code,
   } = requestPayload;
+  const resolvedTestEventCode = test_event_code ?? bodyTestEventCode;
 
   if (!event_name) {
     throw createError({
@@ -133,8 +138,8 @@ export default defineEventHandler(async (event) => {
     custom_data,
   });
 
-  if (test_event_code) {
-    payload.test_event_code = test_event_code;
+  if (resolvedTestEventCode) {
+    payload.test_event_code = resolvedTestEventCode;
   }
 
   function summarizeMetaResponse(result: {
@@ -251,7 +256,7 @@ export default defineEventHandler(async (event) => {
       event_source_url,
       user_data_keys: Object.keys(payload.user_data || {}),
       custom_data,
-      test_event_code: test_event_code || "none",
+      test_event_code: resolvedTestEventCode || "none",
     };
 
     const result = await $fetch(
@@ -278,7 +283,7 @@ export default defineEventHandler(async (event) => {
       {
         event_id,
         event_source_url,
-        test_event_code,
+        test_event_code: resolvedTestEventCode,
         payload_preview: payloadPreview,
         debug: debugMeta,
         response: responseSummary,
@@ -301,12 +306,13 @@ export default defineEventHandler(async (event) => {
       message: errorMessage,
       event_id,
       event_source_url,
-      test_event_code,
+      test_event_code: resolvedTestEventCode,
       payload_preview: {
         event_name: payload.event_name,
         event_time: payload.event_time,
         user_data_keys: Object.keys(payload.user_data || {}),
         custom_data_keys: Object.keys(payload.custom_data || {}),
+        test_event_code: resolvedTestEventCode || "none",
       },
       meta_error: errorData,
     });

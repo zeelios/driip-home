@@ -139,7 +139,8 @@ function getRequestMeta(params?: Record<string, unknown>): RequestMeta | null {
 }
 
 function copyCode(el: HTMLElement) {
-  const code = el.textContent || "";
+  const pre = el.querySelector("pre");
+  const code = pre?.textContent || "";
   navigator.clipboard.writeText(code).catch(() => {});
   el.classList.add("copied");
   setTimeout(() => el.classList.remove("copied"), 1200);
