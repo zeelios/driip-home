@@ -130,6 +130,43 @@ export default defineEventHandler(async (event) => {
     payload.test_event_code = config.metaTestEventCode;
   }
 
+  function summarizeMetaResponse(result: {
+    events_received?: number;
+    messages?: Array<{ event_name: string; errors: string[] }>;
+    fbtrace_id?: string;
+  }) {
+    const messageCount = result.messages?.length ?? 0;
+    return {
+      events_received: result.events_received ?? 0,
+      message_count: messageCount,
+      status: messageCount > 0 ? "partial" : "ok",
+      fbtrace_id: result.fbtrace_id,
+      messages: result.messages?.map((message) => ({
+        event_name: message.event_name,
+        errors: message.errors,
+      })),
+    };
+  }
+
+  function logMetaEvent(
+    level: "success" | "warning" | "error",
+    title: string,
+    details: Record<string, unknown>
+  ): void {
+    const prefix = `[CAPI] ${title}`;
+    if (level === "error") {
+      console.error(prefix, details);
+      return;
+    }
+
+    if (level === "warning") {
+      console.warn(prefix, details);
+      return;
+    }
+
+    console.info(prefix, details);
+  }
+
   // ─── POST to Facebook Graph API ──────────────────────────────────
   try {
     const userAgent = getRequestHeader(event, "user-agent") ?? undefined;
@@ -200,15 +237,14 @@ export default defineEventHandler(async (event) => {
             ? user_data.fb_login_id.trim()
             : undefined,
       }),
-      hashed_user_data: hashedUser,
     };
-    const debugPayload = {
+    const payloadPreview = {
       event_name,
       event_id,
       event_source_url,
-      user_data: hashedUser,
+      user_data_keys: Object.keys(payload.user_data || {}),
       custom_data,
-      testEventCode: config.metaTestEventCode || "none",
+      test_event_code: config.metaTestEventCode || "none",
     };
 
     const result = await $fetch(
@@ -220,23 +256,25 @@ export default defineEventHandler(async (event) => {
       }
     );
 
-    // Check if Meta returned any errors in the result
     const metaResult = result as {
       events_received?: number;
       messages?: Array<{ event_name: string; errors: string[] }>;
       fbtrace_id?: string;
     };
-    const hasErrors = metaResult.messages && metaResult.messages.length > 0;
+    const responseSummary = summarizeMetaResponse(metaResult);
+    const logLevel =
+      responseSummary.status === "partial" ? "warning" : "success";
 
-    // Debug logging for CAPI events
-    console.log(
-      `[CAPI] ${
-        hasErrors ? "Partially sent" : "Successfully sent"
-      } ${event_name} event:`,
+    logMetaEvent(
+      logLevel,
+      `${responseSummary.status.toUpperCase()} ${event_name}`,
       {
-        ...debugPayload,
-        debugMeta,
-        graphResponse: result,
+        event_id,
+        event_source_url,
+        test_event_code: config.metaTestEventCode || "none",
+        payload_preview: payloadPreview,
+        debug: debugMeta,
+        response: responseSummary,
       }
     );
 
@@ -251,11 +289,19 @@ export default defineEventHandler(async (event) => {
     const errorMessage = err.message || "Unknown error";
     const errorStatus = err.statusCode || err.status || 500;
 
-    console.error(`[CAPI] Failed to send ${event_name} event:`, {
+    console.error(`[CAPI] ERROR ${event_name}`, {
       status: errorStatus,
       message: errorMessage,
-      data: errorData,
-      payload_sent: payload,
+      event_id,
+      event_source_url,
+      test_event_code: config.metaTestEventCode || "none",
+      payload_preview: {
+        event_name: payload.event_name,
+        event_time: payload.event_time,
+        user_data_keys: Object.keys(payload.user_data || {}),
+        custom_data_keys: Object.keys(payload.custom_data || {}),
+      },
+      meta_error: errorData,
     });
 
     // Return error details to frontend for debugging
