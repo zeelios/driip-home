@@ -4,7 +4,7 @@
     <slot />
     <SharedMessengerChat />
     <ClientOnly>
-      <SharedTrackingDebugPanel />
+      <!-- <SharedTrackingDebugPanel /> -->
     </ClientOnly>
   </div>
 </template>
