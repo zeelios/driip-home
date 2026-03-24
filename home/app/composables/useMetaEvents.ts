@@ -45,6 +45,19 @@ interface MetaEventOptions {
   merge_stored_profile?: boolean;
 }
 
+interface MetaCapiEventBody {
+  event_name: string;
+  event_id: string;
+  user_data: MetaUserData;
+  custom_data: Record<string, unknown>;
+  event_source_url: string;
+  test_event_code?: string;
+}
+
+interface MetaCapiRequestPayload {
+  data: MetaCapiEventBody;
+}
+
 interface MetaUserData {
   // Hashed user data (Meta CAPI format)
   em?: string[];
@@ -374,12 +387,7 @@ function enrichMetaUserData(
 }
 
 async function sendMetaCapiEvent(payload: {
-  event_name: string;
-  event_id: string;
-  user_data: MetaUserData;
-  custom_data: Record<string, unknown>;
-  event_source_url: string;
-  test_event_code?: string;
+  data: MetaCapiEventBody;
 }): Promise<MetaDebugResponse | { error: any } | undefined> {
   try {
     return await $fetch<MetaDebugResponse>("/api/meta-capi", {
@@ -397,14 +405,7 @@ function logMetaCapiDebug(
   dbg: ReturnType<typeof useTrackingDebug>["log"],
   eventName: string,
   eventId: string,
-  sentPayload: {
-    event_name: string;
-    event_id: string;
-    user_data: MetaUserData;
-    custom_data: Record<string, unknown>;
-    event_source_url: string;
-    test_event_code?: string;
-  },
+  sentPayload: MetaCapiRequestPayload,
   customData: Record<string, unknown>,
   originalData: OrderData,
   hashedPayload: MetaUserData,
@@ -435,8 +436,8 @@ function logMetaCapiDebug(
     // Exact payload sent to the server for Meta CAPI
     _payload_sent_to_meta: sentPayload,
     _payload_keys: {
-      user_data: Object.keys(sentPayload.user_data || {}),
-      custom_data: Object.keys(sentPayload.custom_data || {}),
+      user_data: Object.keys(sentPayload.data.user_data || {}),
+      custom_data: Object.keys(sentPayload.data.custom_data || {}),
     },
     _hashed_user_data: hashedPayload,
     // Meta's response (if available)
@@ -549,13 +550,15 @@ export function useMetaEvents() {
     const orderData = enrichOrderDataForMeta(rawUserData, options);
     const hashedPayload = await hashUserDataForMeta(orderData);
     const testEventCode = getMetaTestEventCode(route);
-    const sentPayload = {
-      event_name: eventName,
-      event_id: eventId,
-      user_data: hashedPayload,
-      custom_data: customData,
-      event_source_url: window.location.href,
-      test_event_code: testEventCode,
+    const sentPayload: MetaCapiRequestPayload = {
+      data: {
+        event_name: eventName,
+        event_id: eventId,
+        user_data: hashedPayload,
+        custom_data: customData,
+        event_source_url: window.location.href,
+        test_event_code: testEventCode,
+      },
     };
 
     const response = await sendMetaCapiEvent(sentPayload);

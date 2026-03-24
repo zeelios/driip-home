@@ -56,9 +56,9 @@
                   JSON.stringify(e.params._original_data, null, 2)
                 }}</pre>
               </div>
-              <div v-if="e.params._payload_sent" class="dbg-section">
+              <div v-if="e.payload" class="dbg-section">
                 <strong class="dbg-section-title">Payload to Meta:</strong>
-                <pre>{{ JSON.stringify(e.params._payload_sent, null, 2) }}</pre>
+                <pre>{{ JSON.stringify(e.payload, null, 2) }}</pre>
               </div>
               <div v-if="e.params._meta_normalized" class="dbg-section">
                 <strong class="dbg-section-title">Meta Normalized:</strong>
@@ -318,6 +318,11 @@ function getRequestMeta(params?: Record<string, unknown>): RequestMeta | null {
   background: #0a0a0a;
   padding: 6px 8px;
   border-radius: 3px;
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .dbg-empty {
