@@ -98,6 +98,14 @@ function getQueryStringValue(value: unknown): string | undefined {
   return undefined;
 }
 
+function getMetaTestEventCode(route = useRoute()): string | undefined {
+  return (
+    getQueryStringValue(route.query.test_event_code) ??
+    getQueryStringValue(route.query.meta_test_event_code) ??
+    getQueryStringValue(route.query.metaTestEventCode)
+  );
+}
+
 function buildFbcValue(clickId: string, timestamp = Date.now()): string {
   return `fb.1.${timestamp}.${clickId}`;
 }
@@ -371,6 +379,7 @@ async function sendMetaCapiEvent(payload: {
   user_data: MetaUserData;
   custom_data: Record<string, unknown>;
   event_source_url: string;
+  test_event_code?: string;
 }): Promise<MetaDebugResponse | { error: any } | undefined> {
   try {
     return await $fetch<MetaDebugResponse>("/api/meta-capi", {
@@ -529,6 +538,7 @@ export function useMetaEvents() {
 
     const orderData = enrichOrderDataForMeta(rawUserData, options);
     const hashedPayload = await hashUserDataForMeta(orderData);
+    const testEventCode = getMetaTestEventCode(route);
 
     const response = await sendMetaCapiEvent({
       event_name: eventName,
@@ -536,6 +546,7 @@ export function useMetaEvents() {
       user_data: hashedPayload,
       custom_data: customData,
       event_source_url: window.location.href,
+      test_event_code: testEventCode,
     });
 
     logMetaCapiDebug(

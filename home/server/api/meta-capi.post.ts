@@ -101,6 +101,7 @@ export default defineEventHandler(async (event) => {
     user_data = {},
     custom_data = {},
     event_source_url,
+    test_event_code,
   } = body;
 
   if (!event_name) {
@@ -126,8 +127,8 @@ export default defineEventHandler(async (event) => {
     custom_data,
   });
 
-  if (config.metaTestEventCode) {
-    payload.test_event_code = config.metaTestEventCode;
+  if (test_event_code) {
+    payload.test_event_code = test_event_code;
   }
 
   function summarizeMetaResponse(result: {
@@ -244,7 +245,7 @@ export default defineEventHandler(async (event) => {
       event_source_url,
       user_data_keys: Object.keys(payload.user_data || {}),
       custom_data,
-      test_event_code: config.metaTestEventCode || "none",
+      test_event_code: test_event_code || "none",
     };
 
     const result = await $fetch(
@@ -271,7 +272,7 @@ export default defineEventHandler(async (event) => {
       {
         event_id,
         event_source_url,
-        test_event_code: config.metaTestEventCode || "none",
+        test_event_code,
         payload_preview: payloadPreview,
         debug: debugMeta,
         response: responseSummary,
@@ -294,7 +295,7 @@ export default defineEventHandler(async (event) => {
       message: errorMessage,
       event_id,
       event_source_url,
-      test_event_code: config.metaTestEventCode || "none",
+      test_event_code,
       payload_preview: {
         event_name: payload.event_name,
         event_time: payload.event_time,
