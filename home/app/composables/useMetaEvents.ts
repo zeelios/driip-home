@@ -561,7 +561,9 @@ export function useMetaEvents() {
     const customData = buildTrackingParams({ depth, page: route.path });
 
     pixel("trackCustom", "ScrollDepth", customData, eventId);
-    void capi("ScrollDepth", getMetaBrowserIdentifiers(), customData, eventId);
+    void capi("ScrollDepth", getMetaBrowserIdentifiers(), customData, eventId, {
+      merge_stored_profile: true,
+    });
   }
 
   function trackViewContent(sku?: string): void {
