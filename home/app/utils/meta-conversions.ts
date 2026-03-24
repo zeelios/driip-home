@@ -26,15 +26,25 @@ function normalizeMetaName(raw: string): string {
 }
 
 function normalizeMetaLocation(raw: string): string {
-  return raw.trim().toLowerCase().replace(/[\s\p{P}]+/gu, "");
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\p{P}]+/gu, "");
 }
 
 function normalizeMetaCountry(raw: string): string {
-  return raw.trim().toLowerCase().replace(/[^a-z]/g, "").slice(0, 2);
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z]/g, "")
+    .slice(0, 2);
 }
 
 function normalizeMetaZip(raw: string): string {
-  return raw.trim().toLowerCase().replace(/[\s-]+/g, "");
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "");
 }
 
 function normalizeMetaGender(raw: string): string {
@@ -88,6 +98,7 @@ export interface MetaCapiEventPayloadInput {
   custom_data?: Record<string, unknown>;
   event_time?: number;
   actionSource?: string;
+  test_event_code?: string;
 }
 
 export function compactMetaObject<T extends Record<string, unknown>>(
@@ -152,7 +163,8 @@ export function buildMetaUserData(
     ...(options.clientIp ? { client_ip_address: options.clientIp } : {}),
   };
 
-  if (input.email) userData.em = [options.hash(normalizeMetaEmail(input.email))];
+  if (input.email)
+    userData.em = [options.hash(normalizeMetaEmail(input.email))];
   if (input.email)
     userData.external_id = [options.hash(normalizeMetaEmail(input.email))];
   if (input.phone)
@@ -165,7 +177,8 @@ export function buildMetaUserData(
     userData.fn = [options.hash(normalizeMetaName(input.first_name))];
   if (input.last_name)
     userData.ln = [options.hash(normalizeMetaName(input.last_name))];
-  if (input.city) userData.ct = [options.hash(normalizeMetaLocation(input.city))];
+  if (input.city)
+    userData.ct = [options.hash(normalizeMetaLocation(input.city))];
   if (input.state)
     userData.st = [options.hash(normalizeMetaLocation(input.state))];
   if (input.country)
@@ -185,7 +198,7 @@ export function buildMetaUserData(
 export function buildMetaCapiEventPayload(
   input: MetaCapiEventPayloadInput
 ): Record<string, unknown> {
-  return {
+  return compactMetaObject({
     data: [
       {
         event_name: input.event_name,
@@ -197,5 +210,6 @@ export function buildMetaCapiEventPayload(
         custom_data: input.custom_data ?? {},
       },
     ],
-  };
+    test_event_code: input.test_event_code,
+  });
 }

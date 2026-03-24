@@ -52,19 +52,37 @@
             <div v-if="expanded.has(e.id) && e.params" class="dbg-params">
               <div v-if="e.params._original_data" class="dbg-section">
                 <strong class="dbg-section-title">Original Data:</strong>
-                <pre>{{
-                  JSON.stringify(e.params._original_data, null, 2)
-                }}</pre>
+                <div
+                  class="dbg-code-wrap"
+                  @click="copyCode($event.currentTarget as HTMLElement)"
+                >
+                  <pre>{{
+                    JSON.stringify(e.params._original_data, null, 2)
+                  }}</pre>
+                  <span class="dbg-copy-hint">Copy</span>
+                </div>
               </div>
               <div v-if="e.payload" class="dbg-section">
                 <strong class="dbg-section-title">Payload to Meta:</strong>
-                <pre>{{ JSON.stringify(e.payload, null, 2) }}</pre>
+                <div
+                  class="dbg-code-wrap"
+                  @click="copyCode($event.currentTarget as HTMLElement)"
+                >
+                  <pre>{{ JSON.stringify(e.payload, null, 2) }}</pre>
+                  <span class="dbg-copy-hint">Copy</span>
+                </div>
               </div>
               <div v-if="e.params._meta_normalized" class="dbg-section">
                 <strong class="dbg-section-title">Meta Normalized:</strong>
-                <pre>{{
-                  JSON.stringify(e.params._meta_normalized, null, 2)
-                }}</pre>
+                <div
+                  class="dbg-code-wrap"
+                  @click="copyCode($event.currentTarget as HTMLElement)"
+                >
+                  <pre>{{
+                    JSON.stringify(e.params._meta_normalized, null, 2)
+                  }}</pre>
+                  <span class="dbg-copy-hint">Copy</span>
+                </div>
               </div>
             </div>
           </div>
@@ -118,6 +136,13 @@ function getRequestMeta(params?: Record<string, unknown>): RequestMeta | null {
     client_ip: request.client_ip ?? request.clientIp,
     user_agent: request.user_agent ?? request.userAgent,
   };
+}
+
+function copyCode(el: HTMLElement) {
+  const code = el.textContent || "";
+  navigator.clipboard.writeText(code).catch(() => {});
+  el.classList.add("copied");
+  setTimeout(() => el.classList.remove("copied"), 1200);
 }
 </script>
 
@@ -323,6 +348,61 @@ function getRequestMeta(params?: Record<string, unknown>): RequestMeta | null {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
+}
+
+.dbg-code-wrap {
+  position: relative;
+  cursor: pointer;
+}
+
+.dbg-code-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0);
+  transition: background 0.15s;
+  border-radius: 3px;
+}
+
+.dbg-code-wrap:hover::after {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dbg-copy-hint {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #aaa;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  pointer-events: none;
+}
+
+.dbg-code-wrap:hover .dbg-copy-hint {
+  opacity: 1;
+}
+
+.dbg-code-wrap.copied .dbg-copy-hint {
+  opacity: 1;
+  background: #10b981;
+  color: #fff;
+  content: "Copied!";
+}
+
+.dbg-code-wrap.copied .dbg-copy-hint::after {
+  content: "Copied!";
+}
+
+.dbg-code-wrap.copied .dbg-copy-hint {
+  font-size: 0;
+}
+
+.dbg-code-wrap.copied .dbg-copy-hint::after {
+  font-size: 9px;
 }
 
 .dbg-empty {

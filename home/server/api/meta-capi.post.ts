@@ -95,6 +95,12 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event);
+  const requestPayload =
+    Array.isArray(body?.data) && body.data.length > 0
+      ? body.data[0]
+      : body?.data && typeof body.data === "object"
+      ? body.data
+      : body;
   const {
     event_name,
     event_id,
@@ -102,7 +108,7 @@ export default defineEventHandler(async (event) => {
     custom_data = {},
     event_source_url,
     test_event_code,
-  } = body;
+  } = requestPayload;
 
   if (!event_name) {
     throw createError({
