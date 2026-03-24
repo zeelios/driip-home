@@ -487,6 +487,14 @@ function buildTrackingParams(
   return compactMetaObject(input);
 }
 
+function buildViewContentCustomData(sku?: string): Record<string, unknown> {
+  return buildTrackingParams({
+    content_ids: sku ? [sku] : undefined,
+    content_name: sku ? buildMetaPurchaseContentName(sku) : undefined,
+    content_type: "product",
+  });
+}
+
 export function useMetaEvents() {
   const { $fbq } = useNuxtApp() as MetaPixelApi;
   const route = useRoute();
@@ -558,8 +566,7 @@ export function useMetaEvents() {
 
   function trackViewContent(sku?: string): void {
     const eventId = genEventId("view-content");
-    const value = sku ? SKU_PRICES[sku] ?? 89 : 89;
-    const customData = buildMetaPurchaseCustomData({ sku, value });
+    const customData = buildViewContentCustomData(sku);
 
     pixel("track", "ViewContent", customData, eventId);
     void capi("ViewContent", getMetaBrowserIdentifiers(), customData, eventId);

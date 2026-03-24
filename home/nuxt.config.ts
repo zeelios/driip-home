@@ -82,7 +82,10 @@ export default defineNuxtConfig({
           property: "og:image",
           content: "https://driip.com/driip-cover.jpg",
         },
-        { property: "og:image:secure_url", content: "https://driip.com/driip-cover.jpg" },
+        {
+          property: "og:image:secure_url",
+          content: "https://driip.com/driip-cover.jpg",
+        },
         { property: "og:image:type", content: "image/jpeg" },
         { property: "og:image:width", content: "8484" },
         { property: "og:image:height", content: "4512" },
@@ -133,7 +136,10 @@ export default defineNuxtConfig({
     googleSheetId: process.env.GOOGLE_SHEET_ID || "",
     googleServiceAccountJson: process.env.GOOGLE_SERVICE_ACCOUNT_JSON || "",
     metaCAPIAccessToken: process.env.META_CAPI_ACCESS_TOKEN || "",
-    metaTestEventCode: process.env.META_TEST_EVENT_CODE || "",
+    metaTestEventCode:
+      process.env.META_TEST_EVENT_CODE ||
+      process.env.NUXT_META_TEST_EVENT_CODE ||
+      "",
     // Public — populated from NUXT_PUBLIC_META_PIXEL_ID
     public: {
       metaPixelId: "",
