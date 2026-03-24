@@ -174,7 +174,7 @@
       },
       "reviewOrder": "XÁC NHẬN ĐƠN",
       "successTitle": "Đơn hàng đã được ghi nhận",
-      "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Chúng tôi sẽ xác nhận trong vòng 24 giờ qua số {phone}.",
+      "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Đơn sẽ được giao trong vòng 3–10 ngày.",
       "step1": "GIỎ HÀNG",
       "step2": "THÔNG TIN",
       "step3": "XÁC NHẬN",

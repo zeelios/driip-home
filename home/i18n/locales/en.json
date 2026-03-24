@@ -168,7 +168,7 @@
       },
       "reviewOrder": "REVIEW ORDER",
       "successTitle": "ORDER RECEIVED",
-      "successBody": "{name}, your order for {sku} · {size} · {color} has been received. We'll confirm within 24 hours to {phone}.",
+      "successBody": "{name}, your order for {sku} · {size} · {color} has been received. It will be shipped within 3–10 days.",
       "step1": "CART",
       "step2": "INFO",
       "step3": "CONFIRM",

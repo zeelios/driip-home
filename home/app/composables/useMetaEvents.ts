@@ -397,6 +397,14 @@ function logMetaCapiDebug(
   dbg: ReturnType<typeof useTrackingDebug>["log"],
   eventName: string,
   eventId: string,
+  sentPayload: {
+    event_name: string;
+    event_id: string;
+    user_data: MetaUserData;
+    custom_data: Record<string, unknown>;
+    event_source_url: string;
+    test_event_code?: string;
+  },
   customData: Record<string, unknown>,
   originalData: OrderData,
   hashedPayload: MetaUserData,
@@ -424,11 +432,13 @@ function logMetaCapiDebug(
       dob: originalData.dob,
       gender: originalData.gender,
     }),
-    // Payload sent to Meta (SHA-256 hashed)
-    _payload_sent: {
-      user_data: hashedPayload,
-      custom_data: customData,
+    // Exact payload sent to the server for Meta CAPI
+    _payload_sent_to_meta: sentPayload,
+    _payload_keys: {
+      user_data: Object.keys(sentPayload.user_data || {}),
+      custom_data: Object.keys(sentPayload.custom_data || {}),
     },
+    _hashed_user_data: hashedPayload,
     // Meta's response (if available)
     _meta_response: metaResponse?._metaResponse,
     // Error details if request failed
@@ -539,20 +549,22 @@ export function useMetaEvents() {
     const orderData = enrichOrderDataForMeta(rawUserData, options);
     const hashedPayload = await hashUserDataForMeta(orderData);
     const testEventCode = getMetaTestEventCode(route);
-
-    const response = await sendMetaCapiEvent({
+    const sentPayload = {
       event_name: eventName,
       event_id: eventId,
       user_data: hashedPayload,
       custom_data: customData,
       event_source_url: window.location.href,
       test_event_code: testEventCode,
-    });
+    };
+
+    const response = await sendMetaCapiEvent(sentPayload);
 
     logMetaCapiDebug(
       dbg,
       eventName,
       eventId,
+      sentPayload,
       customData,
       orderData,
       hashedPayload,
