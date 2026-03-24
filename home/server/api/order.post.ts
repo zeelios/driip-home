@@ -1,5 +1,9 @@
 import { getCookie } from "h3";
-import { queueOrderRows, reserveOrderId } from "../utils/order-queue";
+import {
+  flushOrderQueue,
+  queueOrderRows,
+  reserveOrderId,
+} from "../utils/order-queue";
 import {
   BASE_BOX_COMPARE_PRICE,
   getFinalTotal,
@@ -186,6 +190,7 @@ export default defineEventHandler(async (event) => {
     }
 
     queueOrderRows(rows);
+    await flushOrderQueue();
 
     return {
       ok: true,
