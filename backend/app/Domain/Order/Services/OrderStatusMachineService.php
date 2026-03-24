@@ -18,27 +18,32 @@ use App\Domain\Staff\Models\User;
  */
 class OrderStatusMachineService
 {
+    public function __construct(
+        private readonly OrderActivityLogger $activityLogger
+    ) {
+    }
+
     /**
      * Valid transitions: current_status → list of allowed next statuses.
      *
      * @var array<string,list<string>>
      */
     private const TRANSITIONS = [
-        'pending'            => ['confirmed', 'cancelled'],
-        'confirmed'          => ['processing', 'cancelled'],
-        'processing'         => ['packed', 'cancelled'],
-        'packed'             => ['handed_to_courier', 'cancelled'],
-        'handed_to_courier'  => ['shipped'],
-        'shipped'            => ['in_transit'],
-        'in_transit'         => ['out_for_delivery', 'failed_delivery'],
-        'out_for_delivery'   => ['delivered', 'failed_delivery'],
-        'delivered'          => ['returned', 'disputed'],
-        'failed_delivery'    => ['returning', 'on_hold'],
-        'returning'          => ['returned'],
-        'returned'           => ['return_processing'],
-        'return_processing'  => ['return_completed', 'refunded'],
-        'on_hold'            => ['confirmed', 'cancelled'],
-        'disputed'           => ['resolved', 'refunded'],
+        'pending' => ['confirmed', 'cancelled'],
+        'confirmed' => ['processing', 'cancelled'],
+        'processing' => ['packed', 'cancelled'],
+        'packed' => ['handed_to_courier', 'cancelled'],
+        'handed_to_courier' => ['shipped'],
+        'shipped' => ['in_transit'],
+        'in_transit' => ['out_for_delivery', 'failed_delivery'],
+        'out_for_delivery' => ['delivered', 'failed_delivery'],
+        'delivered' => ['returned', 'disputed'],
+        'failed_delivery' => ['returning', 'on_hold'],
+        'returning' => ['returned'],
+        'returned' => ['return_processing'],
+        'return_processing' => ['return_completed', 'refunded'],
+        'on_hold' => ['confirmed', 'cancelled'],
+        'disputed' => ['resolved', 'refunded'],
     ];
 
     /**
@@ -103,24 +108,27 @@ class OrderStatusMachineService
         $fromStatus = $order->status;
 
         $timestamps = match ($newStatus) {
-            'confirmed'  => ['confirmed_at' => now()],
-            'packed'     => ['packed_at'    => now()],
-            'delivered'  => ['delivered_at' => now()],
-            'cancelled'  => ['cancelled_at' => now()],
-            default      => [],
+            'confirmed' => ['confirmed_at' => now()],
+            'packed' => ['packed_at' => now()],
+            'delivered' => ['delivered_at' => now()],
+            'cancelled' => ['cancelled_at' => now()],
+            default => [],
         };
 
         $order->update(array_merge(['status' => $newStatus], $timestamps));
 
         /** @var OrderStatusHistory $history */
         $history = OrderStatusHistory::create([
-            'order_id'    => $order->id,
+            'order_id' => $order->id,
             'from_status' => $fromStatus,
-            'to_status'   => $newStatus,
-            'note'        => $notes,
-            'created_by'  => $by?->id,
-            'created_at'  => now(),
+            'to_status' => $newStatus,
+            'note' => $notes,
+            'created_by' => $by?->id,
+            'created_at' => now(),
         ]);
+
+        // Log to activity log
+        $this->activityLogger->logStatusChange($order, $fromStatus, $newStatus, $notes, $by);
 
         return $history;
     }

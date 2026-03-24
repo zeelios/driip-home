@@ -98,6 +98,19 @@ class Order extends Model
         'loyalty_points_used',
         'loyalty_discount',
         'shipping_fee',
+        'deposit_amount',
+        'deposit_paid_at',
+        'deposit_proof_urls',
+        'payment_notes',
+        'public_token',
+        'token_expires_at',
+        'referral_code',
+        'sales_rep_id',
+        'commission_amount',
+        'commission_rate',
+        'commission_status',
+        'commission_paid_reference',
+        'commission_paid_at',
         'vat_rate',
         'vat_amount',
         'total_before_tax',
@@ -130,21 +143,24 @@ class Order extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'tags'          => 'array',
-        'paid_at'       => 'datetime',
-        'packed_at'     => 'datetime',
-        'confirmed_at'  => 'datetime',
-        'delivered_at'  => 'datetime',
-        'cancelled_at'  => 'datetime',
-        'subtotal'      => 'integer',
-        'coupon_discount'   => 'integer',
+        'tags' => 'array',
+        'paid_at' => 'datetime',
+        'deposit_paid_at' => 'datetime',
+        'deposit_proof_urls' => 'array',
+        'packed_at' => 'datetime',
+        'confirmed_at' => 'datetime',
+        'delivered_at' => 'datetime',
+        'cancelled_at' => 'datetime',
+        'commission_paid_at' => 'datetime',
+        'subtotal' => 'integer',
+        'coupon_discount' => 'integer',
         'loyalty_points_used' => 'integer',
-        'loyalty_discount'  => 'integer',
-        'shipping_fee'  => 'integer',
-        'vat_amount'    => 'integer',
-        'total_before_tax'  => 'integer',
-        'total_after_tax'   => 'integer',
-        'cost_total'    => 'integer',
+        'loyalty_discount' => 'integer',
+        'shipping_fee' => 'integer',
+        'vat_amount' => 'integer',
+        'total_before_tax' => 'integer',
+        'total_after_tax' => 'integer',
+        'cost_total' => 'integer',
     ];
 
     /** @var array<string> Eager load relationships. */
@@ -170,6 +186,16 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class, 'order_id');
+    }
+
+    /**
+     * Get all activity log entries for this order.
+     *
+     * @return HasMany<OrderActivity>
+     */
+    public function activities(): HasMany
+    {
+        return $this->hasMany(OrderActivity::class, 'order_id');
     }
 
     /**
@@ -276,6 +302,75 @@ class Order extends Model
     public function isCancellable(): bool
     {
         return in_array($this->status, ['pending', 'confirmed', 'processing'], true);
+    }
+
+    /**
+     * Get the remaining balance due on this order.
+     *
+     * @return int
+     */
+    public function balanceDue(): int
+    {
+        return max(0, $this->total_after_tax - $this->deposit_amount);
+    }
+
+    /**
+     * Determine if the order has a deposit recorded.
+     *
+     * @return bool
+     */
+    public function hasDeposit(): bool
+    {
+        return $this->deposit_amount > 0;
+    }
+
+    /**
+     * Determine if the order is fully paid.
+     *
+     * @return bool
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->deposit_amount >= $this->total_after_tax;
+    }
+
+    /**
+     * Record a deposit payment.
+     *
+     * @param  int       $amount
+     * @param  string[]  $proofUrls
+     * @param  string|null $notes
+     * @return void
+     */
+    public function recordDeposit(int $amount, array $proofUrls = [], ?string $notes = null): void
+    {
+        $newDepositAmount = $this->deposit_amount + $amount;
+
+        $this->update([
+            'deposit_amount' => $newDepositAmount,
+            'deposit_paid_at' => now(),
+            'deposit_proof_urls' => array_merge($this->deposit_proof_urls ?? [], $proofUrls),
+            'payment_notes' => $notes ? ($this->payment_notes ? $this->payment_notes . "\n" . $notes : $notes) : $this->payment_notes,
+            'payment_status' => $newDepositAmount >= $this->total_after_tax ? 'paid' : 'partial',
+        ]);
+    }
+
+    /**
+     * Mark order as fully paid.
+     *
+     * @param  string      $method
+     * @param  string|null $reference
+     * @return void
+     */
+    public function markFullyPaid(string $method, ?string $reference = null): void
+    {
+        $this->update([
+            'deposit_amount' => $this->total_after_tax,
+            'payment_status' => 'paid',
+            'payment_method' => $method,
+            'payment_reference' => $reference,
+            'paid_at' => now(),
+        ]);
     }
 
     /**

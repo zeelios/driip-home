@@ -37,6 +37,7 @@ readonly class CreateOrderDto
      * @param  string|null                $utmSource             UTM source tracking parameter.
      * @param  string|null                $utmMedium             UTM medium tracking parameter.
      * @param  string|null                $utmCampaign           UTM campaign tracking parameter.
+     * @param  string|null                $referralCode          Referral code from sales staff.
      */
     public function __construct(
         public ?string $customerId,
@@ -44,21 +45,23 @@ readonly class CreateOrderDto
         public ?string $guestEmail,
         public ?string $guestPhone,
         public ?string $paymentMethod,
-        public array   $items,
+        public array $items,
         public ?string $couponCode,
-        public int     $loyaltyPointsToUse = 0,
+        public int $loyaltyPointsToUse = 0,
         public ?string $warehouseId = null,
-        public string  $shippingName = '',
-        public string  $shippingPhone = '',
-        public string  $shippingProvince = '',
+        public string $shippingName = '',
+        public string $shippingPhone = '',
+        public string $shippingProvince = '',
         public ?string $shippingDistrict = null,
         public ?string $shippingWard = null,
-        public string  $shippingAddress = '',
+        public string $shippingAddress = '',
         public ?string $shippingZip = null,
         public ?string $notes = null,
-        public string  $source = 'admin',
+        public string $source = 'admin',
         public ?string $utmSource = null,
         public ?string $utmMedium = null,
         public ?string $utmCampaign = null,
-    ) {}
+        public ?string $referralCode = null,
+    ) {
+    }
 }

@@ -16,6 +16,9 @@ use App\Http\Controllers\Api\V1\Order\OrderClaimController;
 use App\Http\Controllers\Api\V1\Order\OrderReturnController;
 use App\Http\Controllers\Api\V1\Order\BulkOrderController;
 use App\Http\Controllers\Api\V1\Order\DocumentController;
+use App\Http\Controllers\Api\V1\Order\OrderPaymentController;
+use App\Http\Controllers\Api\V1\Order\OrderActivityController;
+use App\Http\Controllers\Api\V1\CommissionController;
 use App\Http\Controllers\Api\V1\Inventory\InventoryController;
 use App\Http\Controllers\Api\V1\Inventory\PurchaseOrderController;
 use App\Http\Controllers\Api\V1\Inventory\StockTransferController;
@@ -94,6 +97,22 @@ Route::prefix('v1/panel')->group(function () {
         Route::post('orders/{order}/tax-invoice', [DocumentController::class, 'generateTaxInvoice']);
         Route::apiResource('orders.claims', OrderClaimController::class)->only(['index', 'store', 'show', 'update']);
         Route::apiResource('orders.returns', OrderReturnController::class)->only(['index', 'store', 'show', 'update']);
+
+        // Order Payments & Activity
+        Route::post('orders/{order}/deposit', [OrderPaymentController::class, 'recordDeposit']);
+        Route::post('orders/{order}/payment-proof', [OrderPaymentController::class, 'uploadProof']);
+        Route::delete('orders/{order}/payment-proof/{index}', [OrderPaymentController::class, 'removeProof']);
+        Route::post('orders/{order}/verify-payment', [OrderPaymentController::class, 'verifyPayment']);
+        Route::get('orders/{order}/activities', [OrderActivityController::class, 'index']);
+        Route::get('orders/{order}/activities/{activity}', [OrderActivityController::class, 'show']);
+
+        // Commission Management
+        Route::get('commissions/summary', [CommissionController::class, 'summary']);
+        Route::get('commissions/orders', [CommissionController::class, 'orders']);
+        Route::post('commissions/configs', [CommissionController::class, 'storeConfig']);
+        Route::post('commissions/{order}/approve', [CommissionController::class, 'approve']);
+        Route::post('commissions/{order}/mark-paid', [CommissionController::class, 'markPaid']);
+        Route::post('commissions/{order}/cancel', [CommissionController::class, 'cancel']);
 
         // Inventory
         Route::get('inventory', [InventoryController::class, 'index']);

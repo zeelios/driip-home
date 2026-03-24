@@ -11,7 +11,7 @@
 import { useSiteNavStore } from "~/stores/site-nav";
 
 const { locale } = useI18n();
-const { setupScrollDepth } = useMetaEvents();
+const { setupScrollDepth, trackPageView } = useMetaEvents();
 const siteNavStore = useSiteNavStore();
 
 watchEffect(() => {
@@ -64,6 +64,7 @@ function scrollTo(id: string): void {
 }
 
 onMounted(() => {
+  trackPageView();
   setupScrollDepth();
 
   const root = document.documentElement;

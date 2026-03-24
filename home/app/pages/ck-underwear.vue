@@ -17,7 +17,7 @@ import { useCkUnderwearStore } from "~/stores/ck-underwear";
 import { useSiteNavStore } from "~/stores/site-nav";
 
 const { locale, t } = useI18n();
-const { setupScrollDepth } = useMetaEvents();
+const { setupScrollDepth, trackPageView } = useMetaEvents();
 const ckStore = useCkUnderwearStore();
 const siteNavStore = useSiteNavStore();
 
@@ -96,6 +96,7 @@ useHead({
 });
 
 onMounted(() => {
+  trackPageView();
   setupScrollDepth();
   setupParallax();
   setupRevealObserver();

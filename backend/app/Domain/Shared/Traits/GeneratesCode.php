@@ -36,4 +36,14 @@ trait GeneratesCode
 
         return 'DRP-' . $date . '-' . str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Generate a secure public token for customer self-service portal.
+     *
+     * @return string  32-character hex string
+     */
+    protected function generatePublicToken(): string
+    {
+        return bin2hex(random_bytes(16));
+    }
 }

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domain\Order\Actions;
 
+use App\Domain\Commission\Services\CommissionCalculator;
 use App\Domain\Order\Data\CreateOrderDto;
 use App\Domain\Order\Data\CreateOrderItemDto;
 use App\Domain\Order\Models\Order;
 use App\Domain\Order\Models\OrderItem;
 use App\Domain\Order\Models\OrderStatusHistory;
+use App\Domain\Order\Services\OrderActivityLogger;
 use App\Domain\Shared\Traits\GeneratesCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +25,12 @@ use Illuminate\Support\Facades\Log;
 class CreateOrderAction
 {
     use GeneratesCode;
+
+    public function __construct(
+        private readonly OrderActivityLogger $activityLogger,
+        private readonly CommissionCalculator $commissionCalculator
+    ) {
+    }
 
     /**
      * Execute the order creation.
@@ -42,7 +50,7 @@ class CreateOrderAction
             $itemSnapshots = $this->buildItemSnapshots($dto->items);
 
             $subtotal = array_sum(array_map(
-                fn (array $s) => $s['unit_price'] * $s['quantity'],
+                fn(array $s) => $s['unit_price'] * $s['quantity'],
                 $itemSnapshots
             ));
 
@@ -50,49 +58,52 @@ class CreateOrderAction
 
             $loyaltyDiscount = $dto->loyaltyPointsToUse;
 
-            $vatRate   = $this->activeVatRate();
-            $taxable   = $subtotal - $couponDiscount - $loyaltyDiscount;
+            $vatRate = $this->activeVatRate();
+            $taxable = $subtotal - $couponDiscount - $loyaltyDiscount;
             $vatAmount = (int) round($taxable * $vatRate / 100);
 
             $totalBeforeTax = $taxable;
-            $totalAfterTax  = $taxable + $vatAmount;
+            $totalAfterTax = $taxable + $vatAmount;
 
-            $sequence    = Order::withTrashed()->count() + 1;
+            $sequence = Order::withTrashed()->count() + 1;
             $orderNumber = $this->buildOrderNumber($sequence);
 
             $order = Order::create([
-                'order_number'       => $orderNumber,
-                'customer_id'        => $dto->customerId,
-                'guest_name'         => $dto->guestName,
-                'guest_email'        => $dto->guestEmail,
-                'guest_phone'        => $dto->guestPhone,
-                'payment_method'     => $dto->paymentMethod,
-                'status'             => 'pending',
-                'payment_status'     => 'unpaid',
-                'subtotal'           => $subtotal,
-                'coupon_id'          => $couponId,
-                'coupon_code'        => $dto->couponCode,
-                'coupon_discount'    => $couponDiscount,
+                'order_number' => $orderNumber,
+                'customer_id' => $dto->customerId,
+                'guest_name' => $dto->guestName,
+                'guest_email' => $dto->guestEmail,
+                'guest_phone' => $dto->guestPhone,
+                'payment_method' => $dto->paymentMethod,
+                'status' => 'pending',
+                'payment_status' => 'unpaid',
+                'subtotal' => $subtotal,
+                'coupon_id' => $couponId,
+                'coupon_code' => $dto->couponCode,
+                'coupon_discount' => $couponDiscount,
                 'loyalty_points_used' => $dto->loyaltyPointsToUse,
-                'loyalty_discount'   => $loyaltyDiscount,
-                'vat_rate'           => $vatRate,
-                'vat_amount'         => $vatAmount,
-                'total_before_tax'   => $totalBeforeTax,
-                'total_after_tax'    => $totalAfterTax,
-                'shipping_name'      => $dto->shippingName,
-                'shipping_phone'     => $dto->shippingPhone,
-                'shipping_province'  => $dto->shippingProvince,
-                'shipping_district'  => $dto->shippingDistrict,
-                'shipping_ward'      => $dto->shippingWard,
-                'shipping_address'   => $dto->shippingAddress,
-                'shipping_zip'       => $dto->shippingZip,
-                'notes'              => $dto->notes,
-                'source'             => $dto->source,
-                'utm_source'         => $dto->utmSource,
-                'utm_medium'         => $dto->utmMedium,
-                'utm_campaign'       => $dto->utmCampaign,
-                'warehouse_id'       => $dto->warehouseId,
-                'tags'               => [],
+                'loyalty_discount' => $loyaltyDiscount,
+                'vat_rate' => $vatRate,
+                'vat_amount' => $vatAmount,
+                'total_before_tax' => $totalBeforeTax,
+                'total_after_tax' => $totalAfterTax,
+                'shipping_name' => $dto->shippingName,
+                'shipping_phone' => $dto->shippingPhone,
+                'shipping_province' => $dto->shippingProvince,
+                'shipping_district' => $dto->shippingDistrict,
+                'shipping_ward' => $dto->shippingWard,
+                'shipping_address' => $dto->shippingAddress,
+                'shipping_zip' => $dto->shippingZip,
+                'notes' => $dto->notes,
+                'source' => $dto->source,
+                'utm_source' => $dto->utmSource,
+                'utm_medium' => $dto->utmMedium,
+                'utm_campaign' => $dto->utmCampaign,
+                'warehouse_id' => $dto->warehouseId,
+                'referral_code' => $dto->referralCode,
+                'tags' => [],
+                'public_token' => $this->generatePublicToken(),
+                'token_expires_at' => now()->addDays(30),
             ]);
 
             foreach ($itemSnapshots as $snapshot) {
@@ -100,13 +111,16 @@ class CreateOrderAction
             }
 
             OrderStatusHistory::create([
-                'order_id'            => $order->id,
-                'from_status'         => null,
-                'to_status'           => 'pending',
-                'note'                => 'Order created.',
+                'order_id' => $order->id,
+                'from_status' => null,
+                'to_status' => 'pending',
+                'note' => 'Order created.',
                 'is_customer_visible' => true,
-                'created_at'          => now(),
+                'created_at' => now(),
             ]);
+
+            // Log order creation activity
+            $this->activityLogger->logOrderCreated($order);
 
             $this->reserveInventory($order, $itemSnapshots, $dto->warehouseId);
 
@@ -129,16 +143,16 @@ class CreateOrderAction
 
             $snapshots[] = [
                 'product_variant_id' => $variant->id,
-                'sku'                => $variant->sku,
-                'name'               => $variant->product?->name ?? $variant->sku,
-                'size'               => $variant->attribute_values['size'] ?? null,
-                'color'              => $variant->attribute_values['color'] ?? null,
-                'unit_price'         => $item->unitPrice,
-                'cost_price'         => $variant->cost_price ?? 0,
-                'quantity'           => $item->quantity,
-                'quantity_returned'  => 0,
-                'discount_amount'    => 0,
-                'total_price'        => $item->unitPrice * $item->quantity,
+                'sku' => $variant->sku,
+                'name' => $variant->product?->name ?? $variant->sku,
+                'size' => $variant->attribute_values['size'] ?? null,
+                'color' => $variant->attribute_values['color'] ?? null,
+                'unit_price' => $item->unitPrice,
+                'cost_price' => $variant->cost_price ?? 0,
+                'quantity' => $item->quantity,
+                'quantity_returned' => 0,
+                'discount_amount' => 0,
+                'total_price' => $item->unitPrice * $item->quantity,
             ];
         }
 
@@ -167,9 +181,9 @@ class CreateOrderAction
         }
 
         $discount = match ($coupon->type) {
-            'percent'      => (int) round($subtotal * $coupon->value / 100),
+            'percent' => (int) round($subtotal * $coupon->value / 100),
             'fixed_amount' => (int) $coupon->value,
-            default        => 0,
+            default => 0,
         };
 
         if ($coupon->max_discount_amount !== null) {
@@ -227,9 +241,9 @@ class CreateOrderAction
                 }
             } catch (\Throwable $e) {
                 Log::warning('Failed to reserve inventory for order item.', [
-                    'order_id'           => $order->id,
+                    'order_id' => $order->id,
                     'product_variant_id' => $snapshot['product_variant_id'],
-                    'error'              => $e->getMessage(),
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
