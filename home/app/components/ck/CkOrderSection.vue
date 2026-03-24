@@ -522,6 +522,7 @@ import { computed, nextTick, ref, watch, type Ref } from "vue";
 import { storeToRefs } from "pinia";
 import { vietnamProvinces } from "~/data/vietnam-addresses";
 import { useMetaEvents } from "~/composables/useMetaEvents";
+import { useReferral } from "~/composables/useReferral";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
 import { useCartStore } from "~/stores/cart";
 import {
@@ -534,6 +535,7 @@ const { t } = useI18n();
 const store = useCkUnderwearStore();
 const cart = useCartStore();
 const { trackPurchase, trackInitiateCheckout } = useMetaEvents();
+const { referralCode } = useReferral();
 
 const provinceOptions = computed(() =>
   vietnamProvinces.map((p) => ({ value: p.name, label: p.name }))
@@ -593,13 +595,9 @@ const step2FieldRefs: Record<Step2FieldKey, Ref<HTMLElement | null>> = {
 
 const step2FieldMessages = computed<Record<Step2FieldKey, string>>(() => ({
   firstName:
-    order.value.firstName.trim() !== ""
-      ? ""
-      : t("ck.order.validate.firstName"),
+    order.value.firstName.trim() !== "" ? "" : t("ck.order.validate.firstName"),
   lastName:
-    order.value.lastName.trim() !== ""
-      ? ""
-      : t("ck.order.validate.lastName"),
+    order.value.lastName.trim() !== "" ? "" : t("ck.order.validate.lastName"),
   phone:
     order.value.phone.trim() === ""
       ? t("ck.order.validate.phone")
@@ -771,6 +769,7 @@ async function handleSubmit(): Promise<void> {
         })),
         purchaseEventId,
         timestamp: new Date().toISOString(),
+        referal: referralCode.value ?? undefined,
       },
     });
 

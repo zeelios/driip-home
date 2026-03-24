@@ -1,6 +1,14 @@
 <template>
-  <div class="z-select-wrap" :class="{ 'z-select-wrap--error': !!error, 'z-select-wrap--disabled': disabled }">
-    <label v-if="label" :for="selectId" class="z-select-label">{{ label }}</label>
+  <div
+    class="z-select-wrap"
+    :class="{
+      'z-select-wrap--error': !!error,
+      'z-select-wrap--disabled': disabled,
+    }"
+  >
+    <label v-if="label" :for="selectId" class="z-select-label">{{
+      label
+    }}</label>
     <div class="z-select-field">
       <select
         :id="selectId"
@@ -24,7 +32,14 @@
         </option>
       </select>
       <span class="z-select-chevron" aria-hidden="true">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </span>
@@ -54,6 +69,7 @@ const props = withDefaults(
     error?: string | null;
     hint?: string;
     id?: string;
+    searchable?: false;
   }>(),
   { disabled: false, required: false }
 );
@@ -75,7 +91,11 @@ function onChange(event: Event): void {
 </script>
 
 <style scoped>
-.z-select-wrap { display: flex; flex-direction: column; gap: 0.375rem; }
+.z-select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
 .z-select-label {
   font-size: 0.75rem;
   font-weight: 600;
@@ -83,11 +103,13 @@ function onChange(event: Event): void {
   text-transform: uppercase;
   color: #6b6b68;
 }
-.z-select-field { position: relative; }
+.z-select-field {
+  position: relative;
+}
 .z-select {
   width: 100%;
   padding: 0.5625rem 2.25rem 0.5625rem 0.875rem;
-  border: 1px solid rgba(0,0,0,0.14);
+  border: 1px solid rgba(0, 0, 0, 0.14);
   border-radius: 8px;
   background: #fff;
   font: inherit;
@@ -100,9 +122,13 @@ function onChange(event: Event): void {
 }
 .z-select:focus {
   border-color: #111110;
-  box-shadow: 0 0 0 3px rgba(17,17,16,0.08);
+  box-shadow: 0 0 0 3px rgba(17, 17, 16, 0.08);
 }
-.z-select:disabled { background: #f5f5f4; color: #a0a09d; cursor: not-allowed; }
+.z-select:disabled {
+  background: #f5f5f4;
+  color: #a0a09d;
+  cursor: not-allowed;
+}
 .z-select-chevron {
   position: absolute;
   right: 0.75rem;
@@ -113,8 +139,20 @@ function onChange(event: Event): void {
   color: #9d9d9a;
   pointer-events: none;
 }
-.z-select-wrap--error .z-select { border-color: #ef4444; }
-.z-select-wrap--error .z-select:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
-.z-select-error { margin: 0; font-size: 0.75rem; color: #ef4444; }
-.z-select-hint { margin: 0; font-size: 0.75rem; color: #9d9d9a; }
+.z-select-wrap--error .z-select {
+  border-color: #ef4444;
+}
+.z-select-wrap--error .z-select:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+.z-select-error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+.z-select-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #9d9d9a;
+}
 </style>

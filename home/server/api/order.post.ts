@@ -1,3 +1,4 @@
+import { getCookie } from "h3";
 import { queueOrderRows, reserveOrderId } from "../utils/order-queue";
 import {
   BASE_BOX_COMPARE_PRICE,
@@ -10,6 +11,13 @@ interface CartItemPayload {
   size: string;
   color: string;
   boxes: number;
+}
+
+function normalizeSalesSource(raw: unknown): string {
+  if (typeof raw !== "string") return "Website";
+
+  const normalized = raw.trim().replace(/\s+/g, " ");
+  return normalized || "Website";
 }
 
 function normalizeVietnamSheetPhone(raw: string): string {
@@ -54,6 +62,9 @@ export default defineEventHandler(async (event) => {
     zipCode,
     note,
     purchaseEventId,
+    referal,
+    referral,
+    sales,
     // Cart-based payload (new)
     cartItems,
     // Legacy single-item payload (kept for backwards compat)
@@ -100,6 +111,9 @@ export default defineEventHandler(async (event) => {
   const addressParts = [fullAddress || street, province].filter(Boolean);
   const address = `${addressParts.join(", ")}${zipCode ? ` ${zipCode}` : ""}`;
   const cleanPhone = `'${normalizeVietnamSheetPhone(String(phone))}`;
+  const salesSource = normalizeSalesSource(
+    referal ?? referral ?? sales ?? getCookie(event, "driip_referral")
+  );
 
   try {
     const orderId = await reserveOrderId();
@@ -158,7 +172,7 @@ export default defineEventHandler(async (event) => {
           "0", // M: Đặt Cọc
           rowFinal, // N: Dư Nợ
           isFirstRow ? note ?? "" : "", // O: Note
-          "Website", // P: Sales
+          salesSource, // P: Sales
           "", // Q: Comestic Tracking
           "", // R: Global Tracking
           isFirstRow ? dob ?? "" : "", // S: DoB

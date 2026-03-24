@@ -5,7 +5,7 @@
       <div class="detail-header-skeleton">
         <div class="flex gap-3 items-center">
           <ZSkeleton variant="circle" width="3.5rem" height="3.5rem" />
-          <div class="flex flex-col gap-1" style="flex:1">
+          <div class="flex flex-col gap-1" style="flex: 1">
             <ZSkeleton height="1.25rem" width="160px" />
             <ZSkeleton height="0.875rem" width="100px" />
           </div>
@@ -30,7 +30,9 @@
       :icon="ERROR_ICON"
     >
       <template #action>
-        <ZButton variant="outline" size="sm" @click="store.fetchStaffMember(id)">Thử lại</ZButton>
+        <ZButton variant="outline" size="sm" @click="store.fetchStaffMember(id)"
+          >Thử lại</ZButton
+        >
       </template>
     </ZEmptyState>
 
@@ -40,14 +42,23 @@
       <div class="detail-page-header">
         <div class="detail-page-header__left">
           <NuxtLink to="/staff" class="detail-back">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
             Nhân viên
           </NuxtLink>
           <div class="staff-identity">
             <div class="staff-avatar">{{ staffInitials }}</div>
             <div>
               <h1 class="detail-page-title">{{ staff.name }}</h1>
-              <p class="staff-code">{{ staff.employee_code ?? '—' }}</p>
+              <p class="staff-code">{{ staff.employee_code ?? "—" }}</p>
             </div>
           </div>
           <ZBadge :variant="staffStatusVariant(staff.status) as BadgeVariant">
@@ -64,7 +75,9 @@
           </div>
         </div>
         <div class="detail-page-header__actions">
-          <ZButton variant="outline" size="sm" @click="openEditModal">Chỉnh sửa</ZButton>
+          <ZButton variant="outline" size="sm" @click="openEditModal"
+            >Chỉnh sửa</ZButton
+          >
           <ZButton
             v-if="staff.status === 'active'"
             variant="danger"
@@ -96,15 +109,15 @@
             </div>
             <div class="detail-dl__row">
               <dt>Điện thoại</dt>
-              <dd>{{ staff.phone ?? '—' }}</dd>
+              <dd>{{ staff.phone ?? "—" }}</dd>
             </div>
             <div class="detail-dl__row">
               <dt>Phòng ban</dt>
-              <dd>{{ staff.department ?? '—' }}</dd>
+              <dd>{{ staff.department ?? "—" }}</dd>
             </div>
             <div class="detail-dl__row">
               <dt>Chức vụ</dt>
-              <dd>{{ staff.position ?? '—' }}</dd>
+              <dd>{{ staff.position ?? "—" }}</dd>
             </div>
           </dl>
         </div>
@@ -128,10 +141,33 @@
           </dl>
         </div>
 
-        <!-- Notes -->
-        <div class="detail-card" v-if="staff.notes">
-          <p class="detail-card__title">Ghi chú</p>
-          <p class="detail-note-text">{{ staff.notes }}</p>
+        <!-- Referral link -->
+        <div class="detail-card">
+          <p class="detail-card__title">Link giới thiệu</p>
+          <div class="referral-section">
+            <p class="referral-desc">
+              Nhân viên chia sẻ link này để nhận hoa hồng:
+            </p>
+            <div class="referral-input-wrap">
+              <input
+                :value="referralUrl"
+                readonly
+                class="referral-input"
+                @click="copyReferralUrl"
+              />
+              <button
+                class="referral-copy-btn"
+                :class="{ copied: copied }"
+                @click="copyReferralUrl"
+              >
+                {{ copied ? "Đã copy!" : "Copy" }}
+              </button>
+            </div>
+            <p v-if="referralCodeHint" class="referral-hint">
+              Mã: <code>{{ referralCodeHint }}</code> — Sửa
+              <code>?referal=</code> trong URL để thay đổi
+            </p>
+          </div>
         </div>
       </div>
     </template>
@@ -151,17 +187,25 @@
           type="email"
           :error="editErrors.email"
         />
-        <ZInput
-          v-model="editForm.phone"
-          label="Điện thoại"
-          type="tel"
-        />
+        <ZInput v-model="editForm.phone" label="Điện thoại" type="tel" />
         <ZInput v-model="editForm.department" label="Phòng ban" />
         <ZInput v-model="editForm.position" label="Chức vụ" />
       </div>
       <template #footer>
-        <ZButton variant="outline" size="sm" :disabled="store.formPending" @click="showEditModal = false">Hủy</ZButton>
-        <ZButton variant="primary" size="sm" :loading="store.formPending" @click="handleUpdate">Lưu thay đổi</ZButton>
+        <ZButton
+          variant="outline"
+          size="sm"
+          :disabled="store.formPending"
+          @click="showEditModal = false"
+          >Hủy</ZButton
+        >
+        <ZButton
+          variant="primary"
+          size="sm"
+          :loading="store.formPending"
+          @click="handleUpdate"
+          >Lưu thay đổi</ZButton
+        >
       </template>
     </ZModal>
 
@@ -182,12 +226,27 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useStaffStore } from "~/stores/staff";
-import { formatDate, staffStatusLabel, staffStatusVariant, sanitizeString, sanitizeEmail } from "~/utils/format";
+import {
+  formatDate,
+  staffStatusLabel,
+  staffStatusVariant,
+  sanitizeString,
+  sanitizeEmail,
+} from "~/utils/format";
 
 definePageMeta({ layout: "panel" });
 
-type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "neutral" | "amber";
-interface RoleItem { name?: string }
+type BadgeVariant =
+  | "default"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "neutral"
+  | "amber";
+interface RoleItem {
+  name?: string;
+}
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -196,6 +255,7 @@ const store = useStaffStore();
 const showEditModal = ref(false);
 const showStatusConfirm = ref(false);
 const pendingStatus = ref<string | null>(null);
+const copied = ref(false);
 
 const ERROR_ICON = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
@@ -203,11 +263,44 @@ const staff = computed(() => store.currentStaff!);
 
 const staffInitials = computed(() => {
   const name = store.currentStaff?.name ?? "";
-  return name.split(" ").slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
 });
 
+const HOMEPAGE_URL = "https://driip.vn/ck-underwear";
+
+const referralUrl = computed(() => {
+  const staffCode = staff.value.employee_code?.toLowerCase() ?? "";
+  const firstName = staff.value.name?.split(" ").pop()?.toLowerCase() ?? "";
+  const code = staffCode || firstName || "staff";
+  return `${HOMEPAGE_URL}?referal=${encodeURIComponent(code)}`;
+});
+
+const referralCodeHint = computed(() => {
+  const staffCode = staff.value.employee_code?.toLowerCase() ?? "";
+  const firstName = staff.value.name?.split(" ").pop()?.toLowerCase() ?? "";
+  return staffCode || firstName || "staff";
+});
+
+async function copyReferralUrl(): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(referralUrl.value);
+    copied.value = true;
+    window.setTimeout(() => {
+      copied.value = false;
+    }, 2000);
+  } catch {
+    // Fallback: silently fail
+  }
+}
+
 const statusConfirmTitle = computed(() =>
-  pendingStatus.value === "active" ? "Kích hoạt lại tài khoản" : "Ngừng hoạt động"
+  pendingStatus.value === "active"
+    ? "Kích hoạt lại tài khoản"
+    : "Ngừng hoạt động"
 );
 const statusConfirmMessage = computed(() =>
   pendingStatus.value === "active"
@@ -218,11 +311,17 @@ const statusConfirmLabel = computed(() =>
   pendingStatus.value === "active" ? "Kích hoạt" : "Ngừng hoạt động"
 );
 
-const editForm = reactive({ name: "", email: "", phone: "", department: "", position: "" });
+const editForm = reactive({
+  name: "",
+  email: "",
+  phone: "",
+  department: "",
+  position: "",
+});
 const editErrors = reactive({ name: "", email: "" });
 
 function roleDisplayLabel(role: RoleItem | string): string {
-  const name = typeof role === "string" ? role : (role.name ?? "");
+  const name = typeof role === "string" ? role : role.name ?? "";
   const map: Record<string, string> = {
     "super-admin": "Quản trị viên",
     admin: "Quản trị viên",
@@ -307,15 +406,31 @@ onMounted(() => {
   text-decoration: none;
   transition: color 130ms;
 }
-.detail-back:hover { color: #1a1a18; }
-.detail-page-header__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.detail-back:hover {
+  color: #1a1a18;
+}
+.detail-page-header__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
 
-.staff-identity { display: flex; align-items: center; gap: 0.75rem; }
+.staff-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 .staff-avatar {
-  width: 3rem; height: 3rem; border-radius: 50%;
-  background: #111110; color: #f5a623;
-  font-size: 0.9375rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: #111110;
+  color: #f5a623;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 .detail-page-title {
@@ -330,7 +445,11 @@ onMounted(() => {
   color: #999;
   font-family: ui-monospace, monospace;
 }
-.staff-roles { display: flex; gap: 0.375rem; flex-wrap: wrap; }
+.staff-roles {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
 
 .detail-header-skeleton {
   display: flex;
@@ -345,12 +464,14 @@ onMounted(() => {
   gap: 0.875rem;
 }
 @media (min-width: 768px) {
-  .detail-grid { grid-template-columns: repeat(3, 1fr); }
+  .detail-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .detail-card {
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.07);
+  border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: 10px;
   padding: 1.125rem;
 }
@@ -363,29 +484,144 @@ onMounted(() => {
   color: #888;
 }
 
-.detail-dl { margin: 0; }
+.detail-dl {
+  margin: 0;
+}
 .detail-dl__row {
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.3125rem 0;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   font-size: 0.875rem;
 }
-.detail-dl__row:last-child { border-bottom: none; }
-.detail-dl__row dt { color: #888; flex-shrink: 0; }
-.detail-dl__row dd { margin: 0; color: #1a1a18; text-align: right; word-break: break-word; }
-.detail-note-text { margin: 0; font-size: 0.875rem; color: #555; line-height: 1.55; }
+.detail-dl__row:last-child {
+  border-bottom: none;
+}
+.detail-dl__row dt {
+  color: #888;
+  flex-shrink: 0;
+}
+.detail-dl__row dd {
+  margin: 0;
+  color: #1a1a18;
+  text-align: right;
+  word-break: break-word;
+}
+.detail-note-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #555;
+  line-height: 1.55;
+}
 
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.form-grid__full { grid-column: 1 / -1; }
-@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.form-grid__full {
+  grid-column: 1 / -1;
+}
+@media (max-width: 480px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
-.flex { display: flex; }
-.items-center { align-items: center; }
-.gap-1 { gap: 0.25rem; }
-.gap-3 { gap: 0.75rem; }
-.flex-col { flex-direction: column; }
-.mb-1 { margin-bottom: 0.25rem; }
-.mb-2 { margin-bottom: 0.5rem; }
+.flex {
+  display: flex;
+}
+.items-center {
+  align-items: center;
+}
+.gap-1 {
+  gap: 0.25rem;
+}
+.gap-3 {
+  gap: 0.75rem;
+}
+.flex-col {
+  flex-direction: column;
+}
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+/* ── Referral section ────────────────────────────────────────────── */
+.referral-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.referral-desc {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.referral-input-wrap {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.referral-input {
+  flex: 1;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: #f8f8f8;
+  font-size: 0.8125rem;
+  color: #333;
+  font-family: ui-monospace, monospace;
+  cursor: pointer;
+  outline: none;
+  min-width: 0;
+}
+
+.referral-input:focus {
+  border-color: #111110;
+  background: #fff;
+}
+
+.referral-copy-btn {
+  padding: 0.625rem 1rem;
+  border: 1px solid #111110;
+  border-radius: 8px;
+  background: #111110;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.referral-copy-btn:hover {
+  background: #333;
+}
+
+.referral-copy-btn.copied {
+  background: #2a7a2a;
+  border-color: #2a7a2a;
+}
+
+.referral-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.referral-hint code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+  color: #555;
+}
 </style>

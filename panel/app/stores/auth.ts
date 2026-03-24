@@ -38,6 +38,9 @@ const LOGIN_ROUTE = "/login";
 const DEFAULT_AUTHENTICATED_ROUTE = "/";
 const FORGOT_PASSWORD_ROUTE = "/forgot-password";
 const RESET_PASSWORD_ROUTE = "/reset-password";
+const EXPIRED_SESSION_MESSAGE =
+  "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+const EXPIRED_SESSION_TOAST_COOLDOWN_MS = 5_000;
 const PUBLIC_ROUTES = new Set<string>([
   LOGIN_ROUTE,
   FORGOT_PASSWORD_ROUTE,
@@ -103,6 +106,7 @@ export const useAuthStore = defineStore("auth", () => {
   const logoutPending = ref(false);
   const redirectAfterLogin = ref<string | null>(null);
   const error = ref<string | null>(null);
+  const lastExpiredSessionToastAt = ref(0);
 
   const isAuthenticated = computed(() => Boolean(user.value));
   const isGuest = computed(() => !user.value);
@@ -145,12 +149,28 @@ export const useAuthStore = defineStore("auth", () => {
     setError(reason);
   }
 
+  function shouldNotifyExpiredSession(): boolean {
+    return Boolean(authHint.value === "1" || user.value);
+  }
+
   async function handleExpiredSession(
-    message = "Session expired. Please log in again."
+    message = EXPIRED_SESSION_MESSAGE
   ): Promise<RedirectInstruction | null> {
-    clearSession(message);
+    const shouldNotify = shouldNotifyExpiredSession();
+    clearSession(shouldNotify ? message : null);
     setAuthHint(false);
-    toast.warning("Phiên đăng nhập đã hết hạn", message);
+
+    if (shouldNotify) {
+      const now = Date.now();
+      if (
+        now - lastExpiredSessionToastAt.value >=
+        EXPIRED_SESSION_TOAST_COOLDOWN_MS
+      ) {
+        lastExpiredSessionToastAt.value = now;
+        toast.warning("Phiên đăng nhập đã hết hạn", message);
+      }
+    }
+
     return null;
   }
 
@@ -191,7 +211,9 @@ export const useAuthStore = defineStore("auth", () => {
 
       const nextUser = normalizeUser(response.data);
       if (!nextUser) {
-        throw new Error("Invalid user payload from login response.");
+        throw new Error(
+          "Dữ liệu người dùng từ phản hồi đăng nhập không hợp lệ."
+        );
       }
 
       user.value = nextUser;
@@ -202,7 +224,7 @@ export const useAuthStore = defineStore("auth", () => {
       toast.success("Đăng nhập thành công", "Chào mừng trở lại.");
       return true;
     } catch (error) {
-      const message = getErrorMessage(error, "Login failed.");
+      const message = getErrorMessage(error, "Đăng nhập không thành công.");
       clearSession(message);
       toast.error("Đăng nhập thất bại", message);
       initialized.value = true;
@@ -218,7 +240,7 @@ export const useAuthStore = defineStore("auth", () => {
       const nextUser = normalizeUser(response);
 
       if (!nextUser) {
-        throw new Error("Invalid user payload from /auth/me.");
+        throw new Error("Dữ liệu người dùng từ /auth/me không hợp lệ.");
       }
 
       user.value = nextUser;
@@ -231,7 +253,10 @@ export const useAuthStore = defineStore("auth", () => {
       const statusCode = maybe.statusCode ?? maybe.status;
 
       if (statusCode !== 401) {
-        const message = getErrorMessage(error, "Failed to restore session.");
+        const message = getErrorMessage(
+          error,
+          "Không thể khôi phục phiên làm việc."
+        );
         clearSession(message);
         toast.error("Không thể khôi phục phiên", message);
       }
@@ -336,7 +361,7 @@ export const useAuthStore = defineStore("auth", () => {
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Khong the gui email. Vui long thu lai."
+        "Không thể gửi email. Vui lòng thử lại."
       );
       toast.error("Không thể gửi liên kết đặt lại mật khẩu", message);
       return {
@@ -363,7 +388,7 @@ export const useAuthStore = defineStore("auth", () => {
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Khong the dat lai mat khau. Link co the da het han."
+        "Không thể đặt lại mật khẩu. Liên kết có thể đã hết hạn."
       );
       toast.error("Không thể đặt lại mật khẩu", message);
       return {

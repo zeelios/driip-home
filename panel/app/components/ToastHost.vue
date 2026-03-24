@@ -40,7 +40,7 @@
             <button
               type="button"
               class="mt-0.5 rounded-full p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
-              @click="dismiss(toast.id)"
+              @click="handleDismiss(toast.id)"
               aria-label="Dismiss notification"
             >
               <span aria-hidden="true">×</span>
@@ -53,12 +53,74 @@
 </template>
 
 <script setup lang="ts">
+import { onBeforeUnmount, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useToast } from "~/composables/useToast";
 
 const toast = useToast();
 const { toasts } = storeToRefs(toast);
 const { dismiss } = toast;
+
+const dismissTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+function clearDismissTimer(id: string): void {
+  const timer = dismissTimers.get(id);
+  if (!timer) return;
+
+  clearTimeout(timer);
+  dismissTimers.delete(id);
+}
+
+function scheduleDismissTimer(id: string, timeout: number): void {
+  if (timeout <= 0) return;
+
+  clearDismissTimer(id);
+
+  const timer = setTimeout(() => {
+    dismissTimers.delete(id);
+    dismiss(id);
+  }, timeout);
+
+  dismissTimers.set(id, timer);
+}
+
+function syncDismissTimers(nextToasts: typeof toasts.value): void {
+  const nextIds = new Set(nextToasts.map((toastItem) => toastItem.id));
+
+  for (const id of Array.from(dismissTimers.keys())) {
+    if (!nextIds.has(id)) {
+      clearDismissTimer(id);
+    }
+  }
+
+  for (const toastItem of nextToasts) {
+    if (!dismissTimers.has(toastItem.id)) {
+      scheduleDismissTimer(toastItem.id, toastItem.timeout);
+    }
+  }
+}
+
+function handleDismiss(id: string): void {
+  clearDismissTimer(id);
+  dismiss(id);
+}
+
+if (import.meta.client) {
+  watch(
+    toasts,
+    (nextToasts) => {
+      syncDismissTimers(nextToasts);
+    },
+    { immediate: true }
+  );
+
+  onBeforeUnmount(() => {
+    for (const timer of dismissTimers.values()) {
+      clearTimeout(timer);
+    }
+    dismissTimers.clear();
+  });
+}
 
 function variantLabel(
   variant: "success" | "error" | "warning" | "info"
@@ -81,11 +143,11 @@ function toastClasses(
 ): string {
   switch (variant) {
     case "success":
-      return "border-emerald-200";
+      return "border-neutral-200";
     case "error":
-      return "border-rose-200";
+      return "border-neutral-200";
     case "warning":
-      return "border-amber-200";
+      return "border-neutral-200";
     case "info":
     default:
       return "border-neutral-200";
@@ -97,14 +159,14 @@ function badgeClasses(
 ): string {
   switch (variant) {
     case "success":
-      return "bg-emerald-100 text-emerald-700";
+      return "bg-neutral-100 text-neutral-700";
     case "error":
-      return "bg-rose-100 text-rose-700";
+      return "bg-neutral-100 text-neutral-700";
     case "warning":
-      return "bg-amber-100 text-amber-700";
+      return "bg-neutral-100 text-neutral-700";
     case "info":
     default:
-      return "bg-neutral-100 text-neutral-600";
+      return "bg-neutral-100 text-neutral-700";
   }
 }
 </script>
