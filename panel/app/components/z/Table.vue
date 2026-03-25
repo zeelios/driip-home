@@ -1,15 +1,20 @@
 <template>
   <div class="border border-white/8 rounded-[10px] overflow-hidden bg-[#111111]">
-    <div class="overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch]">
-      <table class="w-full border-collapse text-sm">
+    <div class="overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [-ms-overflow-style:none]">
+      <table class="w-full border-collapse text-sm table-auto min-w-150">
         <thead class="bg-white/4">
           <tr>
             <th
               v-for="col in columns"
               :key="col.key"
-              class="py-3 px-4 text-left text-[0.6875rem] font-bold tracking-[0.06em] uppercase text-white/50 border-b border-white/8 whitespace-nowrap select-none"
-              :class="{ 'cursor-pointer hover:text-white/80': col.sortable, 'text-right': col.align === 'right', 'text-center': col.align === 'center' }"
-              :style="col.width ? { width: col.width } : {}"
+              class="py-3 px-4 text-left text-[0.6875rem] font-bold tracking-[0.06em] uppercase text-white/50 border-b border-white/8 select-none"
+              :class="{ 
+                'cursor-pointer hover:text-white/80': col.sortable, 
+                'text-right': col.align === 'right', 
+                'text-center': col.align === 'center',
+                'whitespace-nowrap': col.width
+              }"
+              :style="col.width ? { width: col.width, minWidth: col.width } : {}"
               @click="col.sortable ? onSort(col.key) : undefined"
             >
               <span class="inline-flex items-center gap-1.25">
@@ -56,7 +61,7 @@
               <td
                 v-for="col in columns"
                 :key="col.key"
-                class="py-3.25 px-4 text-white/85 align-middle"
+                class="py-3.25 px-4 text-white/85 align-middle min-w-0"
                 :class="{ 'text-right': col.align === 'right', 'text-center': col.align === 'center' }"
               >
                 <slot :name="`cell-${col.key}`" :row="row" :value="(row as Record<string, unknown>)[col.key]">

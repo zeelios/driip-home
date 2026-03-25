@@ -16,14 +16,33 @@ use App\Http\Resources\ErrorResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
  * Handles all CRUD and action endpoints for the Customer resource.
  */
-class CustomerController extends BaseApiController
+class CustomerController extends BaseApiController implements HasMiddleware
 {
+    /**
+     * Get the middleware that should be assigned to the controller.
+     *
+     * @return array<Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:customers.view', only: ['index', 'show']),
+            new Middleware('permission:customers.create', only: ['store']),
+            new Middleware('permission:customers.update', only: ['update']),
+            new Middleware('permission:customers.delete', only: ['destroy']),
+            new Middleware('permission:customers.block', only: ['block']),
+            new Middleware('permission:loyalty.view', only: ['loyalty']),
+        ];
+    }
+
     /**
      * List customers with filtering and pagination.
      *

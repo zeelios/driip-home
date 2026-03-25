@@ -16,7 +16,8 @@ type BadgeVariant =
   | "warning"
   | "danger"
   | "info"
-  | "neutral";
+  | "neutral"
+  | "amber";
 
 const props = withDefaults(
   defineProps<{
@@ -33,6 +34,7 @@ const variantClass = computed(() => {
     warning: "bg-white/[0.08] text-white/75",
     danger: "bg-red-500/15 text-red-500",
     info: "bg-white/[0.06] text-white/70",
+    amber: "bg-amber-500/15 text-amber-500",
   };
   return map[props.variant];
 });

@@ -1,12 +1,14 @@
 <template>
   <div>
     <!-- Toolbar -->
-    <div class="flex items-start justify-between gap-3 mb-4.5 flex-wrap">
+    <div
+      class="flex flex-col sm:flex-row items-start justify-between gap-3 mb-4 sm:mb-4.5"
+    >
       <ZInput
         v-model="search"
         placeholder="Tìm mã giảm giá..."
         type="search"
-        class="flex-1 min-w-[180px] max-w-[280px]"
+        class="flex-1 w-full min-w-0"
         @input="onSearchInput"
       >
         <template #prefix>
@@ -23,7 +25,11 @@
           </svg>
         </template>
       </ZInput>
-      <ZButton size="sm" @click="showCreateModal = true">
+      <ZButton
+        size="sm"
+        @click="showCreateModal = true"
+        class="w-full sm:w-auto shrink-0"
+      >
         <template #prefix>
           <svg
             width="14"

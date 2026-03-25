@@ -16,6 +16,8 @@ use App\Jobs\ExportInventoryJob;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -26,14 +28,29 @@ use Spatie\QueryBuilder\QueryBuilder;
  * applying manual adjustments, browsing transaction history, and
  * dispatching background export jobs.
  */
-class InventoryController extends BaseApiController
+class InventoryController extends BaseApiController implements HasMiddleware
 {
+    /**
+     * Get the middleware that should be assigned to the controller.
+     *
+     * @return array<Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:inventory.view', only: ['index', 'show', 'movements']),
+            new Middleware('permission:inventory.adjust', only: ['adjust']),
+            new Middleware('permission:inventory.export', only: ['export']),
+        ];
+    }
+
     /**
      * @param  AdjustInventoryAction  $adjustAction  Action that applies inventory adjustments.
      */
     public function __construct(
         private readonly AdjustInventoryAction $adjustAction,
-    ) {}
+    ) {
+    }
 
     /**
      * List all inventory records with optional filtering.
@@ -90,16 +107,16 @@ class InventoryController extends BaseApiController
     {
         try {
             $transaction = $this->adjustAction->execute(
-                variantId:     $request->input('variant_id'),
-                warehouseId:   $request->input('warehouse_id'),
+                variantId: $request->input('variant_id'),
+                warehouseId: $request->input('warehouse_id'),
                 quantityDelta: (int) $request->input('quantity'),
-                reason:        $request->input('reason'),
-                createdBy:     $request->user()->id,
+                reason: $request->input('reason'),
+                createdBy: $request->user()->id,
             );
 
             return response()->json([
                 'success' => true,
-                'data'    => InventoryTransactionResource::make($transaction),
+                'data' => InventoryTransactionResource::make($transaction),
             ], 201);
         } catch (InsufficientStockException $e) {
             return response()->json([
@@ -164,7 +181,7 @@ class InventoryController extends BaseApiController
 
             return response()->json([
                 'success' => true,
-                'queued'  => true,
+                'queued' => true,
                 'message' => 'Inventory export has been queued.',
             ]);
         } catch (\Throwable $e) {

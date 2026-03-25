@@ -16,6 +16,8 @@ use App\Http\Resources\Coupon\CouponResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Validation\ValidationException;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -27,8 +29,24 @@ use Spatie\QueryBuilder\QueryBuilder;
  * endpoint used by the checkout flow to check eligibility before order
  * confirmation.
  */
-class CouponController extends BaseApiController
+class CouponController extends BaseApiController implements HasMiddleware
 {
+    /**
+     * Get the middleware that should be assigned to the controller.
+     *
+     * @return array<Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:coupons.view', only: ['index', 'show']),
+            new Middleware('permission:coupons.create', only: ['store']),
+            new Middleware('permission:coupons.update', only: ['update']),
+            new Middleware('permission:coupons.delete', only: ['destroy']),
+            new Middleware('permission:coupons.validate', only: ['validate']),
+        ];
+    }
+
     /**
      * @param  CreateCouponAction   $createAction   Action for creating coupons.
      * @param  UpdateCouponAction   $updateAction   Action for updating coupons.
@@ -60,7 +78,6 @@ class CouponController extends BaseApiController
                     AllowedFilter::exact('applies_to'),
                 )
                 ->allowedSorts('code', 'name', 'used_count', 'expires_at', 'created_at')
-                ->with(['createdBy'])
                 ->paginate(20);
 
             return CouponResource::collection($coupons);
@@ -166,7 +183,7 @@ class CouponController extends BaseApiController
                         : null,
                 ],
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return $this->validationError($e, 'VALIDATE_COUPON');
         } catch (\Throwable $e) {
             return $this->serverError($e, 'VALIDATE_COUPON');

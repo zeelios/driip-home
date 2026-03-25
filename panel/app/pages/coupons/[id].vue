@@ -63,7 +63,7 @@
           </NuxtLink>
           <div class="flex items-center gap-3">
             <div
-              class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white text-xl font-bold flex items-center justify-center shrink-0"
+              class="w-12 h-12 rounded-full bg-linear-to-br from-amber-500 to-amber-600 text-white text-xl font-bold flex items-center justify-center shrink-0"
             >
               %
             </div>

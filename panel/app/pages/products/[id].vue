@@ -94,10 +94,10 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Danh mục</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{
                   (product.category as CategoryObj | null | undefined)?.name ??
                   "—"
@@ -105,36 +105,36 @@
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Thương hiệu</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{
                   (product.brand as BrandObj | null | undefined)?.name ?? "—"
                 }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Giới tính</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ genderDisplayLabel(product.gender) }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Mùa</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ product.season ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Ngày tạo</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ formatDate(product.created_at) }}
               </dd>
             </div>

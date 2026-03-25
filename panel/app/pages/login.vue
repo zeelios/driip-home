@@ -18,50 +18,44 @@
 
       <!-- Form -->
       <form class="space-y-5" @submit.prevent="submit">
-        <div>
-          <label
-            class="block text-[11px] font-semibold tracking-widest uppercase text-white/50 mb-2"
-          >
-            Email
-          </label>
-          <input
-            v-model="form.email"
-            type="email"
-            inputmode="email"
-            autocomplete="username"
-            placeholder="you@driip.vn"
-            required
-            class="w-full border border-white/12 bg-white/4 rounded-lg px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/40 focus:ring-1 focus:ring-white/20 transition-colors"
-          />
-        </div>
+        <ZInput
+          v-model="form.email"
+          label="Email"
+          type="email"
+          inputmode="email"
+          autocomplete="username"
+          placeholder="you@driip.vn"
+          required
+        />
 
-        <div>
-          <label
-            class="block text-[11px] font-semibold tracking-widest uppercase text-white/50 mb-2"
-          >
-            Mật khẩu
-          </label>
-          <input
-            v-model="form.password"
-            type="password"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            required
-            class="w-full border border-white/12 bg-white/4 rounded-lg px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/40 focus:ring-1 focus:ring-white/20 transition-colors"
-          />
-        </div>
+        <ZInput
+          v-model="form.password"
+          label="Mật khẩu"
+          type="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          required
+        />
 
         <p v-if="auth.error" class="text-sm text-red-400">
           {{ auth.error }}
         </p>
 
-        <button
+        <ZButton
           type="submit"
-          :disabled="auth.loginPending"
-          class="w-full bg-white text-[#0a0a0a] rounded-lg py-3 text-sm font-semibold hover:bg-white/90 active:bg-white/80 transition-colors disabled:opacity-40 disabled:cursor-wait mt-2"
+          size="lg"
+          :loading="auth.loginPending"
+          :disabled="auth.loginPending || auth.loginAttemptLocked"
+          class="w-full mt-2"
         >
-          {{ auth.loginPending ? "Đang đăng nhập..." : "Đăng nhập" }}
-        </button>
+          {{
+            auth.loginPending
+              ? "Đang đăng nhập..."
+              : auth.loginAttemptLocked
+              ? "Đã khóa thử lại"
+              : "Đăng nhập"
+          }}
+        </ZButton>
       </form>
 
       <!-- Footer -->

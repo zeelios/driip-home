@@ -10,8 +10,8 @@ const nodeEnv =
 
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
-  devtools: { enabled: true },
-
+  devtools: { enabled: false },
+  ssr: false,
   css: ["~/assets/main.css"],
 
   modules: [
@@ -41,5 +41,27 @@ export default defineNuxtConfig({
 
   app: {
     rootId: "__zeelios",
+    head: {
+      viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+      meta: [
+        { name: "color-scheme", content: "dark light" },
+        {
+          name: "theme-color",
+          content: "#000000",
+          media: "(prefers-color-scheme: light)",
+        },
+        {
+          name: "theme-color",
+          content: "#000000",
+          media: "(prefers-color-scheme: dark)",
+        },
+        { name: "theme-color", content: "#000000" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        {
+          name: "apple-mobile-web-app-status-bar-style",
+          content: "black-translucent",
+        },
+      ],
+    },
   },
 });

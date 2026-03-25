@@ -150,34 +150,34 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Email</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ customer.email ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Điện thoại</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ customer.phone ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Giới tính</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ genderLabel(customer.gender) }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Nguồn</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ customer.source ?? "—" }}
               </dd>
             </div>
@@ -196,26 +196,28 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Số dư điểm</dt>
-              <dd class="m-0 text-white/85 text-right break-words font-bold">
+              <dd
+                class="m-0 text-white/85 text-right wrap-break-word font-bold"
+              >
                 {{ formatNumber(customer.loyaltyAccount.points_balance) }} điểm
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Điểm vĩnh cửu</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ formatNumber(customer.loyaltyAccount.lifetime_points) }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Hạng</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ customer.loyaltyAccount.tier?.name ?? "—" }}
               </dd>
             </div>

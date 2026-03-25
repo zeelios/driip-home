@@ -5,7 +5,7 @@
     aria-label="Phân trang"
   >
     <button
-      class="inline-flex items-center justify-center min-w-8 h-8 px-1.75 border border-white/12 rounded-[7px] bg-transparent font-inherit text-[0.8125rem] text-white/70 cursor-pointer transition-all duration-130 hover:bg-white/6 hover:text-white/95 hover:border-white/20 disabled:opacity-35 disabled:cursor-not-allowed"
+      class="inline-flex items-center justify-center min-w-11 h-11 md:min-w-8 md:h-8 px-2 md:px-1.75 border border-white/12 rounded-lg md:rounded-[7px] bg-transparent font-inherit text-sm md:text-[0.8125rem] text-white/70 cursor-pointer transition-all duration-130 hover:bg-white/6 hover:text-white/95 hover:border-white/20 disabled:opacity-35 disabled:cursor-not-allowed touch-manipulation"
       :disabled="currentPage <= 1"
       aria-label="Trang trước"
       @click="$emit('change', currentPage - 1)"
@@ -30,7 +30,7 @@
       >
       <button
         v-else
-        class="inline-flex items-center justify-center min-w-8 h-8 px-[0.4375rem] border border-white/12 rounded-[7px] bg-transparent font-inherit text-[0.8125rem] text-white/70 cursor-pointer transition-all duration-130 hover:bg-white/6 hover:text-white/95 hover:border-white/20"
+        class="inline-flex items-center justify-center min-w-11 h-11 md:min-w-8 md:h-8 px-2 md:px-1.75 border border-white/12 rounded-lg md:rounded-[7px] bg-transparent font-inherit text-sm md:text-[0.8125rem] text-white/70 cursor-pointer transition-all duration-130 hover:bg-white/6 hover:text-white/95 hover:border-white/20 touch-manipulation"
         :class="{
           'bg-white border-white text-[#0a0a0a] font-semibold':
             page === currentPage,
@@ -43,7 +43,7 @@
     </template>
 
     <button
-      class="inline-flex items-center justify-center min-w-8 h-8 px-1.75 border border-white/12 rounded-[7px] bg-transparent font-inherit text-[0.8125rem] text-white/70 cursor-pointer transition-all duration-130 hover:bg-white/6 hover:text-white/95 hover:border-white/20 disabled:opacity-35 disabled:cursor-not-allowed"
+      class="inline-flex items-center justify-center min-w-11 h-11 md:min-w-8 md:h-8 px-2 md:px-1.75 border border-white/12 rounded-lg md:rounded-[7px] bg-transparent font-inherit text-sm md:text-[0.8125rem] text-white/70 cursor-pointer transition-all duration-130 hover:bg-white/6 hover:text-white/95 hover:border-white/20 disabled:opacity-35 disabled:cursor-not-allowed touch-manipulation"
       :disabled="currentPage >= totalPages"
       aria-label="Trang tiếp"
       @click="$emit('change', currentPage + 1)"

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Inventory\Models;
 
 use App\Domain\Product\Models\Product;
+use App\Domain\Product\Models\ProductVariant;
 use App\Domain\Warehouse\Models\Warehouse;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -76,7 +77,17 @@ class Inventory extends Model
     ];
 
     /**
-     * Get the product this inventory record belongs to.
+     * Get the product variant this inventory record belongs to.
+     *
+     * @return BelongsTo<ProductVariant, Inventory>
+     */
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    /**
+     * Get the product this inventory record belongs to (through variant).
      *
      * @return BelongsTo<Product, Inventory>
      */

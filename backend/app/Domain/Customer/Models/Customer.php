@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Customer\Models;
 
 use App\Domain\Loyalty\Models\LoyaltyAccount;
+use App\Domain\Order\Models\Order;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -77,13 +78,13 @@ class Customer extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'tags'             => 'array',
-        'is_blocked'       => 'boolean',
-        'date_of_birth'    => 'date',
-        'last_ordered_at'  => 'datetime',
+        'tags' => 'array',
+        'is_blocked' => 'boolean',
+        'date_of_birth' => 'date',
+        'last_ordered_at' => 'datetime',
         'phone_verified_at' => 'datetime',
-        'total_orders'     => 'integer',
-        'total_spent'      => 'integer',
+        'total_orders' => 'integer',
+        'total_spent' => 'integer',
     ];
 
     /**
@@ -134,6 +135,16 @@ class Customer extends Model
     public function loyaltyAccount(): HasOne
     {
         return $this->hasOne(LoyaltyAccount::class, 'customer_id');
+    }
+
+    /**
+     * Get all orders for this customer.
+     *
+     * @return HasMany<Order>
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'customer_id');
     }
 
     /**

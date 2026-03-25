@@ -18,6 +18,8 @@ use App\Http\Resources\Order\StatusHistoryResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -28,7 +30,7 @@ use Spatie\QueryBuilder\QueryBuilder;
  * transitions on orders. Bulk and document operations are delegated to
  * BulkOrderController and DocumentController respectively.
  */
-class OrderController extends BaseApiController
+class OrderController extends BaseApiController implements HasMiddleware
 {
     /**
      * @param  CreateOrderAction   $createOrder   Creates a new order.
@@ -37,11 +39,32 @@ class OrderController extends BaseApiController
      * @param  CancelOrderAction   $cancelOrder   Cancels a cancellable order.
      */
     public function __construct(
-        private readonly CreateOrderAction  $createOrder,
+        private readonly CreateOrderAction $createOrder,
         private readonly ConfirmOrderAction $confirmOrder,
-        private readonly PackOrderAction    $packOrder,
-        private readonly CancelOrderAction  $cancelOrder,
-    ) {}
+        private readonly PackOrderAction $packOrder,
+        private readonly CancelOrderAction $cancelOrder,
+    ) {
+    }
+
+    /**
+     * Get the middleware that should be assigned to the controller.
+     *
+     * @return array<Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:orders.view|orders.view.own', only: ['index']),
+            new Middleware('permission:orders.view|orders.view.own', only: ['show']),
+            new Middleware('permission:orders.create', only: ['store']),
+            new Middleware('permission:orders.update|orders.update.own', only: ['update']),
+            new Middleware('permission:orders.delete', only: ['destroy']),
+            new Middleware('permission:orders.confirm', only: ['confirm']),
+            new Middleware('permission:orders.pack', only: ['pack']),
+            new Middleware('permission:orders.cancel', only: ['cancel']),
+            new Middleware('permission:orders.view|orders.view.own', only: ['timeline']),
+        ];
+    }
 
     /**
      * List orders with filters, sorting and pagination.

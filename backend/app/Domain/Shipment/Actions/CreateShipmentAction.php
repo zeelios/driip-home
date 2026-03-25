@@ -6,10 +6,7 @@ namespace App\Domain\Shipment\Actions;
 
 use App\Domain\Shipment\Data\CreateShipmentDto;
 use App\Domain\Shipment\Models\Shipment;
-use App\Domain\Shipment\Services\CourierServiceInterface;
-use App\Domain\Shipment\Services\GHNService;
-use App\Domain\Shipment\Services\GHTKService;
-use Illuminate\Container\Container;
+use App\Domain\Shipment\Services\CourierServiceResolver;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -22,15 +19,10 @@ use Illuminate\Support\Facades\DB;
  */
 class CreateShipmentAction
 {
-    /**
-     * Map of courier codes to their service class names.
-     *
-     * @var array<string,class-string<CourierServiceInterface>>
-     */
-    private array $courierMap = [
-        'ghn'     => GHNService::class,
-        'ghtk'    => GHTKService::class,
-    ];
+    public function __construct(
+        private readonly CourierServiceResolver $courierResolver
+    ) {
+    }
 
     /**
      * Execute the shipment creation.
@@ -48,36 +40,29 @@ class CreateShipmentAction
      */
     public function execute(CreateShipmentDto $dto, string $createdBy): Shipment
     {
-        $serviceClass = $this->courierMap[$dto->courierCode] ?? null;
-
-        if ($serviceClass === null) {
-            throw new \RuntimeException("Unsupported courier code: {$dto->courierCode}");
-        }
-
-        /** @var CourierServiceInterface $courierService */
-        $courierService = Container::getInstance()->make($serviceClass);
+        $courierService = $this->courierResolver->resolve($dto->courierCode);
 
         return DB::transaction(function () use ($dto, $createdBy, $courierService): Shipment {
             /** @var Shipment $shipment */
             $shipment = Shipment::create([
-                'order_id'     => $dto->orderId,
+                'order_id' => $dto->orderId,
                 'courier_code' => $dto->courierCode,
-                'cod_amount'   => $dto->codAmount,
-                'weight_kg'    => $dto->weightKg,
-                'status'       => 'draft',
-                'created_by'   => $createdBy,
+                'cod_amount' => $dto->codAmount,
+                'weight_kg' => $dto->weightKg,
+                'status' => 'draft',
+                'created_by' => $createdBy,
             ]);
 
             $courierResponse = $courierService->createShipment($shipment);
 
             $shipment->update([
-                'tracking_number'  => $courierResponse['tracking_number'] ?? null,
-                'label_url'        => $courierResponse['label_url']       ?? null,
+                'tracking_number' => $courierResponse['tracking_number'] ?? null,
+                'label_url' => $courierResponse['label_url'] ?? null,
                 'shipping_fee_quoted' => isset($courierResponse['estimated_fee'])
                     ? (int) $courierResponse['estimated_fee']
                     : null,
                 'courier_response' => $courierResponse,
-                'status'           => $courierResponse['status'] === 'created' ? 'created' : 'draft',
+                'status' => $courierResponse['status'] === 'created' ? 'created' : 'draft',
             ]);
 
             return $shipment->refresh();

@@ -8,11 +8,9 @@ use App\Domain\Shipment\Actions\CreateShipmentAction;
 use App\Domain\Shipment\Actions\SyncTrackingAction;
 use App\Domain\Shipment\Models\Shipment;
 use App\Domain\Shipment\Services\CourierServiceInterface;
-use App\Domain\Shipment\Services\GHNService;
-use App\Domain\Shipment\Services\GHTKService;
+use App\Domain\Shipment\Services\CourierServiceResolver;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Resources\Shipment\ShipmentResource;
-use Illuminate\Container\Container;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,22 +25,13 @@ use Spatie\QueryBuilder\QueryBuilder;
 class ShipmentController extends BaseApiController
 {
     /**
-     * Map of courier codes to their service class names.
-     *
-     * @var array<string,class-string<CourierServiceInterface>>
-     */
-    private array $courierMap = [
-        'ghn' => GHNService::class,
-        'ghtk' => GHTKService::class,
-    ];
-
-    /**
      * @param CreateShipmentAction $createShipment Action responsible for creating a shipment.
      * @param SyncTrackingAction   $syncTracking   Action responsible for syncing tracking events.
      */
     public function __construct(
         private readonly CreateShipmentAction $createShipment,
         private readonly SyncTrackingAction $syncTracking,
+        private readonly CourierServiceResolver $courierResolver,
     ) {
     }
 
@@ -90,13 +79,9 @@ class ShipmentController extends BaseApiController
             }
 
             if (!empty($shipment->tracking_number)) {
-                $serviceClass = $this->courierMap[$shipment->courier_code] ?? null;
-
-                if ($serviceClass !== null) {
-                    /** @var CourierServiceInterface $service */
-                    $service = Container::getInstance()->make($serviceClass);
-                    $service->cancelShipment($shipment->tracking_number);
-                }
+                /** @var CourierServiceInterface $service */
+                $service = $this->courierResolver->resolve($shipment->courier_code);
+                $service->cancelShipment($shipment->tracking_number);
             }
 
             $shipment->update(['status' => 'cancelled']);

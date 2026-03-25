@@ -109,28 +109,28 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Tên</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ customerDisplayName }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
               v-if="order.customer?.email || order.guest_email"
             >
               <dt class="text-white/50 shrink-0">Email</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ order.customer?.email ?? order.guest_email ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
               v-if="order.customer?.phone || order.guest_phone"
             >
               <dt class="text-white/50 shrink-0">Điện thoại</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ order.customer?.phone ?? order.guest_phone ?? "—" }}
               </dd>
             </div>
@@ -146,26 +146,26 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Người nhận</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ order.shipping_name }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Điện thoại</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ order.shipping_phone }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Địa chỉ</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ shippingAddress }}
               </dd>
             </div>
@@ -181,26 +181,26 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Ngày tạo</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ formatDatetime(order.created_at) }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Nguồn</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ order.source ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Phương thức thanh toán</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ order.payment_method ?? "—" }}
               </dd>
             </div>
@@ -249,13 +249,13 @@
         class="mt-4 bg-[#111111] border border-white/8 rounded-[10px] py-4 px-5 max-w-md ml-auto"
       >
         <div
-          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/[0.06] last:border-b-0"
+          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/6 last:border-b-0"
         >
           <span>Tạm tính</span>
           <span>{{ formatVnd(order.subtotal) }}</span>
         </div>
         <div
-          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/[0.06] last:border-b-0"
+          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/6 last:border-b-0"
           v-if="order.coupon_discount > 0"
         >
           <span>Giảm giá ({{ order.coupon_code }})</span>
@@ -264,7 +264,7 @@
           >
         </div>
         <div
-          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/[0.06] last:border-b-0"
+          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/6 last:border-b-0"
           v-if="order.loyalty_discount > 0"
         >
           <span>Điểm tích lũy</span>
@@ -273,13 +273,13 @@
           >
         </div>
         <div
-          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/[0.06] last:border-b-0"
+          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/6 last:border-b-0"
         >
           <span>Phí vận chuyển</span>
           <span>{{ formatVnd(order.shipping_fee) }}</span>
         </div>
         <div
-          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/[0.06] last:border-b-0"
+          class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/6 last:border-b-0"
           v-if="order.vat_amount > 0"
         >
           <span>VAT ({{ order.vat_rate }}%)</span>
@@ -301,7 +301,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div
             v-if="order.notes"
-            class="p-4 bg-white/[0.04] border border-white/[0.08] rounded-lg"
+            class="p-4 bg-white/4 border border-white/8 rounded-lg"
           >
             <p
               class="m-0 mb-1.5 text-[0.6875rem] font-bold tracking-[0.06em] uppercase text-white/50"
@@ -314,7 +314,7 @@
           </div>
           <div
             v-if="order.internal_notes"
-            class="p-4 bg-white/[0.08] border border-white/20 rounded-lg"
+            class="p-4 bg-white/8 border border-white/20 rounded-lg"
           >
             <p
               class="m-0 mb-1.5 text-[0.6875rem] font-bold tracking-[0.06em] uppercase text-white/50"

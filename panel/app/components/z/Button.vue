@@ -1,7 +1,7 @@
 <template>
   <component
     :is="to ? NuxtLink : 'button'"
-    class="inline-flex items-center justify-center gap-1.75 border border-transparent rounded-lg font-inherit font-semibold cursor-pointer no-underline transition-all duration-150 whitespace-nowrap relative select-none outline-none focus-visible:ring-[3px] focus-visible:ring-[#111110]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+    class="inline-flex items-center justify-center gap-1.75 border border-transparent rounded-lg font-inherit font-semibold cursor-pointer no-underline transition-all duration-150 whitespace-nowrap relative select-none outline-none focus-visible:ring-[3px] focus-visible:ring-[#111110]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none touch-manipulation"
     :class="[
       variantClass,
       sizeClass,
@@ -77,9 +77,9 @@ const variantClass = computed((): string => {
 
 const sizeClass = computed((): string => {
   const sizes: Record<BtnSize, string> = {
-    sm: props.iconOnly ? "" : "py-1.5 px-3 text-[0.8125rem]",
-    md: props.iconOnly ? "" : "py-2.5 px-4 text-[0.875rem]",
-    lg: props.iconOnly ? "" : "py-3 px-5 text-[0.9375rem]",
+    sm: props.iconOnly ? "min-w-11 min-h-11" : "py-1.5 px-3 md:py-1.5 md:px-3 text-[0.8125rem] min-h-11 md:min-h-0",
+    md: props.iconOnly ? "min-w-11 min-h-11" : "py-2.5 px-4 md:py-2.5 md:px-4 text-[0.875rem] min-h-11 md:min-h-0",
+    lg: props.iconOnly ? "min-w-12 min-h-12" : "py-3 px-5 md:py-3 md:px-5 text-[0.9375rem] min-h-12 md:min-h-0",
   };
   return sizes[props.size];
 });

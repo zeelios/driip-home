@@ -6,7 +6,7 @@
         v-model="search"
         placeholder="Tìm mã, tên kho..."
         type="search"
-        class="flex-1 min-w-[180px] max-w-[320px]"
+        class="flex-1 min-w-45 max-w-[320px]"
         @input="onSearchInput"
       >
         <template #prefix>

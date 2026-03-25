@@ -12,6 +12,8 @@ use App\Http\Resources\Product\ProductResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -22,8 +24,23 @@ use Spatie\QueryBuilder\QueryBuilder;
  * Store delegates to CreateProductAction to enforce slug uniqueness.
  * Show eagerly loads brand, category, and variants.
  */
-class ProductController extends BaseApiController
+class ProductController extends BaseApiController implements HasMiddleware
 {
+    /**
+     * Get the middleware that should be assigned to the controller.
+     *
+     * @return array<Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:products.view', only: ['index', 'show']),
+            new Middleware('permission:products.create', only: ['store']),
+            new Middleware('permission:products.update', only: ['update']),
+            new Middleware('permission:products.delete', only: ['destroy']),
+        ];
+    }
+
     /**
      * List products with optional filtering and pagination.
      *
@@ -103,22 +120,22 @@ class ProductController extends BaseApiController
     {
         try {
             $validated = $request->validate([
-                'brand_id'          => ['nullable', 'uuid', 'exists:brands,id'],
-                'category_id'       => ['nullable', 'uuid', 'exists:categories,id'],
-                'name'              => ['sometimes', 'string', 'max:255'],
-                'slug'              => ['sometimes', 'string', 'max:255', 'unique:products,slug,' . $product->id],
-                'description'       => ['nullable', 'string'],
+                'brand_id' => ['nullable', 'uuid', 'exists:brands,id'],
+                'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+                'name' => ['sometimes', 'string', 'max:255'],
+                'slug' => ['sometimes', 'string', 'max:255', 'unique:products,slug,' . $product->id],
+                'description' => ['nullable', 'string'],
                 'short_description' => ['nullable', 'string', 'max:500'],
-                'sku_base'          => ['nullable', 'string', 'max:50'],
-                'gender'            => ['nullable', 'in:men,women,unisex,kids'],
-                'season'            => ['nullable', 'string', 'max:20'],
-                'tags'              => ['nullable', 'array'],
-                'tags.*'            => ['string'],
-                'status'            => ['nullable', 'in:draft,active,archived'],
-                'is_featured'       => ['nullable', 'boolean'],
-                'published_at'      => ['nullable', 'date'],
-                'meta_title'        => ['nullable', 'string', 'max:255'],
-                'meta_description'  => ['nullable', 'string'],
+                'sku_base' => ['nullable', 'string', 'max:50'],
+                'gender' => ['nullable', 'in:men,women,unisex,kids'],
+                'season' => ['nullable', 'string', 'max:20'],
+                'tags' => ['nullable', 'array'],
+                'tags.*' => ['string'],
+                'status' => ['nullable', 'in:draft,active,archived'],
+                'is_featured' => ['nullable', 'boolean'],
+                'published_at' => ['nullable', 'date'],
+                'meta_title' => ['nullable', 'string', 'max:255'],
+                'meta_description' => ['nullable', 'string'],
             ]);
 
             $product->update($validated);

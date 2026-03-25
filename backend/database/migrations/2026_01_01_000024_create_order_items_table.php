@@ -10,6 +10,8 @@ return new class extends Migration {
         Schema::create('order_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('order_id')->constrained()->cascadeOnDelete();
+            $table->uuid('product_id')->nullable();
+            $table->foreign('product_id')->references('id')->on('products')->nullOnDelete();
             $table->uuid('product_variant_id')->nullable();
             $table->foreign('product_variant_id')->references('id')->on('product_variants')->nullOnDelete();
             $table->string('sku', 100);

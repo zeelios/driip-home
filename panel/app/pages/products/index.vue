@@ -1,13 +1,15 @@
 <template>
   <div>
     <!-- Toolbar -->
-    <div class="flex items-start justify-between gap-3 mb-4.5 flex-wrap">
-      <div class="flex gap-2.5 flex-1 flex-wrap">
+    <div
+      class="flex flex-col sm:flex-row items-start justify-between gap-3 mb-4 sm:mb-4.5"
+    >
+      <div class="flex flex-col sm:flex-row gap-2.5 flex-1 w-full">
         <ZInput
           v-model="search"
           placeholder="Tìm sản phẩm, SKU..."
           type="search"
-          class="flex-1 min-w-[180px] max-w-[280px]"
+          class="flex-1 w-full min-w-0"
           @input="onSearchInput"
         >
           <template #prefix>
@@ -28,11 +30,15 @@
           v-model="statusFilter"
           :options="statusOptions"
           placeholder="Tất cả trạng thái"
-          class="min-w-[150px]"
+          class="w-full sm:w-auto sm:min-w-37.5"
           @change="onFilterChange"
         />
       </div>
-      <ZButton size="sm" @click="showCreateModal = true">
+      <ZButton
+        size="sm"
+        @click="showCreateModal = true"
+        class="w-full sm:w-auto shrink-0"
+      >
         <template #prefix>
           <svg
             width="14"

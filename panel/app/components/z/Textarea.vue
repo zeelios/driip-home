@@ -18,7 +18,7 @@
     <textarea
       :id="textareaId"
       v-bind="$attrs"
-      class="w-full py-3 px-3.5 border border-white/12 rounded-lg bg-white/4 font-inherit text-sm text-white/90 outline-none transition-all duration-150 min-w-0 resize-y focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.08)] disabled:bg-white/2 disabled:text-white/35 disabled:cursor-not-allowed"
+      class="w-full py-3 px-4 md:py-3 md:px-3.5 border border-white/12 rounded-lg bg-white/4 font-inherit text-base md:text-sm text-white/90 outline-none transition-all duration-150 min-w-0 resize-y min-h-28 md:min-h-24 focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.08)] disabled:bg-white/2 disabled:text-white/35 disabled:cursor-not-allowed touch-manipulation"
       :value="modelValue ?? ''"
       :placeholder="placeholder"
       :disabled="disabled"

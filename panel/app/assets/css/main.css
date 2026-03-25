@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* Phải là cả html và body */
+html,
+body {
+  background-color: #000000 !important;
+  margin: 0;
+  padding: 0;
+  /* Ngăn hiện tượng trắng ởn khi kéo quá đà (overscroll) trên iOS */
+  overscroll-behavior-y: none;
+  min-height: 100%;
+}
+
+/* Đảm bảo root element của Nuxt cũng đen xì */
+#__zeelios {
+  background-color: #000000;
+  min-height: 100vh;
+}
+
 /* ─── PANEL DESIGN TOKENS ───────────────────────────────────────── */
 :root {
   /* Background layers — darkest to lightest */

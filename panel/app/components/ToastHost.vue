@@ -3,7 +3,7 @@
     <div
       aria-live="polite"
       aria-relevant="additions removals"
-      class="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4 py-4 sm:justify-end sm:px-6"
+      class="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 py-4 sm:bottom-auto sm:top-0 sm:justify-end sm:px-6"
     >
       <TransitionGroup
         tag="div"
@@ -180,6 +180,13 @@ function badgeClasses(
 .panel-toast-enter-from,
 .panel-toast-leave-to {
   opacity: 0;
-  transform: translateY(-8px) scale(0.98);
+  transform: translateY(8px) scale(0.98);
+}
+
+@media (min-width: 640px) {
+  .panel-toast-enter-from,
+  .panel-toast-leave-to {
+    transform: translateY(-8px) scale(0.98);
+  }
 }
 </style>

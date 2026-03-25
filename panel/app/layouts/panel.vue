@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen bg-[#0a0a0a]">
+  <div class="flex min-h-screen bg-[#0a0a0a] w-full overflow-x-hidden">
     <!-- Mobile overlay -->
     <ClientOnly>
       <Transition name="overlay">
@@ -13,7 +13,7 @@
 
     <!-- Sidebar -->
     <aside
-      class="fixed inset-y-0 left-0 z-40 w-60 flex flex-col bg-[#111110] transition-transform duration-220 ease-out"
+      class="fixed inset-y-0 left-0 z-40 w-60 flex flex-col bg-[#111110] transition-transform duration-220 ease-out max-w-[85vw]"
       :class="
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       "
@@ -198,7 +198,7 @@
       </header>
 
       <!-- Page content -->
-      <main class="flex-1 p-6 sm:p-7">
+      <main class="flex-1 p-4 sm:p-5 lg:p-6 min-w-0">
         <slot />
       </main>
     </div>

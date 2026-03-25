@@ -1,12 +1,14 @@
 <template>
   <div>
     <!-- KPI Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-7">
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 sm:mb-7"
+    >
       <template v-if="dashboard.isLoading">
         <div
           v-for="i in 4"
           :key="i"
-          class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5 px-5"
+          class="bg-[#111111] border border-white/8 rounded-[10px] p-4 sm:p-4.5"
         >
           <ZSkeleton height="0.75rem" width="50%" class="mb-2" />
           <ZSkeleton height="1.75rem" width="70%" class="mb-1" />
@@ -15,73 +17,72 @@
       </template>
       <template v-else>
         <div
-          class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5 px-5"
+          class="bg-[#111111] border border-white/8 rounded-[10px] p-4 sm:p-4.5"
         >
           <p
-            class="m-0 mb-1.5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+            class="m-0 mb-1 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
           >
             Doanh thu hôm nay
           </p>
           <p
-            class="m-0 mb-1 text-2xl font-bold text-white/95 tracking-tight leading-tight break-all"
+            class="m-0 mb-1 text-xl sm:text-2xl font-bold text-white/95 tracking-tight leading-tight break-all"
           >
             {{ formatVnd(dashboard.stats.total_revenue_today) }}
           </p>
           <p class="m-0 text-xs text-white/45">
-            {{ dashboard.stats.total_orders_today }} đơn hàng
+            {{ dashboard.stats.total_orders_today }} đơn
           </p>
         </div>
         <div
-          class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5 px-5"
+          class="bg-[#111111] border border-white/8 rounded-[10px] p-4 sm:p-4.5"
         >
           <p
-            class="m-0 mb-1.5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+            class="m-0 mb-1 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
           >
             Doanh thu tháng
           </p>
           <p
-            class="m-0 mb-1 text-2xl font-bold text-white/95 tracking-tight leading-tight break-all"
+            class="m-0 mb-1 text-xl sm:text-2xl font-bold text-white/95 tracking-tight leading-tight break-all"
           >
             {{ formatVnd(dashboard.stats.total_revenue_month) }}
           </p>
           <p class="m-0 text-xs text-white/45">
-            {{ dashboard.stats.total_orders_month }} đơn hàng
+            {{ dashboard.stats.total_orders_month }} đơn
           </p>
         </div>
         <div
-          class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5 px-5"
+          class="bg-[#111111] border border-white/8 rounded-[10px] p-4 sm:p-4.5"
         >
           <p
-            class="m-0 mb-1.5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+            class="m-0 mb-1 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
           >
             Khách hàng
           </p>
           <p
-            class="m-0 mb-1 text-2xl font-bold text-white/95 tracking-tight leading-tight break-all"
+            class="m-0 mb-1 text-xl sm:text-2xl font-bold text-white/95 tracking-tight leading-tight break-all"
           >
             {{ formatNumber(dashboard.stats.total_customers) }}
           </p>
-          <p class="m-0 text-xs text-white/45">Tổng số khách hàng</p>
+          <p class="m-0 text-xs text-white/45">Tổng số khách</p>
         </div>
         <div
-          class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5 px-5"
+          class="bg-[#111111] border border-white/8 rounded-[10px] p-4 sm:p-4.5"
           :class="{
-            'border-white/25 bg-white/[0.06]':
-              dashboard.stats.pending_orders > 0,
+            'border-white/25 bg-white/6': dashboard.stats.pending_orders > 0,
           }"
         >
           <p
-            class="m-0 mb-1.5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+            class="m-0 mb-1 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
           >
             Chờ xử lý
           </p>
           <p
-            class="m-0 mb-1 text-2xl font-bold text-white/95 tracking-tight leading-tight break-all"
+            class="m-0 mb-1 text-xl sm:text-2xl font-bold text-white/95 tracking-tight leading-tight break-all"
           >
             {{ dashboard.stats.pending_orders }}
           </p>
           <p class="m-0 text-xs text-white/45">
-            {{ dashboard.stats.low_stock_variants }} SKU sắp hết hàng
+            {{ dashboard.stats.low_stock_variants }} sắp hết hàng
           </p>
         </div>
       </template>

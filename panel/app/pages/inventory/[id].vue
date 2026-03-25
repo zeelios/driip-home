@@ -142,38 +142,38 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">SKU</dt>
               <dd
-                class="m-0 text-white/85 text-right break-words font-mono text-[0.8125rem] font-semibold"
+                class="m-0 text-white/85 text-right wrap-break-word font-mono text-[0.8125rem] font-semibold"
               >
                 {{ inventory.variant?.sku ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Sản phẩm</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ inventory.variant?.product?.name ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Barcode</dt>
               <dd
-                class="m-0 text-white/85 text-right break-words font-mono text-[0.8125rem] font-semibold"
+                class="m-0 text-white/85 text-right wrap-break-word font-mono text-[0.8125rem] font-semibold"
               >
                 {{ inventory.variant?.barcode ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Trạng thái</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 <ZBadge
                   :variant="(productStatusVariant(inventory.variant?.status ?? '') as any)"
                 >
@@ -193,45 +193,47 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Kho</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ inventory.warehouse?.name ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Tồn thực tế</dt>
-              <dd class="m-0 text-white/85 text-right break-words font-bold">
+              <dd
+                class="m-0 text-white/85 text-right wrap-break-word font-bold"
+              >
                 {{ inventory.quantity_on_hand }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Đặt trước</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ inventory.quantity_reserved }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Có thể bán</dt>
               <dd
-                class="m-0 text-white/85 text-right break-words font-bold"
+                class="m-0 text-white/85 text-right wrap-break-word font-bold"
                 :class="isLowStock ? 'text-red-500' : ''"
               >
                 {{ inventory.quantity_available }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Đang về</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ inventory.quantity_incoming }}
               </dd>
             </div>
@@ -250,34 +252,36 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Giá so sánh</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ formatVnd(inventory.variant.compare_price) }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Giá vốn</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ formatVnd(inventory.variant.cost_price) }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Giá bán</dt>
-              <dd class="m-0 text-white/85 text-right break-words font-bold">
+              <dd
+                class="m-0 text-white/85 text-right wrap-break-word font-bold"
+              >
                 {{ formatVnd(inventory.variant.selling_price) }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Giá sale</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{
                   inventory.variant.sale_price
                     ? formatVnd(inventory.variant.sale_price)
@@ -376,13 +380,13 @@
     <!-- Adjust modal -->
     <ZModal v-model="showAdjustModal" title="Điều chỉnh tồn kho" size="sm">
       <div class="flex flex-col gap-4">
-        <div class="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3">
+        <div class="bg-white/3 border border-white/8 rounded-lg p-3">
           <p class="m-0 mb-1 text-[0.6875rem] text-white/50">Sản phẩm</p>
           <p class="m-0 font-medium text-white/90">
             {{ inventory?.variant?.product?.name ?? "—" }}
           </p>
         </div>
-        <div class="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3">
+        <div class="bg-white/3 border border-white/8 rounded-lg p-3">
           <p class="m-0 mb-1 text-[0.6875rem] text-white/50">SKU</p>
           <p class="m-0 font-medium text-white/90 font-mono text-[0.8125rem]">
             {{ inventory?.variant?.sku ?? "—" }}

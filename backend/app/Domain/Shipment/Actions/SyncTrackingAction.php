@@ -6,10 +6,7 @@ namespace App\Domain\Shipment\Actions;
 
 use App\Domain\Shipment\Models\Shipment;
 use App\Domain\Shipment\Models\ShipmentTrackingEvent;
-use App\Domain\Shipment\Services\CourierServiceInterface;
-use App\Domain\Shipment\Services\GHNService;
-use App\Domain\Shipment\Services\GHTKService;
-use Illuminate\Container\Container;
+use App\Domain\Shipment\Services\CourierServiceResolver;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -21,15 +18,10 @@ use Illuminate\Support\Facades\DB;
  */
 class SyncTrackingAction
 {
-    /**
-     * Map of courier codes to their service class names.
-     *
-     * @var array<string,class-string<CourierServiceInterface>>
-     */
-    private array $courierMap = [
-        'ghn'  => GHNService::class,
-        'ghtk' => GHTKService::class,
-    ];
+    public function __construct(
+        private readonly CourierServiceResolver $courierResolver
+    ) {
+    }
 
     /**
      * Status values in courier tracking responses that map to internal statuses.
@@ -37,16 +29,16 @@ class SyncTrackingAction
      * @var array<string,string>
      */
     private array $statusMap = [
-        'created'           => 'created',
-        'ready_to_pick'     => 'created',
-        'picked_up'         => 'picked_up',
-        'in_transit'        => 'in_transit',
-        'out_for_delivery'  => 'out_for_delivery',
-        'delivered'         => 'delivered',
-        'failed_delivery'   => 'failed_delivery',
-        'returning'         => 'returning',
-        'returned'          => 'returned',
-        'cancelled'         => 'cancelled',
+        'created' => 'created',
+        'ready_to_pick' => 'created',
+        'picked_up' => 'picked_up',
+        'in_transit' => 'in_transit',
+        'out_for_delivery' => 'out_for_delivery',
+        'delivered' => 'delivered',
+        'failed_delivery' => 'failed_delivery',
+        'returning' => 'returning',
+        'returned' => 'returned',
+        'cancelled' => 'cancelled',
     ];
 
     /**
@@ -67,14 +59,7 @@ class SyncTrackingAction
             throw new \RuntimeException('Cannot sync tracking: shipment has no tracking number.');
         }
 
-        $serviceClass = $this->courierMap[$shipment->courier_code] ?? null;
-
-        if ($serviceClass === null) {
-            throw new \RuntimeException("Unsupported courier code: {$shipment->courier_code}");
-        }
-
-        /** @var CourierServiceInterface $courierService */
-        $courierService = Container::getInstance()->make($serviceClass);
+        $courierService = $this->courierResolver->resolve($shipment->courier_code);
 
         $events = $courierService->getTrackingEvents($shipment->tracking_number);
 
@@ -85,13 +70,13 @@ class SyncTrackingAction
             foreach ($events as $event) {
                 ShipmentTrackingEvent::updateOrCreate(
                     [
-                        'shipment_id'         => $shipment->id,
-                        'occurred_at'         => $event['occurred_at'],
+                        'shipment_id' => $shipment->id,
+                        'occurred_at' => $event['occurred_at'],
                         'courier_status_code' => $event['courier_status_code'] ?? null,
                     ],
                     [
-                        'status'   => $event['status'],
-                        'message'  => $event['message'] ?? '',
+                        'status' => $event['status'],
+                        'message' => $event['message'] ?? '',
                         'location' => $event['location'] ?? null,
                         'synced_at' => now(),
                         'raw_data' => $event,

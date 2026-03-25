@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
         then: function () {
             Route::middleware('api')
@@ -26,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'verify.courier.webhook' => \App\Http\Middleware\VerifyCourierWebhookSignature::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -44,6 +46,19 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthorizationException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'This action is unauthorized.'], 403);
+            }
+        });
+
+        // Catch all other exceptions for API requests to ensure JSON response with request_code
+        $exceptions->render(function (\Throwable $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                $code = 'API_' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
+
+                return response()->json([
+                    'success' => false,
+                    'request_code' => $code,
+                    'message' => $e->getMessage() ?: 'An unexpected error occurred.',
+                ], 500);
             }
         });
     })->create();

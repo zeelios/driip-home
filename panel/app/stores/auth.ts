@@ -32,6 +32,7 @@ interface ApiRequestOptions {
   body?: BodyInit | object | null;
   headers?: Record<string, string>;
   auth?: boolean;
+  skipSessionExpiry?: boolean;
 }
 
 const LOGIN_ROUTE = "/login";
@@ -102,7 +103,9 @@ export const useAuthStore = defineStore("auth", () => {
   const initialized = ref(false);
   const bootstrapping = ref(false);
   const sessionProbeDone = ref(false);
+  const sessionRecoveryLocked = ref(false);
   const loginPending = ref(false);
+  const loginAttemptLocked = ref(false);
   const logoutPending = ref(false);
   const redirectAfterLogin = ref<string | null>(null);
   const error = ref<string | null>(null);
@@ -156,6 +159,13 @@ export const useAuthStore = defineStore("auth", () => {
   async function handleExpiredSession(
     message = EXPIRED_SESSION_MESSAGE
   ): Promise<RedirectInstruction | null> {
+    if (sessionRecoveryLocked.value) {
+      clearSession(null);
+      setAuthHint(false);
+      return null;
+    }
+
+    sessionRecoveryLocked.value = true;
     const shouldNotify = shouldNotifyExpiredSession();
     clearSession(shouldNotify ? message : null);
     setAuthHint(false);
@@ -189,7 +199,11 @@ export const useAuthStore = defineStore("auth", () => {
       const maybe = error as { statusCode?: number; status?: number };
       const statusCode = maybe.statusCode ?? maybe.status;
 
-      if (statusCode === 401 && options.auth !== false) {
+      if (
+        statusCode === 401 &&
+        options.auth !== false &&
+        !options.skipSessionExpiry
+      ) {
         await handleExpiredSession();
       }
 
@@ -198,6 +212,14 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function login(payload: LoginRequestDto): Promise<boolean> {
+    if (loginAttemptLocked.value) {
+      const message =
+        "Phiên đăng nhập này đã bị khóa sau một lần thử thất bại. Vui lòng tải lại trang để thử lại.";
+      setError(message);
+      toast.error("Đăng nhập bị khóa", message);
+      return false;
+    }
+
     loginPending.value = true;
     status.value = "bootstrapping";
     setError(null);
@@ -220,12 +242,15 @@ export const useAuthStore = defineStore("auth", () => {
       status.value = "authenticated";
       initialized.value = true;
       sessionProbeDone.value = true;
+      sessionRecoveryLocked.value = false;
+      loginAttemptLocked.value = false;
       setAuthHint(true);
       toast.success("Đăng nhập thành công", "Chào mừng trở lại.");
       return true;
     } catch (error) {
       const message = getErrorMessage(error, "Đăng nhập không thành công.");
       clearSession(message);
+      loginAttemptLocked.value = true;
       toast.error("Đăng nhập thất bại", message);
       initialized.value = true;
       return false;
@@ -234,9 +259,13 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  async function fetchMe(): Promise<PublicStaffUserModel | null> {
+  async function fetchMe(
+    isInitialProbe = false
+  ): Promise<PublicStaffUserModel | null> {
     try {
-      const response = await apiFetch<MeResponseDto>("/auth/me");
+      const response = await apiFetch<MeResponseDto>("/auth/me", {
+        skipSessionExpiry: isInitialProbe,
+      });
       const nextUser = normalizeUser(response);
 
       if (!nextUser) {
@@ -253,14 +282,21 @@ export const useAuthStore = defineStore("auth", () => {
       const statusCode = maybe.statusCode ?? maybe.status;
 
       if (statusCode === 401) {
-        await handleExpiredSession();
+        // During initial probe, silently handle 401 without clearing session
+        // Let bootstrap() handle cleanup to avoid race conditions
+        if (!isInitialProbe) {
+          await handleExpiredSession();
+        }
       } else {
         const message = getErrorMessage(
           error,
           "Không thể khôi phục phiên làm việc."
         );
         clearSession(message);
-        toast.error("Không thể khôi phục phiên", message);
+        // Only show toast error if not initial probe (user explicitly refreshed)
+        if (!isInitialProbe) {
+          toast.error("Không thể khôi phục phiên", message);
+        }
       }
 
       return null;
@@ -279,6 +315,8 @@ export const useAuthStore = defineStore("auth", () => {
     } finally {
       clearSession(null);
       setAuthHint(false);
+      sessionRecoveryLocked.value = false;
+      loginAttemptLocked.value = false;
       toast.success("Đã đăng xuất", "Phiên làm việc đã được xóa.");
       initialized.value = true;
       sessionProbeDone.value = true;
@@ -289,14 +327,26 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function bootstrap(): Promise<void> {
-    if (sessionProbeDone.value || bootstrapping.value) return;
+    if (
+      sessionProbeDone.value ||
+      bootstrapping.value ||
+      sessionRecoveryLocked.value
+    )
+      return;
+
+    if (authHint.value !== "1") {
+      sessionProbeDone.value = true;
+      initialized.value = true;
+      status.value = "guest";
+      return;
+    }
 
     bootstrapping.value = true;
     status.value = "bootstrapping";
     setError(null);
 
     try {
-      await fetchMe();
+      await fetchMe(true);
     } finally {
       sessionProbeDone.value = true;
       initialized.value = true;
@@ -304,6 +354,9 @@ export const useAuthStore = defineStore("auth", () => {
 
       if (!user.value) {
         status.value = "guest";
+        if (authHint.value === "1") {
+          authHint.value = null;
+        }
       }
     }
   }
@@ -405,7 +458,9 @@ export const useAuthStore = defineStore("auth", () => {
     user,
     initialized,
     bootstrapping,
+    sessionRecoveryLocked,
     loginPending,
+    loginAttemptLocked,
     logoutPending,
     redirectAfterLogin,
     error,

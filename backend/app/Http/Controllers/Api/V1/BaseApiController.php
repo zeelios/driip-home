@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ErrorResource;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
@@ -17,6 +18,17 @@ use Illuminate\Validation\ValidationException;
  */
 abstract class BaseApiController extends Controller
 {
+    /**
+     * Role hierarchy levels for permission checks.
+     */
+    protected const ROLE_LEVELS = [
+        'warehouse-staff' => 1,
+        'sales-staff' => 2,
+        'manager' => 3,
+        'admin' => 4,
+        'super-admin' => 5,
+    ];
+
     /**
      * Return a 422 validation error response.
      *
@@ -69,5 +81,95 @@ abstract class BaseApiController extends Controller
         return ErrorResource::fromException($message, $actionName)
             ->response()
             ->setStatusCode(403);
+    }
+
+    /**
+     * Check if the current user owns the given resource.
+     *
+     * @param  Model   $model
+     * @param  string  $field  Field to compare against user ID (default: 'user_id')
+     * @return bool
+     */
+    protected function checkOwnership(Model $model, string $field = 'user_id'): bool
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return false;
+        }
+
+        return $user->id === $model->{$field};
+    }
+
+    /**
+     * Check if the current user owns the resource via any of the given fields.
+     *
+     * @param  Model          $model
+     * @param  array<string>  $fields
+     * @return bool
+     */
+    protected function checkOwnershipAny(Model $model, array $fields): bool
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return false;
+        }
+
+        foreach ($fields as $field) {
+            if ($user->id === $model->{$field}) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the role level of the authenticated user.
+     *
+     * @return int
+     */
+    protected function getRoleLevel(): int
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return 0;
+        }
+
+        $roles = $user->roles->pluck('name')->toArray();
+        $maxLevel = 0;
+
+        foreach ($roles as $role) {
+            $level = self::ROLE_LEVELS[$role] ?? 0;
+            if ($level > $maxLevel) {
+                $maxLevel = $level;
+            }
+        }
+
+        return $maxLevel;
+    }
+
+    /**
+     * Check if current user has higher role level than target user.
+     *
+     * @param  \App\Domain\Staff\Models\User  $targetUser
+     * @return bool
+     */
+    protected function hasHigherRoleLevelThan(\App\Domain\Staff\Models\User $targetUser): bool
+    {
+        $currentLevel = $this->getRoleLevel();
+        $targetRoles = $targetUser->roles->pluck('name')->toArray();
+
+        $targetLevel = 0;
+        foreach ($targetRoles as $role) {
+            $level = self::ROLE_LEVELS[$role] ?? 0;
+            if ($level > $targetLevel) {
+                $targetLevel = $level;
+            }
+        }
+
+        return $currentLevel > $targetLevel;
     }
 }

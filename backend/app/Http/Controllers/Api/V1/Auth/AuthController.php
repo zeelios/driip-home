@@ -11,6 +11,7 @@ use App\Http\Resources\Staff\StaffResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
@@ -20,8 +21,22 @@ use Illuminate\Validation\ValidationException;
  *
  * Uses Laravel Sanctum SPA session authentication.
  */
-class AuthController extends BaseApiController
+class AuthController extends BaseApiController implements HasMiddleware
 {
+    /**
+     * Get the middleware that should be assigned to the controller.
+     *
+     * Auth endpoints are public (no auth required), except logout and me.
+     *
+     * @return array<\Illuminate\Routing\Controllers\Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [
+            new \Illuminate\Routing\Controllers\Middleware('auth:sanctum', only: ['logout', 'me']),
+        ];
+    }
+
     /**
      * Authenticate a staff member using the session guard.
      *
