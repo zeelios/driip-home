@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Requests\Shipment;
 
 use App\Domain\Shipment\Data\CreateShipmentDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new shipment.
  */
-class CreateShipmentRequest extends FormRequest
+class CreateShipmentRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

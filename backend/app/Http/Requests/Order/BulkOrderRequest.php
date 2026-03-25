@@ -6,7 +6,7 @@ namespace App\Http\Requests\Order;
 
 use App\Domain\Order\Data\BulkOrderDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for bulk order operations.
@@ -15,7 +15,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * (confirm, cancel, ship) may add additional rules in their own request
  * classes, but this base class ensures the order_ids are always valid.
  */
-class BulkOrderRequest extends FormRequest
+class BulkOrderRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

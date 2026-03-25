@@ -1,5 +1,8 @@
 <template>
-  <span class="z-badge" :class="variantClass">
+  <span
+    class="inline-flex items-center whitespace-nowrap rounded-full text-[0.6875rem] font-semibold tracking-[0.02em] leading-[1.4] py-0.75 px-2"
+    :class="variantClass"
+  >
     <slot />
   </span>
 </template>
@@ -13,8 +16,7 @@ type BadgeVariant =
   | "warning"
   | "danger"
   | "info"
-  | "neutral"
-  | "amber";
+  | "neutral";
 
 const props = withDefaults(
   defineProps<{
@@ -23,45 +25,15 @@ const props = withDefaults(
   { variant: "default" }
 );
 
-const variantClass = computed(() => `z-badge--${props.variant}`);
+const variantClass = computed(() => {
+  const map: Record<BadgeVariant, string> = {
+    default: "bg-white/10 text-white/85",
+    neutral: "bg-white/10 text-white/85",
+    success: "bg-white/[0.12] text-white/95",
+    warning: "bg-white/[0.08] text-white/75",
+    danger: "bg-red-500/15 text-red-500",
+    info: "bg-white/[0.06] text-white/70",
+  };
+  return map[props.variant];
+});
 </script>
-
-<style scoped>
-.z-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.1875rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  line-height: 1.4;
-}
-
-.z-badge--default,
-.z-badge--neutral {
-  background: #f0efed;
-  color: #555;
-}
-.z-badge--success {
-  background: #dcfce7;
-  color: #15803d;
-}
-.z-badge--warning {
-  background: #fef9c3;
-  color: #a16207;
-}
-.z-badge--danger {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-.z-badge--info {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-.z-badge--amber {
-  background: rgba(245, 166, 35, 0.14);
-  color: #b45309;
-}
-</style>

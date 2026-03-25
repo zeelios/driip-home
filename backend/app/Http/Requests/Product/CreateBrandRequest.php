@@ -6,12 +6,12 @@ namespace App\Http\Requests\Product;
 
 use App\Domain\Product\Data\CreateBrandDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new brand.
  */
-class CreateBrandRequest extends FormRequest
+class CreateBrandRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Inventory\Models;
 
-use App\Domain\Product\Models\ProductVariant;
+use App\Domain\Product\Models\Product;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,11 +14,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * PurchaseOrderItem model representing a single line item on a purchase order.
  *
  * Tracks the ordered quantity, received quantity, and unit/total cost for
- * a specific product variant SKU on a given purchase order.
+ * a specific product SKU on a given purchase order.
  *
  * @property string       $id
  * @property string       $purchase_order_id
- * @property string       $product_variant_id
+ * @property string       $product_id
  * @property string       $sku
  * @property int          $quantity_ordered
  * @property int          $quantity_received
@@ -38,7 +38,7 @@ class PurchaseOrderItem extends Model
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
         'purchase_order_id',
-        'product_variant_id',
+        'product_id',
         'sku',
         'quantity_ordered',
         'quantity_received',
@@ -49,10 +49,10 @@ class PurchaseOrderItem extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'quantity_ordered'  => 'integer',
+        'quantity_ordered' => 'integer',
         'quantity_received' => 'integer',
-        'unit_cost'         => 'integer',
-        'total_cost'        => 'integer',
+        'unit_cost' => 'integer',
+        'total_cost' => 'integer',
     ];
 
     /**
@@ -66,12 +66,12 @@ class PurchaseOrderItem extends Model
     }
 
     /**
-     * Get the product variant for this line item.
+     * Get the product for this line item.
      *
-     * @return BelongsTo<ProductVariant, PurchaseOrderItem>
+     * @return BelongsTo<Product, PurchaseOrderItem>
      */
-    public function variant(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

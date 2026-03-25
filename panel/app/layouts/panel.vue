@@ -1,13 +1,15 @@
 <template>
-  <div class="flex min-h-screen bg-stone-100">
+  <div class="flex min-h-screen bg-[#0a0a0a]">
     <!-- Mobile overlay -->
-    <Transition name="overlay">
-      <div
-        v-if="sidebarOpen"
-        class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden"
-        @click="sidebarOpen = false"
-      />
-    </Transition>
+    <ClientOnly>
+      <Transition name="overlay">
+        <div
+          v-if="sidebarOpen"
+          class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+          @click="sidebarOpen = false"
+        />
+      </Transition>
+    </ClientOnly>
 
     <!-- Sidebar -->
     <aside
@@ -18,20 +20,20 @@
     >
       <!-- Logo -->
       <div
-        class="flex items-center justify-between px-4 py-5 border-b border-white/6"
+        class="flex items-center justify-between px-4 py-5 border-b border-white/8"
       >
         <div class="flex items-center gap-2.5">
           <div
-            class="w-7.5 h-7.5 bg-amber-500 flex items-center justify-center text-sm font-extrabold text-[#111110] rounded-md"
+            class="w-7.5 h-7.5 bg-white flex items-center justify-center text-sm font-extrabold text-[#111110] rounded-md"
           >
             D
           </div>
           <span class="text-base font-bold text-white tracking-tight"
-            >driip<span class="text-amber-500">.</span></span
+            >driip<span class="text-white">.</span></span
           >
         </div>
         <button
-          class="flex items-center justify-center w-8 h-8 bg-transparent text-white/50 hover:bg-white/8 hover:text-white rounded-md transition-colors duration-150 lg:hidden"
+          class="flex items-center justify-center w-8 h-8 bg-transparent text-white/50 hover:bg-white/10 hover:text-white rounded-md transition-colors duration-150 lg:hidden"
           aria-label="Đóng menu"
           @click="sidebarOpen = false"
         >
@@ -63,17 +65,17 @@
             <li v-for="item in group.items" :key="item.to">
               <NuxtLink
                 :to="item.to"
-                class="flex items-center gap-2.5 mx-2 my-px px-2.5 py-2.5 rounded-lg text-sm font-medium text-white/60 no-underline transition-colors duration-150 hover:bg-white/7 hover:text-white/90"
+                class="flex items-center gap-2.5 mx-2 my-px px-2.5 py-2.5 rounded-lg text-sm font-medium text-white/55 no-underline transition-colors duration-150 hover:bg-white/8 hover:text-white"
                 :class="
                   isActive(item.to)
-                    ? 'bg-amber-500/14 text-amber-500 font-semibold'
+                    ? 'bg-white/10 text-white border-l-2 border-white'
                     : ''
                 "
                 @click="sidebarOpen = false"
               >
                 <span
                   class="flex items-center shrink-0"
-                  :class="isActive(item.to) ? 'opacity-100' : 'opacity-80'"
+                  :class="isActive(item.to) ? 'opacity-100' : 'opacity-70'"
                   v-html="item.icon"
                 />
                 <span>{{ item.label }}</span>
@@ -84,10 +86,10 @@
       </nav>
 
       <!-- User footer -->
-      <div class="p-3 border-t border-white/6 flex items-center gap-2">
+      <div class="p-3 border-t border-white/8 flex items-center gap-2">
         <div class="flex items-center gap-2.5 flex-1 min-w-0">
           <div
-            class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-500 text-xs font-bold flex items-center justify-center shrink-0"
+            class="w-8 h-8 rounded-full bg-white/15 text-white text-xs font-bold flex items-center justify-center shrink-0"
           >
             {{ userInitials }}
           </div>
@@ -98,14 +100,14 @@
               {{ auth.user?.name }}
             </p>
             <p
-              class="m-0 text-xs text-white/35 whitespace-nowrap overflow-hidden text-ellipsis"
+              class="m-0 text-xs text-white/40 whitespace-nowrap overflow-hidden text-ellipsis"
             >
               {{ userRole }}
             </p>
           </div>
         </div>
         <button
-          class="flex items-center justify-center w-8 h-8 bg-transparent text-white/35 hover:bg-white/7 hover:text-white/80 rounded-md shrink-0 transition-colors duration-150 disabled:opacity-40 disabled:cursor-wait"
+          class="flex items-center justify-center w-8 h-8 bg-transparent text-white/40 hover:bg-white/10 hover:text-white/80 rounded-md shrink-0 transition-colors duration-150 disabled:opacity-40 disabled:cursor-wait"
           :disabled="auth.logoutPending"
           aria-label="Đăng xuất"
           @click="signOut"
@@ -132,10 +134,10 @@
     >
       <!-- Topbar -->
       <header
-        class="sticky top-0 z-20 flex items-center gap-4 px-5 h-14 bg-stone-100/92 backdrop-blur-sm border-b border-black/6"
+        class="sticky top-0 z-20 flex items-center gap-4 px-5 h-14 bg-[#0a0a0a]/92 backdrop-blur-md border-b border-white/8"
       >
         <button
-          class="flex items-center justify-center w-9 h-9 bg-transparent text-neutral-700 hover:bg-black/6 rounded-lg transition-colors duration-150 lg:hidden"
+          class="flex items-center justify-center w-9 h-9 bg-transparent text-white/60 hover:bg-white/10 hover:text-white rounded-lg transition-colors duration-150 lg:hidden"
           aria-label="Mở menu"
           @click="sidebarOpen = true"
         >
@@ -152,7 +154,7 @@
         </button>
 
         <div class="flex-1">
-          <span class="text-base font-semibold text-neutral-900">{{
+          <span class="text-base font-semibold text-white/90">{{
             currentPageTitle
           }}</span>
         </div>
@@ -160,23 +162,21 @@
         <div class="flex items-center gap-3">
           <div class="hidden lg:flex items-center gap-2">
             <div
-              class="w-8 h-8 rounded-full bg-[#111110] text-amber-500 text-xs font-bold flex items-center justify-center"
+              class="w-8 h-8 rounded-full bg-white/10 text-white text-xs font-bold flex items-center justify-center"
             >
               {{ userInitials }}
             </div>
             <div class="flex flex-col">
-              <p
-                class="m-0 text-sm font-semibold text-neutral-900 leading-tight"
-              >
+              <p class="m-0 text-sm font-semibold text-white/90 leading-tight">
                 {{ auth.user?.name }}
               </p>
-              <p class="m-0 text-xs text-neutral-500 leading-tight">
+              <p class="m-0 text-xs text-white/40 leading-tight">
                 {{ userRole }}
               </p>
             </div>
           </div>
           <button
-            class="hidden lg:flex items-center gap-1.5 px-3 py-2 border border-black/10 bg-transparent text-neutral-600 text-sm font-medium hover:bg-black/4 hover:text-neutral-900 rounded-lg transition-colors duration-150 disabled:opacity-40 disabled:cursor-wait"
+            class="hidden lg:flex items-center gap-1.5 px-3 py-2 border border-white/15 bg-transparent text-white/70 text-sm font-medium hover:bg-white/10 hover:text-white hover:border-white/25 rounded-lg transition-colors duration-150 disabled:opacity-40 disabled:cursor-wait"
             :disabled="auth.logoutPending"
             @click="signOut"
           >
@@ -206,13 +206,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useRoute } from "vue-router";
+import { ref, computed, watch } from "vue";
+import { useRoute, navigateTo } from "nuxt/app";
 import { useAuthStore } from "~/stores/auth";
 
 const auth = useAuthStore();
 const route = useRoute();
 const sidebarOpen = ref(false);
+
+// Redirect to login when session expires on protected pages (client-only)
+if (import.meta.client) {
+  watch(
+    () => auth.isAuthenticated,
+    (isAuthenticated, wasAuthenticated) => {
+      // Only redirect if we were authenticated and now we're not
+      // and we're on a protected route (not login/forgot-password/reset-password)
+      if (wasAuthenticated && !isAuthenticated) {
+        const publicRoutes = ["/login", "/forgot-password", "/reset-password"];
+        const isPublicRoute = publicRoutes.some(
+          (p) => route.path === p || route.path.startsWith(p + "/")
+        );
+        if (!isPublicRoute) {
+          navigateTo({
+            path: "/login",
+            query: { redirect: route.fullPath },
+          });
+        }
+      }
+    }
+  );
+}
 
 const ICON_DASHBOARD = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`;
 const ICON_ORDERS = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;

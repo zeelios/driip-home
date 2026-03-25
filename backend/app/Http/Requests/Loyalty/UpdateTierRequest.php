@@ -6,14 +6,14 @@ namespace App\Http\Requests\Loyalty;
 
 use App\Domain\Loyalty\Data\UpdateTierDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing loyalty tier.
  *
  * All fields are optional (PATCH semantics).
  */
-class UpdateTierRequest extends FormRequest
+class UpdateTierRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

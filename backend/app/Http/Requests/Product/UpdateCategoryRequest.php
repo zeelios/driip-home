@@ -6,7 +6,7 @@ namespace App\Http\Requests\Product;
 
 use App\Domain\Product\Data\UpdateCategoryDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing category.
@@ -14,7 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * All fields are optional (patch semantics). Slug uniqueness is checked
  * at the Action layer so we only validate format here.
  */
-class UpdateCategoryRequest extends FormRequest
+class UpdateCategoryRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

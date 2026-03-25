@@ -6,14 +6,14 @@ namespace App\Http\Requests\Tax;
 
 use App\Domain\Tax\Data\UpdateTaxConfigDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for updating an existing tax rate configuration.
  *
  * All fields are optional to support partial updates.
  */
-class UpdateTaxConfigRequest extends FormRequest
+class UpdateTaxConfigRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

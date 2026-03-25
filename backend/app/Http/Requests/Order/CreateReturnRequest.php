@@ -6,7 +6,7 @@ namespace App\Http\Requests\Order;
 
 use App\Domain\Order\Data\CreateReturnDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for creating a new order return request.
@@ -14,7 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * The return_items array must list the order item UUIDs and the quantities
  * being returned. An optional notes field captures customer-provided context.
  */
-class CreateReturnRequest extends FormRequest
+class CreateReturnRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

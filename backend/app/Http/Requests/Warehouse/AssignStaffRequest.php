@@ -6,12 +6,12 @@ namespace App\Http\Requests\Warehouse;
 
 use App\Domain\Warehouse\Data\AssignStaffDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for assigning a staff member to a warehouse.
  */
-class AssignStaffRequest extends FormRequest
+class AssignStaffRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Domain\Inventory\Models;
 
-use App\Domain\Product\Models\ProductVariant;
+use App\Domain\Product\Models\Product;
 use App\Domain\Warehouse\Models\Warehouse;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
 
 /**
- * Inventory model representing the stock level of a product variant in a warehouse.
+ * Inventory model representing the stock level of a product in a warehouse.
  *
  * Tracks on-hand, reserved, available, and incoming quantities along with
  * reorder thresholds. Only has an updated_at timestamp (no created_at).
  * The syncAvailable() method recalculates quantity_available from on-hand minus reserved.
  *
  * @property string               $id
- * @property string               $product_variant_id
+ * @property string               $product_id
  * @property string               $warehouse_id
  * @property int                  $quantity_on_hand
  * @property int                  $quantity_reserved
@@ -50,7 +51,7 @@ class Inventory extends Model
 
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
-        'product_variant_id',
+        'product_id',
         'warehouse_id',
         'quantity_on_hand',
         'quantity_reserved',
@@ -64,24 +65,24 @@ class Inventory extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'quantity_on_hand'    => 'integer',
-        'quantity_reserved'   => 'integer',
-        'quantity_available'  => 'integer',
-        'quantity_incoming'   => 'integer',
-        'reorder_point'       => 'integer',
-        'reorder_quantity'    => 'integer',
-        'last_counted_at'     => 'datetime',
-        'updated_at'          => 'datetime',
+        'quantity_on_hand' => 'integer',
+        'quantity_reserved' => 'integer',
+        'quantity_available' => 'integer',
+        'quantity_incoming' => 'integer',
+        'reorder_point' => 'integer',
+        'reorder_quantity' => 'integer',
+        'last_counted_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
-     * Get the product variant this inventory record belongs to.
+     * Get the product this inventory record belongs to.
      *
-     * @return BelongsTo<ProductVariant, Inventory>
+     * @return BelongsTo<Product, Inventory>
      */
-    public function variant(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     /**
@@ -105,7 +106,7 @@ class Inventory extends Model
     public function syncAvailable(): void
     {
         $this->quantity_available = $this->quantity_on_hand - $this->quantity_reserved;
-        $this->updated_at         = now();
+        $this->updated_at = now();
         $this->save();
     }
 }

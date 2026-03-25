@@ -138,7 +138,12 @@ class Order extends Model
         'confirmed_at',
         'delivered_at',
         'cancelled_at',
-        'cancellation_reason',
+        'cod_expected_amount',
+        'cod_collected_amount',
+        'cod_collected_at',
+        'cod_collection_reference',
+        'cod_reconciliation_status',
+        'cod_discrepancy_amount',
     ];
 
     /** @var array<string,string> Attribute type casts. */
@@ -160,7 +165,10 @@ class Order extends Model
         'vat_amount' => 'integer',
         'total_before_tax' => 'integer',
         'total_after_tax' => 'integer',
-        'cost_total' => 'integer',
+        'cod_collected_at' => 'datetime',
+        'cod_expected_amount' => 'integer',
+        'cod_collected_amount' => 'integer',
+        'cod_discrepancy_amount' => 'integer',
     ];
 
     /** @var array<string> Eager load relationships. */
@@ -251,13 +259,33 @@ class Order extends Model
     }
 
     /**
-     * Get the staff member assigned to this order as a sales representative.
+     * Get the staff member assigned to handle this order operationally.
      *
      * @return BelongsTo<User, Order>
      */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    /**
+     * Get the sales representative credited for this order.
+     *
+     * @return BelongsTo<User, Order>
+     */
+    public function salesRep(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sales_rep_id');
+    }
+
+    /**
+     * Get the staff member who packed this order.
+     *
+     * @return BelongsTo<User, Order>
+     */
+    public function packedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'packed_by');
     }
 
     /**

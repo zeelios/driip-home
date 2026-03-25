@@ -1,19 +1,22 @@
 <template>
   <div
-    class="z-select-wrap"
+    class="flex flex-col gap-1.5"
     :class="{
-      'z-select-wrap--error': !!error,
-      'z-select-wrap--disabled': disabled,
+      '[&_select]:border-red-500 [&_select:focus]:shadow-[0_0_0_3px_rgba(239,68,68,0.15)]':
+        !!error,
     }"
   >
-    <label v-if="label" :for="selectId" class="z-select-label">{{
-      label
-    }}</label>
-    <div class="z-select-field">
+    <label
+      v-if="label"
+      :for="selectId"
+      class="text-xs font-semibold tracking-[0.06em] uppercase text-white/50"
+      >{{ label }}</label
+    >
+    <div class="relative">
       <select
         :id="selectId"
         v-bind="$attrs"
-        class="z-select"
+        class="w-full py-2.5 pr-9 pl-3.5 border border-white/12 rounded-lg bg-white/4 font-inherit text-sm text-white/90 outline-none appearance-none cursor-pointer transition-all duration-150 focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.08)] disabled:bg-white/2 disabled:text-white/35 disabled:cursor-not-allowed"
         :value="modelValue"
         :disabled="disabled"
         :required="required"
@@ -31,7 +34,10 @@
           {{ opt.label }}
         </option>
       </select>
-      <span class="z-select-chevron" aria-hidden="true">
+      <span
+        class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-white/40 pointer-events-none"
+        aria-hidden="true"
+      >
         <svg
           width="14"
           height="14"
@@ -44,8 +50,10 @@
         </svg>
       </span>
     </div>
-    <p v-if="error" class="z-select-error" role="alert">{{ error }}</p>
-    <p v-else-if="hint" class="z-select-hint">{{ hint }}</p>
+    <p v-if="error" class="m-0 text-xs text-red-500" role="alert">
+      {{ error }}
+    </p>
+    <p v-else-if="hint" class="m-0 text-xs text-white/45">{{ hint }}</p>
   </div>
 </template>
 
@@ -89,70 +97,3 @@ function onChange(event: Event): void {
   emit("change", val);
 }
 </script>
-
-<style scoped>
-.z-select-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-.z-select-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #6b6b68;
-}
-.z-select-field {
-  position: relative;
-}
-.z-select {
-  width: 100%;
-  padding: 0.5625rem 2.25rem 0.5625rem 0.875rem;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 8px;
-  background: #fff;
-  font: inherit;
-  font-size: 0.875rem;
-  color: #1a1a18;
-  outline: none;
-  appearance: none;
-  cursor: pointer;
-  transition: border-color 150ms, box-shadow 150ms;
-}
-.z-select:focus {
-  border-color: #111110;
-  box-shadow: 0 0 0 3px rgba(17, 17, 16, 0.08);
-}
-.z-select:disabled {
-  background: #f5f5f4;
-  color: #a0a09d;
-  cursor: not-allowed;
-}
-.z-select-chevron {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  color: #9d9d9a;
-  pointer-events: none;
-}
-.z-select-wrap--error .z-select {
-  border-color: #ef4444;
-}
-.z-select-wrap--error .z-select:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
-}
-.z-select-error {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #ef4444;
-}
-.z-select-hint {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #9d9d9a;
-}
-</style>

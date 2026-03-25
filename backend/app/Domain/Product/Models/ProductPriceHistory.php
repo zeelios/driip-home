@@ -10,14 +10,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * ProductPriceHistory model capturing an immutable snapshot of a variant's prices
+ * ProductPriceHistory model capturing an immutable snapshot of a product's prices
  * at a specific point in time.
  *
  * This table is append-only; records are never updated. There is no updated_at
  * column — changed_at serves as the sole timestamp and is set on creation.
  *
  * @property string               $id
- * @property string               $product_variant_id
+ * @property string               $product_id
  * @property int                  $compare_price
  * @property int                  $cost_price
  * @property int                  $selling_price
@@ -48,7 +48,7 @@ class ProductPriceHistory extends Model
 
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
-        'product_variant_id',
+        'product_id',
         'compare_price',
         'cost_price',
         'selling_price',
@@ -59,20 +59,20 @@ class ProductPriceHistory extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'compare_price'  => 'integer',
-        'cost_price'     => 'integer',
-        'selling_price'  => 'integer',
-        'changed_at'     => 'datetime',
+        'compare_price' => 'integer',
+        'cost_price' => 'integer',
+        'selling_price' => 'integer',
+        'changed_at' => 'datetime',
     ];
 
     /**
-     * Get the variant this price history entry belongs to.
+     * Get the product this price history entry belongs to.
      *
-     * @return BelongsTo<ProductVariant, ProductPriceHistory>
+     * @return BelongsTo<Product, ProductPriceHistory>
      */
-    public function variant(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     /**

@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Domain\Inventory\Models;
 
-use App\Domain\Product\Models\ProductVariant;
+use App\Domain\Product\Models\Product;
 use App\Domain\Staff\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * StockCountItem model representing a single variant line in a stock count task.
+ * StockCountItem model representing a single product line in a stock count task.
  *
  * Records the expected quantity (from system), the physically counted quantity,
  * the resulting variance, its monetary value, and who performed the count.
  *
  * @property string                $id
  * @property string                $stock_count_id
- * @property string                $product_variant_id
+ * @property string                $product_id
  * @property int                   $quantity_expected
  * @property int|null              $quantity_counted
  * @property int|null              $variance
@@ -39,7 +39,7 @@ class StockCountItem extends Model
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
         'stock_count_id',
-        'product_variant_id',
+        'product_id',
         'quantity_expected',
         'quantity_counted',
         'variance',
@@ -52,10 +52,10 @@ class StockCountItem extends Model
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
         'quantity_expected' => 'integer',
-        'quantity_counted'  => 'integer',
-        'variance'          => 'integer',
-        'variance_value'    => 'integer',
-        'counted_at'        => 'datetime',
+        'quantity_counted' => 'integer',
+        'variance' => 'integer',
+        'variance_value' => 'integer',
+        'counted_at' => 'datetime',
     ];
 
     /**
@@ -69,13 +69,13 @@ class StockCountItem extends Model
     }
 
     /**
-     * Get the product variant being counted.
+     * Get the product being counted.
      *
-     * @return BelongsTo<ProductVariant, StockCountItem>
+     * @return BelongsTo<Product, StockCountItem>
      */
-    public function variant(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     /**

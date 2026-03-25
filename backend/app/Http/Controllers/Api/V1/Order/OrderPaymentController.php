@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Order;
 
+use App\Domain\Order\Actions\RecordCODCollectionAction;
+use App\Domain\Order\Actions\RecordPaymentAction;
+use App\Domain\Order\Data\RecordPaymentDto;
 use App\Domain\Order\Models\Order;
 use App\Domain\Order\Services\OrderActivityLogger;
 use App\Domain\Shared\Services\ImageUploadService;
@@ -202,6 +205,106 @@ class OrderPaymentController extends BaseApiController
             return $this->validationError($e, 'VERIFY_PAYMENT');
         } catch (\Throwable $e) {
             return $this->serverError($e, 'VERIFY_PAYMENT');
+        }
+    }
+
+    /**
+     * Record a generic payment for an order (deposit, final, refund, adjustment).
+     *
+     * @param  Request              $request
+     * @param  Order                $order
+     * @param  RecordPaymentAction  $action
+     * @return JsonResponse|OrderResource
+     */
+    public function recordPayment(Request $request, Order $order, RecordPaymentAction $action): JsonResponse|OrderResource
+    {
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|integer|min:1',
+            'payment_method' => 'required|string|in:cod,bank_transfer,momo,zalopay,vnpay,credit_card,cash,loyalty_points',
+            'payment_type' => 'required|string|in:deposit,final,cod_collection,refund,adjustment',
+            'reference' => 'nullable|string|max:255',
+            'proof_files' => 'nullable|array|max:5',
+            'proof_files.*' => 'file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationError($validator->toException(), 'RECORD_PAYMENT');
+        }
+
+        try {
+            // Upload proof images if provided
+            $proofUrls = [];
+            if ($request->hasFile('proof_files')) {
+                foreach ($request->file('proof_files') as $file) {
+                    $proofUrls[] = $this->imageUpload->uploadPaymentProof($file, $order->order_number);
+                }
+            }
+
+            $dto = new RecordPaymentDto(
+                amount: (int) $request->input('amount'),
+                paymentMethod: $request->input('payment_method'),
+                paymentType: $request->input('payment_type'),
+                reference: $request->input('reference'),
+                proofUrls: $proofUrls,
+                notes: $request->input('notes'),
+                recordedBy: $request->user()?->id,
+            );
+
+            $payment = $action->execute($order, $dto);
+
+            return response()->json([
+                'data' => [
+                    'payment' => $payment,
+                    'order' => OrderResource::make($order->refresh()),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'RECORD_PAYMENT');
+        }
+    }
+
+    /**
+     * Record COD (Cash on Delivery) collection.
+     *
+     * @param  Request                      $request
+     * @param  Order                        $order
+     * @param  RecordCODCollectionAction  $action
+     * @return JsonResponse|OrderResource
+     */
+    public function recordCodCollection(Request $request, Order $order, RecordCODCollectionAction $action): JsonResponse|OrderResource
+    {
+        $validator = Validator::make($request->all(), [
+            'collected_amount' => 'required|integer|min:0',
+            'reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationError($validator->toException(), 'COD_COLLECTION');
+        }
+
+        try {
+            $result = $action->execute(
+                order: $order,
+                collectedAmount: (int) $request->input('collected_amount'),
+                reference: $request->input('reference'),
+                notes: $request->input('notes'),
+                recordedBy: $request->user()?->id,
+            );
+
+            return response()->json([
+                'data' => [
+                    'payment' => $result['payment'],
+                    'discrepancy' => $result['discrepancy'],
+                    'status' => $result['status'],
+                    'order' => OrderResource::make($order->refresh()),
+                ],
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'COD_COLLECTION');
         }
     }
 }

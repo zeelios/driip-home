@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Inventory\Models;
 
-use App\Domain\Product\Models\ProductVariant;
+use App\Domain\Product\Models\Product;
 use App\Domain\Staff\Models\User;
 use App\Domain\Warehouse\Models\Warehouse;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Only has a created_at timestamp — records are never updated.
  *
  * @property string               $id
- * @property string               $product_variant_id
+ * @property string               $product_id
  * @property string               $warehouse_id
  * @property string               $type
  * @property int                  $quantity
@@ -59,7 +59,7 @@ class InventoryTransaction extends Model
 
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
-        'product_variant_id',
+        'product_id',
         'warehouse_id',
         'type',
         'quantity',
@@ -76,21 +76,21 @@ class InventoryTransaction extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'quantity'        => 'integer',
+        'quantity' => 'integer',
         'quantity_before' => 'integer',
-        'quantity_after'  => 'integer',
-        'unit_cost'       => 'integer',
-        'created_at'      => 'datetime',
+        'quantity_after' => 'integer',
+        'unit_cost' => 'integer',
+        'created_at' => 'datetime',
     ];
 
     /**
-     * Get the product variant this transaction is for.
+     * Get the product this transaction is for.
      *
-     * @return BelongsTo<ProductVariant, InventoryTransaction>
+     * @return BelongsTo<Product, InventoryTransaction>
      */
-    public function variant(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     /**

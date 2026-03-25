@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Settings;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for a batch settings update.
  */
-class UpdateSettingsRequest extends FormRequest
+class UpdateSettingsRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,6 +34,14 @@ class UpdateSettingsRequest extends FormRequest
             'settings.*.key'    => ['required', 'string', 'max:100'],
             'settings.*.value'  => ['present'],
         ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function sanitizeExcept(): array
+    {
+        return ['settings.*.value'];
     }
 
     /**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Tax;
 
 use App\Domain\Tax\Data\GenerateTaxInvoiceDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for generating a tax invoice for an order.
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * Supports both retail (B2C) and VAT (B2B) invoice types. For B2B invoices
  * the buyer_tax_code should be provided.
  */
-class GenerateTaxInvoiceRequest extends FormRequest
+class GenerateTaxInvoiceRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

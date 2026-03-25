@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Customer;
 
 use App\Domain\Customer\Data\UpdateCustomerDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Form request for updating an existing customer.
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * All fields are optional; only provided fields will be updated.
  * Provides a typed DTO accessor for the validated payload.
  */
-class UpdateCustomerRequest extends FormRequest
+class UpdateCustomerRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

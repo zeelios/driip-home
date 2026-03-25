@@ -58,7 +58,6 @@ class WaitlistEntry extends Model
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
         'product_id',
-        'product_variant_id',
         'customer_id',
         'email',
         'phone',
@@ -70,6 +69,6 @@ class WaitlistEntry extends Model
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
         'notified_at' => 'datetime',
-        'created_at'  => 'datetime',
+        'created_at' => 'datetime',
     ];
 }

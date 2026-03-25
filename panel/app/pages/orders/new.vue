@@ -8,7 +8,7 @@
           v-model="globalSearch"
           type="text"
           placeholder="Tìm kiếm đơn hàng, sản phẩm, khách hàng..."
-          class="w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 pr-10 text-sm text-neutral-900 placeholder-neutral-400 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900"
+          class="w-full rounded-lg border border-white/12 bg-white/4 px-4 py-3 pr-10 text-sm text-white placeholder-white/35 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20"
           @focus="onSearchFocus"
         />
         <div
@@ -35,7 +35,7 @@
       <div class="flex items-center gap-4">
         <NuxtLink
           to="/orders"
-          class="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
+          class="flex items-center gap-1.5 text-sm text-white/50 hover:text-white/80 transition-colors"
         >
           <svg
             width="14"
@@ -49,7 +49,7 @@
           </svg>
           Đơn hàng
         </NuxtLink>
-        <h1 class="text-2xl font-semibold text-neutral-900 tracking-tight">
+        <h1 class="text-2xl font-semibold text-white tracking-tight">
           Tạo đơn hàng mới
         </h1>
       </div>
@@ -60,10 +60,8 @@
       <!-- Left column -->
       <div class="flex flex-col gap-5">
         <!-- Products section -->
-        <div
-          class="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
-        >
-          <p class="mb-5 text-sm font-semibold text-neutral-900">Sản phẩm</p>
+        <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
+          <p class="mb-5 text-sm font-semibold text-white">Sản phẩm</p>
           <div class="mb-5">
             <ZInput
               v-model="productSearch"
@@ -75,17 +73,17 @@
             <div
               v-for="(item, index) in selectedItems"
               :key="index"
-              class="flex items-center justify-between rounded-lg border border-neutral-100 bg-neutral-50 p-4 transition-all hover:border-neutral-200"
+              class="flex items-center justify-between rounded-lg border border-white/6 bg-white/4 p-4 transition-all hover:border-white/10"
             >
               <div class="flex items-center gap-3">
                 <img
                   :src="item.image || '/placeholder.png'"
                   :alt="item.name"
-                  class="h-12 w-12 rounded-lg object-cover border border-neutral-200"
+                  class="h-12 w-12 rounded-lg object-cover border border-white/10"
                 />
                 <div>
-                  <p class="font-medium text-neutral-900">{{ item.name }}</p>
-                  <p class="text-sm text-neutral-500">{{ item.variant }}</p>
+                  <p class="font-medium text-white">{{ item.name }}</p>
+                  <p class="text-sm text-white/50">{{ item.variant }}</p>
                 </div>
               </div>
               <div class="flex items-center gap-4">
@@ -96,13 +94,11 @@
                   class="w-20"
                   @update:modelValue="updateQuantity(index, Number($event))"
                 />
-                <span
-                  class="min-w-24 text-right font-semibold text-neutral-900"
-                >
+                <span class="min-w-24 text-right font-semibold text-white">
                   {{ formatVnd(item.price * item.quantity) }}
                 </span>
                 <button
-                  class="rounded-lg p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
+                  class="rounded-lg p-2 text-white/40 hover:bg-white/10 hover:text-white/70 transition-colors"
                   @click="removeItem(index)"
                 >
                   <svg
@@ -122,7 +118,7 @@
           </div>
           <div v-else class="py-12 text-center">
             <div
-              class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100"
+              class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/6"
             >
               <svg
                 width="20"
@@ -131,23 +127,19 @@
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
-                class="text-neutral-400"
+                class="text-white/35"
               >
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
               </svg>
             </div>
-            <p class="text-sm text-neutral-500">
-              Chưa có sản phẩm nào được chọn
-            </p>
+            <p class="text-sm text-white/50">Chưa có sản phẩm nào được chọn</p>
           </div>
         </div>
 
         <!-- Payment section -->
-        <div
-          class="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
-        >
-          <p class="mb-5 text-sm font-semibold text-neutral-900">Thanh toán</p>
+        <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
+          <p class="mb-5 text-sm font-semibold text-white">Thanh toán</p>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <ZSelect
               v-model="form.payment_method"
@@ -165,10 +157,8 @@
         </div>
 
         <!-- Notes section -->
-        <div
-          class="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
-        >
-          <p class="mb-5 text-sm font-semibold text-neutral-900">Ghi chú</p>
+        <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
+          <p class="mb-5 text-sm font-semibold text-white">Ghi chú</p>
           <div class="flex flex-col gap-4">
             <ZTextarea
               v-model="form.notes"
@@ -189,19 +179,17 @@
       <!-- Right column -->
       <div class="flex flex-col gap-5">
         <!-- Customer section -->
-        <div
-          class="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
-        >
-          <p class="mb-5 text-sm font-semibold text-neutral-900">Khách hàng</p>
+        <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
+          <p class="mb-5 text-sm font-semibold text-white">Khách hàng</p>
           <div
-            class="mb-5 flex rounded-lg border border-neutral-200 bg-neutral-50 p-1"
+            class="mb-5 flex rounded-lg border border-white/10 bg-white/4 p-1"
           >
             <button
               :class="[
                 'flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all',
                 customerType === 'existing'
-                  ? 'bg-neutral-900 text-white shadow-sm'
-                  : 'text-neutral-600 hover:text-neutral-900',
+                  ? 'bg-white text-[#0a0a0a] shadow-sm'
+                  : 'text-white/60 hover:text-white',
               ]"
               @click="customerType = 'existing'"
             >
@@ -211,8 +199,8 @@
               :class="[
                 'flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all',
                 customerType === 'guest'
-                  ? 'bg-neutral-900 text-white shadow-sm'
-                  : 'text-neutral-600 hover:text-neutral-900',
+                  ? 'bg-white text-[#0a0a0a] shadow-sm'
+                  : 'text-white/60 hover:text-white',
               ]"
               @click="customerType = 'guest'"
             >
@@ -227,19 +215,19 @@
             />
             <div
               v-if="selectedCustomer"
-              class="flex items-center justify-between rounded-lg border border-neutral-100 bg-neutral-50 p-4"
+              class="flex items-center justify-between rounded-lg border border-white/6 bg-white/4 p-4"
             >
               <div>
-                <p class="font-medium text-neutral-900">
+                <p class="font-medium text-white">
                   {{ selectedCustomer.first_name }}
                   {{ selectedCustomer.last_name }}
                 </p>
-                <p class="text-sm text-neutral-500">
+                <p class="text-sm text-white/50">
                   {{ selectedCustomer.email || selectedCustomer.phone }}
                 </p>
               </div>
               <button
-                class="rounded-lg p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
+                class="rounded-lg p-2 text-white/40 hover:bg-white/10 hover:text-white/70 transition-colors"
                 @click="selectedCustomer = null"
               >
                 <svg
@@ -278,10 +266,8 @@
         </div>
 
         <!-- Shipping section -->
-        <div
-          class="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
-        >
-          <p class="mb-5 text-sm font-semibold text-neutral-900">Giao hàng</p>
+        <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
+          <p class="mb-5 text-sm font-semibold text-white">Giao hàng</p>
           <div class="flex flex-col gap-4">
             <ZInput
               v-model="form.shipping_address"
@@ -310,10 +296,8 @@
         </div>
 
         <!-- Discount section -->
-        <div
-          class="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
-        >
-          <p class="mb-5 text-sm font-semibold text-neutral-900">Giảm giá</p>
+        <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
+          <p class="mb-5 text-sm font-semibold text-white">Giảm giá</p>
           <div class="flex gap-3">
             <ZInput
               v-model="form.coupon_code"
@@ -327,29 +311,27 @@
         </div>
 
         <!-- Summary section -->
-        <div
-          class="rounded-xl border border-neutral-900 bg-neutral-900 p-6 shadow-lg"
-        >
+        <div class="rounded-xl border border-white/10 bg-[#141414] p-6">
           <p class="mb-5 text-sm font-semibold text-white">Tổng cộng</p>
           <div class="flex flex-col gap-3">
             <div class="flex justify-between text-sm">
-              <span class="text-neutral-400">Tạm tính</span>
+              <span class="text-white/50">Tạm tính</span>
               <span class="text-white">{{ formatVnd(subtotal) }}</span>
             </div>
             <div class="flex justify-between text-sm">
-              <span class="text-neutral-400">Giảm giá</span>
-              <span class="text-emerald-400">-{{ formatVnd(discount) }}</span>
+              <span class="text-white/50">Giảm giá</span>
+              <span class="text-white/70">-{{ formatVnd(discount) }}</span>
             </div>
             <div class="flex justify-between text-sm">
-              <span class="text-neutral-400">Phí vận chuyển</span>
+              <span class="text-white/50">Phí vận chuyển</span>
               <span class="text-white">{{ formatVnd(shippingFee) }}</span>
             </div>
             <div class="flex justify-between text-sm">
-              <span class="text-neutral-400">Thuế (10%)</span>
+              <span class="text-white/50">Thuế (10%)</span>
               <span class="text-white">{{ formatVnd(tax) }}</span>
             </div>
             <div
-              class="mt-3 flex justify-between border-t border-neutral-700 pt-4"
+              class="mt-3 flex justify-between border-t border-white/10 pt-4"
             >
               <span class="text-base font-semibold text-white">Tổng cộng</span>
               <span class="text-lg font-bold text-white">{{
@@ -528,206 +510,3 @@ async function handleCreate(): Promise<void> {
   }
 }
 </script>
-
-<style scoped>
-.order-create-grid {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 24px;
-}
-
-.order-create-left,
-.order-create-right {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.product-search {
-  margin-bottom: 16px;
-}
-
-.selected-items {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.selected-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  background: var(--color-neutral-50);
-  border-radius: 8px;
-}
-
-.selected-item__info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.selected-item__image {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
-.selected-item__name {
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.selected-item__variant {
-  font-size: 12px;
-  color: var(--color-neutral-500);
-}
-
-.selected-item__controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.selected-item__qty {
-  width: 64px;
-}
-
-.selected-item__price {
-  font-weight: 600;
-  min-width: 100px;
-  text-align: right;
-}
-
-.selected-item__remove,
-.selected-customer__remove {
-  padding: 4px;
-  color: var(--color-neutral-400);
-  cursor: pointer;
-  transition: color 0.15s;
-}
-
-.selected-item__remove:hover,
-.selected-customer__remove:hover {
-  color: var(--color-red-500);
-}
-
-.empty-products {
-  padding: 40px;
-  text-align: center;
-  color: var(--color-neutral-400);
-  background: var(--color-neutral-50);
-  border-radius: 8px;
-}
-
-.customer-type-toggle {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.toggle-btn {
-  flex: 1;
-  padding: 10px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  border: 1px solid var(--color-neutral-200);
-  background: var(--color-neutral-50);
-  color: var(--color-neutral-600);
-  cursor: pointer;
-  transition: all 0.15s;
-  border-radius: 6px;
-}
-
-.toggle-btn:first-child {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.toggle-btn:last-child {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  margin-left: -1px;
-}
-
-.toggle-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-}
-
-.toggle-btn:hover:not(.active) {
-  background: var(--color-neutral-100);
-}
-
-.form-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.selected-customer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  background: var(--color-neutral-50);
-  border: 1px solid var(--color-neutral-200);
-  border-radius: 8px;
-}
-
-.selected-customer__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.selected-customer__name {
-  font-weight: 500;
-  font-size: 14px;
-  margin: 0;
-}
-
-.selected-customer__contact {
-  font-size: 12px;
-  color: var(--color-neutral-500);
-  margin: 0;
-}
-
-.order-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  background: var(--color-neutral-50);
-  border-radius: 8px;
-}
-
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-}
-
-.summary-row--total {
-  font-weight: 600;
-  font-size: 16px;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-neutral-200);
-}
-
-.coupon-input {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-@media (max-width: 1024px) {
-  .order-create-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

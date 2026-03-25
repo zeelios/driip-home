@@ -11,8 +11,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('order_number', 30)->unique();
-            $table->uuid('customer_id')->nullable();
-            $table->foreign('customer_id')->references('id')->on('customers')->nullOnDelete();
+            $table->foreignUuid('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->string('guest_name', 255)->nullable();
             $table->string('guest_email', 255)->nullable();
             $table->string('guest_phone', 20)->nullable();
@@ -38,13 +37,22 @@ return new class extends Migration
             ])->default('pending');
 
             $table->enum('payment_status', ['unpaid', 'paid', 'partial', 'refunded', 'failed', 'void'])->default('unpaid');
-            $table->enum('payment_method', ['cod', 'bank_transfer', 'momo', 'zalopay', 'vnpay', 'credit_card', 'loyalty_points'])->nullable();
+            $table->enum('payment_method', ['cod', 'bank_transfer', 'momo', 'zalopay', 'vnpay', 'credit_card', 'cash', 'loyalty_points'])->nullable();
+            $table->bigInteger('deposit_amount')->default(0);
+            $table->timestamp('deposit_paid_at')->nullable();
+            $table->jsonb('deposit_proof_urls')->default('[]');
+            $table->text('payment_notes')->nullable();
             $table->string('payment_reference', 255)->nullable();
             $table->timestamp('paid_at')->nullable();
+            $table->bigInteger('cod_expected_amount')->nullable();
+            $table->bigInteger('cod_collected_amount')->nullable();
+            $table->timestamp('cod_collected_at')->nullable();
+            $table->string('cod_collection_reference', 255)->nullable();
+            $table->enum('cod_reconciliation_status', ['pending', 'matched', 'disputed', 'waived'])->default('pending');
+            $table->bigInteger('cod_discrepancy_amount')->nullable();
 
             $table->bigInteger('subtotal')->default(0);
-            $table->uuid('coupon_id')->nullable();
-            $table->foreign('coupon_id')->references('id')->on('coupons')->nullOnDelete();
+            $table->foreignUuid('coupon_id')->nullable()->constrained()->nullOnDelete();
             $table->string('coupon_code', 50)->nullable();
             $table->bigInteger('coupon_discount')->default(0);
             $table->integer('loyalty_points_used')->default(0);
@@ -75,24 +83,35 @@ return new class extends Migration
             $table->string('utm_medium', 100)->nullable();
             $table->string('utm_campaign', 100)->nullable();
 
-            $table->uuid('warehouse_id')->nullable();
-            $table->foreign('warehouse_id')->references('id')->on('warehouses')->nullOnDelete();
-            $table->uuid('assigned_to')->nullable();
-            $table->foreign('assigned_to')->references('id')->on('users')->nullOnDelete(); // sales rep
-            $table->uuid('packed_by')->nullable();
-            $table->foreign('packed_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreignUuid('warehouse_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete(); // ops / staff assignee
+            $table->foreignUuid('sales_rep_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('referral_code', 20)->nullable();
+            $table->bigInteger('commission_amount')->default(0);
+            $table->decimal('commission_rate', 5, 2)->default(0);
+            $table->enum('commission_status', ['pending', 'approved', 'paid', 'cancelled'])->default('pending');
+            $table->string('commission_paid_reference', 255)->nullable();
+            $table->timestamp('commission_paid_at')->nullable();
+            $table->foreignUuid('packed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('packed_at')->nullable();
             $table->timestamp('confirmed_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
             $table->text('cancellation_reason')->nullable();
+            $table->string('public_token', 64)->unique()->nullable();
+            $table->timestamp('token_expires_at')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
 
             $table->index('status');
             $table->index('payment_status');
+            $table->index(['payment_method', 'payment_status']);
+            $table->index(['cod_reconciliation_status', 'status']);
             $table->index('customer_id');
+            $table->index('sales_rep_id');
+            $table->index('referral_code');
+            $table->index('commission_status');
             $table->index('created_at');
         });
     }

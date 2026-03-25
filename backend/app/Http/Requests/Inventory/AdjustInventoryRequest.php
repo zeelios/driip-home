@@ -6,12 +6,12 @@ namespace App\Http\Requests\Inventory;
 
 use App\Domain\Inventory\Data\AdjustInventoryDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for applying a manual inventory adjustment.
  */
-class AdjustInventoryRequest extends FormRequest
+class AdjustInventoryRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

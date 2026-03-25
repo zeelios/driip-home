@@ -6,12 +6,12 @@ namespace App\Http\Requests\Loyalty;
 
 use App\Domain\Loyalty\Data\CreateTierDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new loyalty tier.
  */
-class CreateTierRequest extends FormRequest
+class CreateTierRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

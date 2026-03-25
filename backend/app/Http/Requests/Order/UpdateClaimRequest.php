@@ -6,7 +6,7 @@ namespace App\Http\Requests\Order;
 
 use App\Domain\Order\Data\UpdateClaimDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for updating an existing order claim.
@@ -14,7 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * Allows updating status, resolution details, refund amount, and
  * the assigned handler. All fields are optional for partial updates.
  */
-class UpdateClaimRequest extends FormRequest
+class UpdateClaimRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

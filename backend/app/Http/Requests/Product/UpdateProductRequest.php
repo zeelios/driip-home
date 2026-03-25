@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Product;
 
 use App\Domain\Product\Data\UpdateProductDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing product.
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * All fields are optional (patch semantics). Slug uniqueness is checked
  * at the Action layer.
  */
-class UpdateProductRequest extends FormRequest
+class UpdateProductRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

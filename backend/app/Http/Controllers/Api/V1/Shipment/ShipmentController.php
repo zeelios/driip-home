@@ -11,7 +11,6 @@ use App\Domain\Shipment\Services\CourierServiceInterface;
 use App\Domain\Shipment\Services\GHNService;
 use App\Domain\Shipment\Services\GHTKService;
 use App\Http\Controllers\Api\V1\BaseApiController;
-use App\Http\Requests\Shipment\CreateShipmentRequest;
 use App\Http\Resources\Shipment\ShipmentResource;
 use Illuminate\Container\Container;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +32,7 @@ class ShipmentController extends BaseApiController
      * @var array<string,class-string<CourierServiceInterface>>
      */
     private array $courierMap = [
-        'ghn'  => GHNService::class,
+        'ghn' => GHNService::class,
         'ghtk' => GHTKService::class,
     ];
 
@@ -43,8 +42,9 @@ class ShipmentController extends BaseApiController
      */
     public function __construct(
         private readonly CreateShipmentAction $createShipment,
-        private readonly SyncTrackingAction   $syncTracking,
-    ) {}
+        private readonly SyncTrackingAction $syncTracking,
+    ) {
+    }
 
     /**
      * List shipments with optional courier_code and status filters.
@@ -57,7 +57,7 @@ class ShipmentController extends BaseApiController
         $shipments = QueryBuilder::for(Shipment::class)
             ->allowedFilters('courier_code', 'status', 'order_id')
             ->allowedSorts('created_at', 'delivered_at', 'estimated_delivery_at')
-            ->with(['order', 'createdBy'])
+            ->with(['order.customer', 'createdBy'])
             ->paginate($request->integer('per_page', 20));
 
         return ShipmentResource::collection($shipments);

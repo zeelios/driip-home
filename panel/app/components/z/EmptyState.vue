@@ -1,9 +1,17 @@
 <template>
-  <div class="z-empty">
-    <div class="z-empty__icon" aria-hidden="true" v-html="icon" />
-    <p class="z-empty__title">{{ title }}</p>
-    <p v-if="description" class="z-empty__desc">{{ description }}</p>
-    <div v-if="$slots.action" class="z-empty__action">
+  <div
+    class="flex flex-col items-center justify-center py-12 px-6 text-center gap-2"
+  >
+    <div
+      class="flex items-center justify-center w-14 h-14 rounded-full bg-white/6 text-white/35 mb-1"
+      aria-hidden="true"
+      v-html="icon"
+    />
+    <p class="m-0 text-[0.9375rem] font-semibold text-white/90">{{ title }}</p>
+    <p v-if="description" class="m-0 text-sm text-white/50 max-w-96">
+      {{ description }}
+    </p>
+    <div v-if="$slots.action" class="mt-3">
       <slot name="action" />
     </div>
   </div>
@@ -21,41 +29,3 @@ withDefaults(
   }
 );
 </script>
-
-<style scoped>
-.z-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1.5rem;
-  text-align: center;
-  gap: 0.5rem;
-}
-.z-empty__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  background: #f0efed;
-  color: #a0a09d;
-  margin-bottom: 0.25rem;
-}
-.z-empty__title {
-  margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #1a1a18;
-}
-.z-empty__desc {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #7a7a77;
-  max-width: 24rem;
-}
-.z-empty__action {
-  margin-top: 0.75rem;
-}
-</style>

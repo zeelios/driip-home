@@ -6,12 +6,12 @@ namespace App\Http\Requests\Loyalty;
 
 use App\Domain\Loyalty\Data\CreateCampaignDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new loyalty campaign.
  */
-class CreateCampaignRequest extends FormRequest
+class CreateCampaignRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

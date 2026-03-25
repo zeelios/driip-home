@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Domain\Inventory\Models;
 
-use App\Domain\Product\Models\ProductVariant;
+use App\Domain\Product\Models\Product;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * StockTransferItem model representing a single variant line on a stock transfer.
+ * StockTransferItem model representing a single product line on a stock transfer.
  *
  * Tracks how many units were requested, how many were actually dispatched,
  * and how many arrived at the destination warehouse.
  *
  * @property string       $id
  * @property string       $stock_transfer_id
- * @property string       $product_variant_id
+ * @property string       $product_id
  * @property int          $quantity_requested
  * @property int          $quantity_dispatched
  * @property int          $quantity_received
@@ -35,7 +35,7 @@ class StockTransferItem extends Model
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
         'stock_transfer_id',
-        'product_variant_id',
+        'product_id',
         'quantity_requested',
         'quantity_dispatched',
         'quantity_received',
@@ -44,9 +44,9 @@ class StockTransferItem extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'quantity_requested'  => 'integer',
+        'quantity_requested' => 'integer',
         'quantity_dispatched' => 'integer',
-        'quantity_received'   => 'integer',
+        'quantity_received' => 'integer',
     ];
 
     /**
@@ -60,12 +60,12 @@ class StockTransferItem extends Model
     }
 
     /**
-     * Get the product variant being transferred.
+     * Get the product being transferred.
      *
-     * @return BelongsTo<ProductVariant, StockTransferItem>
+     * @return BelongsTo<Product, StockTransferItem>
      */
-    public function variant(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

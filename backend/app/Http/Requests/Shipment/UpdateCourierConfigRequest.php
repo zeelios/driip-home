@@ -6,12 +6,12 @@ namespace App\Http\Requests\Shipment;
 
 use App\Domain\Shipment\Data\UpdateCourierConfigDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating a courier configuration.
  */
-class UpdateCourierConfigRequest extends FormRequest
+class UpdateCourierConfigRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -45,6 +45,20 @@ class UpdateCourierConfigRequest extends FormRequest
             'settings'         => ['sometimes', 'nullable', 'array'],
         ];
     }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function sanitizeExcept(): array
+    {
+        return [
+            'api_key',
+            'api_secret',
+            'webhook_secret',
+            'settings.*',
+        ];
+    }
+
     /**
      * Build the DTO from validated request data.
      */

@@ -36,7 +36,8 @@ class CouponController extends BaseApiController
     public function __construct(
         private readonly CreateCouponAction $createAction,
         private readonly UpdateCouponAction $updateAction,
-    ) {}
+    ) {
+    }
 
     /**
      * List all coupons with optional filtering and pagination.
@@ -59,6 +60,7 @@ class CouponController extends BaseApiController
                     AllowedFilter::exact('applies_to'),
                 )
                 ->allowedSorts('code', 'name', 'used_count', 'expires_at', 'created_at')
+                ->with(['createdBy'])
                 ->paginate(20);
 
             return CouponResource::collection($coupons);
@@ -155,11 +157,11 @@ class CouponController extends BaseApiController
 
             return response()->json([
                 'success' => true,
-                'data'    => [
-                    'valid'           => $result['valid'],
+                'data' => [
+                    'valid' => $result['valid'],
                     'discount_amount' => $result['discount_amount'],
-                    'message'         => $result['message'],
-                    'coupon'          => $result['coupon'] !== null
+                    'message' => $result['message'],
+                    'coupon' => $result['coupon'] !== null
                         ? new CouponResource($result['coupon'])
                         : null,
                 ],

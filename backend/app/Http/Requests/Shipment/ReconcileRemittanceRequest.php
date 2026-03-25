@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Requests\Shipment;
 
 use App\Domain\Shipment\Data\ReconcileRemittanceDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for reconciling a COD remittance.
  */
-class ReconcileRemittanceRequest extends FormRequest
+class ReconcileRemittanceRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

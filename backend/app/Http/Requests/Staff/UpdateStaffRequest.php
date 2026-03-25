@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Staff;
 
 use App\Domain\Staff\Data\UpdateStaffDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing staff member.
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * All fields are optional, allowing partial updates. Password changes
  * are handled through a separate dedicated endpoint.
  */
-class UpdateStaffRequest extends FormRequest
+class UpdateStaffRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

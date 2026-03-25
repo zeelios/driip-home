@@ -9,15 +9,17 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Product model representing a top-level catalogue item in Driip.
  *
- * A product groups one or more variants (e.g. different sizes/colours) and
- * carries shared metadata such as brand, category, gender, season, and SEO
- * fields. Actual pricing and inventory live on ProductVariant.
+ * A product now carries its own SKU, pricing, and weight. It can be linked to
+ * other products as variants (e.g., different colors) via the
+ * product_variant_links table. Size options are selected from the category's
+ * available sizes.
  *
  * @property string               $id
  * @property string|null          $brand_id
@@ -26,7 +28,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string               $slug
  * @property string|null          $description
  * @property string|null          $short_description
- * @property string|null          $sku_base
+ * @property string|null          $sku
+ * @property string|null          $barcode
+ * @property int                  $compare_price
+ * @property int                  $cost_price
+ * @property int                  $selling_price
+ * @property int|null             $sale_price
+ * @property int|null             $weight_grams
+ * @property string|null          $sale_event_id
  * @property string|null          $gender
  * @property string|null          $season
  * @property array<int,string>    $tags
@@ -38,6 +47,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon|null  $created_at
  * @property \Carbon\Carbon|null  $updated_at
  * @property \Carbon\Carbon|null  $deleted_at
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, SizeOption> $sizeOptions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $variantPeers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $parentVariants
  */
 class Product extends Model
 {
@@ -54,7 +67,14 @@ class Product extends Model
         'slug',
         'description',
         'short_description',
-        'sku_base',
+        'sku',
+        'barcode',
+        'compare_price',
+        'cost_price',
+        'selling_price',
+        'sale_price',
+        'weight_grams',
+        'sale_event_id',
         'gender',
         'season',
         'tags',
@@ -67,9 +87,14 @@ class Product extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'tags'         => 'array',
-        'is_featured'  => 'boolean',
+        'tags' => 'array',
+        'is_featured' => 'boolean',
         'published_at' => 'datetime',
+        'compare_price' => 'integer',
+        'cost_price' => 'integer',
+        'selling_price' => 'integer',
+        'sale_price' => 'integer',
+        'weight_grams' => 'integer',
     ];
 
     /**
@@ -93,13 +118,78 @@ class Product extends Model
     }
 
     /**
-     * Get all variants for this product.
+     * Get size options for this product.
      *
-     * @return HasMany<ProductVariant>
+     * @return BelongsToMany<SizeOption>
      */
-    public function variants(): HasMany
+    public function sizeOptions(): BelongsToMany
     {
-        return $this->hasMany(ProductVariant::class, 'product_id');
+        return $this->belongsToMany(SizeOption::class, 'product_sizes')
+            ->withPivot('sku_suffix', 'sort_order')
+            ->orderBy('product_sizes.sort_order');
+    }
+
+    /**
+     * Get products that are variants of this product (e.g., different colors).
+     *
+     * @return BelongsToMany<Product>
+     */
+    public function variantPeers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'product_variant_links',
+            'parent_product_id',
+            'variant_product_id'
+        )->withPivot('relationship_type', 'sort_order');
+    }
+
+    /**
+     * Get products that list this product as their variant.
+     *
+     * @return BelongsToMany<Product>
+     */
+    public function parentVariants(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'product_variant_links',
+            'variant_product_id',
+            'parent_product_id'
+        )->withPivot('relationship_type', 'sort_order');
+    }
+
+    /**
+     * Get all inventory records for this product across all warehouses.
+     *
+     * @return HasMany<\App\Domain\Inventory\Models\Inventory>
+     */
+    public function inventory(): HasMany
+    {
+        return $this->hasMany(\App\Domain\Inventory\Models\Inventory::class, 'product_id');
+    }
+
+    /**
+     * Return the currently applicable selling price for this product.
+     *
+     * If an active sale_price is set (i.e. a flash sale is in progress),
+     * it takes precedence over the standard selling_price.
+     *
+     * @return int
+     */
+    public function effectivePrice(): int
+    {
+        return $this->sale_price ?? $this->selling_price;
+    }
+
+    /**
+     * Get all related variants (bidirectional).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Product>
+     */
+    public function allVariants(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->variantPeers->merge($this->parentVariants);
     }
 
     /**

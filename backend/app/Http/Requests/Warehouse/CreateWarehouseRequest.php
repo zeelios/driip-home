@@ -6,12 +6,12 @@ namespace App\Http\Requests\Warehouse;
 
 use App\Domain\Warehouse\Data\CreateWarehouseDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new warehouse.
  */
-class CreateWarehouseRequest extends FormRequest
+class CreateWarehouseRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

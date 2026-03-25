@@ -15,7 +15,6 @@ use App\Domain\Order\Models\OrderItem;
 use App\Domain\Product\Models\Brand;
 use App\Domain\Product\Models\Category;
 use App\Domain\Product\Models\Product;
-use App\Domain\Product\Models\ProductVariant;
 use App\Domain\Shipment\Models\CourierConfig;
 use App\Domain\Warehouse\Models\Warehouse;
 use App\Domain\Coupon\Models\Coupon;
@@ -85,7 +84,7 @@ class DatabaseSeeder extends Seeder
         // 10. Suppliers
         $this->seedSuppliers();
 
-        // 11. Products with variants and inventory
+        // 11. Products with size options and inventory
         $this->seedProducts();
 
         // 12. Customers with loyalty accounts and addresses
@@ -459,6 +458,10 @@ class DatabaseSeeder extends Seeder
             $slug = Str::slug($def['name']);
             $skuBase = strtoupper(substr(Str::slug($def['name'], ''), 0, 8));
 
+            $comparePrice = $def['price_range'][1];
+            $sellingPrice = $def['price_range'][0];
+            $costPrice = (int) round($sellingPrice * 0.60);
+
             $product = Product::updateOrCreate(
                 ['slug' => $slug],
                 [
@@ -468,61 +471,42 @@ class DatabaseSeeder extends Seeder
                     'slug' => $slug,
                     'description' => $def['description'],
                     'short_description' => substr($def['description'], 0, 80) . '...',
-                    'sku_base' => $skuBase,
+                    'sku' => 'DRP-' . $skuBase,
                     'gender' => null,
                     'season' => 'SS25',
                     'tags' => $def['tags'],
+                    'compare_price' => $comparePrice,
+                    'cost_price' => $costPrice,
+                    'selling_price' => $sellingPrice,
+                    'sale_price' => null,
+                    'weight_grams' => 250,
                     'status' => 'active',
                     'is_featured' => $i < 2,
                     'published_at' => now(),
                 ],
             );
 
-            $comparePrice = $def['price_range'][1];
-            $sellingPrice = $def['price_range'][0];
-            $costPrice = (int) round($sellingPrice * 0.60);
+            // Create inventory for each warehouse
+            foreach ($warehouses as $warehouse) {
+                $onHand = rand(10, 100);
+                $reserved = rand(0, min(5, $onHand));
+                $available = $onHand - $reserved;
 
-            foreach ($variantCombinations as $j => $attrs) {
-                $sku = 'DRP-' . $skuBase . '-' . $attrs['Size'] . '-' . mb_strtoupper(substr($attrs['Color'], 0, 2));
-
-                $variant = ProductVariant::updateOrCreate(
-                    ['sku' => $sku],
+                Inventory::updateOrCreate(
                     [
                         'product_id' => $product->id,
-                        'sku' => $sku,
-                        'attribute_values' => $attrs,
-                        'compare_price' => $comparePrice,
-                        'cost_price' => $costPrice,
-                        'selling_price' => $sellingPrice,
-                        'sale_price' => null,
-                        'weight_grams' => 250,
-                        'status' => 'active',
-                        'sort_order' => $j,
+                        'warehouse_id' => $warehouse->id,
+                    ],
+                    [
+                        'quantity_on_hand' => $onHand,
+                        'quantity_reserved' => $reserved,
+                        'quantity_available' => $available,
+                        'quantity_incoming' => 0,
+                        'reorder_point' => 10,
+                        'reorder_quantity' => 50,
+                        'updated_at' => now(),
                     ],
                 );
-
-                // Create inventory for each warehouse
-                foreach ($warehouses as $warehouse) {
-                    $onHand = rand(10, 100);
-                    $reserved = rand(0, min(5, $onHand));
-                    $available = $onHand - $reserved;
-
-                    Inventory::updateOrCreate(
-                        [
-                            'product_variant_id' => $variant->id,
-                            'warehouse_id' => $warehouse->id,
-                        ],
-                        [
-                            'quantity_on_hand' => $onHand,
-                            'quantity_reserved' => $reserved,
-                            'quantity_available' => $available,
-                            'quantity_incoming' => 0,
-                            'reorder_point' => 10,
-                            'reorder_quantity' => 50,
-                            'updated_at' => now(),
-                        ],
-                    );
-                }
             }
         }
     }
@@ -749,10 +733,10 @@ class DatabaseSeeder extends Seeder
     private function seedOrders(): void
     {
         $customers = Customer::limit(10)->get();
-        $variants = ProductVariant::limit(10)->get();
+        $products = Product::limit(10)->get();
         $warehouses = Warehouse::all();
 
-        if ($customers->isEmpty() || $variants->isEmpty()) {
+        if ($customers->isEmpty() || $products->isEmpty()) {
             return;
         }
 
@@ -767,14 +751,14 @@ class DatabaseSeeder extends Seeder
 
         for ($i = 1; $i <= 10; $i++) {
             $customer = $customers->get(($i - 1) % $customers->count());
-            $variant = $variants->get(($i - 1) % $variants->count());
+            $product = $products->get(($i - 1) % $products->count());
             $warehouse = $warehouses->first();
             $shipping = $shippingData[$i % count($shippingData)];
             $status = $statuses[($i - 1) % count($statuses)];
             $payment = $paymentMethods[($i - 1) % count($paymentMethods)];
 
             $quantity = rand(1, 3);
-            $unitPrice = $variant?->selling_price ?? 300000;
+            $unitPrice = $product?->selling_price ?? 300000;
             $subtotal = $unitPrice * $quantity;
             $shippingFee = $subtotal >= 500000 ? 0 : 30000;
             $totalBefore = $subtotal + $shippingFee;
@@ -821,16 +805,16 @@ class DatabaseSeeder extends Seeder
 
             // Create order item
             OrderItem::updateOrCreate(
-                ['order_id' => $order->id, 'sku' => $variant?->sku ?? 'DRP-SKU-DEFAULT'],
+                ['order_id' => $order->id, 'sku' => $product?->sku ?? 'DRP-SKU-DEFAULT'],
                 [
                     'order_id' => $order->id,
-                    'product_variant_id' => $variant?->id,
-                    'sku' => $variant?->sku ?? 'DRP-SKU-DEFAULT',
-                    'name' => $variant?->product?->name ?? 'Sản phẩm Driip',
-                    'size' => $variant?->attribute_values['Size'] ?? 'M',
-                    'color' => $variant?->attribute_values['Color'] ?? 'Đen',
+                    'product_id' => $product?->id,
+                    'sku' => $product?->sku ?? 'DRP-SKU-DEFAULT',
+                    'name' => $product?->name ?? 'Sản phẩm Driip',
+                    'size' => null,
+                    'color' => null,
                     'unit_price' => $unitPrice,
-                    'cost_price' => $variant?->cost_price ?? (int) round($unitPrice * 0.6),
+                    'cost_price' => $product?->cost_price ?? (int) round($unitPrice * 0.6),
                     'quantity' => $quantity,
                     'quantity_returned' => 0,
                     'discount_amount' => 0,

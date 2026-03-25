@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Order;
 
 use App\Domain\Order\Data\CancelOrderDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for cancelling an order.
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * A cancellation reason is mandatory so every cancellation can be
  * audited and communicated to the customer.
  */
-class CancelOrderRequest extends FormRequest
+class CancelOrderRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

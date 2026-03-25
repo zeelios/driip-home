@@ -5,13 +5,25 @@
     size="sm"
     @update:model-value="$emit('update:modelValue', $event)"
   >
-    <p class="z-confirm__message">{{ message }}</p>
+    <p class="m-0 text-[0.9375rem] text-white/75 leading-relaxed">
+      {{ message }}
+    </p>
 
     <template #footer>
-      <ZButton variant="outline" size="sm" :disabled="loading" @click="$emit('update:modelValue', false)">
+      <ZButton
+        variant="outline"
+        size="sm"
+        :disabled="loading"
+        @click="$emit('update:modelValue', false)"
+      >
         {{ cancelLabel }}
       </ZButton>
-      <ZButton :variant="dangerous ? 'danger' : 'primary'" size="sm" :loading="loading" @click="$emit('confirm')">
+      <ZButton
+        :variant="dangerous ? 'danger' : 'primary'"
+        size="sm"
+        :loading="loading"
+        @click="$emit('confirm')"
+      >
         {{ confirmLabel }}
       </ZButton>
     </template>
@@ -43,12 +55,3 @@ defineEmits<{
   confirm: [];
 }>();
 </script>
-
-<style scoped>
-.z-confirm__message {
-  margin: 0;
-  font-size: 0.9375rem;
-  color: #444;
-  line-height: 1.5;
-}
-</style>

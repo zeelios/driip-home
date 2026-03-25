@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Domain\SaleEvent\Models;
 
-use App\Domain\Product\Models\ProductVariant;
+use App\Domain\Product\Models\Product;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * SaleEventItem model representing one variant's participation in a sale event.
+ * SaleEventItem model representing one product's participation in a sale event.
  *
- * Stores the discounted sale_price for the variant during the event window,
+ * Stores the discounted sale_price for the product during the event window,
  * optional per-customer and global quantity caps, and a sold_count counter.
  *
  * @property string               $id
  * @property string               $sale_event_id
- * @property string               $product_variant_id
+ * @property string               $product_id
  * @property int                  $sale_price
  * @property int|null             $compare_price
  * @property int|null             $max_qty_per_customer
@@ -38,7 +38,7 @@ class SaleEventItem extends Model
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
         'sale_event_id',
-        'product_variant_id',
+        'product_id',
         'sale_price',
         'compare_price',
         'max_qty_per_customer',
@@ -49,12 +49,12 @@ class SaleEventItem extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'sale_price'           => 'integer',
-        'compare_price'        => 'integer',
+        'sale_price' => 'integer',
+        'compare_price' => 'integer',
         'max_qty_per_customer' => 'integer',
-        'max_qty_total'        => 'integer',
-        'sold_count'           => 'integer',
-        'is_active'            => 'boolean',
+        'max_qty_total' => 'integer',
+        'sold_count' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     /**
@@ -68,12 +68,12 @@ class SaleEventItem extends Model
     }
 
     /**
-     * Get the product variant this item refers to.
+     * Get the product this item refers to.
      *
-     * @return BelongsTo<ProductVariant, SaleEventItem>
+     * @return BelongsTo<Product, SaleEventItem>
      */
-    public function variant(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

@@ -6,7 +6,7 @@ namespace App\Http\Requests\Order;
 
 use App\Domain\Order\Data\UpdateOrderDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for updating mutable fields on an existing order.
@@ -14,7 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * Only the fields that are safe to change post-creation are exposed here.
  * Status transitions must go through the dedicated action endpoints.
  */
-class UpdateOrderRequest extends FormRequest
+class UpdateOrderRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -6,7 +6,7 @@ namespace App\Http\Requests\Order;
 
 use App\Domain\Order\Data\CreateClaimDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for creating a new order claim.
@@ -14,7 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * Claims may be filed against the entire order or a specific line item.
  * Evidence URLs are optional and stored as a JSON array.
  */
-class CreateClaimRequest extends FormRequest
+class CreateClaimRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

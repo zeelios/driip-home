@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -17,6 +18,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Categories support one level of parent/child nesting. A category without
  * a parent_id is a top-level (root) category. Soft deletes preserve
  * historical associations.
+ *
+ * Size options can be assigned to categories, making those sizes available
+ * for all products within the category.
  *
  * @property string               $id
  * @property string|null          $parent_id
@@ -29,6 +33,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Carbon\Carbon|null  $created_at
  * @property \Carbon\Carbon|null  $updated_at
  * @property \Carbon\Carbon|null  $deleted_at
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, SizeOption> $sizeOptions
  */
 class Category extends Model
 {
@@ -50,7 +56,7 @@ class Category extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'is_active'  => 'boolean',
+        'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
 
@@ -82,5 +88,27 @@ class Category extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'category_id');
+    }
+
+    /**
+     * Get size options available for this category.
+     *
+     * @return BelongsToMany<SizeOption>
+     */
+    public function sizeOptions(): BelongsToMany
+    {
+        return $this->belongsToMany(SizeOption::class, 'category_sizes')
+            ->withPivot('sort_order')
+            ->orderBy('category_sizes.sort_order');
+    }
+
+    /**
+     * Get available size options for this category.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, SizeOption>
+     */
+    public function availableSizes(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->sizeOptions;
     }
 }

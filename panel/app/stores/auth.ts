@@ -252,7 +252,9 @@ export const useAuthStore = defineStore("auth", () => {
       const maybe = error as { statusCode?: number; status?: number };
       const statusCode = maybe.statusCode ?? maybe.status;
 
-      if (statusCode !== 401) {
+      if (statusCode === 401) {
+        await handleExpiredSession();
+      } else {
         const message = getErrorMessage(
           error,
           "Không thể khôi phục phiên làm việc."

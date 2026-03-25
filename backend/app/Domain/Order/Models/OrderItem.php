@@ -12,13 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * OrderItem model representing a single line item within an order.
  *
- * Snapshots the product variant's key attributes (sku, name, size, color,
+ * Snapshots the product's key attributes (sku, name, size, color,
  * pricing) at the time of purchase so the record remains accurate even if
  * the underlying product is later modified or deleted.
  *
  * @property string      $id
  * @property string      $order_id
- * @property string|null $product_variant_id
+ * @property string|null $product_id
  * @property string      $sku
  * @property string      $name
  * @property string|null $size
@@ -40,7 +40,7 @@ class OrderItem extends Model
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
         'order_id',
-        'product_variant_id',
+        'product_id',
         'sku',
         'name',
         'size',
@@ -55,11 +55,11 @@ class OrderItem extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'unit_price'        => 'integer',
-        'cost_price'        => 'integer',
-        'total_price'       => 'integer',
-        'discount_amount'   => 'integer',
-        'quantity'          => 'integer',
+        'unit_price' => 'integer',
+        'cost_price' => 'integer',
+        'total_price' => 'integer',
+        'discount_amount' => 'integer',
+        'quantity' => 'integer',
         'quantity_returned' => 'integer',
     ];
 
@@ -74,14 +74,14 @@ class OrderItem extends Model
     }
 
     /**
-     * Get the product variant this item was created from.
+     * Get the product this item was created from.
      *
-     * Returns null if the variant has since been deleted.
+     * Returns null if the product has since been deleted.
      *
-     * @return BelongsTo<\App\Domain\Product\Models\ProductVariant, OrderItem>
+     * @return BelongsTo<\App\Domain\Product\Models\Product, OrderItem>
      */
-    public function variant(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo('App\Domain\Product\Models\ProductVariant', 'product_variant_id');
+        return $this->belongsTo(\App\Domain\Product\Models\Product::class, 'product_id');
     }
 }

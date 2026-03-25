@@ -18,6 +18,9 @@ use App\Http\Controllers\Api\V1\Order\BulkOrderController;
 use App\Http\Controllers\Api\V1\Order\DocumentController;
 use App\Http\Controllers\Api\V1\Order\OrderPaymentController;
 use App\Http\Controllers\Api\V1\Order\OrderActivityController;
+use App\Http\Controllers\Api\V1\Order\PaymentReportController;
+use App\Http\Controllers\Api\V1\Payment\BankConfigController;
+use App\Http\Controllers\Api\V1\Payment\PendingDepositController;
 use App\Http\Controllers\Api\V1\CommissionController;
 use App\Http\Controllers\Api\V1\Inventory\InventoryController;
 use App\Http\Controllers\Api\V1\Inventory\PurchaseOrderController;
@@ -27,6 +30,8 @@ use App\Http\Controllers\Api\V1\Warehouse\WarehouseController;
 use App\Http\Controllers\Api\V1\Shipment\ShipmentController;
 use App\Http\Controllers\Api\V1\Shipment\CourierConfigController;
 use App\Http\Controllers\Api\V1\Shipment\RemittanceController;
+use App\Http\Controllers\Api\V1\Shipment\ShipmentDiscrepancyController;
+use App\Http\Controllers\Api\V1\Shipment\GhtkController;
 use App\Http\Controllers\Api\V1\Loyalty\LoyaltyTierController;
 use App\Http\Controllers\Api\V1\Loyalty\LoyaltyAccountController;
 use App\Http\Controllers\Api\V1\Loyalty\LoyaltyCampaignController;
@@ -103,8 +108,30 @@ Route::prefix('v1/panel')->group(function () {
         Route::post('orders/{order}/payment-proof', [OrderPaymentController::class, 'uploadProof']);
         Route::delete('orders/{order}/payment-proof/{index}', [OrderPaymentController::class, 'removeProof']);
         Route::post('orders/{order}/verify-payment', [OrderPaymentController::class, 'verifyPayment']);
+        Route::post('orders/{order}/record-payment', [OrderPaymentController::class, 'recordPayment']);
+        Route::post('orders/{order}/cod-collection', [OrderPaymentController::class, 'recordCodCollection']);
         Route::get('orders/{order}/activities', [OrderActivityController::class, 'index']);
         Route::get('orders/{order}/activities/{activity}', [OrderActivityController::class, 'show']);
+
+        // Payment Reports
+        Route::get('payments/summary', [PaymentReportController::class, 'summary']);
+        Route::get('payments/outstanding', [PaymentReportController::class, 'outstanding']);
+        Route::get('payments/daily', [PaymentReportController::class, 'daily']);
+        Route::get('payments/cod-pending', [PaymentReportController::class, 'codPendingCollection']);
+        Route::get('payments/cod-discrepancies', [PaymentReportController::class, 'codDiscrepancies']);
+
+        // Bank Configurations (RPA)
+        Route::apiResource('bank-configs', BankConfigController::class);
+        Route::post('bank-configs/{bankConfig}/test-connection', [BankConfigController::class, 'testConnection']);
+        Route::post('bank-configs/{bankConfig}/trigger-check', [BankConfigController::class, 'triggerCheck']);
+
+        // Pending Deposits
+        Route::get('pending-deposits', [PendingDepositController::class, 'index']);
+        Route::get('pending-deposits/{pendingDeposit}', [PendingDepositController::class, 'show']);
+        Route::post('pending-deposits/{pendingDeposit}/cancel', [PendingDepositController::class, 'cancel']);
+        Route::post('pending-deposits/{pendingDeposit}/manual-match', [PendingDepositController::class, 'manualMatch']);
+        Route::get('bank-check-logs', [PendingDepositController::class, 'logs']);
+        Route::post('orders/{order}/pending-deposit', [PendingDepositController::class, 'store']);
 
         // Commission Management
         Route::get('commissions/summary', [CommissionController::class, 'summary']);
@@ -141,6 +168,26 @@ Route::prefix('v1/panel')->group(function () {
         Route::apiResource('shipments', ShipmentController::class)->only(['index', 'show', 'destroy']);
         Route::post('shipments/{shipment}/track', [ShipmentController::class, 'syncTracking']);
         Route::get('shipments/{shipment}/label', [ShipmentController::class, 'label']);
+        Route::get('shipments/pending-cod', [ShipmentDiscrepancyController::class, 'pendingCod']);
+        Route::get('shipments/discrepancies', [ShipmentDiscrepancyController::class, 'index']);
+        Route::get('shipments/discrepancies/summary', [ShipmentDiscrepancyController::class, 'summary']);
+        Route::post('shipments/discrepancies/detect', [ShipmentDiscrepancyController::class, 'forceDetect']);
+        Route::get('shipments/discrepancies/{discrepancy}', [ShipmentDiscrepancyController::class, 'show']);
+        Route::post('shipments/discrepancies/{discrepancy}/resolve', [ShipmentDiscrepancyController::class, 'resolve']);
+        Route::post('shipments/discrepancies/{discrepancy}/investigate', [ShipmentDiscrepancyController::class, 'investigate']);
+        Route::post('shipments/discrepancies/{discrepancy}/dismiss', [ShipmentDiscrepancyController::class, 'dismiss']);
+
+        // GHTK Specific Endpoints
+        Route::prefix('ghtk')->group(function () {
+            Route::post('calculate-fee', [GhtkController::class, 'calculateFee']);
+            Route::post('submit-order', [GhtkController::class, 'submitOrder']);
+            Route::get('orders/{trackingNumber}/status', [GhtkController::class, 'getOrderStatus']);
+            Route::post('orders/{trackingNumber}/sync', [GhtkController::class, 'syncStatus']);
+            Route::get('orders/{trackingNumber}/label', [GhtkController::class, 'printLabel']);
+            Route::post('orders/{trackingNumber}/cancel', [GhtkController::class, 'cancelOrder']);
+            Route::post('shipments/{shipment}/cancel', [GhtkController::class, 'cancelShipment']);
+        });
+
         Route::apiResource('courier-configs', CourierConfigController::class);
         Route::get('courier-remittances', [RemittanceController::class, 'index']);
         Route::get('courier-remittances/{remittance}', [RemittanceController::class, 'show']);

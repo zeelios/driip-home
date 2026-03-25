@@ -6,12 +6,12 @@ namespace App\Http\Requests\Loyalty;
 
 use App\Domain\Loyalty\Data\EarnPointsDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for crediting loyalty points to a customer's account.
  */
-class EarnPointsRequest extends FormRequest
+class EarnPointsRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

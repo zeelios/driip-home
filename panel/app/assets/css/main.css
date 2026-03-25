@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+/* ─── PANEL DESIGN TOKENS ───────────────────────────────────────── */
+:root {
+  /* Background layers — darkest to lightest */
+  --panel-bg: #0a0a0a;
+  --panel-sidebar: #111110;
+  --panel-surface: #0f0f0f;
+  --panel-card: #111111;
+  --panel-elevated: #141414;
+  --panel-hover: rgba(255, 255, 255, 0.04);
+
+  /* Borders */
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --panel-border-hover: rgba(255, 255, 255, 0.15);
+  --panel-border-focus: rgba(255, 255, 255, 0.35);
+
+  /* Text hierarchy — white with opacity */
+  --panel-text: #ffffff;
+  --panel-text-primary: rgba(255, 255, 255, 0.9);
+  --panel-text-secondary: rgba(255, 255, 255, 0.6);
+  --panel-text-muted: rgba(255, 255, 255, 0.45);
+  --panel-text-subtle: rgba(255, 255, 255, 0.3);
+  --panel-text-disabled: rgba(255, 255, 255, 0.25);
+
+  /* Status colors — subtle grey scale only */
+  --panel-success: rgba(255, 255, 255, 0.9);
+  --panel-success-bg: rgba(255, 255, 255, 0.1);
+  --panel-warning: rgba(255, 255, 255, 0.8);
+  --panel-warning-bg: rgba(255, 255, 255, 0.08);
+  --panel-danger: #ef4444;
+  --panel-danger-bg: rgba(239, 68, 68, 0.15);
+  --panel-info: rgba(255, 255, 255, 0.7);
+  --panel-info-bg: rgba(255, 255, 255, 0.06);
+
+  /* Interactive */
+  --panel-accent: #ffffff;
+  --panel-accent-hover: rgba(255, 255, 255, 0.85);
+
+  /* Typography */
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-body: "Be Vietnam Pro", sans-serif;
+}
+
+/* ─── BASE RESET ──────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--panel-bg);
+  color: var(--panel-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── SCROLLBAR STYLING ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* ─── FOCUS STATES ──────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ─── SELECTION ─────────────────────────────────────────────────── */
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}

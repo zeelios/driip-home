@@ -1,20 +1,20 @@
 <template>
-  <div class="z-table-wrap">
-    <div class="z-table-scroll">
-      <table class="z-table">
-        <thead class="z-table__head">
+  <div class="border border-white/8 rounded-[10px] overflow-hidden bg-[#111111]">
+    <div class="overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch]">
+      <table class="w-full border-collapse text-sm">
+        <thead class="bg-white/4">
           <tr>
             <th
               v-for="col in columns"
               :key="col.key"
-              class="z-table__th"
-              :class="{ 'z-table__th--sortable': col.sortable, 'z-table__th--right': col.align === 'right', 'z-table__th--center': col.align === 'center' }"
+              class="py-3 px-4 text-left text-[0.6875rem] font-bold tracking-[0.06em] uppercase text-white/50 border-b border-white/8 whitespace-nowrap select-none"
+              :class="{ 'cursor-pointer hover:text-white/80': col.sortable, 'text-right': col.align === 'right', 'text-center': col.align === 'center' }"
               :style="col.width ? { width: col.width } : {}"
               @click="col.sortable ? onSort(col.key) : undefined"
             >
-              <span class="z-table__th-inner">
+              <span class="inline-flex items-center gap-1.25">
                 {{ col.label }}
-                <span v-if="col.sortable" class="z-table__sort-icon" aria-hidden="true">
+                <span v-if="col.sortable" class="flex items-center" aria-hidden="true">
                   <svg v-if="sortKey === col.key && sortDir === 'asc'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
                   <svg v-else-if="sortKey === col.key && sortDir === 'desc'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                   <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.35"><polyline points="18 15 12 9 6 15"/></svg>
@@ -23,11 +23,11 @@
             </th>
           </tr>
         </thead>
-        <tbody class="z-table__body">
+        <tbody>
           <!-- Loading skeleton rows -->
           <template v-if="loading">
-            <tr v-for="i in skeletonRows" :key="`sk-${i}`" class="z-table__row">
-              <td v-for="col in columns" :key="`sk-${i}-${col.key}`" class="z-table__td">
+            <tr v-for="i in skeletonRows" :key="`sk-${i}`" class="border-b border-white/5 transition-colors duration-100">
+              <td v-for="col in columns" :key="`sk-${i}-${col.key}`" class="py-3.25 px-4 text-white/85 align-middle" :class="{ 'text-right': col.align === 'right', 'text-center': col.align === 'center' }">
                 <ZSkeleton :width="col.skeletonWidth ?? '80%'" height="0.875rem" />
               </td>
             </tr>
@@ -36,7 +36,7 @@
           <!-- Empty state -->
           <template v-else-if="!rows.length">
             <tr>
-              <td :colspan="columns.length" class="z-table__empty-cell">
+              <td :colspan="columns.length" class="p-0">
                 <slot name="empty">
                   <ZEmptyState :title="emptyTitle" :description="emptyDescription" />
                 </slot>
@@ -49,15 +49,15 @@
             <tr
               v-for="(row, idx) in rows"
               :key="rowKey ? String((row as Record<string, unknown>)[rowKey]) : idx"
-              class="z-table__row"
-              :class="{ 'z-table__row--clickable': !!onRowClick }"
+              class="border-b border-white/5 transition-colors duration-100 last:border-b-0"
+              :class="{ 'cursor-pointer hover:bg-white/3': !!onRowClick }"
               @click="onRowClick ? onRowClick(row) : undefined"
             >
               <td
                 v-for="col in columns"
                 :key="col.key"
-                class="z-table__td"
-                :class="{ 'z-table__td--right': col.align === 'right', 'z-table__td--center': col.align === 'center' }"
+                class="py-3.25 px-4 text-white/85 align-middle"
+                :class="{ 'text-right': col.align === 'right', 'text-center': col.align === 'center' }"
               >
                 <slot :name="`cell-${col.key}`" :row="row" :value="(row as Record<string, unknown>)[col.key]">
                   {{ (row as Record<string, unknown>)[col.key] ?? '—' }}
@@ -118,59 +118,3 @@ function onSort(key: string): void {
 }
 </script>
 
-<style scoped>
-.z-table-wrap {
-  border: 1px solid rgba(0, 0, 0, 0.07);
-  border-radius: 10px;
-  overflow: hidden;
-  background: #fff;
-}
-.z-table-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.z-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-.z-table__head { background: #fafaf9; }
-.z-table__th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #888;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
-  white-space: nowrap;
-  user-select: none;
-}
-.z-table__th--sortable { cursor: pointer; }
-.z-table__th--sortable:hover { color: #333; }
-.z-table__th--right { text-align: right; }
-.z-table__th--center { text-align: center; }
-.z-table__th-inner {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3125rem;
-}
-.z-table__sort-icon { display: flex; align-items: center; }
-.z-table__body {}
-.z-table__row {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  transition: background 100ms;
-}
-.z-table__row:last-child { border-bottom: 0; }
-.z-table__row--clickable { cursor: pointer; }
-.z-table__row--clickable:hover { background: #fafaf9; }
-.z-table__td {
-  padding: 0.8125rem 1rem;
-  color: #1a1a18;
-  vertical-align: middle;
-}
-.z-table__td--right { text-align: right; }
-.z-table__td--center { text-align: center; }
-.z-table__empty-cell { padding: 0; }
-</style>

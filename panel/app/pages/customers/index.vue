@@ -1,30 +1,54 @@
 <template>
   <div>
     <!-- Toolbar -->
-    <div class="page-toolbar">
+    <div class="flex items-start justify-between gap-3 mb-4.5 flex-wrap">
       <ZInput
         v-model="search"
         placeholder="Tìm tên, email, điện thoại..."
         type="search"
-        class="page-toolbar__search"
+        class="flex-1 min-w-[180px] max-w-[320px]"
         @input="onSearchInput"
       >
         <template #prefix>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
         </template>
       </ZInput>
       <ZButton size="sm" @click="showCreateModal = true">
         <template #prefix>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
         </template>
         Thêm khách hàng
       </ZButton>
     </div>
 
     <!-- Error -->
-    <div v-if="store.listState === 'error'" class="page-error-bar">
+    <div
+      v-if="store.listState === 'error'"
+      class="flex items-center justify-between gap-3 py-3 px-4 mb-3.5 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-500"
+    >
       <span>{{ store.listError }}</span>
-      <ZButton variant="ghost" size="sm" @click="store.fetchCustomers()">Thử lại</ZButton>
+      <ZButton variant="ghost" size="sm" @click="store.fetchCustomers()"
+        >Thử lại</ZButton
+      >
     </div>
 
     <!-- Table -->
@@ -39,40 +63,72 @@
       :on-row-click="(row) => navigateTo(`/customers/${(row as CustomerRow).id}`)"
     >
       <template #cell-name="{ row }">
-        <div class="cell-customer">
-          <div class="cell-customer__avatar">
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-8 h-8 rounded-full bg-white/10 text-white/80 text-[0.6875rem] font-bold flex items-center justify-center shrink-0"
+          >
             {{ initials(row as CustomerRow) }}
           </div>
           <div>
-            <p class="cell-customer__name">{{ fullName(row as CustomerRow) }}</p>
-            <p class="cell-customer__code">{{ (row as CustomerRow).customer_code }}</p>
+            <p class="m-0 font-semibold text-white/90 text-sm">
+              {{ fullName(row as CustomerRow) }}
+            </p>
+            <p class="m-0 text-[0.6875rem] text-white/50 font-mono">
+              {{ (row as CustomerRow).customer_code }}
+            </p>
           </div>
         </div>
       </template>
       <template #cell-contact="{ row }">
-        <div class="cell-contact">
-          <span v-if="(row as CustomerRow).email" class="cell-contact__item">{{ (row as CustomerRow).email }}</span>
-          <span v-if="(row as CustomerRow).phone" class="cell-contact__item">{{ (row as CustomerRow).phone }}</span>
+        <div class="flex flex-col gap-0.5">
+          <span
+            v-if="(row as CustomerRow).email"
+            class="text-[0.8125rem] text-white/60"
+            >{{ (row as CustomerRow).email }}</span
+          >
+          <span
+            v-if="(row as CustomerRow).phone"
+            class="text-[0.8125rem] text-white/60"
+            >{{ (row as CustomerRow).phone }}</span
+          >
         </div>
       </template>
       <template #cell-status="{ row }">
-        <ZBadge v-if="(row as CustomerRow).is_blocked" variant="danger">Đã khóa</ZBadge>
+        <ZBadge v-if="(row as CustomerRow).is_blocked" variant="danger"
+          >Đã khóa</ZBadge
+        >
         <ZBadge v-else variant="success">Hoạt động</ZBadge>
       </template>
       <template #cell-total_spent="{ row }">
-        <span class="cell-amount">{{ formatVnd((row as CustomerRow).total_spent) }}</span>
+        <span class="font-semibold">{{
+          formatVnd((row as CustomerRow).total_spent)
+        }}</span>
       </template>
       <template #cell-total_orders="{ row }">
         {{ (row as CustomerRow).total_orders }}
       </template>
+      <template #cell-loyalty="{ row }">
+        <ZBadge
+          v-if="(row as CustomerRow).loyaltyAccount?.tier"
+          :variant="'default'"
+          size="sm"
+        >
+          {{ (row as CustomerRow).loyaltyAccount!.tier!.name }}
+        </ZBadge>
+        <span v-else class="text-white/40 text-sm">—</span>
+      </template>
       <template #cell-created_at="{ row }">
-        <span class="cell-date">{{ formatDate((row as CustomerRow).created_at) }}</span>
+        <span class="text-[0.8125rem] text-white/50">{{
+          formatDate((row as CustomerRow).created_at)
+        }}</span>
       </template>
     </ZTable>
 
     <!-- Pagination -->
-    <div class="page-footer">
-      <p class="page-footer__count">{{ store.meta.total }} khách hàng</p>
+    <div class="flex items-center justify-between gap-3 pt-4 flex-wrap">
+      <p class="m-0 text-[0.8125rem] text-white/40">
+        {{ store.meta.total }} khách hàng
+      </p>
       <ZPagination
         :current-page="store.meta.current_page"
         :total-pages="store.meta.last_page"
@@ -82,7 +138,9 @@
 
     <!-- Create modal -->
     <ZModal v-model="showCreateModal" title="Thêm khách hàng mới" size="md">
-      <div class="form-grid">
+      <div
+        class="grid grid-cols-2 gap-4 [&>*:nth-child(5)]:col-span-full max-sm:grid-cols-1"
+      >
         <ZInput
           v-model="form.first_name"
           label="Họ *"
@@ -118,12 +176,23 @@
           :options="genderOptions"
           label="Giới tính"
           placeholder="Chọn giới tính"
-          class="form-grid__full"
         />
       </div>
       <template #footer>
-        <ZButton variant="outline" size="sm" :disabled="store.formPending" @click="closeCreateModal">Hủy</ZButton>
-        <ZButton variant="primary" size="sm" :loading="store.formPending" @click="handleCreate">Tạo khách hàng</ZButton>
+        <ZButton
+          variant="outline"
+          size="sm"
+          :disabled="store.formPending"
+          @click="closeCreateModal"
+          >Hủy</ZButton
+        >
+        <ZButton
+          variant="primary"
+          size="sm"
+          :loading="store.formPending"
+          @click="handleCreate"
+          >Tạo khách hàng</ZButton
+        >
       </template>
     </ZModal>
   </div>
@@ -132,7 +201,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useCustomersStore } from "~/stores/customers";
-import { formatVnd, formatDate, sanitizeString, sanitizeEmail } from "~/utils/format";
+import {
+  formatVnd,
+  formatDate,
+  sanitizeString,
+  sanitizeEmail,
+} from "~/utils/format";
 import type { TableColumn } from "~/components/z/Table.vue";
 import type { SelectOption } from "~/components/z/Select.vue";
 
@@ -149,6 +223,13 @@ interface CustomerRow {
   total_spent: number;
   total_orders: number;
   created_at: string | null;
+  loyaltyAccount?: {
+    tier?: {
+      name: string;
+      color?: string | null;
+    } | null;
+    points_balance?: number;
+  } | null;
 }
 
 const store = useCustomersStore();
@@ -176,9 +257,20 @@ const formErrors = reactive({
 const columns: TableColumn[] = [
   { key: "name", label: "Khách hàng", skeletonWidth: "180px" },
   { key: "contact", label: "Liên hệ", skeletonWidth: "160px" },
+  { key: "loyalty", label: "Hạng", skeletonWidth: "80px" },
   { key: "status", label: "Trạng thái", skeletonWidth: "80px" },
-  { key: "total_orders", label: "Đơn hàng", align: "center", skeletonWidth: "50px" },
-  { key: "total_spent", label: "Chi tiêu", align: "right", skeletonWidth: "100px" },
+  {
+    key: "total_orders",
+    label: "Đơn hàng",
+    align: "center",
+    skeletonWidth: "50px",
+  },
+  {
+    key: "total_spent",
+    label: "Chi tiêu",
+    align: "right",
+    skeletonWidth: "100px",
+  },
   { key: "created_at", label: "Ngày tạo", skeletonWidth: "100px" },
 ];
 
@@ -198,8 +290,12 @@ function initials(row: CustomerRow): string {
 
 function validateForm(): boolean {
   let valid = true;
-  formErrors.first_name = sanitizeString(form.first_name) ? "" : "Họ là bắt buộc";
-  formErrors.last_name = sanitizeString(form.last_name) ? "" : "Tên là bắt buộc";
+  formErrors.first_name = sanitizeString(form.first_name)
+    ? ""
+    : "Họ là bắt buộc";
+  formErrors.last_name = sanitizeString(form.last_name)
+    ? ""
+    : "Tên là bắt buộc";
   if (form.email && !sanitizeEmail(form.email)) {
     formErrors.email = "Email không hợp lệ";
     valid = false;
@@ -252,62 +348,3 @@ onMounted(() => {
   store.fetchCustomers();
 });
 </script>
-
-<style scoped>
-.page-toolbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1.125rem;
-  flex-wrap: wrap;
-}
-.page-toolbar__search { flex: 1; min-width: 180px; max-width: 320px; }
-
-.page-error-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.875rem;
-  background: #fff5f5;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: #b91c1c;
-}
-
-.page-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  flex-wrap: wrap;
-}
-.page-footer__count { margin: 0; font-size: 0.8125rem; color: #888; }
-
-.cell-customer { display: flex; align-items: center; gap: 0.625rem; }
-.cell-customer__avatar {
-  width: 2rem; height: 2rem; border-radius: 50%;
-  background: #f0efed; color: #555; font-size: 0.6875rem;
-  font-weight: 700; display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.cell-customer__name { margin: 0; font-weight: 550; color: #1a1a18; font-size: 0.875rem; }
-.cell-customer__code { margin: 0; font-size: 0.6875rem; color: #999; font-family: ui-monospace, monospace; }
-
-.cell-contact { display: flex; flex-direction: column; gap: 0.125rem; }
-.cell-contact__item { font-size: 0.8125rem; color: #555; }
-
-.cell-amount { font-weight: 600; }
-.cell-date { font-size: 0.8125rem; color: #666; }
-
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.form-grid__full { grid-column: 1 / -1; }
-
-@media (max-width: 480px) {
-  .form-grid { grid-template-columns: 1fr; }
-}
-</style>

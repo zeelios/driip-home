@@ -6,14 +6,14 @@ namespace App\Http\Requests\Loyalty;
 
 use App\Domain\Loyalty\Data\UpdateCampaignDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing loyalty campaign.
  *
  * All fields are optional (PATCH semantics).
  */
-class UpdateCampaignRequest extends FormRequest
+class UpdateCampaignRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

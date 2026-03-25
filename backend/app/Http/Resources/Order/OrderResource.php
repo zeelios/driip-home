@@ -33,6 +33,8 @@ class OrderResource extends JsonResource
                 fn() => [
                     'id' => $this->customer->id,
                     'customer_code' => $this->customer->customer_code,
+                    'first_name' => $this->customer->first_name,
+                    'last_name' => $this->customer->last_name,
                     'full_name' => $this->customer->fullName(),
                     'phone' => $this->customer->phone,
                     'email' => $this->customer->email,

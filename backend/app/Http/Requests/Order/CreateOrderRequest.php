@@ -6,7 +6,7 @@ namespace App\Http\Requests\Order;
 
 use App\Domain\Order\Data\CreateOrderDto;
 use App\Domain\Order\Data\CreateOrderItemDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for creating a new order.
@@ -14,7 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * Supports both registered customers and guest shoppers. Requires at
  * least valid shipping details and one or more line items.
  */
-class CreateOrderRequest extends FormRequest
+class CreateOrderRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

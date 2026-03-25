@@ -42,6 +42,8 @@ class CustomerController extends BaseApiController
                     AllowedFilter::exact('is_blocked'),
                     AllowedFilter::scope('tags'),
                 )
+                ->with(['loyaltyAccount.tier'])
+                ->withCount('orders')
                 ->paginate(20);
 
             return CustomerResource::collection($customers);
@@ -129,7 +131,7 @@ class CustomerController extends BaseApiController
     {
         try {
             $customer->update([
-                'is_blocked'     => true,
+                'is_blocked' => true,
                 'blocked_reason' => $request->input('blocked_reason'),
             ]);
             return new CustomerResource($customer->refresh());

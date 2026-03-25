@@ -10,8 +10,7 @@ return new class extends Migration
     {
         Schema::create('order_payments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('order_id');
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreignUuid('order_id')->constrained()->cascadeOnDelete();
 
             $table->bigInteger('amount');
             $table->enum('payment_method', ['cod', 'bank_transfer', 'momo', 'zalopay', 'vnpay', 'credit_card', 'cash', 'loyalty_points']);
@@ -20,8 +19,7 @@ return new class extends Migration
             $table->jsonb('proof_urls')->default('[]');
             $table->text('notes')->nullable();
 
-            $table->uuid('recorded_by')->nullable();
-            $table->foreign('recorded_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreignUuid('recorded_by')->nullable()->constrained('users')->nullOnDelete();
 
             $table->timestamps();
 

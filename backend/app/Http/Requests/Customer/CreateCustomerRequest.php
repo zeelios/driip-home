@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Requests\Customer;
 
 use App\Domain\Customer\Data\CreateCustomerDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Form request for creating a new customer.
  *
  * Validates the minimum required fields and provides a typed DTO accessor.
  */
-class CreateCustomerRequest extends FormRequest
+class CreateCustomerRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

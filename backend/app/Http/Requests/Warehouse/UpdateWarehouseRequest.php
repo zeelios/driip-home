@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Warehouse;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing warehouse.
  */
-class UpdateWarehouseRequest extends FormRequest
+class UpdateWarehouseRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

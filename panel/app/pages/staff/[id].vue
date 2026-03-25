@@ -2,18 +2,22 @@
   <div>
     <!-- Loading skeleton -->
     <template v-if="store.isDetailLoading">
-      <div class="detail-header-skeleton">
+      <div class="flex items-center justify-between mb-6">
         <div class="flex gap-3 items-center">
           <ZSkeleton variant="circle" width="3.5rem" height="3.5rem" />
-          <div class="flex flex-col gap-1" style="flex: 1">
+          <div class="flex flex-col gap-1 flex-1">
             <ZSkeleton height="1.25rem" width="160px" />
             <ZSkeleton height="0.875rem" width="100px" />
           </div>
         </div>
         <ZSkeleton height="2.25rem" width="140px" />
       </div>
-      <div class="detail-grid">
-        <div class="detail-card" v-for="i in 2" :key="i">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <div
+          class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5"
+          v-for="i in 2"
+          :key="i"
+        >
           <ZSkeleton height="0.75rem" width="40%" class="mb-2" />
           <ZSkeleton height="1rem" width="80%" class="mb-1" />
           <ZSkeleton height="1rem" width="65%" class="mb-1" />
@@ -39,9 +43,12 @@
     <!-- Content -->
     <template v-else-if="store.currentStaff">
       <!-- Page header -->
-      <div class="detail-page-header">
-        <div class="detail-page-header__left">
-          <NuxtLink to="/staff" class="detail-back">
+      <div class="flex items-start justify-between gap-4 mb-6 flex-wrap">
+        <div class="flex items-center flex-wrap gap-3">
+          <NuxtLink
+            to="/staff"
+            class="inline-flex items-center gap-1 text-[0.8125rem] text-white/50 no-underline transition-colors duration-130 hover:text-white/80"
+          >
             <svg
               width="14"
               height="14"
@@ -54,17 +61,25 @@
             </svg>
             Nhân viên
           </NuxtLink>
-          <div class="staff-identity">
-            <div class="staff-avatar">{{ staffInitials }}</div>
+          <div class="flex items-center gap-3">
+            <div
+              class="w-12 h-12 rounded-full bg-white/10 text-white/90 text-[0.9375rem] font-bold flex items-center justify-center shrink-0"
+            >
+              {{ staffInitials }}
+            </div>
             <div>
-              <h1 class="detail-page-title">{{ staff.name }}</h1>
-              <p class="staff-code">{{ staff.employee_code ?? "—" }}</p>
+              <h1 class="m-0 text-lg font-bold text-white/95">
+                {{ staff.name }}
+              </h1>
+              <p class="m-0 text-[0.6875rem] text-white/50 font-mono">
+                {{ staff.employee_code ?? "—" }}
+              </p>
             </div>
           </div>
           <ZBadge :variant="staffStatusVariant(staff.status) as BadgeVariant">
             {{ staffStatusLabel(staff.status) }}
           </ZBadge>
-          <div v-if="staff.roles?.length" class="staff-roles">
+          <div v-if="staff.roles?.length" class="flex gap-1.5 flex-wrap">
             <ZBadge
               v-for="role in (staff.roles as RoleItem[])"
               :key="typeof role === 'string' ? role : role.name ?? ''"
@@ -74,7 +89,7 @@
             </ZBadge>
           </div>
         </div>
-        <div class="detail-page-header__actions">
+        <div class="flex gap-2 flex-wrap">
           <ZButton variant="outline" size="sm" @click="openEditModal"
             >Chỉnh sửa</ZButton
           >
@@ -98,74 +113,123 @@
       </div>
 
       <!-- Detail grid -->
-      <div class="detail-grid">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         <!-- Contact info -->
-        <div class="detail-card">
-          <p class="detail-card__title">Thông tin liên hệ</p>
-          <dl class="detail-dl">
-            <div class="detail-dl__row">
-              <dt>Email</dt>
-              <dd>{{ staff.email }}</dd>
+        <div class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5">
+          <p
+            class="m-0 mb-3.5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Thông tin liên hệ
+          </p>
+          <dl class="m-0">
+            <div
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
+            >
+              <dt class="text-white/50 shrink-0">Email</dt>
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
+                {{ staff.email }}
+              </dd>
             </div>
-            <div class="detail-dl__row">
-              <dt>Điện thoại</dt>
-              <dd>{{ staff.phone ?? "—" }}</dd>
+            <div
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
+            >
+              <dt class="text-white/50 shrink-0">Điện thoại</dt>
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
+                {{ staff.phone ?? "—" }}
+              </dd>
             </div>
-            <div class="detail-dl__row">
-              <dt>Phòng ban</dt>
-              <dd>{{ staff.department ?? "—" }}</dd>
+            <div
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
+            >
+              <dt class="text-white/50 shrink-0">Phòng ban</dt>
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
+                {{ staff.department ?? "—" }}
+              </dd>
             </div>
-            <div class="detail-dl__row">
-              <dt>Chức vụ</dt>
-              <dd>{{ staff.position ?? "—" }}</dd>
+            <div
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
+            >
+              <dt class="text-white/50 shrink-0">Chức vụ</dt>
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
+                {{ staff.position ?? "—" }}
+              </dd>
             </div>
           </dl>
         </div>
 
         <!-- Employment info -->
-        <div class="detail-card">
-          <p class="detail-card__title">Thông tin công việc</p>
-          <dl class="detail-dl">
-            <div class="detail-dl__row">
-              <dt>Ngày vào làm</dt>
-              <dd>{{ formatDate(staff.hired_at) }}</dd>
+        <div class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5">
+          <p
+            class="m-0 mb-3.5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Thông tin công việc
+          </p>
+          <dl class="m-0">
+            <div
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
+            >
+              <dt class="text-white/50 shrink-0">Ngày vào làm</dt>
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
+                {{ formatDate(staff.hired_at) }}
+              </dd>
             </div>
-            <div class="detail-dl__row">
-              <dt>Ngày nghỉ việc</dt>
-              <dd>{{ formatDate(staff.terminated_at) }}</dd>
+            <div
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
+            >
+              <dt class="text-white/50 shrink-0">Ngày nghỉ việc</dt>
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
+                {{ formatDate(staff.terminated_at) }}
+              </dd>
             </div>
-            <div class="detail-dl__row">
-              <dt>Ngày tạo TK</dt>
-              <dd>{{ formatDate(staff.created_at) }}</dd>
+            <div
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
+            >
+              <dt class="text-white/50 shrink-0">Ngày tạo TK</dt>
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
+                {{ formatDate(staff.created_at) }}
+              </dd>
             </div>
           </dl>
         </div>
 
         <!-- Referral link -->
-        <div class="detail-card">
-          <p class="detail-card__title">Link giới thiệu</p>
-          <div class="referral-section">
-            <p class="referral-desc">
+        <div class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5">
+          <p
+            class="m-0 mb-3.5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Link giới thiệu
+          </p>
+          <div class="flex flex-col gap-3">
+            <p class="m-0 text-[0.8125rem] text-white/60 leading-relaxed">
               Nhân viên chia sẻ link này để nhận hoa hồng:
             </p>
-            <div class="referral-input-wrap">
+            <div class="flex gap-2">
               <input
                 :value="referralUrl"
                 readonly
-                class="referral-input"
+                class="flex-1 px-3.5 py-2.5 border border-white/12 rounded-lg bg-white/4 text-[0.8125rem] text-white/85 font-mono cursor-pointer outline-none min-w-0 focus:border-white/30 focus:bg-white/6"
                 @click="copyReferralUrl"
               />
               <button
-                class="referral-copy-btn"
-                :class="{ copied: copied }"
+                class="px-4 py-2.5 border border-white/20 rounded-lg bg-white/10 text-white/90 text-xs font-semibold cursor-pointer transition-colors duration-150 whitespace-nowrap hover:bg-white/15"
+                :class="{ 'bg-green-700/80 border-green-700/90': copied }"
                 @click="copyReferralUrl"
               >
                 {{ copied ? "Đã copy!" : "Copy" }}
               </button>
             </div>
-            <p v-if="referralCodeHint" class="referral-hint">
-              Mã: <code>{{ referralCodeHint }}</code> — Sửa
-              <code>?referal=</code> trong URL để thay đổi
+            <p v-if="referralCodeHint" class="m-0 text-xs text-white/40">
+              Mã:
+              <code
+                class="bg-white/8 px-1.5 py-0.5 rounded font-mono text-white/70"
+                >{{ referralCodeHint }}</code
+              >
+              — Sửa
+              <code
+                class="bg-white/8 px-1.5 py-0.5 rounded font-mono text-white/70"
+                >?referal=</code
+              >
+              trong URL để thay đổi
             </p>
           </div>
         </div>
@@ -174,12 +238,13 @@
 
     <!-- Edit modal -->
     <ZModal v-model="showEditModal" title="Chỉnh sửa nhân viên" size="md">
-      <div class="form-grid">
+      <div
+        class="grid grid-cols-2 gap-4 [&>*:first-child]:col-span-full max-sm:grid-cols-1"
+      >
         <ZInput
           v-model="editForm.name"
           label="Họ và tên *"
           :error="editErrors.name"
-          class="form-grid__full"
         />
         <ZInput
           v-model="editForm.email"
@@ -381,247 +446,3 @@ onMounted(() => {
   store.fetchStaffMember(id);
 });
 </script>
-
-<style scoped>
-.detail-page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-.detail-page-header__left {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-.detail-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8125rem;
-  color: #888;
-  text-decoration: none;
-  transition: color 130ms;
-}
-.detail-back:hover {
-  color: #1a1a18;
-}
-.detail-page-header__actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.staff-identity {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.staff-avatar {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background: #111110;
-  color: #f5a623;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.detail-page-title {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #1a1a18;
-}
-.staff-code {
-  margin: 0;
-  font-size: 0.6875rem;
-  color: #999;
-  font-family: ui-monospace, monospace;
-}
-.staff-roles {
-  display: flex;
-  gap: 0.375rem;
-  flex-wrap: wrap;
-}
-
-.detail-header-skeleton {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.875rem;
-}
-@media (min-width: 768px) {
-  .detail-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.detail-card {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.07);
-  border-radius: 10px;
-  padding: 1.125rem;
-}
-.detail-card__title {
-  margin: 0 0 0.875rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #888;
-}
-
-.detail-dl {
-  margin: 0;
-}
-.detail-dl__row {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.3125rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  font-size: 0.875rem;
-}
-.detail-dl__row:last-child {
-  border-bottom: none;
-}
-.detail-dl__row dt {
-  color: #888;
-  flex-shrink: 0;
-}
-.detail-dl__row dd {
-  margin: 0;
-  color: #1a1a18;
-  text-align: right;
-  word-break: break-word;
-}
-.detail-note-text {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #555;
-  line-height: 1.55;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-.form-grid__full {
-  grid-column: 1 / -1;
-}
-@media (max-width: 480px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.flex {
-  display: flex;
-}
-.items-center {
-  align-items: center;
-}
-.gap-1 {
-  gap: 0.25rem;
-}
-.gap-3 {
-  gap: 0.75rem;
-}
-.flex-col {
-  flex-direction: column;
-}
-.mb-1 {
-  margin-bottom: 0.25rem;
-}
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-/* ── Referral section ────────────────────────────────────────────── */
-.referral-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.referral-desc {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: #666;
-  line-height: 1.5;
-}
-
-.referral-input-wrap {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.referral-input {
-  flex: 1;
-  padding: 0.625rem 0.875rem;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  background: #f8f8f8;
-  font-size: 0.8125rem;
-  color: #333;
-  font-family: ui-monospace, monospace;
-  cursor: pointer;
-  outline: none;
-  min-width: 0;
-}
-
-.referral-input:focus {
-  border-color: #111110;
-  background: #fff;
-}
-
-.referral-copy-btn {
-  padding: 0.625rem 1rem;
-  border: 1px solid #111110;
-  border-radius: 8px;
-  background: #111110;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  white-space: nowrap;
-}
-
-.referral-copy-btn:hover {
-  background: #333;
-}
-
-.referral-copy-btn.copied {
-  background: #2a7a2a;
-  border-color: #2a7a2a;
-}
-
-.referral-hint {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #888;
-}
-
-.referral-hint code {
-  background: rgba(0, 0, 0, 0.06);
-  padding: 0.125rem 0.375rem;
-  border-radius: 4px;
-  font-family: ui-monospace, monospace;
-  color: #555;
-}
-</style>

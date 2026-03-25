@@ -6,7 +6,7 @@ namespace App\Http\Requests\Order;
 
 use App\Domain\Order\Data\UpdateReturnDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for updating an existing order return record.
@@ -14,7 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * Allows updating logistics (courier, tracking) and refund disposition
  * fields. All fields are optional for partial updates.
  */
-class UpdateReturnRequest extends FormRequest
+class UpdateReturnRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

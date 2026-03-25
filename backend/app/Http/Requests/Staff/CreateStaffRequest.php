@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Requests\Staff;
 
 use App\Domain\Staff\Data\CreateStaffDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new staff member.
  */
-class CreateStaffRequest extends FormRequest
+class CreateStaffRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -43,6 +43,14 @@ class CreateStaffRequest extends FormRequest
             'roles'      => ['nullable', 'array'],
             'roles.*'    => ['string'],
         ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function sanitizeExcept(): array
+    {
+        return ['password'];
     }
 
     /**

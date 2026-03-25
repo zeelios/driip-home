@@ -1,15 +1,34 @@
 <template>
-  <div class="z-input-wrap" :class="{ 'z-input-wrap--error': !!error, 'z-input-wrap--disabled': disabled }">
-    <label v-if="label" :for="inputId" class="z-input-label">{{ label }}</label>
-    <div class="z-input-field">
-      <span v-if="$slots.prefix" class="z-input-affix z-input-affix--pre" aria-hidden="true">
+  <div
+    class="flex flex-col gap-1.5"
+    :class="{
+      '[&_input]:border-red-500 [&_input:focus]:shadow-[0_0_0_3px_rgba(239,68,68,0.15)]':
+        !!error,
+      '[&_label]:text-white/30': disabled,
+    }"
+  >
+    <label
+      v-if="label"
+      :for="inputId"
+      class="text-xs font-semibold tracking-[0.06em] uppercase text-white/50"
+      >{{ label }}</label
+    >
+    <div class="relative flex items-center">
+      <span
+        v-if="$slots.prefix"
+        class="absolute left-0 flex items-center justify-center w-10 text-white/40 pointer-events-none"
+        aria-hidden="true"
+      >
         <slot name="prefix" />
       </span>
       <input
         :id="inputId"
         v-bind="$attrs"
-        class="z-input"
-        :class="{ 'z-input--prefix': $slots.prefix, 'z-input--suffix': $slots.suffix }"
+        class="w-full py-2.5 px-3.5 border border-white/12 rounded-lg bg-white/4 font-inherit text-sm text-white/90 outline-none transition-all duration-150 min-w-0 focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.08)] disabled:bg-white/2 disabled:text-white/35 disabled:cursor-not-allowed"
+        :class="{
+          'pl-10': $slots.prefix,
+          'pr-10': $slots.suffix,
+        }"
         :type="type"
         :value="modelValue"
         :placeholder="placeholder"
@@ -19,12 +38,18 @@
         @input="onInput"
         @blur="$emit('blur', $event)"
       />
-      <span v-if="$slots.suffix" class="z-input-affix z-input-affix--post" aria-hidden="true">
+      <span
+        v-if="$slots.suffix"
+        class="absolute right-0 flex items-center justify-center w-10 text-white/40 pointer-events-none"
+        aria-hidden="true"
+      >
         <slot name="suffix" />
       </span>
     </div>
-    <p v-if="error" class="z-input-error" role="alert">{{ error }}</p>
-    <p v-else-if="hint" class="z-input-hint">{{ hint }}</p>
+    <p v-if="error" class="m-0 text-xs text-red-500" role="alert">
+      {{ error }}
+    </p>
+    <p v-else-if="hint" class="m-0 text-xs text-white/45">{{ hint }}</p>
   </div>
 </template>
 
@@ -52,59 +77,12 @@ const emit = defineEmits<{
   blur: [event: FocusEvent];
 }>();
 
-const inputId = computed(() => props.id ?? `z-input-${Math.random().toString(36).slice(2, 7)}`);
+const inputId = computed(
+  () => props.id ?? `z-input-${Math.random().toString(36).slice(2, 7)}`
+);
 
 function onInput(event: Event): void {
   const target = event.target as HTMLInputElement;
   emit("update:modelValue", target.value);
 }
 </script>
-
-<style scoped>
-.z-input-wrap { display: flex; flex-direction: column; gap: 0.375rem; }
-.z-input-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #6b6b68;
-}
-.z-input-field { position: relative; display: flex; align-items: center; }
-.z-input {
-  width: 100%;
-  padding: 0.5625rem 0.875rem;
-  border: 1px solid rgba(0,0,0,0.14);
-  border-radius: 8px;
-  background: #fff;
-  font: inherit;
-  font-size: 0.875rem;
-  color: #1a1a18;
-  outline: none;
-  transition: border-color 150ms, box-shadow 150ms;
-  min-width: 0;
-}
-.z-input::placeholder { color: #b0b0ad; }
-.z-input:focus {
-  border-color: #111110;
-  box-shadow: 0 0 0 3px rgba(17,17,16,0.08);
-}
-.z-input:disabled { background: #f5f5f4; color: #a0a09d; cursor: not-allowed; }
-.z-input--prefix { padding-left: 2.5rem; }
-.z-input--suffix { padding-right: 2.5rem; }
-.z-input-affix {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  color: #9d9d9a;
-  pointer-events: none;
-}
-.z-input-affix--pre { left: 0; }
-.z-input-affix--post { right: 0; }
-.z-input-wrap--error .z-input { border-color: #ef4444; }
-.z-input-wrap--error .z-input:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
-.z-input-wrap--disabled .z-input-label { color: #b0b0ad; }
-.z-input-error { margin: 0; font-size: 0.75rem; color: #ef4444; }
-.z-input-hint { margin: 0; font-size: 0.75rem; color: #9d9d9a; }
-</style>

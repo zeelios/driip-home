@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Requests\SaleEvent;
 
 use App\Domain\SaleEvent\Data\CreateSaleEventDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new sale event.
  */
-class CreateSaleEventRequest extends FormRequest
+class CreateSaleEventRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

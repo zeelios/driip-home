@@ -1,39 +1,63 @@
 <template>
   <div>
     <!-- Toolbar -->
-    <div class="page-toolbar">
-      <div class="page-toolbar__filters">
+    <div class="flex items-start justify-between gap-3 mb-4.5 flex-wrap">
+      <div class="flex gap-2.5 flex-1 flex-wrap">
         <ZInput
           v-model="search"
           placeholder="Tìm sản phẩm, SKU..."
           type="search"
-          class="page-toolbar__search"
+          class="flex-1 min-w-[180px] max-w-[280px]"
           @input="onSearchInput"
         >
           <template #prefix>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
           </template>
         </ZInput>
         <ZSelect
           v-model="statusFilter"
           :options="statusOptions"
           placeholder="Tất cả trạng thái"
-          class="page-toolbar__select"
+          class="min-w-[150px]"
           @change="onFilterChange"
         />
       </div>
       <ZButton size="sm" @click="showCreateModal = true">
         <template #prefix>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
         </template>
         Thêm sản phẩm
       </ZButton>
     </div>
 
     <!-- Error -->
-    <div v-if="store.listState === 'error'" class="page-error-bar">
+    <div
+      v-if="store.listState === 'error'"
+      class="flex items-center justify-between gap-3 py-3 px-4 mb-3.5 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-500"
+    >
       <span>{{ store.listError }}</span>
-      <ZButton variant="ghost" size="sm" @click="store.fetchProducts()">Thử lại</ZButton>
+      <ZButton variant="ghost" size="sm" @click="store.fetchProducts()"
+        >Thử lại</ZButton
+      >
     </div>
 
     <!-- Table -->
@@ -48,13 +72,29 @@
       :on-row-click="(row) => navigateTo(`/products/${(row as ProductRow).id}`)"
     >
       <template #cell-name="{ row }">
-        <div class="cell-product">
-          <p class="cell-product__name">{{ (row as ProductRow).name }}</p>
-          <p class="cell-product__sku">{{ (row as ProductRow).sku_base ?? '—' }}</p>
+        <div class="flex flex-col gap-0.5">
+          <p class="m-0 font-medium text-white/90 text-sm">
+            {{ (row as ProductRow).name }}
+          </p>
+          <p class="m-0 text-[0.6875rem] text-white/50 font-mono">
+            {{ (row as ProductRow).sku_base ?? "—" }}
+          </p>
         </div>
       </template>
+      <template #cell-brand="{ row }">
+        <span class="text-white/40 text-sm">{{
+          (row as ProductRow).brand?.name ?? "—"
+        }}</span>
+      </template>
+      <template #cell-category="{ row }">
+        <span class="text-white/40 text-sm">{{
+          (row as ProductRow).category?.name ?? "—"
+        }}</span>
+      </template>
       <template #cell-status="{ row }">
-        <ZBadge :variant="productStatusVariant((row as ProductRow).status) as BadgeVariant">
+        <ZBadge
+          :variant="productStatusVariant((row as ProductRow).status) as BadgeVariant"
+        >
           {{ productStatusLabel((row as ProductRow).status) }}
         </ZBadge>
       </template>
@@ -62,11 +102,15 @@
         {{ (row as ProductRow).variants?.length ?? 0 }}
       </template>
       <template #cell-is_featured="{ row }">
-        <ZBadge v-if="(row as ProductRow).is_featured" variant="amber">Nổi bật</ZBadge>
-        <span v-else class="text-muted">—</span>
+        <ZBadge v-if="(row as ProductRow).is_featured" variant="warning"
+          >Nổi bật</ZBadge
+        >
+        <span v-else class="text-white/40 text-sm">—</span>
       </template>
       <template #cell-created_at="{ row }">
-        <span class="cell-date">{{ formatDate((row as ProductRow).created_at) }}</span>
+        <span class="text-[0.8125rem] text-white/50">{{
+          formatDate((row as ProductRow).created_at)
+        }}</span>
       </template>
       <template #cell-actions="{ row }">
         <ZButton
@@ -76,14 +120,28 @@
           @click.stop="openDeleteConfirm((row as ProductRow).id)"
           aria-label="Xóa sản phẩm"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path
+              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+            />
+          </svg>
         </ZButton>
       </template>
     </ZTable>
 
     <!-- Pagination -->
-    <div class="page-footer">
-      <p class="page-footer__count">{{ store.meta.total }} sản phẩm</p>
+    <div class="flex items-center justify-between gap-3 pt-4 flex-wrap">
+      <p class="m-0 text-[0.8125rem] text-white/40">
+        {{ store.meta.total }} sản phẩm
+      </p>
       <ZPagination
         :current-page="store.meta.current_page"
         :total-pages="store.meta.last_page"
@@ -93,7 +151,7 @@
 
     <!-- Create modal -->
     <ZModal v-model="showCreateModal" title="Thêm sản phẩm mới" size="md">
-      <div class="form-stack">
+      <div class="flex flex-col gap-4">
         <ZInput
           v-model="form.name"
           label="Tên sản phẩm *"
@@ -119,8 +177,20 @@
         />
       </div>
       <template #footer>
-        <ZButton variant="outline" size="sm" :disabled="store.formPending" @click="closeCreateModal">Hủy</ZButton>
-        <ZButton variant="primary" size="sm" :loading="store.formPending" @click="handleCreate">Tạo sản phẩm</ZButton>
+        <ZButton
+          variant="outline"
+          size="sm"
+          :disabled="store.formPending"
+          @click="closeCreateModal"
+          >Hủy</ZButton
+        >
+        <ZButton
+          variant="primary"
+          size="sm"
+          :loading="store.formPending"
+          @click="handleCreate"
+          >Tạo sản phẩm</ZButton
+        >
       </template>
     </ZModal>
 
@@ -140,7 +210,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useProductsStore } from "~/stores/products";
-import { formatDate, productStatusLabel, productStatusVariant, sanitizeString } from "~/utils/format";
+import {
+  formatDate,
+  productStatusLabel,
+  productStatusVariant,
+  sanitizeString,
+} from "~/utils/format";
 import type { TableColumn } from "~/components/z/Table.vue";
 import type { SelectOption } from "~/components/z/Select.vue";
 
@@ -152,11 +227,19 @@ interface ProductRow {
   sku_base: string | null;
   status: string;
   is_featured: boolean;
+  brand?: { name: string } | null;
+  category?: { name: string } | null;
   variants?: unknown[];
   created_at: string | null;
 }
 
-type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "neutral" | "amber";
+type BadgeVariant =
+  | "default"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "neutral";
 
 const store = useProductsStore();
 const search = ref(store.filters.search);
@@ -172,9 +255,22 @@ const formErrors = reactive({ name: "" });
 
 const columns: TableColumn[] = [
   { key: "name", label: "Sản phẩm", skeletonWidth: "200px" },
+  { key: "brand", label: "Thương hiệu", skeletonWidth: "100px" },
+  { key: "category", label: "Danh mục", skeletonWidth: "100px" },
   { key: "status", label: "Trạng thái", skeletonWidth: "80px" },
-  { key: "variants", label: "Biến thể", align: "center", width: "80px", skeletonWidth: "30px" },
-  { key: "is_featured", label: "Nổi bật", align: "center", skeletonWidth: "60px" },
+  {
+    key: "variants",
+    label: "Biến thể",
+    align: "center",
+    width: "80px",
+    skeletonWidth: "30px",
+  },
+  {
+    key: "is_featured",
+    label: "Nổi bật",
+    align: "center",
+    skeletonWidth: "60px",
+  },
   { key: "created_at", label: "Ngày tạo", skeletonWidth: "100px" },
   { key: "actions", label: "", width: "50px", skeletonWidth: "30px" },
 ];
@@ -255,49 +351,3 @@ onMounted(() => {
   store.fetchProducts();
 });
 </script>
-
-<style scoped>
-.page-toolbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1.125rem;
-  flex-wrap: wrap;
-}
-.page-toolbar__filters { display: flex; gap: 0.625rem; flex: 1; flex-wrap: wrap; }
-.page-toolbar__search { flex: 1; min-width: 180px; max-width: 280px; }
-.page-toolbar__select { min-width: 150px; }
-
-.page-error-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.875rem;
-  background: #fff5f5;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: #b91c1c;
-}
-
-.page-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  flex-wrap: wrap;
-}
-.page-footer__count { margin: 0; font-size: 0.8125rem; color: #888; }
-
-.cell-product { display: flex; flex-direction: column; gap: 0.125rem; }
-.cell-product__name { margin: 0; font-weight: 550; color: #1a1a18; font-size: 0.875rem; }
-.cell-product__sku { margin: 0; font-size: 0.6875rem; color: #999; font-family: ui-monospace, monospace; }
-.cell-date { font-size: 0.8125rem; color: #666; }
-.text-muted { color: #bbb; font-size: 0.875rem; }
-
-.form-stack { display: flex; flex-direction: column; gap: 1rem; }
-</style>

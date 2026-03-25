@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Coupon;
 
 use App\Domain\Coupon\Data\UpdateCouponDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing coupon.
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * All fields are optional (patch semantics). Code uniqueness is checked
  * at the Action layer so we only validate format here.
  */
-class UpdateCouponRequest extends FormRequest
+class UpdateCouponRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

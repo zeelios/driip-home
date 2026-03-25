@@ -6,12 +6,12 @@ namespace App\Http\Requests\Shipment;
 
 use App\Domain\Shipment\Data\CreateRemittanceDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new COD remittance record.
  */
-class CreateRemittanceRequest extends FormRequest
+class CreateRemittanceRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

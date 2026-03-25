@@ -6,7 +6,7 @@ namespace App\Http\Requests\Product;
 
 use App\Domain\Product\Data\UpdateVariantDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing product variant.
@@ -14,7 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * All fields are optional (patch semantics). SKU uniqueness is checked
  * at the Action layer so we only validate format here.
  */
-class UpdateVariantRequest extends FormRequest
+class UpdateVariantRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

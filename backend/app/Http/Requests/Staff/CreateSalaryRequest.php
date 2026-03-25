@@ -6,12 +6,12 @@ namespace App\Http\Requests\Staff;
 
 use App\Domain\Staff\Data\CreateSalaryDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a salary record for a staff member.
  */
-class CreateSalaryRequest extends FormRequest
+class CreateSalaryRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

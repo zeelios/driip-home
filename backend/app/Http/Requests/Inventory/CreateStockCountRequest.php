@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Inventory;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new stock count task.
  */
-class CreateStockCountRequest extends FormRequest
+class CreateStockCountRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

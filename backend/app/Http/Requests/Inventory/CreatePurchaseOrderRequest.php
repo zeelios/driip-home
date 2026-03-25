@@ -6,12 +6,12 @@ namespace App\Http\Requests\Inventory;
 
 use App\Domain\Inventory\Data\CreatePurchaseOrderDto;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for creating a new purchase order.
  */
-class CreatePurchaseOrderRequest extends FormRequest
+class CreatePurchaseOrderRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 /**
  * Factory for generating OrderItem model instances.
  *
- * Snapshots product variant data at the time of order creation.
+ * Snapshots product data at the time of order creation.
  *
  * @extends Factory<OrderItem>
  */
@@ -28,7 +28,7 @@ class OrderItemFactory extends Factory
      */
     public function definition(): array
     {
-        $sizes  = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+        $sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
         $colors = ['Đen', 'Trắng', 'Xám', 'Xanh navy', 'Be'];
 
         $productNames = [
@@ -41,24 +41,24 @@ class OrderItemFactory extends Factory
             'Converse Chuck 70 Hi',
         ];
 
-        $unitPrice     = $this->faker->numberBetween(100000, 1500000);
-        $costPrice     = (int) round($unitPrice * $this->faker->randomFloat(2, 0.55, 0.70));
-        $quantity      = $this->faker->numberBetween(1, 3);
-        $totalPrice    = $unitPrice * $quantity;
+        $unitPrice = $this->faker->numberBetween(100000, 1500000);
+        $costPrice = (int) round($unitPrice * $this->faker->randomFloat(2, 0.55, 0.70));
+        $quantity = $this->faker->numberBetween(1, 3);
+        $totalPrice = $unitPrice * $quantity;
 
         return [
-            'order_id'           => Order::factory(),
-            'product_variant_id' => null,
-            'sku'                => 'DRP-SKU-' . strtoupper(Str::random(6)),
-            'name'               => $this->faker->randomElement($productNames),
-            'size'               => $this->faker->randomElement($sizes),
-            'color'              => $this->faker->randomElement($colors),
-            'unit_price'         => $unitPrice,
-            'cost_price'         => $costPrice,
-            'quantity'           => $quantity,
-            'quantity_returned'  => 0,
-            'discount_amount'    => 0,
-            'total_price'        => $totalPrice,
+            'order_id' => Order::factory(),
+            'product_id' => null,
+            'sku' => 'DRP-SKU-' . strtoupper(Str::random(6)),
+            'name' => $this->faker->randomElement($productNames),
+            'size' => $this->faker->randomElement($sizes),
+            'color' => $this->faker->randomElement($colors),
+            'unit_price' => $unitPrice,
+            'cost_price' => $costPrice,
+            'quantity' => $quantity,
+            'quantity_returned' => 0,
+            'discount_amount' => 0,
+            'total_price' => $totalPrice,
         ];
     }
 }

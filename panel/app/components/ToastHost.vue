@@ -13,7 +13,7 @@
         <article
           v-for="toast in toasts"
           :key="toast.id"
-          class="pointer-events-auto overflow-hidden rounded-2xl border bg-white/95 shadow-[0_18px_50px_rgba(0,0,0,0.12)] backdrop-blur"
+          class="pointer-events-auto overflow-hidden rounded-2xl border border-white/10 bg-[#141414]/98 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur"
           :class="toastClasses(toast.variant)"
         >
           <div class="flex items-start gap-3 px-4 py-4">
@@ -26,12 +26,12 @@
             </div>
 
             <div class="min-w-0 flex-1">
-              <h2 class="text-sm font-semibold text-neutral-900">
+              <h2 class="text-sm font-semibold text-white/95">
                 {{ toast.title }}
               </h2>
               <p
                 v-if="toast.message"
-                class="mt-1 text-sm leading-5 text-neutral-500"
+                class="mt-1 text-sm leading-5 text-white/55"
               >
                 {{ toast.message }}
               </p>
@@ -39,7 +39,7 @@
 
             <button
               type="button"
-              class="mt-0.5 rounded-full p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+              class="mt-0.5 rounded-full p-1 text-white/40 transition hover:bg-white/10 hover:text-white/80"
               @click="handleDismiss(toast.id)"
               aria-label="Dismiss notification"
             >
@@ -143,14 +143,14 @@ function toastClasses(
 ): string {
   switch (variant) {
     case "success":
-      return "border-neutral-200";
+      return "border-white/10";
     case "error":
-      return "border-neutral-200";
+      return "border-red-500/30";
     case "warning":
-      return "border-neutral-200";
+      return "border-white/10";
     case "info":
     default:
-      return "border-neutral-200";
+      return "border-white/10";
   }
 }
 
@@ -159,14 +159,14 @@ function badgeClasses(
 ): string {
   switch (variant) {
     case "success":
-      return "bg-neutral-100 text-neutral-700";
+      return "bg-white/10 text-white/90";
     case "error":
-      return "bg-neutral-100 text-neutral-700";
+      return "bg-red-500/20 text-red-400";
     case "warning":
-      return "bg-neutral-100 text-neutral-700";
+      return "bg-white/10 text-white/80";
     case "info":
     default:
-      return "bg-neutral-100 text-neutral-700";
+      return "bg-white/10 text-white/70";
   }
 }
 </script>

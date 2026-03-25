@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\SaleEvent;
 
 use App\Domain\SaleEvent\Data\UpdateSaleEventDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for updating an existing sale event.
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * All fields are optional (patch semantics). Slug uniqueness is checked
  * at the Action layer so we only validate format here.
  */
-class UpdateSaleEventRequest extends FormRequest
+class UpdateSaleEventRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Requests\Tax;
 
 use App\Domain\Tax\Data\CreateTaxConfigDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the payload for creating a new tax rate configuration.
  */
-class CreateTaxConfigRequest extends FormRequest
+class CreateTaxConfigRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

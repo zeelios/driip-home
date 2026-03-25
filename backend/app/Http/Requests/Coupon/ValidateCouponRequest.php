@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Requests\Coupon;
 
 use App\Domain\Coupon\Data\ValidateCouponDto;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiRequest;
 
 /**
  * Validates the request payload for checking coupon validity at checkout.
  */
-class ValidateCouponRequest extends FormRequest
+class ValidateCouponRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorised to make this request.

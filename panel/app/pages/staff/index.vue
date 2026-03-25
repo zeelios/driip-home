@@ -1,39 +1,63 @@
 <template>
   <div>
     <!-- Toolbar -->
-    <div class="page-toolbar">
-      <div class="page-toolbar__filters">
+    <div class="flex items-start justify-between gap-3 mb-4.5 flex-wrap">
+      <div class="flex gap-2.5 flex-1 flex-wrap">
         <ZInput
           v-model="search"
           placeholder="Tìm tên, email..."
           type="search"
-          class="page-toolbar__search"
+          class="flex-1 min-w-[180px] max-w-[280px]"
           @input="onSearchInput"
         >
           <template #prefix>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
           </template>
         </ZInput>
         <ZSelect
           v-model="statusFilter"
           :options="statusOptions"
           placeholder="Tất cả trạng thái"
-          class="page-toolbar__select"
+          class="min-w-[150px]"
           @change="onFilterChange"
         />
       </div>
       <ZButton size="sm" @click="showCreateModal = true">
         <template #prefix>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5v14" />
+          </svg>
         </template>
         Thêm nhân viên
       </ZButton>
     </div>
 
     <!-- Error -->
-    <div v-if="store.listState === 'error'" class="page-error-bar">
+    <div
+      v-if="store.listState === 'error'"
+      class="flex items-center justify-between gap-3 py-3 px-4 mb-3.5 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-500"
+    >
       <span>{{ store.listError }}</span>
-      <ZButton variant="ghost" size="sm" @click="store.fetchStaff()">Thử lại</ZButton>
+      <ZButton variant="ghost" size="sm" @click="store.fetchStaff()"
+        >Thử lại</ZButton
+      >
     </div>
 
     <!-- Table -->
@@ -48,39 +72,64 @@
       :on-row-click="(row) => navigateTo(`/staff/${(row as StaffRow).id}`)"
     >
       <template #cell-name="{ row }">
-        <div class="cell-staff">
-          <div class="cell-staff__avatar">{{ initials(row as StaffRow) }}</div>
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-8 h-8 rounded-full bg-white/10 text-white/90 text-[0.6875rem] font-bold flex items-center justify-center shrink-0"
+          >
+            {{ initials(row as StaffRow) }}
+          </div>
           <div>
-            <p class="cell-staff__name">{{ (row as StaffRow).name }}</p>
-            <p class="cell-staff__code">{{ (row as StaffRow).employee_code ?? '—' }}</p>
+            <p class="m-0 font-semibold text-white/90 text-sm">
+              {{ (row as StaffRow).name }}
+            </p>
+            <p class="m-0 text-[0.6875rem] text-white/50 font-mono">
+              {{ (row as StaffRow).employee_code ?? "—" }}
+            </p>
           </div>
         </div>
       </template>
       <template #cell-contact="{ row }">
-        <div class="cell-contact">
-          <span class="cell-contact__item">{{ (row as StaffRow).email }}</span>
-          <span v-if="(row as StaffRow).phone" class="cell-contact__item">{{ (row as StaffRow).phone }}</span>
+        <div class="flex flex-col gap-0.5">
+          <span class="text-[0.8125rem] text-white/60">{{
+            (row as StaffRow).email
+          }}</span>
+          <span
+            v-if="(row as StaffRow).phone"
+            class="text-[0.8125rem] text-white/60"
+            >{{ (row as StaffRow).phone }}</span
+          >
         </div>
       </template>
       <template #cell-department="{ row }">
-        {{ (row as StaffRow).department ?? '—' }}
+        {{ (row as StaffRow).department ?? "—" }}
       </template>
       <template #cell-position="{ row }">
-        {{ (row as StaffRow).position ?? '—' }}
+        {{ (row as StaffRow).position ?? "—" }}
+      </template>
+      <template #cell-roles="{ row }">
+        <span class="text-white/40 text-sm">{{
+          formatRoles((row as StaffRow).roles)
+        }}</span>
       </template>
       <template #cell-status="{ row }">
-        <ZBadge :variant="staffStatusVariant((row as StaffRow).status) as BadgeVariant">
+        <ZBadge
+          :variant="staffStatusVariant((row as StaffRow).status) as BadgeVariant"
+        >
           {{ staffStatusLabel((row as StaffRow).status) }}
         </ZBadge>
       </template>
       <template #cell-hired_at="{ row }">
-        <span class="cell-date">{{ formatDate((row as StaffRow).hired_at) }}</span>
+        <span class="text-[0.8125rem] text-white/50">{{
+          formatDate((row as StaffRow).hired_at)
+        }}</span>
       </template>
     </ZTable>
 
     <!-- Pagination -->
-    <div class="page-footer">
-      <p class="page-footer__count">{{ store.meta.total }} nhân viên</p>
+    <div class="flex items-center justify-between gap-3 pt-4 flex-wrap">
+      <p class="m-0 text-[0.8125rem] text-white/40">
+        {{ store.meta.total }} nhân viên
+      </p>
       <ZPagination
         :current-page="store.meta.current_page"
         :total-pages="store.meta.last_page"
@@ -90,13 +139,14 @@
 
     <!-- Create modal -->
     <ZModal v-model="showCreateModal" title="Thêm nhân viên mới" size="md">
-      <div class="form-grid">
+      <div
+        class="grid grid-cols-2 gap-4 [&>*:nth-child(1)]:col-span-full [&>*:nth-child(7)]:col-span-full max-sm:grid-cols-1"
+      >
         <ZInput
           v-model="form.name"
           label="Họ và tên *"
           placeholder="Nguyễn Văn An"
           :error="formErrors.name"
-          class="form-grid__full"
           autocomplete="name"
         />
         <ZInput
@@ -132,16 +182,23 @@
           label="Chức vụ"
           placeholder="Nhân viên, Trưởng nhóm..."
         />
-        <ZInput
-          v-model="form.hired_at"
-          label="Ngày vào làm"
-          type="date"
-          class="form-grid__full"
-        />
+        <ZInput v-model="form.hired_at" label="Ngày vào làm" type="date" />
       </div>
       <template #footer>
-        <ZButton variant="outline" size="sm" :disabled="store.formPending" @click="closeCreateModal">Hủy</ZButton>
-        <ZButton variant="primary" size="sm" :loading="store.formPending" @click="handleCreate">Tạo nhân viên</ZButton>
+        <ZButton
+          variant="outline"
+          size="sm"
+          :disabled="store.formPending"
+          @click="closeCreateModal"
+          >Hủy</ZButton
+        >
+        <ZButton
+          variant="primary"
+          size="sm"
+          :loading="store.formPending"
+          @click="handleCreate"
+          >Tạo nhân viên</ZButton
+        >
       </template>
     </ZModal>
   </div>
@@ -150,7 +207,13 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useStaffStore } from "~/stores/staff";
-import { formatDate, staffStatusLabel, staffStatusVariant, sanitizeString, sanitizeEmail } from "~/utils/format";
+import {
+  formatDate,
+  staffStatusLabel,
+  staffStatusVariant,
+  sanitizeString,
+  sanitizeEmail,
+} from "~/utils/format";
 import type { TableColumn } from "~/components/z/Table.vue";
 import type { SelectOption } from "~/components/z/Select.vue";
 
@@ -166,9 +229,16 @@ interface StaffRow {
   position: string | null;
   status: string;
   hired_at: string | null;
+  roles?: { name: string }[];
 }
 
-type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "neutral" | "amber";
+type BadgeVariant =
+  | "default"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "neutral";
 
 const store = useStaffStore();
 const search = ref(store.filters.search);
@@ -193,7 +263,7 @@ const columns: TableColumn[] = [
   { key: "name", label: "Nhân viên", skeletonWidth: "180px" },
   { key: "contact", label: "Liên hệ", skeletonWidth: "160px" },
   { key: "department", label: "Phòng ban", skeletonWidth: "100px" },
-  { key: "position", label: "Chức vụ", skeletonWidth: "100px" },
+  { key: "roles", label: "Vai trò", skeletonWidth: "120px" },
   { key: "status", label: "Trạng thái", skeletonWidth: "90px" },
   { key: "hired_at", label: "Ngày vào làm", skeletonWidth: "100px" },
 ];
@@ -203,6 +273,11 @@ const statusOptions: SelectOption[] = [
   { value: "inactive", label: "Nghỉ việc" },
   { value: "suspended", label: "Tạm dừng" },
 ];
+
+function formatRoles(roles: { name: string }[] | undefined): string {
+  if (!roles || roles.length === 0) return "—";
+  return roles.map((r) => r.name).join(", ");
+}
 
 function initials(row: StaffRow): string {
   return row.name
@@ -216,7 +291,8 @@ function validateForm(): boolean {
   let valid = true;
   formErrors.name = sanitizeString(form.name) ? "" : "Họ tên là bắt buộc";
   formErrors.email = sanitizeEmail(form.email) ? "" : "Email không hợp lệ";
-  formErrors.password = form.password.length >= 8 ? "" : "Mật khẩu tối thiểu 8 ký tự";
+  formErrors.password =
+    form.password.length >= 8 ? "" : "Mật khẩu tối thiểu 8 ký tự";
   if (formErrors.name || formErrors.email || formErrors.password) valid = false;
   return valid;
 }
@@ -271,60 +347,3 @@ onMounted(() => {
   store.fetchStaff();
 });
 </script>
-
-<style scoped>
-.page-toolbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1.125rem;
-  flex-wrap: wrap;
-}
-.page-toolbar__filters { display: flex; gap: 0.625rem; flex: 1; flex-wrap: wrap; }
-.page-toolbar__search { flex: 1; min-width: 180px; max-width: 280px; }
-.page-toolbar__select { min-width: 150px; }
-
-.page-error-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.875rem;
-  background: #fff5f5;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: #b91c1c;
-}
-
-.page-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  flex-wrap: wrap;
-}
-.page-footer__count { margin: 0; font-size: 0.8125rem; color: #888; }
-
-.cell-staff { display: flex; align-items: center; gap: 0.625rem; }
-.cell-staff__avatar {
-  width: 2rem; height: 2rem; border-radius: 50%;
-  background: #111110; color: #f5a623;
-  font-size: 0.6875rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.cell-staff__name { margin: 0; font-weight: 550; color: #1a1a18; font-size: 0.875rem; }
-.cell-staff__code { margin: 0; font-size: 0.6875rem; color: #999; font-family: ui-monospace, monospace; }
-
-.cell-contact { display: flex; flex-direction: column; gap: 0.125rem; }
-.cell-contact__item { font-size: 0.8125rem; color: #555; }
-.cell-date { font-size: 0.8125rem; color: #666; }
-
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.form-grid__full { grid-column: 1 / -1; }
-@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
-</style>

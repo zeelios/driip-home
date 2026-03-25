@@ -1,16 +1,24 @@
 <template>
   <div
-    class="z-textarea-wrap"
-    :class="{ 'z-textarea-wrap--error': !!error, 'z-textarea-wrap--disabled': disabled }"
+    class="flex flex-col gap-1.5"
+    :class="{
+      '[&_textarea]:border-red-500 [&_textarea:focus]:shadow-[0_0_0_3px_rgba(239,68,68,0.15)]':
+        !!error,
+      '[&_label]:text-white/30': disabled,
+    }"
   >
-    <label v-if="label" :for="textareaId" class="z-textarea-label">
+    <label
+      v-if="label"
+      :for="textareaId"
+      class="text-xs font-semibold tracking-[0.06em] uppercase text-white/50"
+    >
       {{ label }}
     </label>
 
     <textarea
       :id="textareaId"
       v-bind="$attrs"
-      class="z-textarea"
+      class="w-full py-3 px-3.5 border border-white/12 rounded-lg bg-white/4 font-inherit text-sm text-white/90 outline-none transition-all duration-150 min-w-0 resize-y focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.08)] disabled:bg-white/2 disabled:text-white/35 disabled:cursor-not-allowed"
       :value="modelValue ?? ''"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -22,8 +30,10 @@
       @blur="$emit('blur', $event)"
     />
 
-    <p v-if="error" class="z-textarea-error" role="alert">{{ error }}</p>
-    <p v-else-if="hint" class="z-textarea-hint">{{ hint }}</p>
+    <p v-if="error" class="m-0 text-xs text-red-500" role="alert">
+      {{ error }}
+    </p>
+    <p v-else-if="hint" class="m-0 text-xs text-white/45">{{ hint }}</p>
   </div>
 </template>
 
@@ -61,73 +71,3 @@ function onInput(event: Event): void {
   emit("update:modelValue", target.value);
 }
 </script>
-
-<style scoped>
-.z-textarea-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.z-textarea-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #6b6b68;
-}
-
-.z-textarea {
-  width: 100%;
-  padding: 0.75rem 0.875rem;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 8px;
-  background: #fff;
-  font: inherit;
-  font-size: 0.875rem;
-  color: #1a1a18;
-  outline: none;
-  transition: border-color 150ms, box-shadow 150ms;
-  min-width: 0;
-  resize: vertical;
-}
-
-.z-textarea::placeholder {
-  color: #b0b0ad;
-}
-
-.z-textarea:focus {
-  border-color: #111110;
-  box-shadow: 0 0 0 3px rgba(17, 17, 16, 0.08);
-}
-
-.z-textarea:disabled {
-  background: #f5f5f4;
-  color: #a0a09d;
-  cursor: not-allowed;
-}
-
-.z-textarea-wrap--error .z-textarea {
-  border-color: #ef4444;
-}
-
-.z-textarea-wrap--error .z-textarea:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
-}
-
-.z-textarea-wrap--disabled .z-textarea-label {
-  color: #b0b0ad;
-}
-
-.z-textarea-error {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #ef4444;
-}
-
-.z-textarea-hint {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #9d9d9a;
-}
-</style>
