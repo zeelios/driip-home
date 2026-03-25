@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Shipment;
 
 use App\Domain\Shipment\Actions\CreateShipmentAction;
+use App\Domain\Shipment\Actions\PrintShipmentLabelAction;
 use App\Domain\Shipment\Actions\SyncTrackingAction;
 use App\Domain\Shipment\Models\Shipment;
 use App\Domain\Shipment\Services\CourierServiceInterface;
 use App\Domain\Shipment\Services\CourierServiceResolver;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Resources\Shipment\ShipmentResource;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -30,6 +31,7 @@ class ShipmentController extends BaseApiController
      */
     public function __construct(
         private readonly CreateShipmentAction $createShipment,
+        private readonly PrintShipmentLabelAction $printShipmentLabel,
         private readonly SyncTrackingAction $syncTracking,
         private readonly CourierServiceResolver $courierResolver,
     ) {
@@ -112,17 +114,25 @@ class ShipmentController extends BaseApiController
     }
 
     /**
-     * Redirect to the shipment's label URL, or return 404 if no label exists.
+     * Render the shipment label as a printable PDF.
      *
      * @param  Shipment  $shipment
-     * @return RedirectResponse|JsonResponse
+     * @return BinaryFileResponse|JsonResponse
      */
-    public function label(Shipment $shipment): RedirectResponse|JsonResponse
+    public function label(Shipment $shipment): BinaryFileResponse|JsonResponse
     {
-        if (empty($shipment->label_url)) {
-            return $this->notFound('GET_SHIPMENT_LABEL', 'No label available for this shipment.');
-        }
+        try {
+            $result = $this->printShipmentLabel->execute($shipment);
 
-        return redirect()->away($shipment->label_url);
+            return response()->file(
+                $result['path'],
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="shipment-label-' . $shipment->id . '.pdf"',
+                ]
+            );
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'GET_SHIPMENT_LABEL');
+        }
     }
 }

@@ -129,11 +129,36 @@ class GHTKService implements CourierServiceInterface
         ];
 
         $result = $this->submitOrder($orderData);
+        $labelReference = $result['label_id'] ?? $result['partner_id'] ?? null;
+        $labelPayload = null;
+
+        if ($labelReference !== null) {
+            try {
+                $pdfContent = $this->printLabel((string) $labelReference);
+
+                $labelPayload = [
+                    'source' => 'ghtk',
+                    'format' => 'pdf',
+                    'mime_type' => 'application/pdf',
+                    'label_reference' => (string) $labelReference,
+                    'content_base64' => base64_encode($pdfContent),
+                ];
+            } catch (
+                \Throwable $e
+            ) {
+                Log::warning('Unable to fetch GHTK label payload after shipment creation', [
+                    'tracking_number' => $labelReference,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         return [
             'courier' => 'ghtk',
             'tracking_number' => $result['label_id'],
             'label_url' => null,
+            'label_reference' => $labelReference,
+            'label_payload' => $labelPayload,
             'status' => $result['success'] ? 'created' : 'failed',
             'estimated_fee' => $result['fee'],
             'estimated_pick_time' => $result['estimated_pick_time'],

@@ -6,8 +6,12 @@ namespace App\Http\Controllers\Api\V1\Settings;
 
 use App\Domain\Settings\Models\Setting;
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Resources\Settings\SettingResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Manages application-wide configuration settings.
@@ -15,26 +19,37 @@ use Illuminate\Http\Request;
  * Settings are grouped by namespace (loyalty, tax, shipping, etc.) and
  * returned as a nested object keyed by group name.
  */
-class SettingsController extends BaseApiController
+class SettingsController extends BaseApiController implements HasMiddleware
 {
     /**
-     * List all settings grouped by their group namespace.
+     * Get the middleware that should be assigned to the controller.
      *
-     * Returns an object where each key is a group name and the value is
-     * a key-value map of settings within that group.
+     * @return array<Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:settings.view', only: ['index']),
+            new Middleware('permission:settings.update', only: ['update']),
+        ];
+    }
+
+    /**
+     * List all settings as a flat array with full metadata.
+     *
+     * Returns array of {group, key, value, type, label} objects.
      *
      * @return JsonResponse
      */
     public function index(): JsonResponse
     {
         try {
-            $settings = Setting::orderBy('group')->orderBy('key')->get();
+            $settings = Setting::query()->orderBy('group')->orderBy('key')->get();
 
-            $grouped = $settings->groupBy('group')->map(function ($items) {
-                return $items->mapWithKeys(fn ($s) => [$s->key => $s->value])->toArray();
-            })->toArray();
-
-            return response()->json(['success' => true, 'data' => $grouped]);
+            return response()->json([
+                'success' => true,
+                'data' => SettingResource::collection($settings),
+            ]);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'LIST_SETTINGS');
         }
@@ -53,10 +68,10 @@ class SettingsController extends BaseApiController
     {
         try {
             $validated = $request->validate([
-                'settings'              => ['required', 'array', 'min:1'],
-                'settings.*.group'      => ['required', 'string', 'max:100'],
-                'settings.*.key'        => ['required', 'string', 'max:100'],
-                'settings.*.value'      => ['present'],
+                'settings' => ['required', 'array', 'min:1'],
+                'settings.*.group' => ['required', 'string', 'max:100'],
+                'settings.*.key' => ['required', 'string', 'max:100'],
+                'settings.*.value' => ['present'],
             ]);
 
             foreach ($validated['settings'] as $item) {
@@ -64,7 +79,7 @@ class SettingsController extends BaseApiController
             }
 
             return response()->json(['success' => true, 'message' => 'Settings updated.']);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return $this->validationError($e, 'UPDATE_SETTINGS');
         } catch (\Throwable $e) {
             return $this->serverError($e, 'UPDATE_SETTINGS');

@@ -26,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null           $internal_reference
  * @property string                $status
  * @property string|null           $label_url
+ * @property string|null           $label_reference
+ * @property array<string,mixed>|null $label_payload
+ * @property \\Carbon\\Carbon|null   $label_printed_at
  * @property int                   $cod_amount
  * @property bool                  $cod_collected
  * @property int|null              $shipping_fee_quoted
@@ -55,6 +58,9 @@ class Shipment extends Model
         'internal_reference',
         'status',
         'label_url',
+        'label_reference',
+        'label_payload',
+        'label_printed_at',
         'cod_amount',
         'cod_collected',
         'shipping_fee_quoted',
@@ -70,15 +76,17 @@ class Shipment extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'cod_amount'            => 'integer',
-        'cod_collected'         => 'boolean',
-        'shipping_fee_quoted'   => 'integer',
-        'shipping_fee_actual'   => 'integer',
-        'failed_attempts'       => 'integer',
+        'cod_amount' => 'integer',
+        'cod_collected' => 'boolean',
+        'shipping_fee_quoted' => 'integer',
+        'shipping_fee_actual' => 'integer',
+        'failed_attempts' => 'integer',
+        'label_payload' => 'array',
+        'label_printed_at' => 'datetime',
         'estimated_delivery_at' => 'date',
-        'delivered_at'          => 'datetime',
-        'courier_request'       => 'array',
-        'courier_response'      => 'array',
+        'delivered_at' => 'datetime',
+        'courier_request' => 'array',
+        'courier_response' => 'array',
     ];
 
     /**

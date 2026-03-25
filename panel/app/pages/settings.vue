@@ -76,7 +76,7 @@
                 <template v-if="setting.type === 'boolean'">
                   <button
                     :id="`setting-${setting.key}`"
-                    class="relative inline-flex items-center w-[2.75rem] h-6 rounded-full border-0 bg-white/15 cursor-pointer transition-colors duration-200 p-0 shrink-0"
+                    class="relative inline-flex items-center w-11 h-6 rounded-full border-0 bg-white/15 cursor-pointer transition-colors duration-200 p-0 shrink-0"
                     :class="{
                       'bg-white': editValues[setting.key] === 'true',
                     }"
@@ -86,7 +86,7 @@
                     @click="toggleBoolean(setting.key)"
                   >
                     <span
-                      class="absolute left-[0.1875rem] w-[1.125rem] h-[1.125rem] rounded-full bg-white/90 transition-transform duration-200 ease shadow-sm"
+                      class="absolute left-0.75 w-4.5 h-4.5 rounded-full bg-white/90 transition-transform duration-200 ease shadow-sm"
                       :class="{
                         'translate-x-5': editValues[setting.key] === 'true',
                         'bg-[#0a0a0a]': editValues[setting.key] === 'true',
@@ -207,9 +207,10 @@ function toggleBoolean(key: string): void {
 async function handleSave(): Promise<void> {
   savePending.value = true;
   try {
-    const payload = Object.entries(editValues).map(([key, value]) => ({
-      key,
-      value,
+    const payload = settings.value.map((s) => ({
+      group: s.group,
+      key: s.key,
+      value: editValues[s.key] ?? "",
     }));
     await api.patch("/settings", { settings: payload });
     toast.success("Đã lưu cài đặt", "Cấu hình đã được cập nhật.");

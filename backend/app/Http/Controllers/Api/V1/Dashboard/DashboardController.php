@@ -52,7 +52,7 @@ class DashboardController extends BaseApiController implements HasMiddleware
                 ],
             ]);
         } catch (\Throwable $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return $this->serverError($e, 'DASHBOARD_METRICS');
         }
     }
 }

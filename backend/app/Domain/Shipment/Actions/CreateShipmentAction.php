@@ -58,6 +58,8 @@ class CreateShipmentAction
             $shipment->update([
                 'tracking_number' => $courierResponse['tracking_number'] ?? null,
                 'label_url' => $courierResponse['label_url'] ?? null,
+                'label_reference' => $courierResponse['label_reference'] ?? $courierResponse['tracking_number'] ?? null,
+                'label_payload' => $courierResponse['label_payload'] ?? null,
                 'shipping_fee_quoted' => isset($courierResponse['estimated_fee'])
                     ? (int) $courierResponse['estimated_fee']
                     : null,

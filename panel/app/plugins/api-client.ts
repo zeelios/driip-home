@@ -5,6 +5,5 @@ export default defineNuxtPlugin(() => {
 
   configureApiClient({
     apiBaseUrl: String(config.public.apiUrl || "/api/v1/panel"),
-    csrfBaseUrl: String(config.public.csrfUrl || ""),
   });
 });

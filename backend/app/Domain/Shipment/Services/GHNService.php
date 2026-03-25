@@ -94,11 +94,28 @@ class GHNService extends AbstractCourierService implements CourierServiceInterfa
 
         $data = $response['data'] ?? [];
         $trackingNumber = $data['order_code'] ?? null;
+        $labelPayload = null;
+
+        if ($trackingNumber !== null) {
+            $labelPayload = [
+                'source' => 'ghn',
+                'format' => 'print-token',
+                'mime_type' => 'application/json',
+                'label_reference' => $trackingNumber,
+                'content' => [
+                    'order_code' => $trackingNumber,
+                    'expected_delivery_time' => $data['expected_delivery_time'] ?? null,
+                ],
+                'raw_response' => $response,
+            ];
+        }
 
         return [
             'courier' => 'ghn',
             'tracking_number' => $trackingNumber,
             'label_url' => null,
+            'label_reference' => $trackingNumber,
+            'label_payload' => $labelPayload,
             'status' => $trackingNumber ? 'created' : 'failed',
             'estimated_fee' => (int) ($data['total_fee'] ?? 0),
             'estimated_pick_time' => $data['expected_delivery_time'] ?? null,

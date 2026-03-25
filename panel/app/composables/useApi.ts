@@ -11,12 +11,10 @@ interface ApiRequestOptions extends UseApiOptions {
 
 interface ApiClientConfig {
   apiBaseUrl: string;
-  csrfBaseUrl: string;
 }
 
 const DEFAULT_API_CLIENT_CONFIG: ApiClientConfig = {
   apiBaseUrl: "/api/v1/panel",
-  csrfBaseUrl: "",
 };
 
 let apiClientConfig: ApiClientConfig = { ...DEFAULT_API_CLIENT_CONFIG };
@@ -47,7 +45,16 @@ function readCookie(name: string): string | null {
 
 export function useApi(defaultOptions: UseApiOptions = {}) {
   const apiBaseUrl = String(apiClientConfig.apiBaseUrl || "/api/v1/panel");
-  const csrfBaseUrl = String(apiClientConfig.csrfBaseUrl || "");
+
+  function resolveOrigin(baseUrl: string): string | null {
+    if (!import.meta.client) return null;
+
+    try {
+      return new URL(baseUrl, window.location.origin).origin;
+    } catch {
+      return null;
+    }
+  }
 
   function buildHeaders(
     method: string,
@@ -75,6 +82,8 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
     if (import.meta.server) return;
     if (readCookie("XSRF-TOKEN")) return;
     if (csrfCookiePromise) return csrfCookiePromise;
+
+    const csrfBaseUrl = resolveOrigin(apiBaseUrl) ?? undefined;
 
     csrfCookiePromise = $fetch("/sanctum/csrf-cookie", {
       baseURL: csrfBaseUrl || undefined,
