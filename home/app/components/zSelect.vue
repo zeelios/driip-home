@@ -13,16 +13,12 @@
       :disabled="disabled"
       :aria-expanded="isOpen"
       :aria-label="label || placeholder"
-      @click="toggleDropdown"
+      @click="openDropdown"
     >
       <span class="z-select-value">{{ selectedText }}</span>
       <span class="z-select-arrow" aria-hidden="true">⌄</span>
     </button>
 
-    <!--
-      Teleported to <body> to escape any parent transform / overflow / stacking
-      context that would break position:fixed on iOS Safari.
-    -->
     <Teleport to="body">
       <Transition :name="isMobile ? 'zs-sheet' : 'zs-drop'">
         <div
@@ -62,28 +58,42 @@
             </div>
 
             <!-- Search -->
-            <input
-              ref="searchRef"
-              v-model="query"
-              class="zs-search"
-              type="text"
-              :placeholder="searchPlaceholder || placeholder"
-              autocomplete="off"
-              autocorrect="off"
-              spellcheck="false"
-              @keydown.esc.prevent="closeDropdown"
-              @keydown.enter.prevent="selectFirstVisible"
-            />
+            <div class="zs-search-wrapper">
+              <input
+                ref="searchRef"
+                v-model="query"
+                class="zs-search"
+                type="text"
+                :placeholder="searchPlaceholder || placeholder"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                @keydown.esc.prevent="closeDropdown"
+                @keydown.enter.prevent="selectActiveOption"
+                @keydown.down.prevent="moveActiveIndex(1)"
+                @keydown.up.prevent="moveActiveIndex(-1)"
+                @keydown.home.prevent="moveActiveIndex('first')"
+                @keydown.end.prevent="moveActiveIndex('last')"
+              />
+              <div v-if="loading" class="zs-search-spinner">
+                <div class="zs-spinner" />
+              </div>
+            </div>
 
             <!-- Options -->
-            <div class="zs-options" role="listbox">
+            <div ref="optionsRef" class="zs-options" role="listbox">
               <button
-                v-for="option in visibleOptions"
+                v-for="(option, index) in visibleOptions"
                 :key="option.value"
                 type="button"
                 class="zs-option"
-                :class="{ active: option.value === modelValue }"
+                :class="{
+                  active: option.value === modelValue,
+                  highlighted: activeIndex === index,
+                }"
+                :data-index="index"
                 @click="selectOption(option)"
+                @mouseenter="activeIndex = index"
               >
                 <span class="zs-option-label">{{ option.label }}</span>
                 <span v-if="option.hint" class="zs-option-hint">{{
@@ -103,6 +113,7 @@
 </template>
 
 <script setup lang="ts">
+import Fuse from "fuse.js";
 import {
   computed,
   nextTick,
@@ -128,29 +139,53 @@ const props = withDefaults(
     emptyState?: string;
     disabled?: boolean;
     embedded?: boolean;
+    searchable?: boolean;
+    async?: boolean;
+    loading?: boolean;
+    debounceMs?: number;
+    fuseThreshold?: number;
   }>(),
   {
     label: "",
     placeholder: "Select an option",
-    searchPlaceholder: "",
+    searchPlaceholder: "Search...",
     emptyState: "No results found.",
     disabled: false,
     embedded: false,
+    searchable: true,
+    async: false,
+    loading: false,
+    debounceMs: 150,
+    fuseThreshold: 0.4,
   }
 );
 
 const emit = defineEmits<{
   "update:modelValue": [value: string];
   change: [value: string];
+  search: [query: string];
 }>();
 
 const rootRef = ref<HTMLElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
 const searchRef = ref<HTMLInputElement | null>(null);
+const optionsRef = ref<HTMLElement | null>(null);
 const isOpen = ref(false);
 const query = ref("");
 const isMobile = ref(true);
 const desktopPanelStyle = ref<Record<string, string>>({});
+const activeIndex = ref(0);
+const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+
+// Fuse instance for fuzzy search
+const fuse = computed(() => {
+  return new Fuse(props.options, {
+    keys: ["label", "value", "hint"],
+    threshold: props.fuseThreshold,
+    includeScore: false,
+    shouldSort: true,
+  });
+});
 
 const selectedOption = computed(
   () => props.options.find((o) => o.value === props.modelValue) ?? null
@@ -160,12 +195,46 @@ const selectedText = computed(
   () => selectedOption.value?.label ?? props.placeholder
 );
 
-const visibleOptions = computed(() => {
-  const q = query.value.trim().toLowerCase();
+// Filter options using Fuse.js fuzzy search
+const visibleOptions = computed((): ZSelectOption[] => {
+  const q = query.value.trim();
   if (!q) return props.options;
-  return props.options.filter((o) =>
-    [o.label, o.value, o.hint ?? ""].join(" ").toLowerCase().includes(q)
-  );
+
+  // If async mode, return all options (filtered by parent via @search)
+  if (props.async) return props.options;
+
+  // Use Fuse.js for fuzzy search
+  const results = fuse.value.search(q);
+  return results.map((r) => r.item);
+});
+
+// Debounced search emit for async filtering
+watch(query, (newQuery) => {
+  if (!props.async) return;
+
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
+  }
+
+  searchTimeout.value = setTimeout(() => {
+    emit("search", newQuery.trim());
+  }, props.debounceMs);
+});
+
+// Reset active index when options change
+watch(visibleOptions, () => {
+  activeIndex.value = 0;
+});
+
+// Reset query when dropdown closes
+watch(isOpen, (open) => {
+  if (!open) {
+    query.value = "";
+    activeIndex.value = 0;
+  }
+  if (process.client) {
+    document.documentElement.style.overflow = open ? "hidden" : "";
+  }
 });
 
 function computeDesktopPosition(): void {
@@ -190,25 +259,19 @@ function openDropdown(): void {
 
   isOpen.value = true;
   query.value = "";
+  activeIndex.value = 0;
 
-  // Only auto-focus search on desktop — on mobile it triggers the iOS
-  // virtual keyboard before the bottom sheet has finished animating in,
-  // which pushes the sheet off-screen.
-  if (!isMobile.value) {
-    void nextTick(() => searchRef.value?.focus());
-  }
+  // Auto-focus search input
+  void nextTick(() => {
+    searchRef.value?.focus();
+    scrollToActiveOption();
+  });
 }
 
 function closeDropdown(): void {
   isOpen.value = false;
-  query.value = "";
-}
-
-function toggleDropdown(): void {
-  if (isOpen.value) {
-    closeDropdown();
-  } else {
-    openDropdown();
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
   }
 }
 
@@ -218,9 +281,37 @@ function selectOption(option: ZSelectOption): void {
   closeDropdown();
 }
 
-function selectFirstVisible(): void {
-  const first = visibleOptions.value[0];
-  if (first) selectOption(first);
+function selectActiveOption(): void {
+  const option = visibleOptions.value[activeIndex.value];
+  if (option) {
+    selectOption(option);
+  }
+}
+
+function moveActiveIndex(direction: 1 | -1 | "first" | "last"): void {
+  const max = visibleOptions.value.length - 1;
+  if (max < 0) return;
+
+  if (direction === "first") {
+    activeIndex.value = 0;
+  } else if (direction === "last") {
+    activeIndex.value = max;
+  } else {
+    activeIndex.value = Math.max(0, Math.min(max, activeIndex.value + direction));
+  }
+
+  scrollToActiveOption();
+}
+
+function scrollToActiveOption(): void {
+  void nextTick(() => {
+    const optionEl = optionsRef.value?.querySelector(
+      `[data-index="${activeIndex.value}"]`
+    ) as HTMLElement | null;
+    if (optionEl && optionsRef.value) {
+      optionEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  });
 }
 
 function onOutsidePointerDown(event: MouseEvent): void {
@@ -233,18 +324,6 @@ function onOutsidePointerDown(event: MouseEvent): void {
   }
 }
 
-watch(
-  () => props.modelValue,
-  () => {
-    if (!isOpen.value) query.value = "";
-  }
-);
-
-watch(isOpen, (open) => {
-  if (!process.client) return;
-  document.documentElement.style.overflow = open ? "hidden" : "";
-});
-
 onMounted(() => {
   document.addEventListener("mousedown", onOutsidePointerDown, true);
 });
@@ -252,6 +331,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener("mousedown", onOutsidePointerDown, true);
   document.documentElement.style.overflow = "";
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
+  }
 });
 </script>
 
@@ -377,7 +459,6 @@ onBeforeUnmount(() => {
 .zs-panel--mobile {
   border-radius: 24px 24px 0 0;
   max-height: 80dvh;
-  /* Safe area padding so options aren't hidden behind home bar */
   padding-bottom: env(safe-area-inset-bottom, 0px);
   border-bottom: none;
 }
@@ -442,8 +523,12 @@ onBeforeUnmount(() => {
 }
 
 /* ── SEARCH ─────────────────────────────────────────────────────── */
-.zs-search {
+.zs-search-wrapper {
+  position: relative;
   flex-shrink: 0;
+}
+
+.zs-search {
   width: 100%;
   border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -452,14 +537,35 @@ onBeforeUnmount(() => {
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 400;
-  padding: 16px;
+  padding: 16px 40px 16px 16px;
   outline: none;
-  /* Prevent iOS zoom on focus (font-size must be ≥16px) */
-  font-size: 16px;
 }
 
 .zs-search::placeholder {
   color: rgba(255, 255, 255, 0.2);
+}
+
+.zs-search-spinner {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.zs-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: zs-spin 0.6s linear infinite;
+}
+
+@keyframes zs-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── OPTIONS ────────────────────────────────────────────────────── */
@@ -481,19 +587,22 @@ onBeforeUnmount(() => {
   background: transparent;
   color: var(--white);
   cursor: pointer;
-  /* 52px touch target on mobile */
   padding: 16px;
   text-align: left;
   transition: background 0.12s;
 }
 
 .zs-option:hover,
-.zs-option.active {
+.zs-option.highlighted {
   background: rgba(255, 255, 255, 0.06);
 }
 
 .zs-option.active {
-  color: var(--white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.zs-option.active .zs-option-label {
+  font-weight: 500;
 }
 
 .zs-option-label {

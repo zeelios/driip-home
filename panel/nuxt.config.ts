@@ -1,12 +1,68 @@
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from "@tailwindcss/vite";
 
-const nodeEnv =
-  (
-    globalThis as typeof globalThis & {
-      process?: { env?: Record<string, string | undefined> };
-    }
-  ).process?.env ?? {};
+interface NodeEnvMap {
+  NUXT_API_URL?: string;
+  NUXT_PUBLIC_API_URL?: string;
+  NUXT_SANCTUM_CSRF_URL?: string;
+  NUXT_PUBLIC_SANCTUM_CSRF_URL?: string;
+}
+
+function getNodeEnv(): NodeEnvMap {
+  const processEnv =
+    (
+      globalThis as typeof globalThis & {
+        process?: { env?: Record<string, string | undefined> };
+      }
+    ).process?.env ?? {};
+
+  return processEnv;
+}
+
+function isAbsoluteUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value);
+}
+
+function withHttpProtocol(value: string): string {
+  if (!value) {
+    return value;
+  }
+
+  return isAbsoluteUrl(value) ? value : `http://${value}`;
+}
+
+function trimTrailingSlash(value: string): string {
+  return value.replace(/\/+$/, "");
+}
+
+function normalizeUrl(value: string | undefined, fallback: string): string {
+  const resolvedValue: string = value?.trim() || fallback;
+
+  return trimTrailingSlash(withHttpProtocol(resolvedValue));
+}
+
+function deriveSanctumCsrfUrl(apiUrl: string): string {
+  try {
+    const parsedUrl = new URL(apiUrl);
+
+    return `${parsedUrl.origin}/sanctum/csrf-cookie`;
+  } catch {
+    return "http://localhost:8888/sanctum/csrf-cookie";
+  }
+}
+
+const nodeEnv = getNodeEnv();
+
+const apiUrl: string = normalizeUrl(
+  nodeEnv.NUXT_PUBLIC_API_URL ?? nodeEnv.NUXT_API_URL,
+  "http://localhost:8888/api/v1",
+);
+
+const sanctumCsrfUrl: string = normalizeUrl(
+  nodeEnv.NUXT_PUBLIC_SANCTUM_CSRF_URL ?? nodeEnv.NUXT_SANCTUM_CSRF_URL,
+  deriveSanctumCsrfUrl(apiUrl),
+);
 
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -30,7 +86,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiUrl: nodeEnv.NUXT_PUBLIC_API_URL ?? "http://localhost/api/v1/panel",
+      apiUrl,
+      sanctumCsrfUrl,
     },
   },
 
@@ -41,7 +98,7 @@ export default defineNuxtConfig({
   app: {
     rootId: "__zeelios",
     head: {
-      viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+      viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
       meta: [
         { name: "color-scheme", content: "dark light" },
         {

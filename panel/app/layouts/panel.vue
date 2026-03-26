@@ -206,36 +206,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
-import { useRoute, navigateTo } from "nuxt/app";
 import { useAuthStore } from "~/stores/auth";
 
 const auth = useAuthStore();
 const route = useRoute();
 const sidebarOpen = ref(false);
-
-// Redirect to login when session expires on protected pages (client-only)
-if (import.meta.client) {
-  watch(
-    () => auth.isAuthenticated,
-    (isAuthenticated, wasAuthenticated) => {
-      // Only redirect if we were authenticated and now we're not
-      // and we're on a protected route (not login/forgot-password/reset-password)
-      if (wasAuthenticated && !isAuthenticated) {
-        const publicRoutes = ["/login", "/forgot-password", "/reset-password"];
-        const isPublicRoute = publicRoutes.some(
-          (p) => route.path === p || route.path.startsWith(p + "/")
-        );
-        if (!isPublicRoute) {
-          navigateTo({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-        }
-      }
-    }
-  );
-}
 
 const ICON_DASHBOARD = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`;
 const ICON_ORDERS = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;

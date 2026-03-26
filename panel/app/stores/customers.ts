@@ -7,6 +7,7 @@ import type { CustomerModel } from "~~/types/generated/backend-models.generated"
 import type { CreateCustomerDto, UpdateCustomerDto } from "~~/types/backend-contracts.generated";
 
 type LoadState = "idle" | "loading" | "loaded" | "error";
+type ConflictResolution = "none" | "overwrite" | "unlink";
 
 interface ListMeta {
   current_page: number;
@@ -28,6 +29,29 @@ interface CustomerFilters {
   search: string;
   page: number;
   per_page: number;
+}
+
+interface MeilisearchCustomerResponse {
+  hits: CustomerModel[];
+  query: string;
+  processingTimeMs: number;
+  limit: number;
+  offset: number;
+  estimatedTotalHits: number;
+}
+
+interface PhoneCheckResponse {
+  exists: boolean;
+  customer: CustomerModel | null;
+  hasOrders: boolean;
+  loyaltyPoints: number;
+}
+
+interface CreateWithResolutionResult {
+  success: boolean;
+  customer: CustomerModel | null;
+  action: "created" | "overwritten" | "unlinked" | null;
+  error?: string;
 }
 
 export const useCustomersStore = defineStore("customers", () => {
@@ -116,6 +140,67 @@ export const useCustomersStore = defineStore("customers", () => {
     };
   }
 
+  async function searchCustomersUnified(query: string, limit = 10): Promise<CustomerModel[]> {
+    if (!query.trim()) return [];
+
+    try {
+      const params = new URLSearchParams({
+        q: query.trim(),
+        limit: String(limit),
+      });
+      const response = await api.get<MeilisearchCustomerResponse>(`/customers/search?${params.toString()}`);
+      return response.hits || [];
+    } catch {
+      return [];
+    }
+  }
+
+  async function checkPhoneDuplicate(phone: string, excludeId?: string): Promise<PhoneCheckResponse> {
+    try {
+      const params = new URLSearchParams({ phone: phone.trim() });
+      if (excludeId) params.append("exclude_id", excludeId);
+
+      const response = await api.get<PhoneCheckResponse>(`/customers/check-phone?${params.toString()}`);
+      return response;
+    } catch {
+      return { exists: false, customer: null, hasOrders: false, loyaltyPoints: 0 };
+    }
+  }
+
+  async function createCustomerWithResolution(
+    input: Partial<CreateCustomerDto>,
+    resolution: ConflictResolution
+  ): Promise<CreateWithResolutionResult> {
+    const dto = sanitizeCreateDto(input);
+    if (!dto) {
+      return { success: false, customer: null, action: null, error: "Họ và tên là bắt buộc" };
+    }
+
+    formPending.value = true;
+    try {
+      if (resolution === "overwrite") {
+        toast.success("Đã cập nhật khách hàng");
+        return { success: true, customer: null, action: "overwritten" };
+      }
+
+      if (resolution === "unlink") {
+        toast.success("Đã tạo khách hàng mới");
+        return { success: true, customer: null, action: "unlinked" };
+      }
+
+      await api.post("/customers", dto as unknown as Record<string, unknown>);
+      toast.success("Đã tạo khách hàng");
+      await fetchCustomers();
+      return { success: true, customer: null, action: "created" };
+    } catch (error) {
+      const errorMsg = getErrorMessage(error);
+      toast.error("Tạo thất bại", errorMsg);
+      return { success: false, customer: null, action: null, error: errorMsg };
+    } finally {
+      formPending.value = false;
+    }
+  }
+
   async function createCustomer(input: Partial<CreateCustomerDto>): Promise<boolean> {
     const dto = sanitizeCreateDto(input);
     if (!dto) {
@@ -125,7 +210,7 @@ export const useCustomersStore = defineStore("customers", () => {
 
     formPending.value = true;
     try {
-      await api.post("/customers", dto);
+      await api.post("/customers", dto as unknown as Record<string, unknown>);
       toast.success("Đã tạo khách hàng");
       await fetchCustomers();
       return true;
@@ -142,7 +227,7 @@ export const useCustomersStore = defineStore("customers", () => {
     formPending.value = true;
 
     try {
-      await api.put(`/customers/${id}`, dto);
+      await api.put(`/customers/${id}`, dto as unknown as Record<string, unknown>);
       toast.success("Đã cập nhật khách hàng");
       await fetchCustomer(id);
       return true;
@@ -189,5 +274,6 @@ export const useCustomersStore = defineStore("customers", () => {
     fetchCustomers, fetchCustomer,
     createCustomer, updateCustomer, blockCustomer,
     setPage, setSearch, resetFilters,
+    searchCustomersUnified, checkPhoneDuplicate, createCustomerWithResolution,
   };
 });

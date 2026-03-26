@@ -1,100 +1,152 @@
 interface UseApiOptions {
   auth?: boolean;
   headers?: Record<string, string>;
+  skipCsrf?: boolean;
 }
 
 interface ApiRequestOptions extends UseApiOptions {
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  body?: BodyInit | object | null;
-  headers?: Record<string, string>;
+  method?: HttpMethod;
+  body?: BodyInit | Record<string, unknown> | null;
 }
 
-interface ApiClientConfig {
-  apiBaseUrl: string;
-}
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-const DEFAULT_API_CLIENT_CONFIG: ApiClientConfig = {
-  apiBaseUrl: "/api/v1/panel",
-};
+const DEFAULT_API_BASE_URL = "/api/v1";
+const DEFAULT_SANCTUM_CSRF_URL = "/sanctum/csrf-cookie";
+const JSON_CONTENT_TYPE = "application/json";
+const XSRF_COOKIE_NAME = "XSRF-TOKEN";
 
-let apiClientConfig: ApiClientConfig = { ...DEFAULT_API_CLIENT_CONFIG };
-
-export function configureApiClient(config: Partial<ApiClientConfig>): void {
-  apiClientConfig = {
-    ...apiClientConfig,
-    ...config,
-  };
-}
-
-const CSRF_SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const CSRF_SAFE_METHODS = new Set<string>(["GET", "HEAD", "OPTIONS"]);
 
 let csrfCookiePromise: Promise<void> | null = null;
 
+function normalizeUrl(
+  value: string | null | undefined,
+  fallback: string,
+): string {
+  const trimmedValue: string = String(value ?? "").trim();
+
+  if (!trimmedValue) {
+    return fallback;
+  }
+
+  if (/^https?:\/\//i.test(trimmedValue)) {
+    return trimmedValue;
+  }
+
+  if (trimmedValue.startsWith("/")) {
+    return trimmedValue;
+  }
+
+  return `http://${trimmedValue}`;
+}
+
 function readCookie(name: string): string | null {
-  if (!import.meta.client) return null;
+  if (!import.meta.client) {
+    return null;
+  }
 
-  const cookie = document.cookie
+  const cookiePart: string | undefined = document.cookie
     .split("; ")
-    .find((part) => part.startsWith(`${name}=`));
+    .find((part: string): boolean => part.startsWith(`${name}=`));
 
-  if (!cookie) return null;
+  if (!cookiePart) {
+    return null;
+  }
 
-  const [, rawValue = ""] = cookie.split("=", 2);
+  const [, rawValue = ""] = cookiePart.split("=", 2);
+
   return decodeURIComponent(rawValue);
 }
 
-export function useApi(defaultOptions: UseApiOptions = {}) {
-  const apiBaseUrl = String(apiClientConfig.apiBaseUrl || "/api/v1/panel");
+function getMethod(method?: HttpMethod): HttpMethod {
+  return (method ?? "GET").toUpperCase() as HttpMethod;
+}
 
-  function resolveOrigin(baseUrl: string): string | null {
-    if (!import.meta.client) return null;
+function isSafeMethod(method: HttpMethod): boolean {
+  return CSRF_SAFE_METHODS.has(method);
+}
 
-    try {
-      return new URL(baseUrl, window.location.origin).origin;
-    } catch {
-      return null;
-    }
-  }
+function createHeaders(
+  defaultHeaders: Record<string, string>,
+  requestHeaders?: Record<string, string>,
+): Record<string, string> {
+  return {
+    Accept: JSON_CONTENT_TYPE,
+    "Content-Type": JSON_CONTENT_TYPE,
+    "X-Requested-With": "XMLHttpRequest",
+    ...defaultHeaders,
+    ...(requestHeaders ?? {}),
+  };
+}
 
-  function buildHeaders(
-    method: string,
-    options: UseApiOptions = {}
-  ): Record<string, string> {
-    const headers: Record<string, string> = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      ...(defaultOptions.headers ?? {}),
-      ...(options.headers ?? {}),
-    };
-
-    if (!CSRF_SAFE_METHODS.has(method.toUpperCase())) {
-      const xsrfToken = readCookie("XSRF-TOKEN");
-      if (xsrfToken) {
-        headers["X-XSRF-TOKEN"] = xsrfToken;
-      }
-    }
-
+function withXsrfHeader(
+  headers: Record<string, string>,
+  method: HttpMethod,
+): Record<string, string> {
+  if (isSafeMethod(method)) {
     return headers;
   }
 
-  async function ensureCsrfCookie(): Promise<void> {
-    if (import.meta.server) return;
-    if (readCookie("XSRF-TOKEN")) return;
-    if (csrfCookiePromise) return csrfCookiePromise;
+  const xsrfToken: string | null = readCookie(XSRF_COOKIE_NAME);
 
-    const csrfBaseUrl = resolveOrigin(apiBaseUrl) ?? undefined;
+  if (!xsrfToken) {
+    return headers;
+  }
 
-    csrfCookiePromise = $fetch("/sanctum/csrf-cookie", {
-      baseURL: csrfBaseUrl || undefined,
+  return {
+    ...headers,
+    "X-XSRF-TOKEN": xsrfToken,
+  };
+}
+
+export function useApi(defaultOptions: UseApiOptions = {}) {
+  const runtimeConfig = useRuntimeConfig();
+
+  const apiBaseUrl: string = normalizeUrl(
+    String(runtimeConfig.public.apiUrl ?? DEFAULT_API_BASE_URL),
+    DEFAULT_API_BASE_URL,
+  );
+
+  const sanctumCsrfUrl: string = normalizeUrl(
+    String(runtimeConfig.public.sanctumCsrfUrl ?? DEFAULT_SANCTUM_CSRF_URL),
+    DEFAULT_SANCTUM_CSRF_URL,
+  );
+
+  function buildHeaders(
+    method: HttpMethod,
+    options: UseApiOptions = {},
+  ): Record<string, string> {
+    const headers: Record<string, string> = createHeaders(
+      defaultOptions.headers ?? {},
+      options.headers,
+    );
+
+    return withXsrfHeader(headers, method);
+  }
+
+  async function ensureCsrfCookie(force = false): Promise<void> {
+    if (import.meta.server) {
+      return;
+    }
+
+    if (!force && readCookie(XSRF_COOKIE_NAME)) {
+      return;
+    }
+
+    if (csrfCookiePromise) {
+      return csrfCookiePromise;
+    }
+
+    csrfCookiePromise = $fetch(sanctumCsrfUrl, {
       credentials: "include",
       headers: {
-        Accept: "application/json",
+        Accept: JSON_CONTENT_TYPE,
         "X-Requested-With": "XMLHttpRequest",
       },
     })
-      .then(() => undefined)
-      .finally(() => {
+      .then((): void => undefined)
+      .finally((): void => {
         csrfCookiePromise = null;
       });
 
@@ -103,49 +155,86 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
 
   async function request<T>(
     path: string,
-    options: ApiRequestOptions = {}
+    options: ApiRequestOptions = {},
   ): Promise<T> {
-    const method = (options.method ?? "GET").toUpperCase() as
-      | "GET"
-      | "POST"
-      | "PUT"
-      | "PATCH"
-      | "DELETE";
+    const method: HttpMethod = getMethod(options.method);
 
-    if (!CSRF_SAFE_METHODS.has(method)) {
+    if (!options.skipCsrf && !isSafeMethod(method)) {
       await ensureCsrfCookie();
     }
 
     return await $fetch<T>(path, {
       baseURL: apiBaseUrl,
       method,
-      body: options.body as BodyInit | Record<string, any> | null | undefined,
+      body: options.body ?? undefined,
       credentials: "include",
       headers: buildHeaders(method, options),
+    });
+  }
+
+  async function get<T>(
+    path: string,
+    options: UseApiOptions = {},
+  ): Promise<T> {
+    return await request<T>(path, {
+      ...options,
+      method: "GET",
+    });
+  }
+
+  async function post<T>(
+    path: string,
+    body?: BodyInit | Record<string, unknown> | null,
+    options: UseApiOptions = {},
+  ): Promise<T> {
+    return await request<T>(path, {
+      ...options,
+      method: "POST",
+      body,
+    });
+  }
+
+  async function put<T>(
+    path: string,
+    body?: BodyInit | Record<string, unknown> | null,
+    options: UseApiOptions = {},
+  ): Promise<T> {
+    return await request<T>(path, {
+      ...options,
+      method: "PUT",
+      body,
+    });
+  }
+
+  async function patch<T>(
+    path: string,
+    body?: BodyInit | Record<string, unknown> | null,
+    options: UseApiOptions = {},
+  ): Promise<T> {
+    return await request<T>(path, {
+      ...options,
+      method: "PATCH",
+      body,
+    });
+  }
+
+  async function remove<T>(
+    path: string,
+    options: UseApiOptions = {},
+  ): Promise<T> {
+    return await request<T>(path, {
+      ...options,
+      method: "DELETE",
     });
   }
 
   return {
     ensureCsrfCookie,
     request,
-    get: <T>(path: string, options: UseApiOptions = {}) =>
-      request<T>(path, { ...options, method: "GET" }),
-    post: <T>(
-      path: string,
-      body?: BodyInit | object | null,
-      options: UseApiOptions = {}
-    ) => request<T>(path, { ...options, method: "POST", body }),
-    put: <T>(
-      path: string,
-      body?: BodyInit | object | null,
-      options: UseApiOptions = {}
-    ) => request<T>(path, { ...options, method: "PUT", body }),
-    patch: <T>(
-      path: string,
-      body?: BodyInit | object | null,
-      options: UseApiOptions = {}
-    ) => request<T>(path, { ...options, method: "PATCH", body }),
-    delete: <T>(path: string, options: UseApiOptions = {}) =>
-      request<T>(path, { ...options, method: "DELETE" }),
+    get,
+    post,
+    put,
+    patch,
+    delete: remove,
   };
 }

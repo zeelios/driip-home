@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Order\Actions;
 
 use App\Domain\Commission\Services\CommissionCalculator;
+use App\Domain\Customer\Models\Customer;
 use App\Domain\Order\Data\CreateOrderDto;
 use App\Domain\Order\Data\CreateOrderItemDto;
 use App\Domain\Order\Models\Order;
@@ -47,6 +48,9 @@ class CreateOrderAction
     public function execute(CreateOrderDto $dto): Order
     {
         return DB::transaction(function () use ($dto): Order {
+            // Resolve customer data if customer_id provided
+            ['customer' => $customer, 'shipping' => $resolvedShipping] = $this->resolveCustomer($dto);
+
             $itemSnapshots = $this->buildItemSnapshots($dto->items);
 
             $subtotal = array_sum(array_map(
@@ -71,9 +75,9 @@ class CreateOrderAction
             $order = Order::create([
                 'order_number' => $orderNumber,
                 'customer_id' => $dto->customerId,
-                'guest_name' => $dto->guestName,
-                'guest_email' => $dto->guestEmail,
-                'guest_phone' => $dto->guestPhone,
+                'guest_name' => $dto->guestName ?? $customer?->fullName(),
+                'guest_email' => $dto->guestEmail ?? $customer?->email,
+                'guest_phone' => $dto->guestPhone ?? $customer?->phone,
                 'payment_method' => $dto->paymentMethod,
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
@@ -87,13 +91,13 @@ class CreateOrderAction
                 'vat_amount' => $vatAmount,
                 'total_before_tax' => $totalBeforeTax,
                 'total_after_tax' => $totalAfterTax,
-                'shipping_name' => $dto->shippingName,
-                'shipping_phone' => $dto->shippingPhone,
-                'shipping_province' => $dto->shippingProvince,
-                'shipping_district' => $dto->shippingDistrict,
-                'shipping_ward' => $dto->shippingWard,
-                'shipping_address' => $dto->shippingAddress,
-                'shipping_zip' => $dto->shippingZip,
+                'shipping_name' => $resolvedShipping['name'] ?? $dto->shippingName,
+                'shipping_phone' => $resolvedShipping['phone'] ?? $dto->shippingPhone,
+                'shipping_province' => $resolvedShipping['province'] ?? $dto->shippingProvince,
+                'shipping_district' => $resolvedShipping['district'] ?? $dto->shippingDistrict,
+                'shipping_ward' => $resolvedShipping['ward'] ?? $dto->shippingWard,
+                'shipping_address' => $resolvedShipping['address'] ?? $dto->shippingAddress,
+                'shipping_zip' => $resolvedShipping['zip'] ?? $dto->shippingZip,
                 'notes' => $dto->notes,
                 'source' => $dto->source,
                 'utm_source' => $dto->utmSource,
@@ -211,6 +215,53 @@ class CreateOrderAction
             ->first();
 
         return $config ? (float) $config->rate : 0.0;
+    }
+
+    /**
+     * Resolve customer from customer_id and return auto-filled shipping data.
+     *
+     * @param  CreateOrderDto  $dto
+     * @return array{customer: Customer|null, shipping: array<string, string|null>}
+     */
+    private function resolveCustomer(CreateOrderDto $dto): array
+    {
+        if (!$dto->customerId) {
+            return ['customer' => null, 'shipping' => []];
+        }
+
+        $customer = Customer::with('addresses')->find($dto->customerId);
+
+        if (!$customer) {
+            return ['customer' => null, 'shipping' => []];
+        }
+
+        $shipping = [
+            'name' => $dto->shippingName ?: $customer->fullName(),
+            'phone' => $dto->shippingPhone ?: $customer->phone,
+            'province' => $dto->shippingProvince,
+            'district' => $dto->shippingDistrict,
+            'ward' => $dto->shippingWard,
+            'address' => $dto->shippingAddress,
+            'zip' => $dto->shippingZip,
+        ];
+
+        // Auto-fill from default address if no shipping info provided
+        if (!$dto->shippingAddress && !$dto->shippingProvince) {
+            $defaultAddress = $customer->addresses->firstWhere('is_default', true)
+                ?? $customer->addresses->first();
+
+            if ($defaultAddress) {
+                $shipping['name'] = $dto->shippingName ?: $defaultAddress->recipient_name;
+                $shipping['phone'] = $dto->shippingPhone ?: $defaultAddress->phone;
+                $shipping['province'] = $defaultAddress->province;
+                $shipping['district'] = $defaultAddress->district;
+                $shipping['ward'] = $defaultAddress->ward;
+                $shipping['address'] = $defaultAddress->address_line;
+                $shipping['zip'] = $defaultAddress->postal_code;
+            }
+        }
+
+        return ['customer' => $customer, 'shipping' => $shipping];
     }
 
     /**

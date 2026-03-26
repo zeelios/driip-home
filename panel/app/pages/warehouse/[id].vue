@@ -116,34 +116,34 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Mã kho</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouse.code }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Loại kho</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouseTypeLabel(warehouse.type) }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Điện thoại</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouse.phone ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Ngày tạo</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ formatDate(warehouse.created_at) }}
               </dd>
             </div>
@@ -159,26 +159,26 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Địa chỉ</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouse.address ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Quận/Huyện</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouse.district ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Tỉnh/Thành</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouse.province ?? "—" }}
               </dd>
             </div>
@@ -197,26 +197,26 @@
           </p>
           <dl class="m-0">
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Họ tên</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouse.manager.name }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Email</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouse.manager.email ?? "—" }}
               </dd>
             </div>
             <div
-              class="flex justify-between gap-3 py-[0.3125rem] border-b border-white/[0.06] text-sm last:border-b-0"
+              class="flex justify-between gap-3 py-1.25 border-b border-white/6 text-sm last:border-b-0"
             >
               <dt class="text-white/50 shrink-0">Điện thoại</dt>
-              <dd class="m-0 text-white/85 text-right break-words">
+              <dd class="m-0 text-white/85 text-right wrap-break-word">
                 {{ warehouse.manager.phone ?? "—" }}
               </dd>
             </div>

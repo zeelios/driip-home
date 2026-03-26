@@ -72,7 +72,7 @@
           <div v-if="selectedItems.length > 0" class="flex flex-col gap-3">
             <div
               v-for="(item, index) in selectedItems"
-              :key="index"
+              :key="item.product_variant_id"
               class="flex items-center justify-between rounded-lg border border-white/6 bg-white/4 p-4 transition-all hover:border-white/10"
             >
               <div class="flex items-center gap-3">
@@ -95,7 +95,7 @@
                   @update:modelValue="updateQuantity(index, Number($event))"
                 />
                 <span class="min-w-24 text-right font-semibold text-white">
-                  {{ formatVnd(item.price * item.quantity) }}
+                  {{ formatVnd(item.unit_price * item.quantity) }}
                 </span>
                 <button
                   class="rounded-lg p-2 text-white/40 hover:bg-white/10 hover:text-white/70 transition-colors"
@@ -154,6 +154,24 @@
               placeholder="Chọn trạng thái"
             />
           </div>
+          <!-- Deposit amount for partial payment -->
+          <div v-if="form.payment_status === 'partial'" class="mt-4">
+            <ZInput
+              v-model="form.deposit_amount"
+              type="number"
+              label="Số tiền đặt cọc *"
+              placeholder="Nhập số tiền đặt cọc"
+              :error="formErrors.deposit_amount"
+            >
+              <template #suffix>VND</template>
+            </ZInput>
+            <p class="mt-1 text-xs text-white/50">
+              Còn lại:
+              {{
+                formatVnd(Math.max(0, total - Number(form.deposit_amount || 0)))
+              }}
+            </p>
+          </div>
         </div>
 
         <!-- Notes section -->
@@ -181,94 +199,121 @@
         <!-- Customer section -->
         <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
           <p class="mb-5 text-sm font-semibold text-white">Khách hàng</p>
-          <div
-            class="mb-5 flex rounded-lg border border-white/10 bg-white/4 p-1"
-          >
-            <button
-              :class="[
-                'flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all',
-                customerType === 'existing'
-                  ? 'bg-white text-[#0a0a0a] shadow-sm'
-                  : 'text-white/60 hover:text-white',
-              ]"
-              @click="customerType = 'existing'"
-            >
-              Khách hàng có sẵn
-            </button>
-            <button
-              :class="[
-                'flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all',
-                customerType === 'guest'
-                  ? 'bg-white text-[#0a0a0a] shadow-sm'
-                  : 'text-white/60 hover:text-white',
-              ]"
-              @click="customerType = 'guest'"
-            >
-              Khách vãng lai
-            </button>
-          </div>
-          <div v-if="customerType === 'existing'" class="flex flex-col gap-4">
-            <ZInput
-              v-model="customerSearch"
-              placeholder="Tìm khách hàng theo tên, email, SĐT..."
-              @input="onCustomerSearch"
+
+          <!-- Unified customer search with create option -->
+          <div class="relative flex flex-col gap-4">
+            <ZSelect
+              v-model="selectedCustomerId"
+              :options="customerSelectOptions"
+              label="Tìm hoặc tạo khách hàng"
+              placeholder="Nhập tên, email, hoặc SĐT để tìm..."
+              :searchable="true"
+              :async="true"
+              :loading="customerSearchLoading"
+              :show-create-option="true"
+              create-option-label="+ Tạo khách hàng mới"
+              @search="onCustomerSearch"
+              @update:model-value="onCustomerSelect"
+              @create="showCreateModal = true"
             />
+
+            <!-- Selected customer info -->
             <div
               v-if="selectedCustomer"
-              class="flex items-center justify-between rounded-lg border border-white/6 bg-white/4 p-4"
+              class="p-3 rounded-lg bg-white/5 border border-white/8"
             >
-              <div>
-                <p class="font-medium text-white">
-                  {{ selectedCustomer.first_name }}
-                  {{ selectedCustomer.last_name }}
-                </p>
-                <p class="text-sm text-white/50">
-                  {{ selectedCustomer.email || selectedCustomer.phone }}
-                </p>
-              </div>
-              <button
-                class="rounded-lg p-2 text-white/40 hover:bg-white/10 hover:text-white/70 transition-colors"
-                @click="selectedCustomer = null"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-full bg-[#8B4513]/20 flex items-center justify-center text-[#C4A77D] font-medium"
                 >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+                  {{ selectedCustomer.first_name.charAt(0)
+                  }}{{ selectedCustomer.last_name.charAt(0) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-white truncate">
+                    {{ selectedCustomer.first_name }}
+                    {{ selectedCustomer.last_name }}
+                  </p>
+                  <p class="text-xs text-white/50">
+                    <span v-if="selectedCustomer.phone">{{
+                      selectedCustomer.phone
+                    }}</span>
+                    <span
+                      v-if="selectedCustomer.phone && selectedCustomer.email"
+                    >
+                      ·
+                    </span>
+                    <span v-if="selectedCustomer.email">{{
+                      selectedCustomer.email
+                    }}</span>
+                  </p>
+                </div>
+                <button
+                  class="p-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
+                  @click="clearCustomer"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
             </div>
+
+            <!-- Quick create button when no search -->
+            <button
+              v-if="!selectedCustomer && !customerSearchLoading"
+              type="button"
+              class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-white/10 bg-white/4 text-sm text-white/70 hover:text-white hover:bg-white/8 transition-colors"
+              @click="showCreateModal = true"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Tạo khách hàng mới
+            </button>
           </div>
-          <div v-else class="flex flex-col gap-4">
-            <ZInput
-              v-model="form.guest_name"
-              label="Tên khách hàng *"
-              placeholder="Nguyễn Văn A"
-              :error="formErrors.guest_name"
-            />
-            <ZInput
-              v-model="form.guest_phone"
-              label="Số điện thoại *"
-              placeholder="0901234567"
-              :error="formErrors.guest_phone"
-            />
-            <ZInput
-              v-model="form.guest_email"
-              label="Email"
-              placeholder="khach@email.com"
-            />
-          </div>
+
+          <!-- Create Customer Modal -->
+          <CreateCustomerModal
+            v-model="showCreateModal"
+            @submit="handleCustomerCreate"
+            @use-existing="handleUseExisting"
+            @cancel="showCreateModal = false"
+          />
         </div>
 
         <!-- Shipping section -->
         <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
           <p class="mb-5 text-sm font-semibold text-white">Giao hàng</p>
           <div class="flex flex-col gap-4">
+            <ZInput
+              v-model="form.shipping_name"
+              label="Tên người nhận *"
+              placeholder="Nguyễn Văn A"
+              :error="formErrors.shipping_name"
+            />
+            <ZInput
+              v-model="form.shipping_phone"
+              label="SĐT người nhận *"
+              placeholder="0901234567"
+              :error="formErrors.shipping_phone"
+            />
             <ZInput
               v-model="form.shipping_address"
               label="Địa chỉ *"
@@ -288,9 +333,15 @@
               />
             </div>
             <ZInput
-              v-model="form.shipping_city"
-              label="Tỉnh/Thành phố"
+              v-model="form.shipping_province"
+              label="Tỉnh/Thành phố *"
               placeholder="TP. Hồ Chí Minh"
+              :error="formErrors.shipping_province"
+            />
+            <ZInput
+              v-model="form.shipping_zip"
+              label="Mã bưu điện"
+              placeholder="700000"
             />
           </div>
         </div>
@@ -369,54 +420,82 @@
 <script setup lang="ts">
 import { formatVnd } from "~/utils/format";
 import type { SelectOption } from "~/components/z/Select.vue";
+import type { CustomerModel } from "~~/types/generated/backend-models.generated";
+import { useCustomersStore } from "~/stores/customers";
 
 definePageMeta({ layout: "panel" });
 
 interface SelectedItem {
-  id: number;
+  product_variant_id: string;
   name: string;
   variant: string;
   image: string | null;
-  price: number;
+  unit_price: number;
   quantity: number;
 }
 
-interface Customer {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string | null;
-  phone: string | null;
-}
+const api = useApi();
+const customersStore = useCustomersStore();
 
 const productSearch = ref("");
 const globalSearch = ref("");
-const customerSearch = ref("");
-const customerType = ref<"existing" | "guest">("existing");
+const showCreateModal = ref(false);
+const selectedCustomer = ref<CustomerModel | null>(null);
+const selectedCustomerId = ref<string | number | null>(null);
+const customerSearchLoading = ref(false);
+const customerResults = ref<CustomerModel[]>([]);
 const selectedItems = ref<SelectedItem[]>([]);
-const selectedCustomer = ref<Customer | null>(null);
 const formPending = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 
+// Debounced customer search
+let customerSearchTimer: ReturnType<typeof setTimeout> | null = null;
+
+const customerSelectOptions = computed(() => {
+  return customerResults.value.map((c) => ({
+    value: c.id,
+    label: `${c.first_name} ${c.last_name} - ${
+      c.phone || c.email || "Không có liên hệ"
+    }`,
+  }));
+});
+
+function onSearchFocus(): void {
+  searchInput.value?.select();
+}
+
+function onProductSearch(): void {
+  // TODO: Implement product search
+}
+
 const form = ref({
+  customer_id: "",
   guest_name: "",
   guest_phone: "",
   guest_email: "",
+  shipping_name: "",
+  shipping_phone: "",
   shipping_address: "",
   shipping_ward: "",
   shipping_district: "",
-  shipping_city: "",
+  shipping_province: "",
+  shipping_zip: "",
   payment_method: "",
   payment_status: "pending",
+  deposit_amount: "",
   coupon_code: "",
   notes: "",
   internal_notes: "",
+  source: "admin",
 });
 
 const formErrors = ref({
-  guest_name: "",
-  guest_phone: "",
+  customer: "",
   shipping_address: "",
+  shipping_name: "",
+  shipping_phone: "",
+  shipping_province: "",
+  deposit_amount: "",
 });
 
 const paymentMethodOptions: SelectOption[] = [
@@ -428,11 +507,15 @@ const paymentMethodOptions: SelectOption[] = [
 
 const paymentStatusOptions: SelectOption[] = [
   { value: "pending", label: "Chờ thanh toán" },
+  { value: "partial", label: "Đã đặt cọc" },
   { value: "paid", label: "Đã thanh toán" },
 ];
 
 const subtotal = computed(() =>
-  selectedItems.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  selectedItems.value.reduce(
+    (sum, item) => sum + item.unit_price * item.quantity,
+    0
+  )
 );
 const discount = ref(0);
 const shippingFee = ref(30000);
@@ -441,16 +524,86 @@ const total = computed(
   () => subtotal.value - discount.value + shippingFee.value + tax.value
 );
 
-function onProductSearch(): void {
-  // TODO: Implement product search
+function onCustomerSearch(query: string): void {
+  if (customerSearchTimer) clearTimeout(customerSearchTimer);
+
+  if (!query.trim()) {
+    customerResults.value = [];
+    return;
+  }
+
+  customerSearchLoading.value = true;
+  customerSearchTimer = setTimeout(async () => {
+    customerResults.value = await customersStore.searchCustomersUnified(
+      query,
+      10
+    );
+    customerSearchLoading.value = false;
+  }, 200);
 }
 
-function onSearchFocus(): void {
-  searchInput.value?.select();
+function onCustomerSelect(value: string | number): void {
+  const customerId = String(value);
+  const customer = customerResults.value.find((c) => c.id === customerId);
+
+  if (customer) {
+    selectedCustomer.value = customer;
+    form.value.customer_id = customerId;
+    // Auto-fill shipping info from customer
+    form.value.shipping_name = `${customer.first_name} ${customer.last_name}`;
+    form.value.shipping_phone = customer.phone || "";
+    form.value.guest_email = customer.email || "";
+  }
 }
 
-function onCustomerSearch(): void {
-  // TODO: Implement customer search
+function clearCustomer(): void {
+  selectedCustomer.value = null;
+  selectedCustomerId.value = null;
+  form.value.customer_id = "";
+  form.value.shipping_name = "";
+  form.value.shipping_phone = "";
+  form.value.guest_email = "";
+}
+
+async function handleCustomerCreate(data: {
+  customer: Partial<CustomerModel>;
+  resolution: "none" | "overwrite" | "unlink";
+}): Promise<void> {
+  const result = await customersStore.createCustomerWithResolution(
+    data.customer,
+    data.resolution
+  );
+
+  if (result.success) {
+    showCreateModal.value = false;
+
+    // If a customer was created/updated, select it
+    if (result.action === "created" || result.action === "unlinked") {
+      // Refresh search and select the new customer
+      // For now, we'll manually set the customer data
+      const newCustomer = {
+        id: "new-customer-id", // This would come from API
+        ...data.customer,
+      } as CustomerModel;
+
+      selectedCustomer.value = newCustomer;
+      selectedCustomerId.value = newCustomer.id;
+      form.value.customer_id = newCustomer.id;
+      form.value.shipping_name = `${newCustomer.first_name} ${newCustomer.last_name}`;
+      form.value.shipping_phone = newCustomer.phone || "";
+      form.value.guest_email = newCustomer.email || "";
+    }
+  }
+}
+
+function handleUseExisting(customer: CustomerModel): void {
+  selectedCustomer.value = customer;
+  selectedCustomerId.value = customer.id;
+  form.value.customer_id = customer.id;
+  form.value.shipping_name = `${customer.first_name} ${customer.last_name}`;
+  form.value.shipping_phone = customer.phone || "";
+  form.value.guest_email = customer.email || "";
+  showCreateModal.value = false;
 }
 
 function removeItem(index: number): void {
@@ -470,25 +623,48 @@ function applyCoupon(): void {
 
 function validateForm(): boolean {
   let valid = true;
-  formErrors.value = { guest_name: "", guest_phone: "", shipping_address: "" };
+  formErrors.value = {
+    customer: "",
+    shipping_address: "",
+    shipping_name: "",
+    shipping_phone: "",
+    shipping_province: "",
+    deposit_amount: "",
+  };
 
-  if (customerType.value === "guest") {
-    if (!form.value.guest_name.trim()) {
-      formErrors.value.guest_name = "Vui lòng nhập tên khách hàng";
-      valid = false;
-    }
-    if (!form.value.guest_phone.trim()) {
-      formErrors.value.guest_phone = "Vui lòng nhập số điện thoại";
-      valid = false;
-    }
-  } else if (!selectedCustomer.value) {
-    // TODO: Show error for missing customer selection
+  // Validate customer selection
+  if (!selectedCustomer.value && !form.value.customer_id) {
+    formErrors.value.customer = "Vui lòng chọn hoặc tạo khách hàng";
     valid = false;
   }
 
   if (!form.value.shipping_address.trim()) {
     formErrors.value.shipping_address = "Vui lòng nhập địa chỉ giao hàng";
     valid = false;
+  }
+  if (!form.value.shipping_name.trim()) {
+    formErrors.value.shipping_name = "Vui lòng nhập tên người nhận";
+    valid = false;
+  }
+  if (!form.value.shipping_phone.trim()) {
+    formErrors.value.shipping_phone = "Vui lòng nhập SĐT người nhận";
+    valid = false;
+  }
+  if (!form.value.shipping_province.trim()) {
+    formErrors.value.shipping_province = "Vui lòng nhập tỉnh/thành phố";
+    valid = false;
+  }
+
+  if (form.value.payment_status === "partial") {
+    const deposit = Number(form.value.deposit_amount);
+    if (!deposit || deposit <= 0) {
+      formErrors.value.deposit_amount = "Vui lòng nhập số tiền đặt cọc";
+      valid = false;
+    } else if (deposit >= total.value) {
+      formErrors.value.deposit_amount =
+        "Số tiền đặt cọc phải nhỏ hơn tổng đơn hàng";
+      valid = false;
+    }
   }
 
   if (selectedItems.value.length === 0) {
