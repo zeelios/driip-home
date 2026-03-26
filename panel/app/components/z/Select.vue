@@ -50,7 +50,7 @@
       <Transition name="z-select-drop">
         <div
           v-if="isOpen"
-          class="fixed z-[100]"
+          class="fixed z-100"
           :style="dropdownStyle"
           @mousedown.self="closeDropdown"
         >
