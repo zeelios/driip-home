@@ -1,16 +1,14 @@
 <template>
   <div>
     <!-- Toolbar -->
-    <div
-      class="flex flex-col sm:flex-row items-start justify-between gap-3 mb-4 sm:mb-4.5"
-    >
-      <div class="flex flex-col sm:flex-row gap-2.5 flex-1 w-full">
+    <div class="mb-4 sm:mb-4.5">
+      <!-- Mobile Layout -->
+      <div class="flex sm:hidden flex-col gap-2.5">
         <ZInput
           v-model="search"
           placeholder="Tìm đơn hàng..."
           type="search"
           size="sm"
-          class="flex-1 w-full min-w-0"
           @input="onSearchInput"
         >
           <template #prefix>
@@ -27,38 +25,99 @@
             </svg>
           </template>
         </ZInput>
-        <ZSelect
-          v-model="statusFilter"
-          :options="statusOptions"
-          placeholder="Trạng thái"
-          size="sm"
-          class="w-full sm:w-auto sm:min-w-37.5"
-          @change="onFilterChange"
-        />
-        <ZSelect
-          v-model="paymentFilter"
-          :options="paymentOptions"
-          placeholder="Thanh toán"
-          size="sm"
-          class="w-full sm:w-auto sm:min-w-37.5"
-          @change="onFilterChange"
-        />
+        <div class="flex gap-2.5">
+          <ZSelect
+            v-model="statusFilter"
+            :options="statusOptions"
+            placeholder="Trạng thái"
+            size="sm"
+            class="flex-1"
+            @change="onFilterChange"
+          />
+          <ZSelect
+            v-model="paymentFilter"
+            :options="paymentOptions"
+            placeholder="Thanh toán"
+            size="sm"
+            class="flex-1"
+            @change="onFilterChange"
+          />
+        </div>
+        <ZButton to="/orders/new" size="sm" class="w-full">
+          <template #prefix>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M5 12h14M12 5v14" />
+            </svg>
+          </template>
+          Tạo đơn hàng
+        </ZButton>
       </div>
-      <ZButton to="/orders/new" size="sm" class="w-full sm:w-auto shrink-0">
-        <template #prefix>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
+
+      <!-- Desktop Layout -->
+      <div class="hidden sm:flex items-center justify-between gap-3">
+        <div class="flex gap-2.5 flex-1">
+          <ZInput
+            v-model="search"
+            placeholder="Tìm đơn hàng..."
+            type="search"
+            size="sm"
+            class="flex-1 min-w-0 max-w-xs"
+            @input="onSearchInput"
           >
-            <path d="M5 12h14M12 5v14" />
-          </svg>
-        </template>
-        Tạo đơn hàng
-      </ZButton>
+            <template #prefix>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+            </template>
+          </ZInput>
+          <ZSelect
+            v-model="statusFilter"
+            :options="statusOptions"
+            placeholder="Trạng thái"
+            size="sm"
+            class="min-w-37.5"
+            @change="onFilterChange"
+          />
+          <ZSelect
+            v-model="paymentFilter"
+            :options="paymentOptions"
+            placeholder="Thanh toán"
+            size="sm"
+            class="min-w-37.5"
+            @change="onFilterChange"
+          />
+        </div>
+        <ZButton to="/orders/new" size="sm" class="shrink-0">
+          <template #prefix>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M5 12h14M12 5v14" />
+            </svg>
+          </template>
+          Tạo đơn hàng
+        </ZButton>
+      </div>
     </div>
 
     <!-- Error -->

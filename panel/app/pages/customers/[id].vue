@@ -43,24 +43,29 @@
     <!-- Content -->
     <template v-else-if="store.currentCustomer">
       <!-- Page header -->
-      <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
-        <div class="flex items-center flex-wrap gap-3">
-          <NuxtLink
-            to="/customers"
-            class="inline-flex items-center gap-1 text-[0.8125rem] text-white/50 no-underline transition-colors duration-130 hover:text-white/80"
+      <div class="mb-5">
+        <!-- Back link -->
+        <NuxtLink
+          to="/customers"
+          class="inline-flex items-center gap-1 text-[0.8125rem] text-white/50 no-underline transition-colors duration-130 hover:text-white/80 mb-4"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-            Khách hàng
-          </NuxtLink>
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Khách hàng
+        </NuxtLink>
+
+        <!-- Customer info and actions row -->
+        <div
+          class="flex flex-col sm:flex-row items-start justify-between gap-4"
+        >
           <div class="flex items-center gap-3">
             <div
               class="w-12 h-12 rounded-full bg-[#f0efed] text-[#333] text-base font-bold flex items-center justify-center shrink-0"
@@ -75,23 +80,23 @@
                 {{ customer.customer_code }}
               </p>
             </div>
+            <ZBadge v-if="customer.is_blocked" variant="danger">Đã khóa</ZBadge>
+            <ZBadge v-else variant="success">Hoạt động</ZBadge>
           </div>
-          <ZBadge v-if="customer.is_blocked" variant="danger">Đã khóa</ZBadge>
-          <ZBadge v-else variant="success">Hoạt động</ZBadge>
-        </div>
-        <div class="flex gap-2 flex-wrap">
-          <ZButton variant="outline" size="sm" @click="openEditModal"
-            >Chỉnh sửa</ZButton
-          >
-          <ZButton
-            v-if="!customer.is_blocked"
-            variant="danger"
-            size="sm"
-            :loading="store.blockPending"
-            @click="showBlockConfirm = true"
-          >
-            Khóa tài khoản
-          </ZButton>
+          <div class="flex gap-2 flex-wrap w-full sm:w-auto justify-end">
+            <ZButton variant="outline" size="sm" @click="openEditModal"
+              >Chỉnh sửa</ZButton
+            >
+            <ZButton
+              v-if="!customer.is_blocked"
+              variant="danger"
+              size="sm"
+              :loading="store.blockPending"
+              @click="showBlockConfirm = true"
+            >
+              Khóa tài khoản
+            </ZButton>
+          </div>
         </div>
       </div>
 
@@ -239,6 +244,82 @@
           </p>
         </div>
       </div>
+
+      <!-- Recent Orders Section -->
+      <div class="mt-5">
+        <div class="flex items-center justify-between mb-3">
+          <p
+            class="m-0 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Đơn hàng gần đây
+          </p>
+          <ZButton
+            v-if="recentOrders.length > 0"
+            variant="ghost"
+            size="sm"
+            @click="loadMoreOrders"
+            :loading="ordersLoading"
+          >
+            Xem thêm
+          </ZButton>
+        </div>
+
+        <!-- Loading state -->
+        <div
+          v-if="ordersLoading && recentOrders.length === 0"
+          class="flex gap-3 overflow-x-auto pb-2"
+        >
+          <div
+            v-for="i in 3"
+            :key="i"
+            class="shrink-0 bg-white/5 border border-white/10 rounded-lg p-3 min-w-50"
+          >
+            <ZSkeleton height="0.875rem" width="80px" class="mb-2" />
+            <ZSkeleton height="0.75rem" width="60px" class="mb-1" />
+            <ZSkeleton height="1rem" width="100px" />
+          </div>
+        </div>
+
+        <!-- Orders list -->
+        <div
+          v-else-if="recentOrders.length > 0"
+          class="flex gap-3 overflow-x-auto pb-2"
+        >
+          <NuxtLink
+            v-for="order in recentOrders"
+            :key="order.id"
+            :to="`/orders/${order.id}`"
+            replace
+            class="shrink-0 bg-white/5 border border-white/10 hover:border-white/20 rounded-lg p-3 min-w-50 transition-colors"
+          >
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="text-sm font-mono text-white/80">{{
+                order.order_number
+              }}</span>
+              <ZBadge
+                :variant="orderStatusVariant(order.status) as BadgeVariant"
+                size="sm"
+              >
+                {{ orderStatusLabel(order.status) }}
+              </ZBadge>
+            </div>
+            <p class="m-0 text-xs text-white/50">
+              {{ formatDatetime(order.created_at) }}
+            </p>
+            <p class="m-0 text-sm font-semibold text-white/90 mt-1">
+              {{ formatVnd(order.total_after_tax) }}
+            </p>
+          </NuxtLink>
+        </div>
+
+        <!-- Empty state -->
+        <div
+          v-else-if="!ordersLoading"
+          class="bg-white/5 border border-white/10 rounded-lg p-4 text-center"
+        >
+          <p class="m-0 text-sm text-white/50">Chưa có đơn hàng nào</p>
+        </div>
+      </div>
     </template>
 
     <!-- Edit modal -->
@@ -313,10 +394,15 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useCustomersStore } from "~/stores/customers";
+import { useApi } from "~/composables/useApi";
+import type { OrderModel } from "~~/types/generated/backend-models.generated";
 import {
   formatVnd,
   formatNumber,
   formatDate,
+  formatDatetime,
+  orderStatusLabel,
+  orderStatusVariant,
   genderLabel,
   sanitizeString,
   sanitizeEmail,
@@ -328,9 +414,24 @@ definePageMeta({ layout: "panel" });
 const route = useRoute();
 const id = route.params.id as string;
 const store = useCustomersStore();
+const api = useApi();
 
 const showEditModal = ref(false);
 const showBlockConfirm = ref(false);
+
+// Recent orders
+const recentOrders = ref<OrderModel[]>([]);
+const ordersLoading = ref(false);
+const ordersPage = ref(1);
+const ordersPerPage = 5;
+
+type BadgeVariant =
+  | "default"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "neutral";
 
 const ERROR_ICON = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
@@ -408,7 +509,38 @@ async function handleBlock(): Promise<void> {
   if (ok) showBlockConfirm.value = false;
 }
 
+async function fetchRecentOrders(): Promise<void> {
+  ordersLoading.value = true;
+  try {
+    const params = new URLSearchParams({
+      customer_id: id,
+      page: String(ordersPage.value),
+      per_page: String(ordersPerPage),
+    });
+    const response = await api.get<{ data: OrderModel[] }>(
+      `/orders?${params.toString()}`
+    );
+    const newOrders = response.data ?? [];
+    if (ordersPage.value === 1) {
+      recentOrders.value = newOrders;
+    } else {
+      recentOrders.value.push(...newOrders);
+    }
+  } catch {
+    // Silently fail - not critical for customer detail
+  } finally {
+    ordersLoading.value = false;
+  }
+}
+
+async function loadMoreOrders(): Promise<void> {
+  ordersPage.value++;
+  await fetchRecentOrders();
+}
+
 onMounted(() => {
-  store.fetchCustomer(id);
+  store.fetchCustomer(id).then(() => {
+    fetchRecentOrders();
+  });
 });
 </script>

@@ -62,12 +62,93 @@ class ProductController extends BaseApiController implements HasMiddleware
             $products = Product::search($query)
                 ->take($limit)
                 ->get()
-                ->loadMissing(['brand', 'category'])
-                ->filter(static fn (Product $product): bool => $product->status === 'active')
+                ->loadMissing(['brand', 'category', 'variantPeers', 'parentVariants'])
+                ->filter(static fn(Product $product): bool => $product->status === 'active')
                 ->values();
 
+            $results = $products->map(function (Product $product): array {
+                $pricing = [
+                    'compare_price' => $product->compare_price,
+                    'cost_price' => $product->cost_price,
+                    'selling_price' => $product->selling_price,
+                    'sale_price' => $product->sale_price,
+                    'effective_price' => $product->effectivePrice(),
+                    'currency' => 'VND',
+                ];
+
+                $variantOptions = $product->allVariants()
+                    ->filter(static fn(Product $variant): bool => $variant->status === 'active')
+                    ->values()
+                    ->map(function (Product $variant): array {
+                        $variantPricing = [
+                            'compare_price' => $variant->compare_price,
+                            'cost_price' => $variant->cost_price,
+                            'selling_price' => $variant->selling_price,
+                            'sale_price' => $variant->sale_price,
+                            'effective_price' => $variant->effectivePrice(),
+                            'currency' => 'VND',
+                        ];
+
+                        return [
+                            'id' => $variant->id,
+                            'name' => $variant->name,
+                            'sku' => $variant->sku,
+                            'pricing' => $variantPricing,
+                            'compare_price' => $variantPricing['compare_price'],
+                            'cost_price' => $variantPricing['cost_price'],
+                            'selling_price' => $variantPricing['selling_price'],
+                            'sale_price' => $variantPricing['sale_price'],
+                            'effective_price' => $variantPricing['effective_price'],
+                            'brand' => $variant->relationLoaded('brand') && $variant->brand !== null ? [
+                                'id' => $variant->brand->id,
+                                'name' => $variant->brand->name,
+                                'slug' => $variant->brand->slug,
+                            ] : null,
+                            'category' => $variant->relationLoaded('category') && $variant->category !== null ? [
+                                'id' => $variant->category->id,
+                                'name' => $variant->category->name,
+                                'slug' => $variant->category->slug,
+                            ] : null,
+                        ];
+                    });
+
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'slug' => $product->slug,
+                    'sku_base' => $product->sku,
+                    'pricing' => $pricing,
+                    'compare_price' => $pricing['compare_price'],
+                    'cost_price' => $pricing['cost_price'],
+                    'selling_price' => $pricing['selling_price'],
+                    'sale_price' => $pricing['sale_price'],
+                    'effective_price' => $pricing['effective_price'],
+                    'brand' => $product->relationLoaded('brand') && $product->brand !== null ? [
+                        'id' => $product->brand->id,
+                        'name' => $product->brand->name,
+                        'slug' => $product->brand->slug,
+                    ] : null,
+                    'category' => $product->relationLoaded('category') && $product->category !== null ? [
+                        'id' => $product->category->id,
+                        'name' => $product->category->name,
+                        'slug' => $product->category->slug,
+                    ] : null,
+                    'gender' => $product->gender,
+                    'season' => $product->season,
+                    'tags' => $product->tags,
+                    'status' => $product->status,
+                    'is_featured' => $product->is_featured,
+                    'published_at' => $product->published_at?->toIso8601String(),
+                    'short_description' => $product->short_description,
+                    'description' => $product->description,
+                    'meta_title' => $product->meta_title,
+                    'meta_description' => $product->meta_description,
+                    'variant_options' => $variantOptions,
+                ];
+            });
+
             return response()->json([
-                'data' => ProductResource::collection($products),
+                'data' => $results,
             ]);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'SEARCH_PRODUCTS');
@@ -154,7 +235,8 @@ class ProductController extends BaseApiController implements HasMiddleware
     public function show(Product $product): ProductResource|JsonResponse
     {
         try {
-            $product->load(['brand', 'category', 'variants']);
+            $product->load(['brand', 'category']);
+            $product->setRelation('variants', $product->variants());
 
             return new ProductResource($product);
         } catch (\Throwable $e) {

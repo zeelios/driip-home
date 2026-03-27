@@ -55,7 +55,9 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->expectsJson() || $request->is('api/*')) {
                 $code = 'API_' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
 
-                Log::error('Unhandled API exception.', [
+                report($e);
+
+                Log::channel('single')->error('Unhandled API exception.', [
                     'request_code' => $code,
                     'method' => $request->method(),
                     'uri' => $request->fullUrl(),

@@ -25,7 +25,7 @@ class DeleteProductAction
     public function execute(Product $product): void
     {
         DB::transaction(function () use ($product): void {
-            $product->variants()->each(function ($variant): void {
+            $product->variants()->each(function (Product $variant): void {
                 $variant->delete();
             });
 

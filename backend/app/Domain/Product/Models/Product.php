@@ -194,6 +194,19 @@ class Product extends Model
     }
 
     /**
+     * Get the product's linked variants as a unique collection.
+     *
+     * This provides a backwards-compatible API for older callers that used
+     * a variants relation before the schema switched to product_variant_links.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Product>
+     */
+    public function variants(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->allVariants()->unique('id')->values();
+    }
+
+    /**
      * Scope a query to only include active products.
      *
      * @param  Builder<Product>  $query

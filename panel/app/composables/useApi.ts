@@ -2,6 +2,7 @@ interface UseApiOptions {
   auth?: boolean;
   headers?: Record<string, string>;
   skipCsrf?: boolean;
+  skipSessionExpiry?: boolean;
 }
 
 interface ApiRequestOptions extends UseApiOptions {
@@ -20,9 +21,14 @@ const CSRF_SAFE_METHODS = new Set<string>(["GET", "HEAD", "OPTIONS"]);
 
 let csrfCookiePromise: Promise<void> | null = null;
 
+interface ApiErrorLike {
+  statusCode?: number;
+  status?: number;
+}
+
 function normalizeUrl(
   value: string | null | undefined,
-  fallback: string,
+  fallback: string
 ): string {
   const trimmedValue: string = String(value ?? "").trim();
 
@@ -69,7 +75,7 @@ function isSafeMethod(method: HttpMethod): boolean {
 
 function createHeaders(
   defaultHeaders: Record<string, string>,
-  requestHeaders?: Record<string, string>,
+  requestHeaders?: Record<string, string>
 ): Record<string, string> {
   return {
     Accept: JSON_CONTENT_TYPE,
@@ -82,7 +88,7 @@ function createHeaders(
 
 function withXsrfHeader(
   headers: Record<string, string>,
-  method: HttpMethod,
+  method: HttpMethod
 ): Record<string, string> {
   if (isSafeMethod(method)) {
     return headers;
@@ -100,26 +106,40 @@ function withXsrfHeader(
   };
 }
 
+function getStatusCode(error: unknown): number | null {
+  const apiError = error as ApiErrorLike;
+
+  if (typeof apiError.statusCode === "number") {
+    return apiError.statusCode;
+  }
+
+  if (typeof apiError.status === "number") {
+    return apiError.status;
+  }
+
+  return null;
+}
+
 export function useApi(defaultOptions: UseApiOptions = {}) {
   const runtimeConfig = useRuntimeConfig();
 
   const apiBaseUrl: string = normalizeUrl(
     String(runtimeConfig.public.apiUrl ?? DEFAULT_API_BASE_URL),
-    DEFAULT_API_BASE_URL,
+    DEFAULT_API_BASE_URL
   );
 
   const sanctumCsrfUrl: string = normalizeUrl(
     String(runtimeConfig.public.sanctumCsrfUrl ?? DEFAULT_SANCTUM_CSRF_URL),
-    DEFAULT_SANCTUM_CSRF_URL,
+    DEFAULT_SANCTUM_CSRF_URL
   );
 
   function buildHeaders(
     method: HttpMethod,
-    options: UseApiOptions = {},
+    options: UseApiOptions = {}
   ): Record<string, string> {
     const headers: Record<string, string> = createHeaders(
       defaultOptions.headers ?? {},
-      options.headers,
+      options.headers
     );
 
     return withXsrfHeader(headers, method);
@@ -155,7 +175,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
 
   async function request<T>(
     path: string,
-    options: ApiRequestOptions = {},
+    options: ApiRequestOptions = {}
   ): Promise<T> {
     const method: HttpMethod = getMethod(options.method);
 
@@ -163,19 +183,31 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
       await ensureCsrfCookie();
     }
 
-    return await $fetch<T>(path, {
-      baseURL: apiBaseUrl,
-      method,
-      body: options.body ?? undefined,
-      credentials: "include",
-      headers: buildHeaders(method, options),
-    });
+    try {
+      return await $fetch<T>(path, {
+        baseURL: apiBaseUrl,
+        method,
+        body: options.body ?? undefined,
+        credentials: "include",
+        headers: buildHeaders(method, options),
+      });
+    } catch (error) {
+      const statusCode = getStatusCode(error);
+
+      if (
+        options.auth !== false &&
+        !options.skipSessionExpiry &&
+        (statusCode === 401 || statusCode === 419)
+      ) {
+        const authStore = useAuthStore();
+        await authStore.handleExpiredSession();
+      }
+
+      throw error;
+    }
   }
 
-  async function get<T>(
-    path: string,
-    options: UseApiOptions = {},
-  ): Promise<T> {
+  async function get<T>(path: string, options: UseApiOptions = {}): Promise<T> {
     return await request<T>(path, {
       ...options,
       method: "GET",
@@ -185,7 +217,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
   async function post<T>(
     path: string,
     body?: BodyInit | Record<string, unknown> | null,
-    options: UseApiOptions = {},
+    options: UseApiOptions = {}
   ): Promise<T> {
     return await request<T>(path, {
       ...options,
@@ -197,7 +229,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
   async function put<T>(
     path: string,
     body?: BodyInit | Record<string, unknown> | null,
-    options: UseApiOptions = {},
+    options: UseApiOptions = {}
   ): Promise<T> {
     return await request<T>(path, {
       ...options,
@@ -209,7 +241,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
   async function patch<T>(
     path: string,
     body?: BodyInit | Record<string, unknown> | null,
-    options: UseApiOptions = {},
+    options: UseApiOptions = {}
   ): Promise<T> {
     return await request<T>(path, {
       ...options,
@@ -220,7 +252,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
 
   async function remove<T>(
     path: string,
-    options: UseApiOptions = {},
+    options: UseApiOptions = {}
   ): Promise<T> {
     return await request<T>(path, {
       ...options,

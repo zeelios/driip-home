@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Domain\Order\Actions;
 
+use App\Domain\Customer\Actions\CreateCustomerAction;
+use App\Domain\Customer\Data\CreateCustomerDto;
 use App\Domain\Commission\Services\CommissionCalculator;
 use App\Domain\Customer\Models\Customer;
+use App\Domain\Inventory\Models\Inventory;
 use App\Domain\Order\Data\CreateOrderDto;
 use App\Domain\Order\Data\CreateOrderItemDto;
 use App\Domain\Order\Models\Order;
@@ -29,7 +32,8 @@ class CreateOrderAction
 
     public function __construct(
         private readonly OrderActivityLogger $activityLogger,
-        private readonly CommissionCalculator $commissionCalculator
+        private readonly CommissionCalculator $commissionCalculator,
+        private readonly CreateCustomerAction $createCustomer
     ) {
     }
 
@@ -74,7 +78,7 @@ class CreateOrderAction
 
             $order = Order::create([
                 'order_number' => $orderNumber,
-                'customer_id' => $dto->customerId,
+                'customer_id' => $customer?->id ?? $dto->customerId,
                 'guest_name' => $dto->guestName ?? $customer?->fullName(),
                 'guest_email' => $dto->guestEmail ?? $customer?->email,
                 'guest_phone' => $dto->guestPhone ?? $customer?->phone,
@@ -226,7 +230,7 @@ class CreateOrderAction
     private function resolveCustomer(CreateOrderDto $dto): array
     {
         if (!$dto->customerId) {
-            return ['customer' => null, 'shipping' => []];
+            return ['customer' => $this->createGuestCustomer($dto), 'shipping' => []];
         }
 
         $customer = Customer::with('addresses')->find($dto->customerId);
@@ -265,6 +269,35 @@ class CreateOrderAction
     }
 
     /**
+     * Create a guest customer record from the order payload when no customer
+     * has been selected.
+     *
+     * @param  CreateOrderDto  $dto
+     * @return Customer|null
+     */
+    private function createGuestCustomer(CreateOrderDto $dto): ?Customer
+    {
+        $guestName = trim((string) ($dto->guestName ?: $dto->shippingName));
+
+        if ($guestName === '') {
+            return null;
+        }
+
+        $nameParts = preg_split('/\s+/', $guestName, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $firstName = array_shift($nameParts) ?: $guestName;
+        $lastName = $nameParts ? implode(' ', $nameParts) : $firstName;
+
+        return $this->createCustomer->execute(new CreateCustomerDto(
+            firstName: $firstName,
+            lastName: $lastName,
+            email: $dto->guestEmail,
+            phone: $dto->guestPhone,
+            source: $dto->source,
+            notes: $dto->notes,
+        ));
+    }
+
+    /**
      * Reserve inventory for each line item in the given warehouse.
      *
      * Failures are logged but do not abort the order creation transaction,
@@ -282,7 +315,8 @@ class CreateOrderAction
 
         foreach ($snapshots as $snapshot) {
             try {
-                $inventory = \App\Domain\Inventory\Models\Inventory::where('product_variant_id', $snapshot['product_variant_id'])
+                /** @var Inventory|null $inventory */
+                $inventory = Inventory::where('product_variant_id', $snapshot['product_variant_id'])
                     ->where('warehouse_id', $warehouseId)
                     ->first();
 

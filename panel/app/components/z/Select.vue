@@ -23,10 +23,18 @@
       :aria-label="label || placeholder"
       @click="toggleDropdown"
     >
-      <span v-if="selectedOption" class="text-white/90">{{
-        selectedOption.label
-      }}</span>
-      <span v-else class="text-white/40">{{ placeholder || "Chọn..." }}</span>
+      <span
+        v-if="selectedOption"
+        class="text-white/90 block truncate pr-8"
+        :title="selectedOption.label"
+        >{{ selectedOption.label }}</span
+      >
+      <span
+        v-else
+        class="text-white/40 block truncate pr-8"
+        :title="placeholder || 'Chọn...'"
+        >{{ placeholder || "Chọn..." }}</span
+      >
       <span
         class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-white/40 pointer-events-none transition-transform duration-200"
         :class="{ 'rotate-180': isOpen }"

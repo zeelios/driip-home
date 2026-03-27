@@ -579,6 +579,35 @@ const itemColumns: TableColumn[] = [
   { key: "total_price", label: "Thành tiền", align: "right", width: "140px" },
 ];
 
+function getOrderCreatedAtTimestamp(order: OrderModel): number {
+  const timestamp = order.created_at ? Date.parse(order.created_at) : NaN;
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function sortRecentCustomerOrders(orders: OrderModel[]): OrderModel[] {
+  const currentOrder = order.value;
+  const currentOrderId = currentOrder?.id;
+  const uniqueOrders = new Map<string, OrderModel>();
+
+  for (const recentOrder of orders) {
+    if (recentOrder.id === currentOrderId) {
+      continue;
+    }
+
+    uniqueOrders.set(recentOrder.id, recentOrder);
+  }
+
+  const sortedOrders = Array.from(uniqueOrders.values()).sort((a, b) => {
+    return getOrderCreatedAtTimestamp(b) - getOrderCreatedAtTimestamp(a);
+  });
+
+  if (!currentOrder) {
+    return sortedOrders;
+  }
+
+  return [currentOrder, ...sortedOrders];
+}
+
 async function fetchRecentOrders(): Promise<void> {
   const customerId = order.value?.customer?.id;
   if (!customerId) {
@@ -593,7 +622,7 @@ async function fetchRecentOrders(): Promise<void> {
     const response = await api.get<{ data: OrderModel[] }>(
       `/orders?${params.toString()}`
     );
-    recentCustomerOrders.value = response.data ?? [];
+    recentCustomerOrders.value = sortRecentCustomerOrders(response.data ?? []);
   } catch {
     recentCustomerOrders.value = [];
   }

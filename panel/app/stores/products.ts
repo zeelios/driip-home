@@ -34,19 +34,48 @@ interface ProductFilters {
   per_page: number;
 }
 
-interface ProductVariantSearchResult {
+interface ProductSearchVariantOption {
   id: string;
-  product_id: string;
-  sku: string;
   name: string;
-  variant_name: string | null;
-  unit_price: number;
-  stock_quantity: number;
-  image: string | null;
+  sku: string | null;
+  compare_price?: number;
+  cost_price?: number;
+  selling_price?: number;
+  sale_price?: number;
+  effective_price?: number;
+  pricing?: {
+    compare_price?: number;
+    cost_price?: number;
+    selling_price?: number;
+    sale_price?: number;
+    effective_price?: number;
+    currency?: string;
+  };
+}
+
+interface ProductSearchResult {
+  id: string;
+  name: string;
+  slug: string;
+  sku_base: string | null;
+  compare_price?: number;
+  cost_price?: number;
+  selling_price?: number;
+  sale_price?: number;
+  effective_price?: number;
+  pricing?: {
+    compare_price?: number;
+    cost_price?: number;
+    selling_price?: number;
+    sale_price?: number;
+    effective_price?: number;
+    currency?: string;
+  };
+  variant_options: ProductSearchVariantOption[];
 }
 
 interface ProductSearchResponse {
-  data: ProductVariantSearchResult[];
+  data: ProductSearchResult[];
 }
 
 export const useProductsStore = defineStore("products", () => {
@@ -253,7 +282,7 @@ export const useProductsStore = defineStore("products", () => {
   async function searchProductsUnified(
     query: string,
     limit: number = 10
-  ): Promise<ProductVariantSearchResult[]> {
+  ): Promise<ProductSearchResult[]> {
     if (!query.trim()) return [];
 
     try {

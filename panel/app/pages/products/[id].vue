@@ -40,46 +40,58 @@
     <!-- Content -->
     <template v-else-if="store.currentProduct">
       <!-- Page header -->
-      <div class="flex items-start justify-between gap-4 mb-6 flex-wrap">
-        <div class="flex items-center flex-wrap gap-3">
-          <NuxtLink
-            to="/products"
-            class="inline-flex items-center gap-1 text-[0.8125rem] text-white/50 no-underline transition-colors duration-130 hover:text-white/80"
+      <div class="mb-5">
+        <!-- Back link -->
+        <NuxtLink
+          to="/products"
+          class="inline-flex items-center gap-1 text-[0.8125rem] text-white/50 no-underline transition-colors duration-130 hover:text-white/80 mb-4"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Sản phẩm
+        </NuxtLink>
+
+        <!-- Product info and actions row -->
+        <div
+          class="flex flex-col sm:flex-row items-start justify-between gap-4"
+        >
+          <div class="flex items-center gap-3 flex-wrap">
+            <div>
+              <h1 class="m-0 text-lg font-bold text-white/95 leading-tight">
+                {{ product.name }}
+              </h1>
+              <p class="m-0 text-[0.6875rem] text-white/40 font-mono">
+                {{ product.sku_base ?? "—" }}
+              </p>
+            </div>
+            <ZBadge
+              :variant="productStatusVariant(product.status) as BadgeVariant"
             >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-            Sản phẩm
-          </NuxtLink>
-          <div>
-            <h1 class="m-0 text-lg font-bold text-white/95 leading-tight">
-              {{ product.name }}
-            </h1>
-            <p class="m-0 text-[0.6875rem] text-white/40 font-mono">
-              {{ product.sku_base ?? "—" }}
-            </p>
+              {{ productStatusLabel(product.status) }}
+            </ZBadge>
+            <ZBadge v-if="product.is_featured" variant="warning"
+              >Nổi bật</ZBadge
+            >
           </div>
-          <ZBadge
-            :variant="productStatusVariant(product.status) as BadgeVariant"
-          >
-            {{ productStatusLabel(product.status) }}
-          </ZBadge>
-          <ZBadge v-if="product.is_featured" variant="warning">Nổi bật</ZBadge>
-        </div>
-        <div class="flex gap-2 flex-wrap">
-          <ZButton variant="outline" size="sm" @click="openEditModal"
-            >Chỉnh sửa</ZButton
-          >
-          <ZButton variant="danger" size="sm" @click="showDeleteConfirm = true"
-            >Xóa</ZButton
-          >
+          <div class="flex gap-2 flex-wrap w-full sm:w-auto justify-end">
+            <ZButton variant="outline" size="sm" @click="openEditModal"
+              >Chỉnh sửa</ZButton
+            >
+            <ZButton
+              variant="danger"
+              size="sm"
+              @click="showDeleteConfirm = true"
+              >Xóa</ZButton
+            >
+          </div>
         </div>
       </div>
 
@@ -170,10 +182,14 @@
       </div>
 
       <!-- Variants table -->
-      <div class="mt-1">
-        <p class="m-0 mb-3 text-[0.9375rem] font-semibold text-white/90">
-          Biến thể ({{ product.variants?.length ?? 0 }})
-        </p>
+      <div class="mt-6">
+        <div class="flex items-center justify-between mb-4">
+          <p
+            class="m-0 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Biến thể ({{ product.variants?.length ?? 0 }})
+          </p>
+        </div>
         <ZTable
           :columns="variantColumns"
           :rows="product.variants ?? []"

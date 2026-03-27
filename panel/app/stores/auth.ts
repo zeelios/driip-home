@@ -70,11 +70,9 @@ const FORGOT_PASSWORD_ROUTE = "/forgot-password";
 const RESET_PASSWORD_ROUTE = "/reset-password";
 const EXPIRED_SESSION_MESSAGE =
   "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
-const SESSION_RECOVERY_ERROR_MESSAGE =
-  "Không thể khôi phục phiên làm việc.";
+const SESSION_RECOVERY_ERROR_MESSAGE = "Không thể khôi phục phiên làm việc.";
 const LOGIN_ERROR_MESSAGE = "Đăng nhập không thành công.";
-const FORGOT_PASSWORD_ERROR_MESSAGE =
-  "Không thể gửi email. Vui lòng thử lại.";
+const FORGOT_PASSWORD_ERROR_MESSAGE = "Không thể gửi email. Vui lòng thử lại.";
 const RESET_PASSWORD_ERROR_MESSAGE =
   "Không thể đặt lại mật khẩu. Liên kết có thể đã hết hạn.";
 const INVALID_LOGIN_RESPONSE_MESSAGE =
@@ -115,7 +113,7 @@ function normalizeRoles(value: unknown): string[] | undefined {
   }
 
   const roles: string[] = value.filter(
-    (item: unknown): item is string => typeof item === "string",
+    (item: unknown): item is string => typeof item === "string"
   );
 
   return roles.length > 0 ? roles : undefined;
@@ -201,10 +199,10 @@ export const useAuthStore = defineStore("auth", () => {
     {
       sameSite: "lax",
       default: (): null => null,
-    },
+    }
   );
   const redirectAfterLogin = ref<string | null>(
-    normalizeInternalPath(redirectAfterLoginCookie.value),
+    normalizeInternalPath(redirectAfterLoginCookie.value)
   );
   const error = ref<string | null>(null);
   const lastExpiredSessionToastAt = ref<number>(0);
@@ -311,7 +309,7 @@ export const useAuthStore = defineStore("auth", () => {
 
     const router = useRouter();
     const normalizedRedirect = normalizeInternalPath(
-      router.currentRoute.value.fullPath,
+      router.currentRoute.value.fullPath
     );
 
     if (normalizedRedirect) {
@@ -320,15 +318,13 @@ export const useAuthStore = defineStore("auth", () => {
 
     await navigateTo({
       path: LOGIN_ROUTE,
-      query: normalizedRedirect
-        ? { redirect: normalizedRedirect }
-        : undefined,
+      query: normalizedRedirect ? { redirect: normalizedRedirect } : undefined,
       replace: true,
     });
   }
 
   async function handleExpiredSession(
-    message: string = EXPIRED_SESSION_MESSAGE,
+    message: string = EXPIRED_SESSION_MESSAGE
   ): Promise<void> {
     if (sessionRecoveryLocked.value) {
       clearSessionSilently();
@@ -360,7 +356,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function apiFetch<T>(
     path: string,
-    options: AuthRequestOptions = {},
+    options: AuthRequestOptions = {}
   ): Promise<T> {
     try {
       return await api.request<T>(path, {
@@ -373,7 +369,7 @@ export const useAuthStore = defineStore("auth", () => {
       const statusCode = getStatusCode(requestError);
 
       if (
-        statusCode === 401 &&
+        (statusCode === 401 || statusCode === 419) &&
         options.auth !== false &&
         !options.skipSessionExpiry
       ) {
@@ -386,11 +382,11 @@ export const useAuthStore = defineStore("auth", () => {
 
   function getFetchMeFailureState(
     requestError: unknown,
-    isInitialProbe: boolean,
+    isInitialProbe: boolean
   ): AuthFailureState {
     const statusCode = getStatusCode(requestError);
 
-    if (statusCode === 401) {
+    if (statusCode === 401 || statusCode === 419) {
       return {
         message: EXPIRED_SESSION_MESSAGE,
         shouldToast: false,
@@ -408,7 +404,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function fetchMe(
-    isInitialProbe: boolean = false,
+    isInitialProbe: boolean = false
   ): Promise<PublicStaffUserModel | null> {
     try {
       const response = await apiFetch<MeResponseDto>("/auth/me", {
@@ -508,6 +504,8 @@ export const useAuthStore = defineStore("auth", () => {
     setError(null);
 
     try {
+      await api.ensureCsrfCookie(true);
+
       const response = await apiFetch<LoginResponseDto>("/auth/login", {
         method: "POST",
         body: {
@@ -569,7 +567,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function handleRouteAccess(
-    to: RouteLocationNormalized,
+    to: RouteLocationNormalized
   ): Promise<RedirectInstruction | null> {
     const requiresBootstrap =
       shouldProtectRoute(to.path) ||
@@ -614,6 +612,8 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function forgotPassword(email: string): Promise<ActionResult> {
     try {
+      await api.ensureCsrfCookie(true);
+
       await apiFetch<ForgotPasswordResponseDto>("/auth/forgot-password", {
         method: "POST",
         body: { email } satisfies ForgotPasswordRequestDto,
@@ -622,14 +622,14 @@ export const useAuthStore = defineStore("auth", () => {
 
       toast.success(
         "Đã gửi liên kết đặt lại mật khẩu",
-        "Vui lòng kiểm tra hộp thư của bạn.",
+        "Vui lòng kiểm tra hộp thư của bạn."
       );
 
       return { ok: true };
     } catch (requestError) {
       const message = getErrorMessage(
         requestError,
-        FORGOT_PASSWORD_ERROR_MESSAGE,
+        FORGOT_PASSWORD_ERROR_MESSAGE
       );
 
       toast.error("Không thể gửi liên kết đặt lại mật khẩu", message);
@@ -642,9 +642,11 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function resetPassword(
-    payload: ResetPasswordRequestDto,
+    payload: ResetPasswordRequestDto
   ): Promise<ActionResult> {
     try {
+      await api.ensureCsrfCookie(true);
+
       await apiFetch<ResetPasswordResponseDto>("/auth/reset-password", {
         method: "POST",
         body: {
@@ -658,12 +660,15 @@ export const useAuthStore = defineStore("auth", () => {
 
       toast.success(
         "Mật khẩu đã được cập nhật",
-        "Bạn có thể đăng nhập ngay bây giờ.",
+        "Bạn có thể đăng nhập ngay bây giờ."
       );
 
       return { ok: true };
     } catch (requestError) {
-      const message = getErrorMessage(requestError, RESET_PASSWORD_ERROR_MESSAGE);
+      const message = getErrorMessage(
+        requestError,
+        RESET_PASSWORD_ERROR_MESSAGE
+      );
 
       toast.error("Không thể đặt lại mật khẩu", message);
 

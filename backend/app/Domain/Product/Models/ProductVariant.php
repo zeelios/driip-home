@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Product\Models;
 
+use App\Domain\SaleEvent\Models\SaleEvent;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -84,5 +85,15 @@ class ProductVariant extends Model
     public function saleEvent(): BelongsTo
     {
         return $this->belongsTo(SaleEvent::class, 'sale_event_id');
+    }
+
+    /**
+     * Return the currently applicable selling price for this variant.
+     *
+     * @return int
+     */
+    public function effectivePrice(): int
+    {
+        return $this->sale_price ?? $this->selling_price;
     }
 }
