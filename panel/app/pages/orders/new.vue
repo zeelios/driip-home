@@ -63,10 +63,16 @@
         <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
           <p class="mb-5 text-sm font-semibold text-white">Sản phẩm</p>
           <div class="mb-5">
-            <ZInput
-              v-model="productSearch"
-              placeholder="Tìm sản phẩm theo tên hoặc SKU..."
-              @input="onProductSearch"
+            <ZSelect
+              v-model="selectedProductId"
+              :options="productSelectOptions"
+              label="Tìm sản phẩm"
+              placeholder="Nhập tên hoặc SKU sản phẩm..."
+              :searchable="true"
+              :async="true"
+              :loading="productSearchLoading"
+              @search="onProductSearch"
+              @update:model-value="onProductSelect"
             />
           </div>
           <div v-if="selectedItems.length > 0" class="flex flex-col gap-3">
@@ -133,7 +139,9 @@
                 <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
               </svg>
             </div>
-            <p class="text-sm text-white/50">Chưa có sản phẩm nào được chọn</p>
+            <p class="text-sm text-neutral-400">
+              Chưa có sản phẩm nào được chọn
+            </p>
           </div>
         </div>
 
@@ -422,6 +430,7 @@ import { formatVnd } from "~/utils/format";
 import type { SelectOption } from "~/components/z/Select.vue";
 import type { CustomerModel } from "~~/types/generated/backend-models.generated";
 import { useCustomersStore } from "~/stores/customers";
+import { useProductsStore } from "~/stores/products";
 
 definePageMeta({ layout: "panel" });
 
@@ -434,8 +443,20 @@ interface SelectedItem {
   quantity: number;
 }
 
+interface ProductVariantSearchResult {
+  id: string;
+  product_id: string;
+  sku: string;
+  name: string;
+  variant_name: string | null;
+  unit_price: number;
+  stock_quantity: number;
+  image: string | null;
+}
+
 const api = useApi();
 const customersStore = useCustomersStore();
+const productsStore = useProductsStore();
 
 const productSearch = ref("");
 const globalSearch = ref("");
@@ -447,6 +468,12 @@ const customerResults = ref<CustomerModel[]>([]);
 const selectedItems = ref<SelectedItem[]>([]);
 const formPending = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
+
+// Product search state
+const selectedProductId = ref<string | number | null>(null);
+const productResults = ref<ProductVariantSearchResult[]>([]);
+const productSearchLoading = ref(false);
+let productSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
 // Debounced customer search
 let customerSearchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -460,12 +487,64 @@ const customerSelectOptions = computed(() => {
   }));
 });
 
+const productSelectOptions = computed(() => {
+  return productResults.value.map((v) => ({
+    value: v.id,
+    label: `${v.name}${v.variant_name ? ` - ${v.variant_name}` : ""} (${
+      v.sku
+    }) - ${formatVnd(v.unit_price)}`,
+  }));
+});
+
+function onProductSelect(variantId: string | number): void {
+  const variant = productResults.value.find((v) => v.id === String(variantId));
+  if (!variant) return;
+
+  // Check if already in cart
+  const existingIndex = selectedItems.value.findIndex(
+    (item) => item.product_variant_id === variant.id
+  );
+
+  if (existingIndex >= 0) {
+    // Increment quantity if already exists
+    const existingItem = selectedItems.value[existingIndex];
+    if (existingItem) {
+      existingItem.quantity += 1;
+    }
+  } else {
+    // Add new item
+    selectedItems.value.push({
+      product_variant_id: variant.id,
+      name: variant.name,
+      variant: variant.variant_name || "Mặc định",
+      image: variant.image,
+      unit_price: variant.unit_price,
+      quantity: 1,
+    });
+  }
+
+  // Clear search
+  productSearch.value = "";
+  productResults.value = [];
+}
+
 function onSearchFocus(): void {
   searchInput.value?.select();
 }
 
-function onProductSearch(): void {
-  // TODO: Implement product search
+function onProductSearch(query: string): void {
+  if (productSearchTimer) clearTimeout(productSearchTimer);
+
+  if (!query.trim()) {
+    productResults.value = [];
+    return;
+  }
+
+  productSearchLoading.value = true;
+  productSearchTimer = setTimeout(async () => {
+    productResults.value = await productsStore.searchProductsUnified(query, 10);
+    productSearchLoading.value = false;
+  }, 200);
 }
 
 const form = ref({
@@ -679,8 +758,43 @@ async function handleCreate(): Promise<void> {
   if (!validateForm()) return;
   formPending.value = true;
   try {
-    // TODO: Implement order creation API call
-    await navigateTo("/orders");
+    // Build items array for API
+    const items = selectedItems.value.map((item) => ({
+      product_variant_id: item.product_variant_id,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+    }));
+
+    // Build order payload matching CreateOrderRequest
+    const payload: Record<string, unknown> = {
+      items,
+      shipping_name: form.value.shipping_name,
+      shipping_phone: form.value.shipping_phone,
+      shipping_address: form.value.shipping_address,
+      shipping_province: form.value.shipping_province,
+      shipping_district: form.value.shipping_district || null,
+      shipping_ward: form.value.shipping_ward || null,
+      shipping_zip: form.value.shipping_zip || null,
+      payment_method: form.value.payment_method || null,
+      notes: form.value.notes || null,
+      internal_notes: form.value.internal_notes || null,
+      coupon_code: form.value.coupon_code || null,
+      source: form.value.source || "admin",
+    };
+
+    // Add customer identification
+    if (form.value.customer_id) {
+      payload.customer_id = form.value.customer_id;
+    } else {
+      payload.guest_name = form.value.guest_name || form.value.shipping_name;
+      payload.guest_phone = form.value.guest_phone || form.value.shipping_phone;
+      payload.guest_email = form.value.guest_email || null;
+    }
+
+    await api.post("/orders", payload);
+    navigateTo("/orders");
+  } catch (error) {
+    // Error is handled by useApi composable
   } finally {
     formPending.value = false;
   }

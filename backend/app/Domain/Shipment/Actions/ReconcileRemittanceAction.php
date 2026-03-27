@@ -50,25 +50,26 @@ class ReconcileRemittanceAction
                     continue;
                 }
 
-                $codAmount   = $itemData['cod_amount'];
+                $codAmount = $itemData['cod_amount'];
                 $shippingFee = $itemData['shipping_fee'];
-                $otherFees   = 0;
-                $netAmount   = $codAmount - $shippingFee - $otherFees;
+                $otherFees = 0;
+                $netAmount = $codAmount - $shippingFee - $otherFees;
 
                 CourierCODRemittanceItem::updateOrCreate(
                     [
                         'remittance_id' => $remittance->id,
-                        'shipment_id'   => $shipment->id,
+                        'shipment_id' => $shipment->id,
                     ],
                     [
-                        'order_id'     => $shipment->order_id,
-                        'cod_amount'   => $codAmount,
+                        'order_id' => $shipment->order_id,
+                        'cod_amount' => $codAmount,
                         'shipping_fee' => $shippingFee,
-                        'other_fees'   => $otherFees,
-                        'net_amount'   => $netAmount,
+                        'other_fees' => $otherFees,
+                        'net_amount' => $netAmount,
                     ]
                 );
 
+                /** @var Shipment $shipment */
                 $shipment->update(['cod_collected' => true]);
 
                 $totalCodCollected += $codAmount;
@@ -78,8 +79,8 @@ class ReconcileRemittanceAction
             $remittance->update([
                 'total_cod_collected' => $totalCodCollected,
                 'total_fees_deducted' => $totalFeesDeducted,
-                'net_remittance'      => $totalCodCollected - $totalFeesDeducted,
-                'status'              => 'received',
+                'net_remittance' => $totalCodCollected - $totalFeesDeducted,
+                'status' => 'received',
             ]);
 
             return $remittance->load('items')->refresh();

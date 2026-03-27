@@ -7,8 +7,8 @@ namespace App\Domain\Inventory\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 /**
  * Supplier model representing a vendor who supplies products to Driip.
@@ -34,7 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Supplier extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, Searchable, SoftDeletes;
 
     /** @var string The table associated with this model. */
     protected $table = 'suppliers';
@@ -60,12 +60,29 @@ class Supplier extends Model
     ];
 
     /**
-     * Get all purchase orders raised for this supplier.
+     * Get the indexable data array for the model.
      *
-     * @return HasMany<PurchaseOrder>
+     * @return array<string, mixed>
      */
-    public function purchaseOrders(): HasMany
+    public function toSearchableArray(): array
     {
-        return $this->hasMany(PurchaseOrder::class, 'supplier_id');
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'code' => $this->code,
+            'contact_name' => $this->contact_name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+        ];
+    }
+
+    /**
+     * Get the index name for the model.
+     *
+     * @return string
+     */
+    public function searchableAs(): string
+    {
+        return 'suppliers';
     }
 }

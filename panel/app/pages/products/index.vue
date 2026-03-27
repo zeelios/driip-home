@@ -9,6 +9,7 @@
           v-model="search"
           placeholder="Tìm sản phẩm, SKU..."
           type="search"
+          size="sm"
           class="flex-1 w-full min-w-0"
           @input="onSearchInput"
         >
@@ -30,6 +31,7 @@
           v-model="statusFilter"
           :options="statusOptions"
           placeholder="Tất cả trạng thái"
+          size="sm"
           class="w-full sm:w-auto sm:min-w-37.5"
           @change="onFilterChange"
         />
@@ -162,24 +164,28 @@
           v-model="form.name"
           label="Tên sản phẩm *"
           placeholder="Áo thun unisex..."
+          size="sm"
           :error="formErrors.name"
         />
         <ZInput
           v-model="form.sku_base"
           label="SKU cơ sở"
           placeholder="SHIRT-001"
+          size="sm"
         />
         <ZSelect
           v-model="form.status"
           :options="statusOptions"
           label="Trạng thái"
           placeholder="Chọn trạng thái"
+          size="sm"
         />
         <ZSelect
           v-model="form.gender"
           :options="genderOptions"
           label="Giới tính"
           placeholder="Chọn giới tính"
+          size="sm"
         />
       </div>
       <template #footer>

@@ -34,11 +34,64 @@ class ProductController extends BaseApiController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:products.view', only: ['index', 'show']),
+            new Middleware('permission:products.view', only: ['index', 'show', 'search']),
             new Middleware('permission:products.create', only: ['store']),
             new Middleware('permission:products.update', only: ['update']),
             new Middleware('permission:products.delete', only: ['destroy']),
         ];
+    }
+
+    /**
+     * Search product variants by name or SKU for order creation.
+     *
+     * Returns active variants with stock info for quick selection.
+     *
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function search(Request $request): JsonResponse
+    {
+        try {
+            $query = trim((string) $request->input('q', ''));
+            $limit = min((int) $request->input('limit', 10), 50);
+
+            if ($query === '') {
+                return response()->json(['data' => []]);
+            }
+
+            $products = Product::search($query)
+                ->take($limit)
+                ->get()
+                ->loadMissing(['brand', 'category'])
+                ->filter(static fn (Product $product): bool => $product->status === 'active')
+                ->values();
+
+            return response()->json([
+                'data' => ProductResource::collection($products),
+            ]);
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'SEARCH_PRODUCTS');
+        }
+    }
+
+    /**
+     * Format variant attribute values into a readable name.
+     *
+     * @param  array|null  $attributeValues
+     * @return string|null
+     */
+    private function formatVariantName(?array $attributeValues): ?string
+    {
+        if (empty($attributeValues)) {
+            return null;
+        }
+
+        $parts = [];
+        foreach ($attributeValues as $attr => $value) {
+            $parts[] = "{$attr}: {$value}";
+        }
+
+        return implode(', ', $parts);
     }
 
     /**

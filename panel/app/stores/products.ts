@@ -4,7 +4,10 @@ import { useApi } from "~/composables/useApi";
 import { useToast } from "~/composables/useToast";
 import { getErrorMessage, sanitizeString } from "~/utils/format";
 import type { ProductModel } from "~~/types/generated/backend-models.generated";
-import type { CreateProductDto, UpdateProductDto } from "~~/types/backend-contracts.generated";
+import type {
+  CreateProductDto,
+  UpdateProductDto,
+} from "~~/types/backend-contracts.generated";
 
 type LoadState = "idle" | "loading" | "loaded" | "error";
 
@@ -31,6 +34,21 @@ interface ProductFilters {
   per_page: number;
 }
 
+interface ProductVariantSearchResult {
+  id: string;
+  product_id: string;
+  sku: string;
+  name: string;
+  variant_name: string | null;
+  unit_price: number;
+  stock_quantity: number;
+  image: string | null;
+}
+
+interface ProductSearchResponse {
+  data: ProductVariantSearchResult[];
+}
+
 export const useProductsStore = defineStore("products", () => {
   const api = useApi();
   const toast = useToast();
@@ -38,8 +56,18 @@ export const useProductsStore = defineStore("products", () => {
   const listState = ref<LoadState>("idle");
   const listError = ref<string | null>(null);
   const products = ref<ProductModel[]>([]);
-  const meta = ref<ListMeta>({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
-  const filters = ref<ProductFilters>({ search: "", status: "", page: 1, per_page: 20 });
+  const meta = ref<ListMeta>({
+    current_page: 1,
+    last_page: 1,
+    per_page: 20,
+    total: 0,
+  });
+  const filters = ref<ProductFilters>({
+    search: "",
+    status: "",
+    page: 1,
+    per_page: 20,
+  });
 
   const detailState = ref<LoadState>("idle");
   const detailError = ref<string | null>(null);
@@ -67,11 +95,19 @@ export const useProductsStore = defineStore("products", () => {
       const query = new URLSearchParams(params).toString();
       const response = await api.get<ProductListResponse>(`/products?${query}`);
       products.value = response.data ?? [];
-      meta.value = response.meta ?? { current_page: 1, last_page: 1, per_page: 20, total: 0 };
+      meta.value = response.meta ?? {
+        current_page: 1,
+        last_page: 1,
+        per_page: 20,
+        total: 0,
+      };
       listState.value = "loaded";
     } catch (error) {
       listState.value = "error";
-      listError.value = getErrorMessage(error, "Không thể tải danh sách sản phẩm.");
+      listError.value = getErrorMessage(
+        error,
+        "Không thể tải danh sách sản phẩm."
+      );
     }
   }
 
@@ -86,11 +122,16 @@ export const useProductsStore = defineStore("products", () => {
       detailState.value = "loaded";
     } catch (error) {
       detailState.value = "error";
-      detailError.value = getErrorMessage(error, "Không thể tải thông tin sản phẩm.");
+      detailError.value = getErrorMessage(
+        error,
+        "Không thể tải thông tin sản phẩm."
+      );
     }
   }
 
-  function sanitizeCreateDto(input: Partial<CreateProductDto>): CreateProductDto | null {
+  function sanitizeCreateDto(
+    input: Partial<CreateProductDto>
+  ): CreateProductDto | null {
     const name = sanitizeString(input.name);
     if (!name) return null;
 
@@ -100,7 +141,9 @@ export const useProductsStore = defineStore("products", () => {
       brand_id: input.brand_id ? sanitizeString(input.brand_id) : null,
       category_id: input.category_id ? sanitizeString(input.category_id) : null,
       description: input.description ? sanitizeString(input.description) : null,
-      short_description: input.short_description ? sanitizeString(input.short_description) : null,
+      short_description: input.short_description
+        ? sanitizeString(input.short_description)
+        : null,
       sku_base: input.sku_base ? sanitizeString(input.sku_base) : null,
       gender: input.gender ? sanitizeString(input.gender) : null,
       season: input.season ? sanitizeString(input.season) : null,
@@ -109,19 +152,30 @@ export const useProductsStore = defineStore("products", () => {
     };
   }
 
-  function sanitizeUpdateDto(input: Partial<UpdateProductDto>): UpdateProductDto {
+  function sanitizeUpdateDto(
+    input: Partial<UpdateProductDto>
+  ): UpdateProductDto {
     const dto: UpdateProductDto = {};
     if (input.name !== undefined) dto.name = sanitizeString(input.name);
-    if (input.status !== undefined) dto.status = sanitizeString(input.status) || null;
-    if (input.description !== undefined) dto.description = sanitizeString(input.description) || null;
-    if (input.brand_id !== undefined) dto.brand_id = input.brand_id ? sanitizeString(input.brand_id) : null;
-    if (input.category_id !== undefined) dto.category_id = input.category_id ? sanitizeString(input.category_id) : null;
+    if (input.status !== undefined)
+      dto.status = sanitizeString(input.status) || null;
+    if (input.description !== undefined)
+      dto.description = sanitizeString(input.description) || null;
+    if (input.brand_id !== undefined)
+      dto.brand_id = input.brand_id ? sanitizeString(input.brand_id) : null;
+    if (input.category_id !== undefined)
+      dto.category_id = input.category_id
+        ? sanitizeString(input.category_id)
+        : null;
     if (input.is_featured !== undefined) dto.is_featured = input.is_featured;
-    if (input.tags !== undefined) dto.tags = Array.isArray(input.tags) ? input.tags : [];
+    if (input.tags !== undefined)
+      dto.tags = Array.isArray(input.tags) ? input.tags : [];
     return dto;
   }
 
-  async function createProduct(input: Partial<CreateProductDto>): Promise<string | null> {
+  async function createProduct(
+    input: Partial<CreateProductDto>
+  ): Promise<string | null> {
     const dto = sanitizeCreateDto(input);
     if (!dto) {
       toast.error("Dữ liệu không hợp lệ", "Tên sản phẩm là bắt buộc.");
@@ -130,7 +184,10 @@ export const useProductsStore = defineStore("products", () => {
 
     formPending.value = true;
     try {
-      const response = await api.post<ProductDetailResponse>("/products", dto);
+      const response = await api.post<ProductDetailResponse>(
+        "/products",
+        dto as unknown as Record<string, unknown>
+      );
       toast.success("Đã tạo sản phẩm");
       await fetchProducts();
       return response.data?.id ?? null;
@@ -142,12 +199,18 @@ export const useProductsStore = defineStore("products", () => {
     }
   }
 
-  async function updateProduct(id: string, input: Partial<UpdateProductDto>): Promise<boolean> {
+  async function updateProduct(
+    id: string,
+    input: Partial<UpdateProductDto>
+  ): Promise<boolean> {
     const dto = sanitizeUpdateDto(input);
     formPending.value = true;
 
     try {
-      await api.put(`/products/${id}`, dto);
+      await api.put(
+        `/products/${id}`,
+        dto as unknown as Record<string, unknown>
+      );
       toast.success("Đã cập nhật sản phẩm");
       await fetchProduct(id);
       return true;
@@ -187,13 +250,48 @@ export const useProductsStore = defineStore("products", () => {
     filters.value = { search: "", status: "", page: 1, per_page: 20 };
   }
 
+  async function searchProductsUnified(
+    query: string,
+    limit: number = 10
+  ): Promise<ProductVariantSearchResult[]> {
+    if (!query.trim()) return [];
+
+    try {
+      const params = new URLSearchParams({
+        q: query.trim(),
+        limit: String(limit),
+      });
+      const response = await api.get<ProductSearchResponse>(
+        `/products/search?${params.toString()}`
+      );
+      return response.data ?? [];
+    } catch (error) {
+      // Silently fail - user can retry by typing
+      return [];
+    }
+  }
+
   return {
-    listState, listError, products, meta, filters,
-    detailState, detailError, currentProduct,
-    formPending, deletePending,
-    isListLoading, isDetailLoading,
-    fetchProducts, fetchProduct,
-    createProduct, updateProduct, deleteProduct,
-    setPage, setFilters, resetFilters,
+    listState,
+    listError,
+    products,
+    meta,
+    filters,
+    detailState,
+    detailError,
+    currentProduct,
+    formPending,
+    deletePending,
+    isListLoading,
+    isDetailLoading,
+    fetchProducts,
+    fetchProduct,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    setPage,
+    setFilters,
+    resetFilters,
+    searchProductsUnified,
   };
 });

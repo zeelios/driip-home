@@ -6,6 +6,7 @@
         v-model="search"
         placeholder="Tìm mã, tên kho..."
         type="search"
+        size="sm"
         class="flex-1 min-w-45 max-w-[320px]"
         @input="onSearchInput"
       >
@@ -120,44 +121,52 @@
           v-model="form.code"
           label="Mã kho *"
           placeholder="WH-001"
+          size="sm"
           :error="formErrors.code"
         />
         <ZInput
           v-model="form.name"
           label="Tên kho *"
           placeholder="Kho chính TP.HCM"
+          size="sm"
           :error="formErrors.name"
         />
         <ZSelect
           v-model="form.type"
           :options="typeOptions"
           label="Loại kho *"
+          size="sm"
           :error="formErrors.type"
         />
         <ZInput
           v-model="form.phone"
           label="Điện thoại"
           placeholder="0901234567"
+          size="sm"
         />
         <ZInput
           v-model="form.address"
           label="Địa chỉ"
           placeholder="123 Đường ABC..."
+          size="sm"
         />
         <ZInput
           v-model="form.province"
           label="Tỉnh/Thành phố"
           placeholder="TP.HCM"
+          size="sm"
         />
         <ZInput
           v-model="form.district"
           label="Quận/Huyện"
           placeholder="Quận 1"
+          size="sm"
         />
         <ZInput
           v-model="form.notes"
           label="Ghi chú"
           placeholder="Ghi chú về kho..."
+          size="sm"
         />
       </div>
       <template #footer>

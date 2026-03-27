@@ -8,6 +8,7 @@
         v-model="search"
         placeholder="Tìm sản phẩm, SKU..."
         type="search"
+        size="sm"
         class="flex-1 w-full min-w-0"
         @input="onSearchInput"
       >
@@ -118,12 +119,14 @@
           v-model="adjustForm.variant_id"
           label="Mã biến thể (ID) *"
           placeholder="uuid của variant"
+          size="sm"
           :error="adjustErrors.variant_id"
         />
         <ZInput
           v-model="adjustForm.warehouse_id"
           label="Mã kho (ID) *"
           placeholder="uuid của warehouse"
+          size="sm"
           :error="adjustErrors.warehouse_id"
         />
         <ZInput
@@ -131,12 +134,14 @@
           label="Số lượng điều chỉnh *"
           type="number"
           placeholder="+10 hoặc -5"
+          size="sm"
           :error="adjustErrors.quantity"
         />
         <ZInput
           v-model="adjustForm.reason"
           label="Lý do *"
           placeholder="Nhập hàng, hàng lỗi..."
+          size="sm"
           :error="adjustErrors.reason"
         />
       </div>

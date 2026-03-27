@@ -8,6 +8,7 @@
         v-model="search"
         placeholder="Tìm tên, email, điện thoại..."
         type="search"
+        size="sm"
         class="flex-1 w-full min-w-0"
         @input="onSearchInput"
       >
@@ -151,6 +152,7 @@
           v-model="form.first_name"
           label="Họ *"
           placeholder="Nguyễn"
+          size="sm"
           :error="formErrors.first_name"
           autocomplete="given-name"
         />
@@ -158,6 +160,7 @@
           v-model="form.last_name"
           label="Tên *"
           placeholder="Văn An"
+          size="sm"
           :error="formErrors.last_name"
           autocomplete="family-name"
         />
@@ -166,6 +169,7 @@
           label="Email"
           type="email"
           placeholder="khach@email.com"
+          size="sm"
           :error="formErrors.email"
           autocomplete="email"
         />
@@ -174,6 +178,7 @@
           label="Điện thoại"
           type="tel"
           placeholder="0901234567"
+          size="sm"
           :error="formErrors.phone"
           autocomplete="tel"
         />
@@ -182,6 +187,7 @@
           :options="genderOptions"
           label="Giới tính"
           placeholder="Chọn giới tính"
+          size="sm"
         />
       </div>
       <template #footer>

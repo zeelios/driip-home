@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 /**
  * Coupon model representing a discount code that customers can apply at checkout.
@@ -42,7 +43,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Coupon extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, Searchable, SoftDeletes;
 
     /** @var string The table associated with this model. */
     protected $table = 'coupons';
@@ -71,18 +72,18 @@ class Coupon extends Model
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
-        'is_active'            => 'boolean',
-        'is_public'            => 'boolean',
-        'applies_to_ids'       => 'array',
-        'value'                => 'decimal:2',
-        'starts_at'            => 'datetime',
-        'expires_at'           => 'datetime',
-        'min_order_amount'     => 'integer',
-        'min_items'            => 'integer',
-        'max_discount_amount'  => 'integer',
-        'max_uses'             => 'integer',
+        'is_active' => 'boolean',
+        'is_public' => 'boolean',
+        'applies_to_ids' => 'array',
+        'value' => 'decimal:2',
+        'starts_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'min_order_amount' => 'integer',
+        'min_items' => 'integer',
+        'max_discount_amount' => 'integer',
+        'max_uses' => 'integer',
         'max_uses_per_customer' => 'integer',
-        'used_count'           => 'integer',
+        'used_count' => 'integer',
     ];
 
     /**
@@ -135,5 +136,30 @@ class Coupon extends Model
     public function isExpired(): bool
     {
         return $this->expires_at !== null && now()->gt($this->expires_at);
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'code' => $this->code,
+            'name' => $this->name,
+            'description' => $this->description,
+        ];
+    }
+
+    /**
+     * Get the index name for the model.
+     *
+     * @return string
+     */
+    public function searchableAs(): string
+    {
+        return 'coupons';
     }
 }

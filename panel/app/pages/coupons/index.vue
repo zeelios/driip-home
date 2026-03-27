@@ -8,6 +8,7 @@
         v-model="search"
         placeholder="Tìm mã giảm giá..."
         type="search"
+        size="sm"
         class="flex-1 w-full min-w-0"
         @input="onSearchInput"
       >
@@ -121,18 +122,21 @@
           v-model="form.code"
           label="Mã giảm giá *"
           placeholder="SUMMER20"
+          size="sm"
           :error="formErrors.code"
         />
         <ZInput
           v-model="form.name"
           label="Tên *"
           placeholder="Khuyến mãi mùa hè"
+          size="sm"
           :error="formErrors.name"
         />
         <ZSelect
           v-model="form.type"
           :options="typeOptions"
           label="Loại giảm giá *"
+          size="sm"
           :error="formErrors.type"
         />
         <ZInput
@@ -140,15 +144,27 @@
           label="Giá trị *"
           type="number"
           placeholder="20"
+          size="sm"
           :error="formErrors.value"
         />
-        <ZInput v-model="form.starts_at" label="Ngày bắt đầu" type="date" />
-        <ZInput v-model="form.expires_at" label="Ngày hết hạn" type="date" />
+        <ZInput
+          v-model="form.starts_at"
+          label="Ngày bắt đầu"
+          type="date"
+          size="sm"
+        />
+        <ZInput
+          v-model="form.expires_at"
+          label="Ngày hết hạn"
+          type="date"
+          size="sm"
+        />
         <ZInput
           v-model="form.max_uses"
           label="Số lần dùng tối đa"
           type="number"
           placeholder="Không giới hạn"
+          size="sm"
         />
       </div>
       <template #footer>

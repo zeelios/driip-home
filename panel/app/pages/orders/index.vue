@@ -9,6 +9,7 @@
           v-model="search"
           placeholder="Tìm đơn hàng..."
           type="search"
+          size="sm"
           class="flex-1 w-full min-w-0"
           @input="onSearchInput"
         >
@@ -30,6 +31,7 @@
           v-model="statusFilter"
           :options="statusOptions"
           placeholder="Trạng thái"
+          size="sm"
           class="w-full sm:w-auto sm:min-w-37.5"
           @change="onFilterChange"
         />
@@ -37,6 +39,7 @@
           v-model="paymentFilter"
           :options="paymentOptions"
           placeholder="Thanh toán"
+          size="sm"
           class="w-full sm:w-auto sm:min-w-37.5"
           @change="onFilterChange"
         />

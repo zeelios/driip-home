@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 /**
  * Product model representing a top-level catalogue item in Driip.
@@ -54,7 +55,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Product extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes, Searchable;
 
     /** @var string The table associated with this model. */
     protected $table = 'products';
@@ -213,4 +214,24 @@ class Product extends Model
     {
         return $query->where('is_featured', true);
     }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'sku' => $this->sku,
+            'barcode' => $this->barcode,
+            'brand_name' => $this->brand?->name,
+            'category_name' => $this->category?->name,
+            'tags' => $this->tags,
+        ];
+    }
+
 }

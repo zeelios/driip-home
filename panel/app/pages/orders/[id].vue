@@ -36,9 +36,12 @@
 
     <!-- Content -->
     <template v-else-if="store.currentOrder">
-      <!-- Page header -->
-      <div class="flex items-start justify-between gap-4 mb-6 flex-wrap">
-        <div class="flex items-center flex-wrap gap-2.5">
+      <!-- Customer Header Section -->
+      <div
+        class="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6"
+      >
+        <div class="flex items-center gap-4">
+          <!-- Back Button -->
           <NuxtLink
             to="/orders"
             class="inline-flex items-center gap-1 text-[0.8125rem] text-white/50 no-underline transition-colors duration-130 hover:text-white/80"
@@ -55,23 +58,15 @@
             </svg>
             Đơn hàng
           </NuxtLink>
-          <h1 class="m-0 text-lg font-bold text-white/95 font-mono">
-            {{ order.order_number }}
-          </h1>
-          <ZBadge :variant="orderStatusVariant(order.status) as BadgeVariant">
-            {{ orderStatusLabel(order.status) }}
-          </ZBadge>
-          <ZBadge
-            :variant="paymentBadgeVariant(order.payment_status) as BadgeVariant"
-          >
-            {{ paymentStatusLabel(order.payment_status) }}
-          </ZBadge>
         </div>
-        <div class="flex gap-2 flex-wrap">
+
+        <!-- Actions -->
+        <div class="flex gap-2 flex-wrap w-full sm:w-auto">
           <ZButton
             v-if="order.status === 'pending'"
             variant="primary"
             size="sm"
+            class="flex-1 sm:flex-none"
             :loading="store.actionPending[id]"
             @click="handleConfirm"
           >
@@ -81,15 +76,17 @@
             v-if="order.status === 'confirmed'"
             variant="outline"
             size="sm"
+            class="flex-1 sm:flex-none"
             :loading="store.actionPending[id]"
             @click="handlePack"
           >
-            Đánh dấu đóng gói
+            Đóng gói
           </ZButton>
           <ZButton
             v-if="canCancel"
             variant="danger"
             size="sm"
+            class="flex-1 sm:flex-none"
             :loading="store.actionPending[id]"
             @click="showCancelModal = true"
           >
@@ -98,7 +95,114 @@
         </div>
       </div>
 
-      <!-- Main grid -->
+      <!-- Customer Info Card -->
+      <div
+        class="bg-[#111111] border border-white/8 rounded-[10px] p-4 sm:p-5 mb-5"
+      >
+        <div
+          class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        >
+          <div class="flex items-center gap-3 sm:gap-4 w-full">
+            <!-- Avatar -->
+            <div
+              class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white/10 flex items-center justify-center text-base sm:text-lg font-semibold text-white/90 shrink-0"
+            >
+              {{ customerInitials }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <h2
+                class="m-0 text-lg sm:text-xl font-bold text-white/95 truncate"
+              >
+                {{ customerDisplayName }}
+              </h2>
+              <p class="m-0 text-xs sm:text-sm text-white/50 font-mono mt-0.5">
+                {{ customerCode }}
+              </p>
+              <div class="flex items-center gap-2 mt-1.5 sm:mt-2">
+                <ZBadge
+                  v-if="order.customer?.is_blocked"
+                  variant="danger"
+                  size="sm"
+                >
+                  Đã khóa
+                </ZBadge>
+                <ZBadge v-else variant="success" size="sm">Hoạt động</ZBadge>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Stats -->
+          <div
+            class="grid grid-cols-2 gap-4 sm:gap-6 w-full sm:w-auto sm:text-right pt-3 sm:pt-0 border-t sm:border-t-0 border-white/8"
+          >
+            <div class="text-left sm:text-right">
+              <p
+                class="m-0 text-[0.625rem] sm:text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+              >
+                Đơn hàng
+              </p>
+              <p class="m-0 text-xl sm:text-2xl font-bold text-white/95 mt-1">
+                {{ customerStats.totalOrders }}
+              </p>
+            </div>
+            <div class="text-left sm:text-right">
+              <p
+                class="m-0 text-[0.625rem] sm:text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+              >
+                Tổng chi tiêu
+              </p>
+              <p class="m-0 text-xl sm:text-2xl font-bold text-white/95 mt-1">
+                {{ formatVnd(customerStats.totalSpent) }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Orders Preview -->
+        <div
+          v-if="recentCustomerOrders.length > 0"
+          class="mt-5 pt-4 border-t border-white/8"
+        >
+          <p
+            class="m-0 mb-3 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Đơn hàng gần đây
+          </p>
+          <div class="flex gap-3 overflow-x-auto pb-2">
+            <NuxtLink
+              v-for="recentOrder in recentCustomerOrders"
+              :key="recentOrder.id"
+              :to="`/orders/${recentOrder.id}`"
+              :class="[
+                'shrink-0 bg-white/5 border rounded-lg p-3 min-w-50 transition-colors',
+                recentOrder.id === order.id
+                  ? 'border-[#C4A77D] bg-[#C4A77D]/10'
+                  : 'border-white/10 hover:border-white/20',
+              ]"
+            >
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-sm font-mono text-white/80">{{
+                  recentOrder.order_number
+                }}</span>
+                <ZBadge
+                  :variant="orderStatusVariant(recentOrder.status) as BadgeVariant"
+                  size="sm"
+                >
+                  {{ orderStatusLabel(recentOrder.status) }}
+                </ZBadge>
+              </div>
+              <p class="m-0 text-xs text-white/50">
+                {{ formatDatetime(recentOrder.created_at) }}
+              </p>
+              <p class="m-0 text-sm font-semibold text-white/90 mt-1">
+                {{ formatVnd(recentOrder.total_after_tax) }}
+              </p>
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Info Grid -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-5">
         <!-- Customer info -->
         <div class="bg-[#111111] border border-white/8 rounded-[10px] p-4.5">
@@ -246,7 +350,7 @@
 
       <!-- Totals -->
       <div
-        class="mt-4 bg-[#111111] border border-white/8 rounded-[10px] py-4 px-5 max-w-md ml-auto"
+        class="mt-4 bg-[#111111] border border-white/8 rounded-[10px] py-4 px-4 sm:px-5 w-full sm:max-w-md sm:ml-auto"
       >
         <div
           class="flex justify-between py-1.5 text-sm text-white/65 border-b border-white/6 last:border-b-0"
@@ -358,6 +462,8 @@
 import { computed, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useOrdersStore } from "~/stores/orders";
+import { useApi } from "~/composables/useApi";
+import type { OrderModel } from "~~/types/generated/backend-models.generated";
 import {
   formatVnd,
   formatDatetime,
@@ -392,10 +498,12 @@ type BadgeVariant =
 const route = useRoute();
 const id = route.params.id as string;
 const store = useOrdersStore();
+const api = useApi();
 
 const showCancelModal = ref(false);
 const cancelReason = ref("");
 const cancelReasonError = ref<string | null>(null);
+const recentCustomerOrders = ref<OrderModel[]>([]);
 
 const ERROR_ICON = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
@@ -409,6 +517,40 @@ const customerDisplayName = computed(() => {
     return `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "—";
   }
   return o.guest_name ?? "—";
+});
+
+const customerInitials = computed(() => {
+  const o = store.currentOrder;
+  if (!o) return "—";
+  if (o.customer) {
+    const c = o.customer as { first_name?: string; last_name?: string };
+    const first = c.first_name?.[0] ?? "";
+    const last = c.last_name?.[0] ?? "";
+    return `${first}${last}`.toUpperCase() || "—";
+  }
+  return o.guest_name?.[0]?.toUpperCase() ?? "—";
+});
+
+const customerCode = computed(() => {
+  const o = store.currentOrder;
+  if (!o) return "";
+  if (o.customer) {
+    const c = o.customer as { customer_code?: string };
+    return c.customer_code ?? "";
+  }
+  return "Khách vãng lai";
+});
+
+const customerStats = computed(() => {
+  const o = store.currentOrder;
+  if (!o || !o.customer) {
+    return { totalOrders: 0, totalSpent: 0 };
+  }
+  const c = o.customer as { total_orders?: number; total_spent?: number };
+  return {
+    totalOrders: c.total_orders ?? 0,
+    totalSpent: c.total_spent ?? 0,
+  };
 });
 
 const shippingAddress = computed(() => {
@@ -436,6 +578,26 @@ const itemColumns: TableColumn[] = [
   { key: "quantity", label: "SL", align: "center", width: "60px" },
   { key: "total_price", label: "Thành tiền", align: "right", width: "140px" },
 ];
+
+async function fetchRecentOrders(): Promise<void> {
+  const customerId = order.value?.customer?.id;
+  if (!customerId) {
+    recentCustomerOrders.value = [];
+    return;
+  }
+  try {
+    const params = new URLSearchParams({
+      customer_id: customerId,
+      per_page: "5",
+    });
+    const response = await api.get<{ data: OrderModel[] }>(
+      `/orders?${params.toString()}`
+    );
+    recentCustomerOrders.value = response.data ?? [];
+  } catch {
+    recentCustomerOrders.value = [];
+  }
+}
 
 function paymentBadgeVariant(status: string): string {
   const map: Record<string, string> = {
@@ -470,6 +632,8 @@ async function handleCancelConfirm(): Promise<void> {
 }
 
 onMounted(() => {
-  store.fetchOrder(id);
+  store.fetchOrder(id).then(() => {
+    fetchRecentOrders();
+  });
 });
 </script>

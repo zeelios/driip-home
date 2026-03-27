@@ -15,7 +15,10 @@
       :aria-label="label || placeholder"
       @click="openDropdown"
     >
-      <span class="z-select-value">{{ selectedText }}</span>
+      <span v-if="selectedOption" class="z-select-value">{{
+        selectedOption.label
+      }}</span>
+      <span v-else class="z-select-placeholder">{{ placeholder }}</span>
       <span class="z-select-arrow" aria-hidden="true">⌄</span>
     </button>
 
@@ -297,7 +300,10 @@ function moveActiveIndex(direction: 1 | -1 | "first" | "last"): void {
   } else if (direction === "last") {
     activeIndex.value = max;
   } else {
-    activeIndex.value = Math.max(0, Math.min(max, activeIndex.value + direction));
+    activeIndex.value = Math.max(
+      0,
+      Math.min(max, activeIndex.value + direction)
+    );
   }
 
   scrollToActiveOption();
@@ -390,10 +396,16 @@ onBeforeUnmount(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--white);
 }
 
-.z-select-trigger:not(.has-value) .z-select-value {
-  color: rgba(255, 255, 255, 0.2);
+.z-select-placeholder {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 300;
 }
 
 .z-select-arrow {

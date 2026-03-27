@@ -80,6 +80,7 @@ Route::prefix('v1/panel')->group(function () {
         // Products
         Route::apiResource('brands', BrandController::class);
         Route::apiResource('categories', CategoryController::class);
+        Route::get('products/search', [ProductController::class, 'search']);
         Route::apiResource('products', ProductController::class);
         Route::apiResource('products.variants', ProductVariantController::class);
         Route::get('products/{product}/variants/{variant}/inventory', [ProductVariantController::class, 'inventory']);

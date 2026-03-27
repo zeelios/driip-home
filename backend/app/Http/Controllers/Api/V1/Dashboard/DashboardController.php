@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Dashboard;
 
+use App\Domain\Order\Models\Order;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -39,6 +40,25 @@ class DashboardController extends BaseApiController implements HasMiddleware
     public function index(Request $request): JsonResponse
     {
         try {
+            $recentOrdersLimit = min(max((int) $request->input('recent_orders_limit', 5), 1), 5);
+
+            $recentOrders = Order::query()
+                ->with('customer')
+                ->latest('created_at')
+                ->limit($recentOrdersLimit)
+                ->get()
+                ->map(static function (Order $order): array {
+                    return [
+                        'id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'customer_name' => $order->customer?->fullName() ?? $order->guest_name,
+                        'status' => $order->status,
+                        'payment_status' => $order->payment_status,
+                        'total_after_tax' => $order->total_after_tax,
+                        'created_at' => $order->created_at?->toIso8601String(),
+                    ];
+                });
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -49,6 +69,7 @@ class DashboardController extends BaseApiController implements HasMiddleware
                     'orders_to_ship' => 0,
                     'low_stock_count' => 0,
                     'customers_today' => 0,
+                    'recent_orders' => $recentOrders,
                 ],
             ]);
         } catch (\Throwable $e) {

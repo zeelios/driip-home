@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -53,6 +54,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Throwable $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 $code = 'API_' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
+
+                Log::error('Unhandled API exception.', [
+                    'request_code' => $code,
+                    'method' => $request->method(),
+                    'uri' => $request->fullUrl(),
+                    'ip' => $request->ip(),
+                    'user_id' => $request->user()?->id,
+                    'exception' => $e,
+                ]);
 
                 return response()->json([
                     'success' => false,

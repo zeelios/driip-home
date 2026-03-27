@@ -1,7 +1,5 @@
 <?php
 
-use Laravel\Sanctum\Sanctum;
-
 return [
 
     /*
@@ -15,12 +13,21 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s,%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1,platform.driip.io',
-        Sanctum::currentApplicationUrlWithPort(),
-        'localhost:3000,127.0.0.1:3000'
-    ))),
+    'stateful' => array_values(array_unique(array_filter(array_merge(
+        [
+            'localhost',
+            'localhost:3000',
+            'localhost:3001',
+            '127.0.0.1',
+            '127.0.0.1:3000',
+            '127.0.0.1:3001',
+            '127.0.0.1:8000',
+            '::1',
+            'platform.driip.io',
+        ],
+        explode(',', (string) env('SANCTUM_STATEFUL_DOMAINS', '')),
+        [parse_url((string) config('app.url'), PHP_URL_HOST) . (parse_url((string) config('app.url'), PHP_URL_PORT) ? ':' . parse_url((string) config('app.url'), PHP_URL_PORT) : '')],
+    )))),
 
     /*
     |--------------------------------------------------------------------------

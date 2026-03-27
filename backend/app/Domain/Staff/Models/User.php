@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -36,16 +37,25 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, HasUuids, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, HasUuids, Notifiable, Searchable, SoftDeletes;
 
     /** @var string The table associated with this model. */
     protected $table = 'users';
 
     /** @var list<string> The attributes that are mass-assignable. */
     protected $fillable = [
-        'employee_code', 'name', 'email', 'phone', 'password',
-        'avatar', 'department', 'position', 'status',
-        'hired_at', 'terminated_at', 'notes',
+        'employee_code',
+        'name',
+        'email',
+        'phone',
+        'password',
+        'avatar',
+        'department',
+        'position',
+        'status',
+        'hired_at',
+        'terminated_at',
+        'notes',
     ];
 
     /** @var list<string> Attributes hidden from arrays/JSON. */
@@ -54,9 +64,9 @@ class User extends Authenticatable
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'hired_at'          => 'date',
-        'terminated_at'     => 'date',
-        'password'          => 'hashed',
+        'hired_at' => 'date',
+        'terminated_at' => 'date',
+        'password' => 'hashed',
     ];
 
     /**
@@ -80,7 +90,35 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the staff member is currently active.
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'employee_code' => $this->employee_code,
+            'department' => $this->department,
+            'position' => $this->position,
+        ];
+    }
+
+    /**
+     * Get the index name for the model.
+     *
+     * @return string
+     */
+    public function searchableAs(): string
+    {
+        return 'staff';
+    }
+
+    /**
+     * Determine whether the staff account is active and can authenticate.
      *
      * @return bool
      */

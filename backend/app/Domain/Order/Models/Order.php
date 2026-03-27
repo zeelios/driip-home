@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 /**
  * Order model representing a customer purchase in the Driip platform.
@@ -74,7 +75,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Order extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes, Searchable;
 
     /** @var string The table associated with this model. */
     protected $table = 'orders';
@@ -343,6 +344,115 @@ class Order extends Model
     }
 
     /**
+     * Calculate commission amount based on rate and order total.
+     *
+     * @param  float       $rate     Commission rate (e.g., 0.05 for 5%)
+     * @param  string|null $staffId   Staff UUID to assign as sales rep
+     * @return int                    Calculated commission amount in cents
+     */
+    public function calculateCommission(float $rate, ?string $staffId = null): int
+    {
+        $amount = (int) round($this->subtotal * $rate);
+
+        $updateData = [
+            'commission_rate' => $rate,
+            'commission_amount' => $amount,
+            'commission_status' => 'pending',
+        ];
+
+        if ($staffId !== null) {
+            $updateData['sales_rep_id'] = $staffId;
+        }
+
+        $this->update($updateData);
+
+        return $amount;
+    }
+
+    /**
+     * Mark commission as eligible for payout (order delivered/paid).
+     *
+     * @return bool
+     */
+    public function approveCommission(): bool
+    {
+        if ($this->commission_amount <= 0 || $this->commission_status !== 'pending') {
+            return false;
+        }
+
+        return $this->update(['commission_status' => 'approved']);
+    }
+
+    /**
+     * Mark commission as paid to the sales rep.
+     *
+     * @param  string|null $reference Payment reference (transaction ID, etc.)
+     * @return bool
+     */
+    public function payCommission(?string $reference = null): bool
+    {
+        if ($this->commission_amount <= 0) {
+            return false;
+        }
+
+        return $this->update([
+            'commission_status' => 'paid',
+            'commission_paid_reference' => $reference,
+            'commission_paid_at' => now(),
+        ]);
+    }
+
+    /**
+     * Cancel/void commission (e.g., on order cancellation or refund).
+     *
+     * @param  string|null $reason Reason for cancellation
+     * @return bool
+     */
+    public function cancelCommission(?string $reason = null): bool
+    {
+        if ($this->commission_amount <= 0) {
+            return false;
+        }
+
+        // If already paid, this requires a commission clawback instead
+        if ($this->commission_status === 'paid') {
+            return false;
+        }
+
+        return $this->update([
+            'commission_status' => 'cancelled',
+            'internal_notes' => $reason
+                ? ($this->internal_notes ? $this->internal_notes . "\n[Commission Cancelled] " . $reason : "[Commission Cancelled] " . $reason)
+                : $this->internal_notes,
+        ]);
+    }
+
+    /**
+     * Check if commission is eligible for payout.
+     *
+     * Typically requires order to be delivered and paid.
+     *
+     * @return bool
+     */
+    public function isCommissionPayable(): bool
+    {
+        return $this->commission_amount > 0
+            && $this->commission_status === 'pending'
+            && $this->status === 'delivered'
+            && in_array($this->payment_status, ['paid', 'cod_collected'], true);
+    }
+
+    /**
+     * Get commission amount formatted for display.
+     *
+     * @return string
+     */
+    public function commissionAmountFormatted(): string
+    {
+        return number_format($this->commission_amount / 100, 2) . ' ₫';
+    }
+
+    /**
      * Determine if the order has a deposit recorded.
      *
      * @return bool
@@ -399,6 +509,29 @@ class Order extends Model
             'payment_reference' => $reference,
             'paid_at' => now(),
         ]);
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'order_number' => $this->order_number,
+            'customer_name' => $this->customer?->name,
+            'customer_email' => $this->customer?->email,
+            'customer_phone' => $this->customer?->phone,
+            'staff_name' => $this->salesRep?->name,
+            'status' => $this->status,
+            'payment_status' => $this->payment_status,
+            'total_amount' => $this->total_amount,
+            'total_after_tax' => $this->total_after_tax,
+            'deposit_amount' => $this->deposit_amount,
+            'payment_method' => $this->payment_method,
+        ];
     }
 
     /**

@@ -6,7 +6,7 @@
   >
     <label
       v-if="label"
-      class="text-xs font-semibold tracking-[0.06em] uppercase text-white/50"
+      class="text-xs font-semibold tracking-[0.06em] uppercase text-white"
       >{{ label }}</label
     >
 
@@ -14,14 +14,19 @@
     <button
       type="button"
       ref="triggerRef"
-      class="z-select-trigger w-full py-3 px-4 md:py-2.5 md:px-3.5 pr-9 md:pr-9 border border-white/12 rounded-lg bg-white/4 text-base md:text-sm text-left outline-none transition-all duration-150 focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.08)] disabled:bg-white/2 disabled:text-white/35 disabled:cursor-not-allowed relative min-h-11 md:min-h-0"
-      :class="modelValue ? 'text-white/90' : 'text-white/50'"
+      :class="[
+        'z-select-trigger w-full border border-white/12 rounded-lg bg-white/4 text-left outline-none transition-all duration-150 focus:border-white/40 focus:shadow-[0_0_0_3px_rgba(255,255,255,0.08)] disabled:bg-white/2 disabled:text-white/35 disabled:cursor-not-allowed relative',
+        sizeClass,
+      ]"
       :disabled="disabled"
       :aria-expanded="isOpen"
       :aria-label="label || placeholder"
-      @click="openDropdown"
+      @click="toggleDropdown"
     >
-      {{ selectedLabel || placeholder || "Chọn..." }}
+      <span v-if="selectedOption" class="text-white/90">{{
+        selectedOption.label
+      }}</span>
+      <span v-else class="text-white/40">{{ placeholder || "Chọn..." }}</span>
       <span
         class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-white/40 pointer-events-none transition-transform duration-200"
         :class="{ 'rotate-180': isOpen }"
@@ -245,6 +250,7 @@ const props = withDefaults(
     error?: string | null;
     hint?: string;
     id?: string;
+    size?: "sm" | "md" | "lg";
     searchable?: boolean;
     async?: boolean;
     loading?: boolean;
@@ -257,6 +263,7 @@ const props = withDefaults(
   {
     disabled: false,
     required: false,
+    size: "md",
     searchable: true,
     async: false,
     loading: false,
@@ -284,9 +291,22 @@ const activeIndex = ref(0);
 const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const dropdownStyle = ref<Record<string, string>>({});
 
+const sizeClass = computed((): string => {
+  const sizes: Record<"sm" | "md" | "lg", string> = {
+    sm: "py-1.5 px-3 text-[0.8125rem] min-h-11 md:min-h-0 pr-9",
+    md: "py-2.5 px-4 text-[0.875rem] min-h-11 md:min-h-0 pr-9",
+    lg: "py-3 px-5 text-[0.9375rem] min-h-12 md:min-h-0 pr-10",
+  };
+  return sizes[props.size];
+});
+
 const selectId = computed(
   () => props.id ?? `z-select-${Math.random().toString(36).slice(2, 7)}`
 );
+
+const selectedOption = computed(() => {
+  return props.options.find((o) => o.value === props.modelValue) ?? null;
+});
 
 const selectedLabel = computed(() => {
   const opt = props.options.find((o) => o.value === props.modelValue);
@@ -380,6 +400,14 @@ function closeDropdown(): void {
   isOpen.value = false;
   if (searchTimeout.value) {
     clearTimeout(searchTimeout.value);
+  }
+}
+
+function toggleDropdown(): void {
+  if (isOpen.value) {
+    closeDropdown();
+  } else {
+    openDropdown();
   }
 }
 

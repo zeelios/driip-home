@@ -33,6 +33,7 @@ readonly class CreateOrderDto
      * @param  string                     $shippingAddress       Street-level address line.
      * @param  string|null                $shippingZip           Postal/ZIP code.
      * @param  string|null                $notes                 Customer-visible delivery notes.
+     * @param  string|null                $internalNotes         Internal staff notes (not visible to customer).
      * @param  string                     $source                Origin channel (e.g. 'admin', 'web').
      * @param  string|null                $utmSource             UTM source tracking parameter.
      * @param  string|null                $utmMedium             UTM medium tracking parameter.
@@ -57,6 +58,7 @@ readonly class CreateOrderDto
         public string $shippingAddress = '',
         public ?string $shippingZip = null,
         public ?string $notes = null,
+        public ?string $internalNotes = null,
         public string $source = 'admin',
         public ?string $utmSource = null,
         public ?string $utmMedium = null,

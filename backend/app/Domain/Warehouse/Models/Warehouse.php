@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 
 /**
  * Warehouse model representing a physical or virtual storage location.
@@ -35,7 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Warehouse extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, Searchable;
 
     /** @var string The table associated with this model. */
     protected $table = 'warehouses';
@@ -80,12 +81,28 @@ class Warehouse extends Model
     }
 
     /**
-     * Get all inventory records stored in this warehouse.
+     * Get the indexable data array for the model.
      *
-     * @return HasMany<Inventory>
+     * @return array<string, mixed>
      */
-    public function inventory(): HasMany
+    public function toSearchableArray(): array
     {
-        return $this->hasMany(Inventory::class, 'warehouse_id');
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'code' => $this->code,
+            'address' => $this->address,
+            'province' => $this->province,
+        ];
+    }
+
+    /**
+     * Get the index name for the model.
+     *
+     * @return string
+     */
+    public function searchableAs(): string
+    {
+        return 'warehouses';
     }
 }

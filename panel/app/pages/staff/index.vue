@@ -9,6 +9,7 @@
           v-model="search"
           placeholder="Tìm tên, email..."
           type="search"
+          size="sm"
           class="flex-1 w-full min-w-0"
           @input="onSearchInput"
         >
@@ -30,6 +31,7 @@
           v-model="statusFilter"
           :options="statusOptions"
           placeholder="Tất cả trạng thái"
+          size="sm"
           class="w-full sm:w-auto sm:min-w-37.5"
           @change="onFilterChange"
         />
@@ -152,6 +154,7 @@
           v-model="form.name"
           label="Họ và tên *"
           placeholder="Nguyễn Văn An"
+          size="sm"
           :error="formErrors.name"
           autocomplete="name"
         />
@@ -160,6 +163,7 @@
           label="Email *"
           type="email"
           placeholder="nhanvien@driip.vn"
+          size="sm"
           :error="formErrors.email"
           autocomplete="email"
         />
@@ -168,6 +172,7 @@
           label="Mật khẩu *"
           type="password"
           placeholder="Tối thiểu 8 ký tự"
+          size="sm"
           :error="formErrors.password"
           autocomplete="new-password"
         />
@@ -176,19 +181,27 @@
           label="Điện thoại"
           type="tel"
           placeholder="0901234567"
+          size="sm"
           autocomplete="tel"
         />
         <ZInput
           v-model="form.department"
           label="Phòng ban"
           placeholder="Sales, Kho, Kế toán..."
+          size="sm"
         />
         <ZInput
           v-model="form.position"
           label="Chức vụ"
           placeholder="Nhân viên, Trưởng nhóm..."
+          size="sm"
         />
-        <ZInput v-model="form.hired_at" label="Ngày vào làm" type="date" />
+        <ZInput
+          v-model="form.hired_at"
+          label="Ngày vào làm"
+          type="date"
+          size="sm"
+        />
       </div>
       <template #footer>
         <ZButton
