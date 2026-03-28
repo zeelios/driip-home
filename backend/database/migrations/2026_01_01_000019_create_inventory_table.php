@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,23 +12,23 @@ return new class extends Migration
     {
         Schema::create('inventory', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('product_variant_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('product_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('warehouse_id')->constrained()->cascadeOnDelete();
             $table->integer('quantity_on_hand')->default(0);
             $table->integer('quantity_reserved')->default(0);
-            $table->integer('quantity_available')->default(0); // computed: on_hand - reserved
+            $table->integer('quantity_available')->default(0);
             $table->integer('quantity_incoming')->default(0);
             $table->integer('reorder_point')->nullable();
             $table->integer('reorder_quantity')->nullable();
             $table->timestamp('last_counted_at')->nullable();
             $table->timestamp('updated_at')->nullable();
 
-            $table->unique(['product_variant_id', 'warehouse_id']);
+            $table->unique(['product_id', 'warehouse_id']);
         });
 
         Schema::create('inventory_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('product_variant_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('product_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('warehouse_id')->constrained()->cascadeOnDelete();
             $table->enum('type', [
                 'receive',
@@ -40,7 +42,7 @@ return new class extends Migration
                 'reserve',
                 'release',
             ]);
-            $table->integer('quantity'); // positive = in, negative = out
+            $table->integer('quantity');
             $table->integer('quantity_before');
             $table->integer('quantity_after');
             $table->bigInteger('unit_cost')->nullable();
@@ -52,7 +54,7 @@ return new class extends Migration
             $table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
             $table->timestamp('created_at')->nullable();
 
-            $table->index(['product_variant_id', 'warehouse_id']);
+            $table->index(['product_id', 'warehouse_id']);
             $table->index(['reference_type', 'reference_id']);
         });
     }

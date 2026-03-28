@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('shipments', function (Blueprint $table) {
@@ -28,6 +27,9 @@ return new class extends Migration
                 'cancelled',
             ])->default('draft');
             $table->string('label_url', 500)->nullable();
+            $table->string('label_reference', 255)->nullable();
+            $table->jsonb('label_payload')->nullable();
+            $table->timestamp('label_printed_at')->nullable();
             $table->bigInteger('cod_amount')->default(0);
             $table->boolean('cod_collected')->default(false);
             $table->bigInteger('shipping_fee_quoted')->nullable();

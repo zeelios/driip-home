@@ -47,6 +47,8 @@ class PermissionSeeder extends Seeder
             $this->getCommissionPermissions(),
             $this->getLoyaltyPermissions(),
             $this->getSettingsPermissions(),
+            $this->getFulfillmentPermissions(),
+            $this->getPurchaseRequestPermissions(),
             $this->getSystemPermissions(),
         );
     }
@@ -324,6 +326,36 @@ class PermissionSeeder extends Seeder
             'activity-logs.view',
             'system.backups',
             'system.maintenance',
+        ];
+    }
+
+    /**
+     * Fulfillment permissions.
+     *
+     * @return array<string>
+     */
+    protected function getFulfillmentPermissions(): array
+    {
+        return [
+            'fulfillment.view',
+            'fulfillment.pick',
+            'fulfillment.pack',
+            'fulfillment.export',
+            'fulfillment.manage',
+        ];
+    }
+
+    /**
+     * Purchase request permissions.
+     *
+     * @return array<string>
+     */
+    protected function getPurchaseRequestPermissions(): array
+    {
+        return [
+            'purchase_request.view',
+            'purchase_request.create',
+            'purchase_request.manage',
         ];
     }
 }

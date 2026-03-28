@@ -32,6 +32,12 @@ class PrintGhtkLabelAction
     {
         $pdfContent = $this->ghtkService->printLabel($labelId);
 
+        // Ensure labels directory exists
+        $labelsDir = storage_path('app/public/labels');
+        if (!is_dir($labelsDir)) {
+            mkdir($labelsDir, 0755, true);
+        }
+
         // Generate filename
         $filename = $shipmentId
             ? "labels/ghtk_{$shipmentId}_{$labelId}.pdf"
@@ -46,6 +52,7 @@ class PrintGhtkLabelAction
             'label_id' => $labelId,
             'shipment_id' => $shipmentId,
             'filename' => $filename,
+            'size' => strlen($pdfContent),
         ]);
 
         return [

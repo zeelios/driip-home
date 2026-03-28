@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('sale_events', function (Blueprint $table) {
@@ -29,7 +28,7 @@ return new class extends Migration
         Schema::create('sale_event_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('sale_event_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('product_variant_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('product_id')->constrained()->cascadeOnDelete();
             $table->bigInteger('sale_price');
             $table->bigInteger('compare_price')->nullable();
             $table->integer('max_qty_per_customer')->nullable();
@@ -42,8 +41,8 @@ return new class extends Migration
         Schema::create('waitlist_entries', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('product_id')->constrained()->cascadeOnDelete();
-            $table->uuid('product_variant_id')->nullable();
-            $table->foreign('product_variant_id')->references('id')->on('product_variants')->nullOnDelete();
+            $table->uuid('linked_product_id')->nullable();
+            $table->foreign('linked_product_id')->references('id')->on('products')->nullOnDelete();
             $table->uuid('customer_id')->nullable();
             $table->foreign('customer_id')->references('id')->on('customers')->nullOnDelete();
             $table->string('email', 255)->nullable();
@@ -52,7 +51,7 @@ return new class extends Migration
             $table->timestamp('notified_at')->nullable();
             $table->timestamp('created_at')->nullable();
 
-            $table->index(['product_variant_id', 'notified_at']);
+            $table->index(['linked_product_id', 'notified_at']);
         });
     }
 

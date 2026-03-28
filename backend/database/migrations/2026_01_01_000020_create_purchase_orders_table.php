@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('purchase_orders', function (Blueprint $table) {
@@ -39,7 +38,7 @@ return new class extends Migration
         Schema::create('purchase_order_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('purchase_order_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('product_variant_id')->constrained()->restrictOnDelete();
+            $table->foreignUuid('product_id')->constrained()->restrictOnDelete();
             $table->string('sku', 100); // snapshot
             $table->integer('quantity_ordered');
             $table->integer('quantity_received')->default(0);

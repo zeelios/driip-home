@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\V1\CommissionController;
 use App\Http\Controllers\Api\V1\Inventory\InventoryController;
 use App\Http\Controllers\Api\V1\Inventory\PurchaseOrderController;
 use App\Http\Controllers\Api\V1\Inventory\StockTransferController;
+use App\Http\Controllers\Api\V1\Inventory\PurchaseRequestController;
 use App\Http\Controllers\Api\V1\Inventory\StockCountController;
 use App\Http\Controllers\Api\V1\Warehouse\WarehouseController;
 use App\Http\Controllers\Api\V1\Shipment\ShipmentController;
@@ -40,6 +41,7 @@ use App\Http\Controllers\Api\V1\Tax\TaxInvoiceController;
 use App\Http\Controllers\Api\V1\SaleEvent\SaleEventController;
 use App\Http\Controllers\Api\V1\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Dashboard\DashboardController;
+use App\Http\Controllers\Api\V1\Fulfillment\FulfillmentController;
 
 Route::prefix('v1/panel')->group(function () {
 
@@ -148,6 +150,13 @@ Route::prefix('v1/panel')->group(function () {
         Route::post('commissions/{order}/mark-paid', [CommissionController::class, 'markPaid']);
         Route::post('commissions/{order}/cancel', [CommissionController::class, 'cancel']);
 
+        // Fulfillment
+        Route::get('fulfillment/items', [FulfillmentController::class, 'index']);
+        Route::get('fulfillment/stats', [FulfillmentController::class, 'stats']);
+        Route::post('fulfillment/pick', [FulfillmentController::class, 'pick']);
+        Route::post('fulfillment/pack', [FulfillmentController::class, 'pack']);
+        Route::post('fulfillment/export', [FulfillmentController::class, 'export']);
+
         // Inventory
         Route::get('inventory', [InventoryController::class, 'index']);
         Route::post('inventory/adjust', [InventoryController::class, 'adjust']);
@@ -155,6 +164,11 @@ Route::prefix('v1/panel')->group(function () {
         Route::get('inventory/export', [InventoryController::class, 'export']);
         Route::get('inventory/{variant}', [InventoryController::class, 'show']);
         Route::apiResource('purchase-orders', PurchaseOrderController::class);
+        Route::get('purchase-requests', [PurchaseRequestController::class, 'index']);
+        Route::get('purchase-requests/low-stock', [PurchaseRequestController::class, 'lowStock']);
+        Route::get('purchase-requests/unfulfillable', [PurchaseRequestController::class, 'unfulfillable']);
+        Route::get('purchase-requests/by-supplier', [PurchaseRequestController::class, 'bySupplier']);
+        Route::post('purchase-requests/create-po', [PurchaseRequestController::class, 'createPurchaseOrders']);
         Route::post('purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve']);
         Route::post('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive']);
         Route::apiResource('stock-transfers', StockTransferController::class);
@@ -191,6 +205,7 @@ Route::prefix('v1/panel')->group(function () {
             Route::get('orders/{trackingNumber}/status', [GhtkController::class, 'getOrderStatus']);
             Route::post('orders/{trackingNumber}/sync', [GhtkController::class, 'syncStatus']);
             Route::get('orders/{trackingNumber}/label', [GhtkController::class, 'printLabel']);
+            Route::get('shipments/{shipment}/label-a7', [GhtkController::class, 'printA7Label']);
             Route::post('orders/{trackingNumber}/cancel', [GhtkController::class, 'cancelOrder']);
             Route::post('shipments/{shipment}/cancel', [GhtkController::class, 'cancelShipment']);
         });

@@ -17,6 +17,7 @@ use App\Domain\Order\Models\OrderStatusHistory;
 use App\Domain\Order\Services\OrderActivityLogger;
 use App\Domain\Product\Models\Product;
 use App\Domain\Product\Models\ProductVariant;
+use App\Domain\Product\Models\SizeOption;
 use App\Domain\Shared\Traits\GeneratesCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,6 +28,8 @@ use Illuminate\Support\Facades\Log;
  * Runs inside a database transaction to ensure the order, its items,
  * and the initial status history entry are created atomically.
  * Inventory reservations are triggered after successful persistence.
+ *
+ * Each physical item gets its own order_items row for individual tracking.
  */
 class CreateOrderAction
 {
@@ -42,9 +45,9 @@ class CreateOrderAction
     /**
      * Execute the order creation.
      *
-     * Processes each item, applies coupon and loyalty discounts, computes
-     * VAT, generates an order number, persists all records, and reserves
-     * inventory for each variant.
+     * Processes each item, creates individual line items for each quantity unit,
+     * applies coupon and loyalty discounts, computes VAT, generates an order
+     * number, persists all records, and reserves inventory for each item.
      *
      * @param  CreateOrderDto  $dto  Validated order creation payload.
      * @return Order                 The newly created order with items loaded.
@@ -54,13 +57,13 @@ class CreateOrderAction
     public function execute(CreateOrderDto $dto): Order
     {
         return DB::transaction(function () use ($dto): Order {
-            // Resolve customer data if customer_id provided
             ['customer' => $customer, 'shipping' => $resolvedShipping] = $this->resolveCustomer($dto);
 
-            $itemSnapshots = $this->buildItemSnapshots($dto->items);
+            $itemSnapshots = $this->buildIndividualItemSnapshots($dto->items);
 
+            // Calculate subtotal as sum of all individual line prices
             $subtotal = array_sum(array_map(
-                fn(array $s) => $s['unit_price'] * $s['quantity'],
+                fn(array $s) => $s['unit_price'] - $s['discount_amount'],
                 $itemSnapshots
             ));
 
@@ -116,6 +119,7 @@ class CreateOrderAction
                 'token_expires_at' => now()->addDays(30),
             ]);
 
+            // Create individual order item rows
             foreach ($itemSnapshots as $snapshot) {
                 OrderItem::create(array_merge($snapshot, ['order_id' => $order->id]));
             }
@@ -129,7 +133,6 @@ class CreateOrderAction
                 'created_at' => now(),
             ]);
 
-            // Log order creation activity
             $this->activityLogger->logOrderCreated($order);
 
             $this->reserveInventory($order, $itemSnapshots, $dto->warehouseId);
@@ -139,162 +142,93 @@ class CreateOrderAction
     }
 
     /**
-     * Load product variants and snapshot their attributes for order persistence.
+     * Load product variants and create individual snapshots for each physical item.
+     *
+     * Creates one snapshot per quantity unit, allowing individual tracking.
      *
      * @param  list<CreateOrderItemDto>  $items
      * @return list<array<string,mixed>>
      */
-    private function buildItemSnapshots(array $items): array
+    private function buildIndividualItemSnapshots(array $items): array
     {
         $snapshots = [];
 
         foreach ($items as $item) {
-            $variant = ProductVariant::with('product')->find($item->productVariantId);
-            $product = null;
-            $attributeValues = [];
+            $baseSnapshot = $this->buildBaseItemSnapshot($item);
 
-            if ($variant !== null) {
-                $product = $variant->product ?? Product::find($variant->product_id);
-                $attributeValues = is_array($variant->attribute_values) ? $variant->attribute_values : [];
-
-                $snapshots[] = [
-                    'product_id' => $variant->product_id,
-                    'product_variant_id' => $variant->id,
-                    'sku' => $variant->sku,
-                    'name' => $product?->name ?? $variant->sku,
-                    'size' => $this->resolveSnapshotSize($attributeValues, $item->size),
-                    'color' => $this->resolveSnapshotAttribute($attributeValues, ['color', 'colour']),
-                    'unit_price' => $item->unitPrice,
-                    'cost_price' => $variant->cost_price ?? 0,
-                    'quantity' => $item->quantity,
-                    'quantity_returned' => 0,
-                    'discount_amount' => 0,
-                    'total_price' => $item->unitPrice * $item->quantity,
-                ];
-
-                continue;
+            // Create individual row for each quantity unit
+            for ($i = 0; $i < $item->quantity; $i++) {
+                $snapshots[] = $baseSnapshot;
             }
-
-            $product = Product::findOrFail($item->productVariantId);
-
-            $resolvedVariant = $this->resolveProductVariantFromProduct($product, $item->size);
-
-            if ($resolvedVariant !== null) {
-                $attributeValues = is_array($resolvedVariant->attribute_values)
-                    ? $resolvedVariant->attribute_values
-                    : [];
-
-                $snapshots[] = [
-                    'product_id' => $product->id,
-                    'product_variant_id' => $resolvedVariant->id,
-                    'sku' => $resolvedVariant->sku,
-                    'name' => $product->name,
-                    'size' => $this->resolveSnapshotSize($attributeValues, $item->size),
-                    'color' => $this->resolveSnapshotAttribute($attributeValues, ['color', 'colour']),
-                    'unit_price' => $item->unitPrice,
-                    'cost_price' => $resolvedVariant->cost_price ?? 0,
-                    'quantity' => $item->quantity,
-                    'quantity_returned' => 0,
-                    'discount_amount' => 0,
-                    'total_price' => $item->unitPrice * $item->quantity,
-                ];
-
-                continue;
-            }
-
-            $snapshots[] = [
-                'product_id' => $product->id,
-                'product_variant_id' => null,
-                'sku' => $product->sku ?? $product->id,
-                'name' => $product->name,
-                'size' => $this->resolveSnapshotSize($attributeValues, $item->size),
-                'color' => $this->resolveSnapshotAttribute($attributeValues, ['color', 'colour']),
-                'unit_price' => $item->unitPrice,
-                'cost_price' => $product->cost_price ?? 0,
-                'quantity' => $item->quantity,
-                'quantity_returned' => 0,
-                'discount_amount' => 0,
-                'total_price' => $item->unitPrice * $item->quantity,
-            ];
         }
 
         return $snapshots;
     }
 
     /**
-     * Resolve the displayed size snapshot from variant attributes and user input.
+     * Build the base snapshot for a single physical item.
      *
-     * @param  array<string,mixed>  $attributeValues
-     * @param  string|null          $fallbackSize
-     * @return string|null
+     * @param  CreateOrderItemDto  $item
+     * @return array<string,mixed>
      */
-    private function resolveSnapshotSize(array $attributeValues, ?string $fallbackSize): ?string
+    private function buildBaseItemSnapshot(CreateOrderItemDto $item): array
     {
-        $size = $this->resolveSnapshotAttribute($attributeValues, ['size', 'size_code', 'size_name', 'size_label']);
+        $variant = ProductVariant::with('product')->find($item->productVariantId);
+        $product = null;
 
-        return $size ?? $fallbackSize;
-    }
+        if ($variant !== null) {
+            $product = $variant->product ?? Product::find($variant->product_id);
 
-    /**
-     * Resolve a scalar snapshot attribute from a variant attribute array.
-     *
-     * @param  array<string,mixed>  $attributeValues
-     * @param  array<int,string>    $keys
-     * @return string|null
-     */
-    private function resolveSnapshotAttribute(array $attributeValues, array $keys): ?string
-    {
-        foreach ($keys as $key) {
-            if (!array_key_exists($key, $attributeValues)) {
-                continue;
-            }
-
-            $value = $attributeValues[$key];
-
-            if (is_scalar($value) && trim((string) $value) !== '') {
-                return trim((string) $value);
-            }
+            return [
+                'product_id' => $variant->product_id,
+                'sku' => $variant->sku,
+                'name' => $product?->name ?? $variant->sku,
+                'size_option_id' => $this->resolveSizeOptionId($item->size, $variant->product_id),
+                'color' => $item->color,
+                'unit_price' => $item->unitPrice,
+                'cost_price' => $variant->cost_price ?? 0,
+                'discount_amount' => 0,
+                'status' => 'pending',
+            ];
         }
 
-        return null;
+        $product = Product::findOrFail($item->productVariantId);
+
+        return [
+            'product_id' => $product->id,
+            'sku' => $product->sku ?? $product->id,
+            'name' => $product->name,
+            'size_option_id' => $this->resolveSizeOptionId($item->size, $product->id),
+            'color' => $item->color,
+            'unit_price' => $item->unitPrice,
+            'cost_price' => $product->cost_price ?? 0,
+            'discount_amount' => 0,
+            'status' => 'pending',
+        ];
     }
 
     /**
-     * Resolve the concrete product variant for a product/size selection.
+     * Resolve size_option_id from size code and product category.
      *
-     * @param  Product       $product
-     * @param  string|null   $size
-     * @return \App\Domain\Product\Models\ProductVariant|null
+     * @param  string|null  $sizeCode
+     * @param  string       $productId
+     * @return string|null
      */
-    private function resolveProductVariantFromProduct(Product $product, ?string $size): ?\App\Domain\Product\Models\ProductVariant
+    private function resolveSizeOptionId(?string $sizeCode, string $productId): ?string
     {
-        $variants = ProductVariant::where('product_id', $product->id)
-            ->where('status', 'active')
-            ->get();
-
-        if ($variants->isEmpty()) {
+        if ($sizeCode === null) {
             return null;
         }
 
-        if ($size === null) {
-            return $variants->first();
+        $product = Product::with('category.sizeOptions')->find($productId);
+        if (!$product || !$product->category) {
+            return null;
         }
 
-        $normalizedSize = strtolower(trim($size));
+        $sizeOption = $product->category->sizeOptions
+            ->first(fn(SizeOption $so) => $so->code === $sizeCode);
 
-        $matchedVariant = $variants->first(function (ProductVariant $variant) use ($normalizedSize): bool {
-            $attributeValues = is_array($variant->attribute_values) ? $variant->attribute_values : [];
-
-            $candidate = $this->resolveSnapshotAttribute($attributeValues, ['size', 'size_code', 'size_name', 'size_label']);
-
-            if ($candidate === null) {
-                return false;
-            }
-
-            return strtolower(trim($candidate)) === $normalizedSize;
-        });
-
-        return $matchedVariant instanceof ProductVariant ? $matchedVariant : $variants->first();
+        return $sizeOption?->id;
     }
 
     /**
@@ -379,7 +313,6 @@ class CreateOrderAction
             'zip' => $dto->shippingZip,
         ];
 
-        // Auto-fill from default address if no shipping info provided
         if (!$dto->shippingAddress && !$dto->shippingProvince) {
             $defaultAddress = $customer->addresses->firstWhere('is_default', true)
                 ?? $customer->addresses->first();
@@ -428,10 +361,7 @@ class CreateOrderAction
     }
 
     /**
-     * Reserve inventory for each line item in the given warehouse.
-     *
-     * Failures are logged but do not abort the order creation transaction,
-     * as the actual inventory domain will enforce consistency separately.
+     * Reserve inventory for each individual line item in the given warehouse.
      *
      * @param  Order                     $order
      * @param  list<array<string,mixed>> $snapshots
@@ -445,19 +375,18 @@ class CreateOrderAction
 
         foreach ($snapshots as $snapshot) {
             try {
-                /** @var Inventory|null $inventory */
-                $inventory = Inventory::where('product_variant_id', $snapshot['product_variant_id'])
+                $inventory = Inventory::where('product_id', $snapshot['product_id'])
                     ->where('warehouse_id', $warehouseId)
                     ->first();
 
                 if ($inventory) {
-                    $inventory->increment('quantity_reserved', $snapshot['quantity']);
-                    $inventory->decrement('quantity_available', $snapshot['quantity']);
+                    $inventory->increment('quantity_reserved', 1);
+                    $inventory->decrement('quantity_available', 1);
                 }
             } catch (\Throwable $e) {
                 Log::warning('Failed to reserve inventory for order item.', [
                     'order_id' => $order->id,
-                    'product_variant_id' => $snapshot['product_variant_id'],
+                    'product_id' => $snapshot['product_id'],
                     'error' => $e->getMessage(),
                 ]);
             }

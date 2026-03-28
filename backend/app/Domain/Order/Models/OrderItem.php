@@ -4,31 +4,46 @@ declare(strict_types=1);
 
 namespace App\Domain\Order\Models;
 
+use App\Domain\Inventory\Models\Inventory;
+use App\Domain\Product\Models\SizeOption;
+use App\Domain\Shipment\Models\Shipment;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * OrderItem model representing a single line item within an order.
+ * OrderItem model representing a single physical item within an order.
  *
- * Snapshots the product's key attributes (sku, name, size, color,
- * pricing) at the time of purchase so the record remains accurate even if
- * the underlying product is later modified or deleted.
+ * Each row represents one physical product instance, allowing individual
+ * tracking of inventory allocation, shipment assignment, and return status.
  *
- * @property string      $id
- * @property string      $order_id
- * @property string|null $product_id
- * @property string      $sku
- * @property string      $name
- * @property string|null $size
- * @property string|null $color
- * @property int         $unit_price
- * @property int         $cost_price
- * @property int         $quantity
- * @property int         $quantity_returned
- * @property int         $discount_amount
- * @property int         $total_price
+ * @property string                $id
+ * @property string                $order_id
+ * @property string|null           $product_id
+ * @property string                $sku
+ * @property string                $name
+ * @property string|null           $size_option_id
+ * @property string|null           $color
+ * @property int                   $unit_price
+ * @property int                   $cost_price
+ * @property int                   $discount_amount
+ * @property string|null           $inventory_id
+ * @property string|null           $shipment_id
+ * @property string                $status
+ * @property \Carbon\Carbon|null   $picked_at
+ * @property string|null           $picked_by
+ * @property \Carbon\Carbon|null   $packed_at
+ * @property string|null           $packed_by
+ * @property \Carbon\Carbon|null   $returned_at
+ * @property \Carbon\Carbon|null   $created_at
+ * @property \Carbon\Carbon|null   $updated_at
+ *
+ * @property-read SizeOption|null  $sizeOption
+ * @property-read Inventory|null   $inventory
+ * @property-read Shipment|null    $shipment
+ * @property-read \App\Domain\User\Models\User|null $pickedBy
+ * @property-read \App\Domain\User\Models\User|null $packedBy
  */
 class OrderItem extends Model
 {
@@ -43,24 +58,29 @@ class OrderItem extends Model
         'product_id',
         'sku',
         'name',
-        'size',
+        'size_option_id',
         'color',
         'unit_price',
         'cost_price',
-        'quantity',
-        'quantity_returned',
         'discount_amount',
-        'total_price',
+        'inventory_id',
+        'shipment_id',
+        'status',
+        'picked_at',
+        'picked_by',
+        'packed_at',
+        'packed_by',
+        'returned_at',
     ];
 
     /** @var array<string,string> Attribute type casts. */
     protected $casts = [
         'unit_price' => 'integer',
         'cost_price' => 'integer',
-        'total_price' => 'integer',
         'discount_amount' => 'integer',
-        'quantity' => 'integer',
-        'quantity_returned' => 'integer',
+        'picked_at' => 'datetime',
+        'packed_at' => 'datetime',
+        'returned_at' => 'datetime',
     ];
 
     /**
@@ -83,5 +103,55 @@ class OrderItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(\App\Domain\Product\Models\Product::class, 'product_id');
+    }
+
+    /**
+     * Get the size option for this item.
+     *
+     * @return BelongsTo<SizeOption, OrderItem>
+     */
+    public function sizeOption(): BelongsTo
+    {
+        return $this->belongsTo(SizeOption::class, 'size_option_id');
+    }
+
+    /**
+     * Get the inventory record allocated to this item.
+     *
+     * @return BelongsTo<Inventory, OrderItem>
+     */
+    public function inventory(): BelongsTo
+    {
+        return $this->belongsTo(Inventory::class, 'inventory_id');
+    }
+
+    /**
+     * Get the shipment this item is assigned to.
+     *
+     * @return BelongsTo<Shipment, OrderItem>
+     */
+    public function shipment(): BelongsTo
+    {
+        return $this->belongsTo(Shipment::class, 'shipment_id');
+    }
+
+    /**
+     * Get the user who picked this item.
+     *
+     * @return BelongsTo<\App\Domain\User\Models\User, OrderItem>
+     */
+    public function pickedBy(): BelongsTo
+    {
+        return $this->belongsTo(\App\Domain\User\Models\User::class, 'picked_by');
+    }
+
+    /**
+     * Get the user who packed this item.
+     *
+     * @return BelongsTo<\App\Domain\User\Models\User, OrderItem>
+     */
+    public function packedBy(): BelongsTo
+    {
+        return $this->belongsTo(\App\Domain\User\Models\User::class, 'packed_by');
     }
 }

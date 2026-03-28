@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Shipment;
 
 use App\Domain\Shipment\Actions\CalculateGhtkFeeAction;
 use App\Domain\Shipment\Actions\CancelGhtkOrderAction;
+use App\Domain\Shipment\Actions\GenerateA7LabelAction;
 use App\Domain\Shipment\Actions\GetGhtkOrderStatusAction;
 use App\Domain\Shipment\Actions\PrintGhtkLabelAction;
 use App\Domain\Shipment\Actions\SubmitGhtkOrderAction;
@@ -211,6 +212,30 @@ class GhtkController extends BaseApiController
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => 'Failed to print label: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate custom A7 thermal label for shipment.
+     */
+    public function printA7Label(
+        Shipment $shipment,
+        GenerateA7LabelAction $action
+    ): Response {
+        try {
+            $result = $action->execute($shipment);
+
+            return response()->file(
+                storage_path('app/public/' . $result['filename']),
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="label_a7_' . $shipment->tracking_number . '.pdf"',
+                ]
+            );
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => 'Failed to generate A7 label: ' . $e->getMessage(),
             ], 500);
         }
     }

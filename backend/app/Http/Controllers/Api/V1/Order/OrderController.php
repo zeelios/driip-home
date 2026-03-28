@@ -115,7 +115,7 @@ class OrderController extends BaseApiController implements HasMiddleware
      */
     public function show(Order $order): OrderResource
     {
-        $order->load(['customer', 'items']);
+        $order->load(['customer', 'items.sizeOption', 'items.inventory', 'items.shipment']);
         return OrderResource::make($order);
     }
 

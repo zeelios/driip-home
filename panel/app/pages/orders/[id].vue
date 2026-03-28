@@ -330,20 +330,45 @@
               }}</span>
               <span class="text-xs text-white/50">
                 {{
-                  [(row as OrderItemRow).size, (row as OrderItemRow).color]
+                  [
+                    (row as OrderItemRow).size_display,
+                    (row as OrderItemRow).color,
+                  ]
                     .filter(Boolean)
                     .join(" · ")
                 }}
               </span>
             </div>
           </template>
+          <template #cell-size="{ row }">
+            <span class="text-sm text-white/70">{{
+              (row as OrderItemRow).size_display ?? "-"
+            }}</span>
+          </template>
           <template #cell-unit_price="{ row }">
             {{ formatVnd((row as OrderItemRow).unit_price) }}
           </template>
-          <template #cell-total_price="{ row }">
-            <span class="font-semibold">{{
-              formatVnd((row as OrderItemRow).total_price)
-            }}</span>
+          <template #cell-status="{ row }">
+            <ZBadge
+              :variant="itemStatusVariant((row as OrderItemRow).status)"
+              size="sm"
+            >
+              {{ itemStatusLabel((row as OrderItemRow).status) }}
+            </ZBadge>
+          </template>
+          <template #cell-shipment="{ row }">
+            <div
+              v-if="(row as OrderItemRow).shipment"
+              class="flex flex-col gap-0.5"
+            >
+              <span class="text-xs font-mono text-white/70">{{
+                (row as OrderItemRow).shipment!.tracking_number ?? "-"
+              }}</span>
+              <span class="text-xs text-white/50">{{
+                (row as OrderItemRow).shipment!.courier_code
+              }}</span>
+            </div>
+            <span v-else class="text-xs text-white/40">Chưa giao</span>
           </template>
         </ZTable>
       </div>
@@ -480,11 +505,25 @@ interface OrderItemRow {
   id: string;
   name: string;
   sku: string;
-  size: string | null;
+  size_display: string | null;
   color: string | null;
   unit_price: number;
-  quantity: number;
-  total_price: number;
+  discount_amount: number;
+  status: string;
+  returned_at: string | null;
+  inventory_id: string | null;
+  inventory: {
+    id: string;
+    warehouse_id: string;
+    quantity_on_hand: number;
+  } | null;
+  shipment_id: string | null;
+  shipment: {
+    id: string;
+    tracking_number: string | null;
+    status: string;
+    courier_code: string;
+  } | null;
 }
 
 type BadgeVariant =
@@ -573,10 +612,11 @@ const canCancel = computed(() => {
 
 const itemColumns: TableColumn[] = [
   { key: "name", label: "Sản phẩm" },
-  { key: "sku", label: "SKU", width: "120px" },
-  { key: "unit_price", label: "Đơn giá", align: "right", width: "130px" },
-  { key: "quantity", label: "SL", align: "center", width: "60px" },
-  { key: "total_price", label: "Thành tiền", align: "right", width: "140px" },
+  { key: "sku", label: "SKU", width: "100px" },
+  { key: "size", label: "Size", width: "60px" },
+  { key: "unit_price", label: "Đơn giá", align: "right", width: "110px" },
+  { key: "status", label: "Trạng thái", align: "center", width: "90px" },
+  { key: "shipment", label: "Vận chuyển", width: "140px" },
 ];
 
 function getOrderCreatedAtTimestamp(order: OrderModel): number {
@@ -636,6 +676,28 @@ function paymentBadgeVariant(status: string): string {
     failed: "danger",
   };
   return map[status] ?? "neutral";
+}
+
+function itemStatusVariant(status: string): BadgeVariant {
+  const map: Record<string, BadgeVariant> = {
+    pending: "warning",
+    shipped: "info",
+    delivered: "success",
+    returned: "danger",
+    cancelled: "neutral",
+  };
+  return map[status] ?? "neutral";
+}
+
+function itemStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    pending: "Chờ xử lý",
+    shipped: "Đã giao",
+    delivered: "Đã nhận",
+    returned: "Đã trả",
+    cancelled: "Đã hủy",
+  };
+  return map[status] ?? status;
 }
 
 async function handleConfirm(): Promise<void> {

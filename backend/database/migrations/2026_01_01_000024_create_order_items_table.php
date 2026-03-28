@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,20 +12,28 @@ return new class extends Migration {
         Schema::create('order_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('order_id')->constrained()->cascadeOnDelete();
-            $table->uuid('product_id')->nullable();
+            $table->foreignUuid('product_id')->nullable();
             $table->foreign('product_id')->references('id')->on('products')->nullOnDelete();
-            $table->uuid('product_variant_id')->nullable();
-            $table->foreign('product_variant_id')->references('id')->on('product_variants')->nullOnDelete();
             $table->string('sku', 100);
             $table->string('name', 255);
-            $table->string('size', 50)->nullable();
+            $table->foreignUuid('size_option_id')->nullable();
+            $table->foreign('size_option_id')->references('id')->on('size_options')->nullOnDelete();
             $table->string('color', 100)->nullable();
             $table->bigInteger('unit_price');
             $table->bigInteger('cost_price')->default(0);
-            $table->integer('quantity');
-            $table->integer('quantity_returned')->default(0);
             $table->bigInteger('discount_amount')->default(0);
-            $table->bigInteger('total_price');
+            $table->foreignUuid('inventory_id')->nullable();
+            $table->foreign('inventory_id')->references('id')->on('inventory')->nullOnDelete();
+            $table->foreignUuid('shipment_id')->nullable();
+            $table->foreign('shipment_id')->references('id')->on('shipments')->nullOnDelete();
+            $table->enum('status', ['pending', 'picked', 'packed', 'shipped', 'delivered', 'returned', 'cancelled'])->default('pending');
+            $table->timestamp('picked_at')->nullable();
+            $table->foreignUuid('picked_by')->nullable();
+            $table->foreign('picked_by')->references('id')->on('users')->nullOnDelete();
+            $table->timestamp('packed_at')->nullable();
+            $table->foreignUuid('packed_by')->nullable();
+            $table->foreign('packed_by')->references('id')->on('users')->nullOnDelete();
+            $table->timestamp('returned_at')->nullable();
             $table->timestamps();
         });
 
@@ -70,7 +80,7 @@ return new class extends Migration {
             $table->uuid('claim_id')->nullable();
             $table->foreign('claim_id')->references('id')->on('order_claims')->nullOnDelete();
             $table->enum('status', ['requested', 'approved', 'in_transit', 'received', 'inspected', 'processed', 'rejected'])->default('requested');
-            $table->jsonb('return_items'); // [{order_item_id, qty, reason, condition, refund_amount}]
+            $table->jsonb('return_items');
             $table->string('return_courier', 50)->nullable();
             $table->string('return_tracking', 100)->nullable();
             $table->bigInteger('total_refund')->nullable();

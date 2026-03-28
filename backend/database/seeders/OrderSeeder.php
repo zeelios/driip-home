@@ -8,18 +8,19 @@ use App\Domain\Customer\Models\Customer;
 use App\Domain\Order\Models\Order;
 use App\Domain\Order\Models\OrderItem;
 use App\Domain\Product\Models\Product;
+use App\Domain\Product\Models\SizeOption;
 use App\Domain\Warehouse\Models\Warehouse;
 use Illuminate\Database\Seeder;
 
 /**
- * Seed 10 sample orders with order items.
+ * Seed sample orders with individual line items for each physical product.
  */
 class OrderSeeder extends Seeder
 {
     public function run(): void
     {
         $customers = Customer::limit(10)->get();
-        $products = Product::limit(10)->get();
+        $products = Product::with('category.sizeOptions')->limit(10)->get();
         $warehouses = Warehouse::all();
 
         if ($customers->isEmpty() || $products->isEmpty()) {
@@ -89,24 +90,41 @@ class OrderSeeder extends Seeder
                 ],
             );
 
-            // Create order item
-            OrderItem::updateOrCreate(
-                ['order_id' => $order->id, 'sku' => $product?->sku ?? 'DRP-SKU-DEFAULT'],
-                [
+            // Get a random size option for this product's category
+            $sizeOption = null;
+            if ($product?->category?->sizeOptions?->isNotEmpty()) {
+                $sizeOption = $product->category->sizeOptions->random();
+            }
+
+            // Create individual order item rows (one per quantity)
+            for ($q = 0; $q < $quantity; $q++) {
+                OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product?->id,
                     'sku' => $product?->sku ?? 'DRP-SKU-DEFAULT',
                     'name' => $product?->name ?? 'Sản phẩm Driip',
-                    'size' => null,
+                    'size_option_id' => $sizeOption?->id,
                     'color' => null,
                     'unit_price' => $unitPrice,
                     'cost_price' => $product?->cost_price ?? (int) round($unitPrice * 0.6),
-                    'quantity' => $quantity,
-                    'quantity_returned' => 0,
                     'discount_amount' => 0,
-                    'total_price' => $unitPrice * $quantity,
-                ],
-            );
+                    'status' => $this->resolveItemStatus($order->status),
+                ]);
+            }
         }
+    }
+
+    /**
+     * Resolve order item status from parent order status.
+     */
+    private function resolveItemStatus(string $orderStatus): string
+    {
+        return match ($orderStatus) {
+            'pending', 'confirmed', 'processing' => 'pending',
+            'packed', 'shipped' => 'shipped',
+            'delivered' => 'delivered',
+            'cancelled' => 'cancelled',
+            default => 'pending',
+        };
     }
 }

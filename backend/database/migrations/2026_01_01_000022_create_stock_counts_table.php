@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('stock_counts', function (Blueprint $table) {
@@ -31,7 +30,7 @@ return new class extends Migration
         Schema::create('stock_count_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('stock_count_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('product_variant_id')->constrained()->restrictOnDelete();
+            $table->foreignUuid('product_id')->constrained()->restrictOnDelete();
             $table->integer('quantity_expected');
             $table->integer('quantity_counted')->nullable();
             $table->integer('variance')->nullable(); // counted - expected
