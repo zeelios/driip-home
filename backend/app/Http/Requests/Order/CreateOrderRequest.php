@@ -45,6 +45,7 @@ class CreateOrderRequest extends ApiRequest
             'items.*.product_variant_id' => ['required', 'uuid'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'integer', 'min:0'],
+            'items.*.size' => ['nullable', 'string', 'max:50'],
             'coupon_code' => ['nullable', 'string'],
             'loyalty_points_to_use' => ['nullable', 'integer', 'min:0'],
             'warehouse_id' => ['nullable', 'uuid'],
@@ -78,6 +79,7 @@ class CreateOrderRequest extends ApiRequest
                 productVariantId: $item['product_variant_id'],
                 quantity: (int) $item['quantity'],
                 unitPrice: (int) $item['unit_price'],
+                size: $item['size'] ?? null,
             ),
             $data['items']
         );

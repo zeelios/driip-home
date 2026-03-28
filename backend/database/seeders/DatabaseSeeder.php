@@ -59,6 +59,9 @@ class DatabaseSeeder extends Seeder
         // 8. Categories
         $this->call(CategorySeeder::class);
 
+        // 8.5. Size options linked to categories
+        $this->call(SizeSeeder::class);
+
         // 9. Staff accounts
         $this->call(StaffSeeder::class);
 

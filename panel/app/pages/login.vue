@@ -24,7 +24,7 @@
           type="email"
           inputmode="email"
           autocomplete="username"
-          placeholder="you@driip.vn"
+          placeholder="you@driip.io"
           required
         />
 

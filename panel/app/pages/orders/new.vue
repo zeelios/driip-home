@@ -1,162 +1,49 @@
 <template>
   <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-    <!-- Search input -->
-    <div class="mb-6">
-      <div class="relative">
-        <input
-          ref="searchInput"
-          v-model="globalSearch"
-          type="text"
-          placeholder="Tìm kiếm đơn hàng, sản phẩm, khách hàng..."
-          class="w-full rounded-lg border border-white/12 bg-white/4 px-4 py-3 pr-10 text-sm text-white placeholder-white/35 focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/20"
-          @focus="onSearchFocus"
-        />
-        <div
-          class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            class="text-neutral-400"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-        </div>
-      </div>
-    </div>
-
     <!-- Page header -->
-    <div class="mb-6 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <NuxtLink
-          to="/orders"
-          class="flex items-center gap-1.5 text-sm text-white/50 hover:text-white/80 transition-colors"
+    <div class="mb-6">
+      <!-- Back link -->
+      <NuxtLink
+        to="/orders"
+        class="inline-flex items-center gap-1 text-[0.8125rem] text-white/50 no-underline transition-colors duration-130 hover:text-white/80 mb-4"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-          Đơn hàng
-        </NuxtLink>
-        <h1 class="text-2xl font-semibold text-white tracking-tight">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Đơn hàng
+      </NuxtLink>
+
+      <!-- Title row -->
+      <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
+        <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">
           Tạo đơn hàng mới
         </h1>
       </div>
     </div>
 
     <!-- Main content -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
+    <form
+      class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]"
+      @submit.prevent="handleCreate"
+    >
       <!-- Left column -->
       <div class="flex flex-col gap-5">
-        <!-- Products section -->
-        <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
-          <p class="mb-5 text-sm font-semibold text-white">Sản phẩm</p>
-          <div class="mb-5">
-            <ZSelect
-              v-model="selectedProductId"
-              :options="productSelectOptions"
-              label="Tìm sản phẩm"
-              placeholder="Nhập tên hoặc SKU sản phẩm..."
-              :searchable="true"
-              :async="true"
-              :loading="productSearchLoading"
-              @search="onProductSearch"
-              @update:model-value="onProductSelect"
-            />
-          </div>
-          <div v-if="selectedProductHasOptions" class="mb-5">
-            <ZSelect
-              v-model="selectedProductOptionId"
-              :options="selectedProductVariantOptions"
-              label="Chọn tuỳ chọn / biến thể"
-              placeholder="Chọn đúng biến thể của sản phẩm"
-              @update:model-value="onProductVariantSelect"
-            />
-          </div>
-          <div v-if="selectedItems.length > 0" class="flex flex-col gap-3">
-            <div
-              v-for="(item, index) in selectedItems"
-              :key="item.product_variant_id"
-              class="flex items-center justify-between rounded-lg border border-white/6 bg-white/4 p-4 transition-all hover:border-white/10"
-            >
-              <div class="flex items-center gap-3">
-                <img
-                  :src="item.image || '/placeholder.png'"
-                  :alt="item.name"
-                  class="h-12 w-12 rounded-lg object-cover border border-white/10"
-                />
-                <div>
-                  <p class="font-medium text-white">{{ item.name }}</p>
-                  <p class="text-sm text-white/50">{{ item.variant }}</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-4">
-                <ZInput
-                  :model-value="item.quantity"
-                  type="number"
-                  min="1"
-                  class="w-20"
-                  @update:modelValue="updateQuantity(index, Number($event))"
-                />
-                <span class="min-w-24 text-right font-semibold text-white">
-                  {{ formatVnd(item.unit_price * item.quantity) }}
-                </span>
-                <button
-                  class="rounded-lg p-2 text-white/40 hover:bg-white/10 hover:text-white/70 transition-colors"
-                  @click="removeItem(index)"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div v-else class="py-12 text-center">
-            <div
-              class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/6"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                class="text-white/35"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
-              </svg>
-            </div>
-            <p class="text-sm text-neutral-400">
-              Chưa có sản phẩm nào được chọn
-            </p>
-          </div>
-        </div>
+        <OrderLineItemsSection />
 
         <!-- Payment section -->
         <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
-          <p class="mb-5 text-sm font-semibold text-white">Thanh toán</p>
+          <p
+            class="m-0 mb-5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Thanh toán
+          </p>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <ZSelect
               v-model="form.payment_method"
@@ -193,7 +80,11 @@
 
         <!-- Notes section -->
         <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
-          <p class="mb-5 text-sm font-semibold text-white">Ghi chú</p>
+          <p
+            class="m-0 mb-5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Ghi chú
+          </p>
           <div class="flex flex-col gap-4">
             <ZTextarea
               v-model="form.notes"
@@ -215,7 +106,11 @@
       <div class="flex flex-col gap-5">
         <!-- Customer section -->
         <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
-          <p class="mb-5 text-sm font-semibold text-white">Khách hàng</p>
+          <p
+            class="m-0 mb-5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Khách hàng
+          </p>
 
           <div class="relative flex flex-col gap-4">
             <ZSelect
@@ -263,6 +158,7 @@
                 </div>
                 <button
                   class="p-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
+                  type="button"
                   @click="clearCustomer"
                 >
                   <svg
@@ -284,7 +180,11 @@
 
         <!-- Shipping section -->
         <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
-          <p class="mb-5 text-sm font-semibold text-white">Giao hàng</p>
+          <p
+            class="m-0 mb-5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Giao hàng
+          </p>
           <div class="flex flex-col gap-4">
             <ZInput
               v-model="form.shipping_name"
@@ -322,6 +222,7 @@
               label="Tỉnh/Thành phố *"
               placeholder="Chọn tỉnh/thành phố"
               :error="formErrors.shipping_province"
+              :searchable="true"
             />
             <ZInput
               v-model="form.shipping_zip"
@@ -334,14 +235,23 @@
 
         <!-- Discount section -->
         <div class="rounded-xl border border-white/8 bg-[#111111] p-6">
-          <p class="mb-5 text-sm font-semibold text-white">Giảm giá</p>
+          <p
+            class="m-0 mb-5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Giảm giá
+          </p>
           <div class="flex gap-3">
             <ZInput
               v-model="form.coupon_code"
               placeholder="Nhập mã giảm giá"
               class="flex-1"
             />
-            <ZButton variant="outline" size="sm" @click="applyCoupon">
+            <ZButton
+              variant="outline"
+              size="sm"
+              type="button"
+              @click="applyCoupon"
+            >
               Áp dụng
             </ZButton>
           </div>
@@ -349,7 +259,11 @@
 
         <!-- Summary section -->
         <div class="rounded-xl border border-white/10 bg-[#141414] p-6">
-          <p class="mb-5 text-sm font-semibold text-white">Tổng cộng</p>
+          <p
+            class="m-0 mb-5 text-[0.6875rem] font-bold tracking-[0.07em] uppercase text-white/50"
+          >
+            Tổng cộng
+          </p>
           <div class="flex flex-col gap-3">
             <div class="flex justify-between text-sm">
               <span class="text-white/50">Tạm tính</span>
@@ -379,11 +293,12 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex gap-3">
+        <div class="flex gap-3 sm:flex-row flex-col">
           <ZButton
             variant="outline"
             size="md"
             class="flex-1"
+            type="button"
             @click="navigateTo('/orders')"
           >
             Hủy
@@ -392,14 +307,14 @@
             variant="primary"
             size="md"
             class="flex-1"
+            type="submit"
             :loading="formPending"
-            @click="handleCreate"
           >
             Tạo đơn hàng
           </ZButton>
         </div>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -408,6 +323,7 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { formatVnd } from "~/utils/format";
 import { useOrderCreateStore } from "~/stores/order-create";
+import OrderLineItemsSection from "~/components/orders/order-line-items-section.vue";
 
 definePageMeta({ layout: "panel" });
 
@@ -417,17 +333,10 @@ const {
   selectedCustomer,
   selectedCustomerId,
   customerSearchLoading,
-  selectedItems,
   formPending,
-  selectedProductId,
-  selectedProductOptionId,
-  productSearchLoading,
   form,
   formErrors,
   customerSelectOptions,
-  productSelectOptions,
-  selectedProductVariantOptions,
-  selectedProductHasOptions,
   provinceOptions,
   paymentMethodOptions,
   paymentStatusOptions,
@@ -439,22 +348,10 @@ const {
 } = storeToRefs(orderCreate);
 
 const {
-  onSearchFocus: focusSearchInput,
-  onProductSelect,
-  onProductVariantSelect,
-  onProductSearch,
   onCustomerSearch,
   onCustomerSelect,
   clearCustomer,
-  removeItem,
-  updateQuantity,
   applyCoupon,
   handleCreate,
 } = orderCreate;
-
-const globalSearch = ref("");
-const searchInput = ref<HTMLInputElement | null>(null);
-function onSearchFocus(): void {
-  focusSearchInput(searchInput.value);
-}
 </script>

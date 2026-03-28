@@ -15,6 +15,8 @@ use App\Domain\Order\Models\Order;
 use App\Domain\Order\Models\OrderItem;
 use App\Domain\Order\Models\OrderStatusHistory;
 use App\Domain\Order\Services\OrderActivityLogger;
+use App\Domain\Product\Models\Product;
+use App\Domain\Product\Models\ProductVariant;
 use App\Domain\Shared\Traits\GeneratesCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -147,16 +149,68 @@ class CreateOrderAction
         $snapshots = [];
 
         foreach ($items as $item) {
-            $variant = \App\Domain\Product\Models\ProductVariant::findOrFail($item->productVariantId);
+            $variant = ProductVariant::with('product')->find($item->productVariantId);
+            $product = null;
+            $attributeValues = [];
+
+            if ($variant !== null) {
+                $product = $variant->product ?? Product::find($variant->product_id);
+                $attributeValues = is_array($variant->attribute_values) ? $variant->attribute_values : [];
+
+                $snapshots[] = [
+                    'product_id' => $variant->product_id,
+                    'product_variant_id' => $variant->id,
+                    'sku' => $variant->sku,
+                    'name' => $product?->name ?? $variant->sku,
+                    'size' => $this->resolveSnapshotSize($attributeValues, $item->size),
+                    'color' => $this->resolveSnapshotAttribute($attributeValues, ['color', 'colour']),
+                    'unit_price' => $item->unitPrice,
+                    'cost_price' => $variant->cost_price ?? 0,
+                    'quantity' => $item->quantity,
+                    'quantity_returned' => 0,
+                    'discount_amount' => 0,
+                    'total_price' => $item->unitPrice * $item->quantity,
+                ];
+
+                continue;
+            }
+
+            $product = Product::findOrFail($item->productVariantId);
+
+            $resolvedVariant = $this->resolveProductVariantFromProduct($product, $item->size);
+
+            if ($resolvedVariant !== null) {
+                $attributeValues = is_array($resolvedVariant->attribute_values)
+                    ? $resolvedVariant->attribute_values
+                    : [];
+
+                $snapshots[] = [
+                    'product_id' => $product->id,
+                    'product_variant_id' => $resolvedVariant->id,
+                    'sku' => $resolvedVariant->sku,
+                    'name' => $product->name,
+                    'size' => $this->resolveSnapshotSize($attributeValues, $item->size),
+                    'color' => $this->resolveSnapshotAttribute($attributeValues, ['color', 'colour']),
+                    'unit_price' => $item->unitPrice,
+                    'cost_price' => $resolvedVariant->cost_price ?? 0,
+                    'quantity' => $item->quantity,
+                    'quantity_returned' => 0,
+                    'discount_amount' => 0,
+                    'total_price' => $item->unitPrice * $item->quantity,
+                ];
+
+                continue;
+            }
 
             $snapshots[] = [
-                'product_variant_id' => $variant->id,
-                'sku' => $variant->sku,
-                'name' => $variant->product?->name ?? $variant->sku,
-                'size' => $variant->attribute_values['size'] ?? null,
-                'color' => $variant->attribute_values['color'] ?? null,
+                'product_id' => $product->id,
+                'product_variant_id' => null,
+                'sku' => $product->sku ?? $product->id,
+                'name' => $product->name,
+                'size' => $this->resolveSnapshotSize($attributeValues, $item->size),
+                'color' => $this->resolveSnapshotAttribute($attributeValues, ['color', 'colour']),
                 'unit_price' => $item->unitPrice,
-                'cost_price' => $variant->cost_price ?? 0,
+                'cost_price' => $product->cost_price ?? 0,
                 'quantity' => $item->quantity,
                 'quantity_returned' => 0,
                 'discount_amount' => 0,
@@ -165,6 +219,82 @@ class CreateOrderAction
         }
 
         return $snapshots;
+    }
+
+    /**
+     * Resolve the displayed size snapshot from variant attributes and user input.
+     *
+     * @param  array<string,mixed>  $attributeValues
+     * @param  string|null          $fallbackSize
+     * @return string|null
+     */
+    private function resolveSnapshotSize(array $attributeValues, ?string $fallbackSize): ?string
+    {
+        $size = $this->resolveSnapshotAttribute($attributeValues, ['size', 'size_code', 'size_name', 'size_label']);
+
+        return $size ?? $fallbackSize;
+    }
+
+    /**
+     * Resolve a scalar snapshot attribute from a variant attribute array.
+     *
+     * @param  array<string,mixed>  $attributeValues
+     * @param  array<int,string>    $keys
+     * @return string|null
+     */
+    private function resolveSnapshotAttribute(array $attributeValues, array $keys): ?string
+    {
+        foreach ($keys as $key) {
+            if (!array_key_exists($key, $attributeValues)) {
+                continue;
+            }
+
+            $value = $attributeValues[$key];
+
+            if (is_scalar($value) && trim((string) $value) !== '') {
+                return trim((string) $value);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the concrete product variant for a product/size selection.
+     *
+     * @param  Product       $product
+     * @param  string|null   $size
+     * @return \App\Domain\Product\Models\ProductVariant|null
+     */
+    private function resolveProductVariantFromProduct(Product $product, ?string $size): ?\App\Domain\Product\Models\ProductVariant
+    {
+        $variants = ProductVariant::where('product_id', $product->id)
+            ->where('status', 'active')
+            ->get();
+
+        if ($variants->isEmpty()) {
+            return null;
+        }
+
+        if ($size === null) {
+            return $variants->first();
+        }
+
+        $normalizedSize = strtolower(trim($size));
+
+        $matchedVariant = $variants->first(function (ProductVariant $variant) use ($normalizedSize): bool {
+            $attributeValues = is_array($variant->attribute_values) ? $variant->attribute_values : [];
+
+            $candidate = $this->resolveSnapshotAttribute($attributeValues, ['size', 'size_code', 'size_name', 'size_label']);
+
+            if ($candidate === null) {
+                return false;
+            }
+
+            return strtolower(trim($candidate)) === $normalizedSize;
+        });
+
+        return $matchedVariant instanceof ProductVariant ? $matchedVariant : $variants->first();
     }
 
     /**

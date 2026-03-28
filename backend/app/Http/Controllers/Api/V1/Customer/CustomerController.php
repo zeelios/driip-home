@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -68,6 +69,73 @@ class CustomerController extends BaseApiController implements HasMiddleware
             return CustomerResource::collection($customers);
         } catch (\Throwable $e) {
             return $this->serverError($e, 'LIST_CUSTOMERS');
+        }
+    }
+
+    /**
+     * Search customers for the order/customer picker.
+     *
+     * Returns a Meilisearch-style response shape so the panel can keep using
+     * the same store contract regardless of whether Scout succeeds or the
+     * fallback DB query is used.
+     *
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $query = trim((string) $request->input('q', ''));
+        $limit = min((int) $request->input('limit', 10), 50);
+
+        if ($query === '') {
+            return response()->json([
+                'hits' => [],
+                'query' => $query,
+                'processingTimeMs' => 0,
+                'limit' => $limit,
+                'offset' => 0,
+                'estimatedTotalHits' => 0,
+            ]);
+        }
+
+        try {
+            $customers = Customer::search($query)
+                ->take($limit)
+                ->get()
+                ->filter(static fn(Customer $customer): bool => !$customer->is_blocked)
+                ->values();
+
+            return response()->json([
+                'hits' => CustomerResource::collection($customers)->resolve(),
+                'query' => $query,
+                'processingTimeMs' => 0,
+                'limit' => $limit,
+                'offset' => 0,
+                'estimatedTotalHits' => $customers->count(),
+            ]);
+        } catch (\Throwable $e) {
+            $customers = Customer::query()
+                ->where(function ($builder) use ($query): void {
+                    $like = '%' . Str::lower($query) . '%';
+                    $builder
+                        ->whereRaw('LOWER(first_name) LIKE ?', [$like])
+                        ->orWhereRaw('LOWER(last_name) LIKE ?', [$like])
+                        ->orWhereRaw('LOWER(email) LIKE ?', [$like])
+                        ->orWhereRaw('LOWER(phone) LIKE ?', [$like])
+                        ->orWhereRaw('LOWER(customer_code) LIKE ?', [$like]);
+                })
+                ->where('is_blocked', false)
+                ->limit($limit)
+                ->get();
+
+            return response()->json([
+                'hits' => CustomerResource::collection($customers)->resolve(),
+                'query' => $query,
+                'processingTimeMs' => 0,
+                'limit' => $limit,
+                'offset' => 0,
+                'estimatedTotalHits' => $customers->count(),
+            ]);
         }
     }
 

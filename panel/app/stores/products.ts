@@ -34,7 +34,7 @@ interface ProductFilters {
   per_page: number;
 }
 
-interface ProductSearchVariantOption {
+export interface ProductSearchVariantOption {
   id: string;
   name: string;
   sku: string | null;
@@ -51,9 +51,18 @@ interface ProductSearchVariantOption {
     effective_price?: number;
     currency?: string;
   };
+  size_options: ProductSearchSizeOption[];
 }
 
-interface ProductSearchResult {
+export interface ProductSearchSizeOption {
+  id: string;
+  code: string;
+  display_name: string;
+  size_type: string;
+  label: string;
+}
+
+export interface ProductSearchResult {
   id: string;
   name: string;
   slug: string;
@@ -71,6 +80,7 @@ interface ProductSearchResult {
     effective_price?: number;
     currency?: string;
   };
+  size_options: ProductSearchSizeOption[];
   variant_options: ProductSearchVariantOption[];
 }
 

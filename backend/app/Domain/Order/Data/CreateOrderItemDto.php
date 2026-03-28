@@ -18,10 +18,13 @@ readonly class CreateOrderItemDto
      * @param  string  $productVariantId  UUID of the product variant.
      * @param  int     $quantity          Number of units ordered (minimum 1).
      * @param  int     $unitPrice         Agreed unit price in VND (minor units).
+     * @param  string|null $size          Selected size snapshot, if applicable.
      */
     public function __construct(
         public string $productVariantId,
-        public int    $quantity,
-        public int    $unitPrice,
-    ) {}
+        public int $quantity,
+        public int $unitPrice,
+        public ?string $size = null,
+    ) {
+    }
 }

@@ -54,7 +54,7 @@ class OrderController extends BaseApiController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:orders.view|orders.view.own', only: ['index']),
+            new Middleware('permission:orders.view|orders.view.own', only: ['index', 'search']),
             new Middleware('permission:orders.view|orders.view.own', only: ['show']),
             new Middleware('permission:orders.create', only: ['store']),
             new Middleware('permission:orders.update|orders.update.own', only: ['update']),
@@ -85,6 +85,7 @@ class OrderController extends BaseApiController implements HasMiddleware
             )
             ->allowedSorts('created_at', 'total_after_tax', 'order_number')
             ->with(['customer'])
+            ->orderBy('created_at', 'desc')
             ->paginate($request->integer('per_page', 20));
 
         return OrderResource::collection($orders);

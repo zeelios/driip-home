@@ -62,7 +62,7 @@ class ProductController extends BaseApiController implements HasMiddleware
             $products = Product::search($query)
                 ->take($limit)
                 ->get()
-                ->loadMissing(['brand', 'category', 'variantPeers', 'parentVariants'])
+                ->loadMissing(['brand', 'category', 'category.sizeOptions', 'variantPeers', 'parentVariants'])
                 ->filter(static fn(Product $product): bool => $product->status === 'active')
                 ->values();
 
@@ -109,8 +109,27 @@ class ProductController extends BaseApiController implements HasMiddleware
                                 'name' => $variant->category->name,
                                 'slug' => $variant->category->slug,
                             ] : null,
+                            'size_options' => $variant->relationLoaded('category') && $variant->category !== null
+                                ? $variant->category->availableSizes()->map(fn($sizeOption): array => [
+                                    'id' => $sizeOption->id,
+                                    'code' => $sizeOption->code,
+                                    'display_name' => $sizeOption->display_name,
+                                    'size_type' => $sizeOption->size_type,
+                                    'label' => $sizeOption->display_name ?: $sizeOption->code,
+                                ])->values()
+                                : collect(),
                         ];
                     });
+
+                $sizeOptions = $product->category?->availableSizes()
+                    ->map(fn($sizeOption): array => [
+                        'id' => $sizeOption->id,
+                        'code' => $sizeOption->code,
+                        'display_name' => $sizeOption->display_name,
+                        'size_type' => $sizeOption->size_type,
+                        'label' => $sizeOption->display_name ?: $sizeOption->code,
+                    ])
+                    ->values() ?? collect();
 
                 return [
                     'id' => $product->id,
@@ -143,6 +162,7 @@ class ProductController extends BaseApiController implements HasMiddleware
                     'description' => $product->description,
                     'meta_title' => $product->meta_title,
                     'meta_description' => $product->meta_description,
+                    'size_options' => $sizeOptions,
                     'variant_options' => $variantOptions,
                 ];
             });

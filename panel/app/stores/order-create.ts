@@ -7,10 +7,16 @@ import type { SelectOption } from "~/components/z/Select.vue";
 import type { CustomerModel } from "~~/types/generated/backend-models.generated";
 import { useCustomersStore } from "~/stores/customers";
 import { useProductsStore } from "~/stores/products";
+import type {
+  ProductSearchResult,
+  ProductSearchSizeOption,
+  ProductSearchVariantOption,
+} from "~/stores/products";
 import { getProvinceZipCode, vietnamProvinces } from "~/data/vietnam-addresses";
 
-interface SelectedItem {
+export interface SelectedItem {
   product_variant_id: string;
+  size: string | null;
   name: string;
   variant: string;
   image: string | null;
@@ -41,46 +47,6 @@ function resolveSearchPrice(
   return Number(rawPrice) || 0;
 }
 
-interface ProductSearchVariantOption {
-  id: string;
-  name: string;
-  sku: string | null;
-  compare_price?: number;
-  cost_price?: number;
-  selling_price?: number;
-  sale_price?: number;
-  effective_price?: number;
-  pricing?: {
-    compare_price?: number;
-    cost_price?: number;
-    selling_price?: number;
-    sale_price?: number;
-    effective_price?: number;
-    currency?: string;
-  };
-}
-
-interface ProductSearchResult {
-  id: string;
-  name: string;
-  slug: string;
-  sku_base: string | null;
-  compare_price?: number;
-  cost_price?: number;
-  selling_price?: number;
-  sale_price?: number;
-  effective_price?: number;
-  pricing?: {
-    compare_price?: number;
-    cost_price?: number;
-    selling_price?: number;
-    sale_price?: number;
-    effective_price?: number;
-    currency?: string;
-  };
-  variant_options: ProductSearchVariantOption[];
-}
-
 interface CreateOrderForm {
   customer_id: string;
   guest_name: string;
@@ -104,6 +70,7 @@ interface CreateOrderForm {
 
 interface CreateOrderErrors {
   customer: string;
+  items: string;
   shipping_address: string;
   shipping_name: string;
   shipping_phone: string;
@@ -134,6 +101,7 @@ const DEFAULT_FORM: CreateOrderForm = {
 
 const DEFAULT_ERRORS: CreateOrderErrors = {
   customer: "",
+  items: "",
   shipping_address: "",
   shipping_name: "",
   shipping_phone: "",
@@ -158,6 +126,7 @@ export const useOrderCreateStore = defineStore("order-create", () => {
   const selectedProductOptionId = ref<string | number | null>(null);
   const selectedProductOption = ref<ProductSearchVariantOption | null>(null);
   const selectedProductId = ref<string | number | null>(null);
+  const selectedSizeOptionId = ref<string | number | null>(null);
   const productResults = ref<ProductSearchResult[]>([]);
   const productSearchLoading = ref(false);
 
@@ -198,6 +167,13 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     }));
   });
 
+  const selectedProductSizeOptions = computed<SelectOption[]>(() => {
+    return (selectedProduct.value?.size_options ?? []).map((option) => ({
+      value: option.id,
+      label: option.label,
+    }));
+  });
+
   const selectedProductVariantOptions = computed<SelectOption[]>(() => {
     return (selectedProduct.value?.variant_options ?? []).map((option) => ({
       value: option.id,
@@ -207,9 +183,27 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     }));
   });
 
-  const selectedProductHasOptions = computed(
+  const selectedProductHasSizeOptions = computed(
+    () => selectedProductSizeOptions.value.length > 0
+  );
+
+  const selectedProductHasVariantOptions = computed(
     () => selectedProductVariantOptions.value.length > 0
   );
+
+  const selectedProductHasOptions = computed(
+    () =>
+      selectedProductHasSizeOptions.value ||
+      selectedProductHasVariantOptions.value
+  );
+
+  const selectedSizeOption = computed<ProductSearchSizeOption | null>(() => {
+    return (
+      selectedProduct.value?.size_options.find(
+        (option) => option.id === selectedSizeOptionId.value
+      ) ?? null
+    );
+  });
 
   const provinceOptions = computed<SelectOption[]>(() =>
     vietnamProvinces.map((province) => ({
@@ -240,6 +234,7 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     selectedProductOption.value = null;
     selectedProductId.value = null;
     selectedProductOptionId.value = null;
+    selectedSizeOptionId.value = null;
     customerResults.value = [];
     productResults.value = [];
     customerSearchLoading.value = false;
@@ -257,21 +252,35 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     form.value.guest_email = "";
   }
 
+  function clearProductDraft(): void {
+    selectedProduct.value = null;
+    selectedProductOption.value = null;
+    selectedProductId.value = null;
+    selectedProductOptionId.value = null;
+    selectedSizeOptionId.value = null;
+    formErrors.value.items = "";
+  }
+
   function onSearchFocus(input: HTMLInputElement | null): void {
     input?.select();
   }
 
   function addSelectedProductToOrder(
     product: ProductSearchResult,
-    variant: ProductSearchVariantOption | null
+    variant: ProductSearchVariantOption | null,
+    size: ProductSearchSizeOption | null
   ): void {
     const unitPrice = resolveSearchPrice(variant ?? product);
     const lineName = product.name;
-    const lineVariant = variant ? variant.name : product.sku_base || "Mặc định";
+    const lineVariant = variant
+      ? variant.name
+      : size?.label || product.sku_base || "Mặc định";
     const lineImage = null;
 
     const existingIndex = selectedItems.value.findIndex(
-      (item) => item.product_variant_id === (variant?.id ?? product.id)
+      (item) =>
+        item.product_variant_id === (variant?.id ?? product.id) &&
+        item.size === (size?.label ?? null)
     );
 
     if (existingIndex >= 0) {
@@ -283,6 +292,7 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     } else {
       selectedItems.value.push({
         product_variant_id: variant?.id ?? product.id,
+        size: size?.label ?? null,
         name: lineName,
         variant: lineVariant,
         image: lineImage,
@@ -291,10 +301,9 @@ export const useOrderCreateStore = defineStore("order-create", () => {
       });
     }
 
-    selectedProduct.value = null;
-    selectedProductOption.value = null;
-    selectedProductId.value = null;
-    selectedProductOptionId.value = null;
+    formErrors.value.items = "";
+
+    clearProductDraft();
   }
 
   function onProductSelect(productId: string | number): void {
@@ -307,11 +316,13 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     }
 
     selectedProduct.value = product;
+    formErrors.value.items = "";
     selectedProductOption.value = null;
     selectedProductOptionId.value = null;
+    selectedSizeOptionId.value = null;
 
-    if (!product.variant_options.length) {
-      addSelectedProductToOrder(product, null);
+    if (!product.variant_options.length && !product.size_options.length) {
+      addSelectedProductToOrder(product, null, null);
     }
   }
 
@@ -332,7 +343,51 @@ export const useOrderCreateStore = defineStore("order-create", () => {
 
     selectedProductOptionId.value = String(variantId);
     selectedProductOption.value = variant;
-    addSelectedProductToOrder(product, variant);
+    formErrors.value.items = "";
+
+    if (selectedSizeOption.value || !selectedProductHasSizeOptions.value) {
+      addSelectedProductToOrder(product, variant, selectedSizeOption.value);
+      clearProductDraft();
+    }
+  }
+
+  function onProductSizeSelect(sizeId: string | number): void {
+    const sizeOption = selectedProduct.value?.size_options.find(
+      (item) => item.id === String(sizeId)
+    );
+
+    if (!sizeOption) {
+      return;
+    }
+
+    selectedSizeOptionId.value = sizeOption.id;
+    selectedProductOption.value = null;
+    selectedProductOptionId.value = null;
+    formErrors.value.items = "";
+
+    if (!selectedProductHasVariantOptions.value) {
+      void commitSelectedProduct();
+    }
+  }
+
+  function commitSelectedProduct(): boolean {
+    if (!selectedProduct.value) {
+      return false;
+    }
+
+    const size = selectedSizeOption.value;
+
+    if (selectedProductHasSizeOptions.value && !size) {
+      formErrors.value.items = "Vui lòng chọn size cho sản phẩm này";
+      return false;
+    }
+
+    addSelectedProductToOrder(
+      selectedProduct.value,
+      selectedProductOption.value,
+      size
+    );
+    return true;
   }
 
   function removeItem(index: number): void {
@@ -377,7 +432,7 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     }, 200);
   }
 
-  function onCustomerSelect(value: string | number): void {
+  async function onCustomerSelect(value: string | number): Promise<void> {
     const customerId = String(value);
     const customer = customerResults.value.find(
       (item) => item.id === customerId
@@ -393,16 +448,47 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     form.value.shipping_name = `${customer.first_name} ${customer.last_name}`;
     form.value.shipping_phone = customer.phone || "";
     form.value.guest_email = customer.email || "";
+
+    // Fetch last order to auto-fill shipping address
+    await fetchCustomerLastOrder(customerId);
+  }
+
+  async function fetchCustomerLastOrder(customerId: string): Promise<void> {
+    try {
+      const response = await api.get<{
+        data: Array<{
+          id: string;
+          shipping_name: string;
+          shipping_phone: string;
+          shipping_address: string;
+          shipping_ward: string | null;
+          shipping_district: string | null;
+          shipping_province: string;
+          shipping_zip: string | null;
+        }>;
+      }>(`/orders?customer_id=${customerId}&page=1&per_page=1`);
+
+      const lastOrder = response.data?.[0];
+      if (lastOrder) {
+        // Only override if fields are empty or use customer's basic info
+        form.value.shipping_name =
+          lastOrder.shipping_name || form.value.shipping_name;
+        form.value.shipping_phone =
+          lastOrder.shipping_phone || form.value.shipping_phone;
+        form.value.shipping_address = lastOrder.shipping_address || "";
+        form.value.shipping_ward = lastOrder.shipping_ward || "";
+        form.value.shipping_district = lastOrder.shipping_district || "";
+        form.value.shipping_province = lastOrder.shipping_province || "";
+        form.value.shipping_zip = lastOrder.shipping_zip || "";
+      }
+    } catch {
+      // Silently fail - not critical for order creation
+    }
   }
 
   function validateForm(): boolean {
     let valid = true;
     formErrors.value = { ...DEFAULT_ERRORS };
-
-    if (!selectedCustomer.value && !form.value.customer_id) {
-      formErrors.value.customer = "Vui lòng chọn hoặc tạo khách hàng";
-      valid = false;
-    }
 
     if (!form.value.shipping_address.trim()) {
       formErrors.value.shipping_address = "Vui lòng nhập địa chỉ giao hàng";
@@ -438,6 +524,7 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     }
 
     if (selectedItems.value.length === 0) {
+      formErrors.value.items = "Vui lòng thêm ít nhất một sản phẩm";
       valid = false;
     }
 
@@ -456,6 +543,7 @@ export const useOrderCreateStore = defineStore("order-create", () => {
         product_variant_id: item.product_variant_id,
         quantity: item.quantity,
         unit_price: item.unit_price,
+        size: item.size,
       }));
 
       const payload: Record<string, unknown> = {
@@ -468,6 +556,11 @@ export const useOrderCreateStore = defineStore("order-create", () => {
         shipping_ward: form.value.shipping_ward || null,
         shipping_zip: form.value.shipping_zip || null,
         payment_method: form.value.payment_method || null,
+        payment_status: form.value.payment_status || null,
+        deposit_amount:
+          form.value.payment_status === "partial"
+            ? Math.max(0, Math.round(Number(form.value.deposit_amount) || 0))
+            : null,
         notes: form.value.notes || null,
         internal_notes: form.value.internal_notes || null,
         coupon_code: form.value.coupon_code || null,
@@ -558,6 +651,7 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     selectedProductId,
     selectedProductOptionId,
     selectedProductOption,
+    selectedSizeOptionId,
     productResults,
     productSearchLoading,
     form,
@@ -566,8 +660,12 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     shippingFee,
     customerSelectOptions,
     productSelectOptions,
+    selectedProductSizeOptions,
+    selectedProductHasSizeOptions,
+    selectedProductHasVariantOptions,
     selectedProductVariantOptions,
     selectedProductHasOptions,
+    selectedSizeOption,
     provinceOptions,
     paymentMethodOptions,
     paymentStatusOptions,
@@ -577,13 +675,16 @@ export const useOrderCreateStore = defineStore("order-create", () => {
     onSearchFocus,
     onProductSelect,
     onProductVariantSelect,
+    onProductSizeSelect,
     onProductSearch,
     onCustomerSearch,
     onCustomerSelect,
     clearCustomer,
+    clearProductDraft,
     removeItem,
     updateQuantity,
     applyCoupon,
+    commitSelectedProduct,
     handleCreate,
     validateForm,
     resetForm,

@@ -71,6 +71,7 @@ Route::prefix('v1/panel')->group(function () {
         Route::get('staff/{staff}/salary', [SalaryController::class, 'index']);
 
         // Customer Management
+        Route::get('customers/search', [CustomerController::class, 'search']);
         Route::apiResource('customers', CustomerController::class);
         Route::post('customers/{customer}/block', [CustomerController::class, 'block']);
         Route::get('customers/{customer}/orders', [CustomerController::class, 'orders']);
