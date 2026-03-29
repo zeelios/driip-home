@@ -37,62 +37,64 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Spatie roles
-        $this->call(RoleSeeder::class);
+        $this->call([
+                // 1. Spatie roles
+            RoleSeeder::class,
 
-        // 2-3. Permissions and role-permission mapping
-        $this->call(PermissionSeeder::class);
-        $this->call(RolePermissionSeeder::class);
+                // 2-3. Permissions and role-permission mapping
+            PermissionSeeder::class,
+            RolePermissionSeeder::class,
 
-        // 4. Loyalty tiers
-        $this->call(LoyaltyTierSeeder::class);
+                // 4. Loyalty tiers
+            LoyaltyTierSeeder::class,
 
-        // 5. Settings
-        $this->call(SettingsSeeder::class);
+                // 5. Settings
+            SettingsSeeder::class,
 
-        // 6. Tax configs (commented out for now)
-        // $this->call(TaxConfigSeeder::class);
+                // 6. Tax configs (commented out for now)
+                // TaxConfigSeeder::class,
 
-        // 7. Brands
-        $this->call(BrandSeeder::class);
+                // 7. Brands
+            BrandSeeder::class,
 
-        // 8. Categories
-        $this->call(CategorySeeder::class);
+                // 8. Categories
+            CategorySeeder::class,
 
-        // 8.5. Size options linked to categories
-        $this->call(SizeSeeder::class);
+                // 8.5. Size options linked to categories
+            SizeSeeder::class,
 
-        // 9. Staff accounts
-        $this->call(StaffSeeder::class);
+                // 9. Staff accounts
+            StaffSeeder::class,
 
-        // 10. Courier configs
-        $this->call(CourierConfigSeeder::class);
+                // 10. Courier configs
+            CourierConfigSeeder::class,
 
-        // 11. Warehouses
-        $this->call(WarehouseSeeder::class);
+                // 11. Warehouses
+            WarehouseSeeder::class,
 
-        // 12. Suppliers
-        $this->call(SupplierSeeder::class);
+                // 12. Suppliers
+            SupplierSeeder::class,
 
-        // 13. Products with inventory
-        $this->call(ProductSeeder::class);
+                // 13. Products with inventory
+            ProductSeeder::class,
 
-        // 14. Customers with loyalty accounts and addresses
-        $this->call(CustomerSeeder::class);
+                // 14. Customers with loyalty accounts and addresses
+            CustomerSeeder::class,
 
-        // 15. Coupons
-        $this->call(CouponSeeder::class);
+                // 15. Coupons
+            CouponSeeder::class,
 
-        // 16. Sale events
-        $this->call(SaleEventSeeder::class);
+                // 16. Sale events
+            SaleEventSeeder::class,
 
-        // 17. Notification templates
-        $this->call(NotificationTemplateSeeder::class);
+                // 17. Notification templates
+            NotificationTemplateSeeder::class,
 
-        // 18. Sample orders
-        $this->call(OrderSeeder::class);
+                // 18. Sample orders
+            OrderSeeder::class,
 
-        // 19. User accounts
-        $this->call(UserSeeder::class);
+                // 19. User accounts
+            UserSeeder::class,
+        ]);
     }
 }

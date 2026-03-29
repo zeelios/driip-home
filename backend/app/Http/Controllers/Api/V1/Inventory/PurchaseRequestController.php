@@ -159,6 +159,92 @@ class PurchaseRequestController extends BaseApiController implements HasMiddlewa
     }
 
     /**
+     * Get details of selected purchase request items by IDs.
+     * Items can be from either low_stock (inventory) or unfulfillable (order_items).
+     */
+    public function getSelectedItems(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'ids' => 'required|array|min:1',
+                'ids.*' => 'uuid',
+                'type' => 'required|in:low_stock,unfulfillable',
+            ]);
+
+            $ids = $validated['ids'];
+            $type = $validated['type'];
+
+            if ($type === 'low_stock') {
+                $items = Inventory::whereIn('id', $ids)
+                    ->with(['product', 'warehouse'])
+                    ->get();
+
+                $data = $items->map(function ($inv) {
+                    $product = $inv->product;
+                    $needed = max(($inv->reorder_point ?? 10) * 2 - $inv->quantity_available, 10);
+
+                    return [
+                        'id' => $inv->id,
+                        'type' => 'low_stock',
+                        'product_id' => $inv->product_id,
+                        'sku' => $product?->sku,
+                        'product_name' => $product?->name,
+                        'size_option_id' => null,
+                        'size_display' => null,
+                        'color' => null,
+                        'warehouse_id' => $inv->warehouse_id,
+                        'warehouse_name' => $inv->warehouse?->name,
+                        'quantity_needed' => $needed,
+                        'quantity_available' => $inv->quantity_available,
+                        'unit_cost' => $product?->cost_price ?? 0,
+                        'supplier' => null,
+                    ];
+                });
+            } else {
+                $items = OrderItem::whereIn('id', $ids)
+                    ->where('status', 'pending')
+                    ->with(['order', 'product', 'sizeOption'])
+                    ->get();
+
+                $data = $items->map(function ($item) {
+                    $product = $item->product;
+
+                    return [
+                        'id' => $item->id,
+                        'type' => 'unfulfillable',
+                        'product_id' => $item->product_id,
+                        'sku' => $item->sku,
+                        'product_name' => $item->name,
+                        'size_option_id' => $item->size_option_id,
+                        'size_display' => $item->sizeOption?->display_name ?? $item->sizeOption?->code,
+                        'color' => $item->color,
+                        'warehouse_id' => null,
+                        'warehouse_name' => null,
+                        'order_id' => $item->order_id,
+                        'order_number' => $item->order?->order_number,
+                        'quantity_needed' => 1,
+                        'unit_cost' => $product?->cost_price ?? 0,
+                        'supplier' => null,
+                    ];
+                });
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            return $this->serverError($e, 'GET_SELECTED_ITEMS');
+        }
+    }
+
+    /**
      * Group items by supplier for PO creation.
      * NOTE: Disabled until supplier relationship is implemented.
      */

@@ -12,25 +12,24 @@ interface ApiRequestOptions extends UseApiOptions {
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-const DEFAULT_API_BASE_URL = "/api/v1";
-const DEFAULT_SANCTUM_CSRF_URL = "/sanctum/csrf-cookie";
-const JSON_CONTENT_TYPE = "application/json";
-const XSRF_COOKIE_NAME = "XSRF-TOKEN";
-
-const CSRF_SAFE_METHODS = new Set<string>(["GET", "HEAD", "OPTIONS"]);
-
-let csrfCookiePromise: Promise<void> | null = null;
-
 interface ApiErrorLike {
   statusCode?: number;
   status?: number;
 }
 
+const DEFAULT_API_BASE_URL = "/api/v1";
+const DEFAULT_SANCTUM_CSRF_URL = "/sanctum/csrf-cookie";
+const JSON_CONTENT_TYPE = "application/json";
+const XSRF_COOKIE_NAME = "XSRF-TOKEN";
+const CSRF_SAFE_METHODS = new Set<string>(["GET", "HEAD", "OPTIONS"]);
+
+let csrfCookiePromise: Promise<void> | null = null;
+
 function normalizeUrl(
   value: string | null | undefined,
-  fallback: string
+  fallback: string,
 ): string {
-  const trimmedValue: string = String(value ?? "").trim();
+  const trimmedValue = String(value ?? "").trim();
 
   if (!trimmedValue) {
     return fallback;
@@ -52,7 +51,7 @@ function readCookie(name: string): string | null {
     return null;
   }
 
-  const cookiePart: string | undefined = document.cookie
+  const cookiePart = document.cookie
     .split("; ")
     .find((part: string): boolean => part.startsWith(`${name}=`));
 
@@ -65,6 +64,43 @@ function readCookie(name: string): string | null {
   return decodeURIComponent(rawValue);
 }
 
+function expireCookie(name: string, domain?: string): void {
+  if (!import.meta.client) {
+    return;
+  }
+
+  const parts = [
+    `${encodeURIComponent(name)}=`,
+    "expires=Thu, 01 Jan 1970 00:00:00 GMT",
+    "Max-Age=0",
+    "path=/",
+    "SameSite=Lax",
+  ];
+
+  if (domain) {
+    parts.push(`domain=${domain}`);
+  }
+
+  document.cookie = parts.join("; ");
+}
+
+function getCookieDomainCandidates(hostname: string): Array<string | undefined> {
+  const candidates: Array<string | undefined> = [undefined];
+
+  if (!hostname || hostname === "localhost" || /^[\d.:]+$/.test(hostname)) {
+    return candidates;
+  }
+
+  const parts = hostname.split(".").filter(Boolean);
+
+  for (let index = 0; index < parts.length - 1; index += 1) {
+    const domain = parts.slice(index).join(".");
+    candidates.push(domain, `.${domain}`);
+  }
+
+  return [...new Set(candidates)];
+}
+
 function getMethod(method?: HttpMethod): HttpMethod {
   return (method ?? "GET").toUpperCase() as HttpMethod;
 }
@@ -75,7 +111,7 @@ function isSafeMethod(method: HttpMethod): boolean {
 
 function createHeaders(
   defaultHeaders: Record<string, string>,
-  requestHeaders?: Record<string, string>
+  requestHeaders?: Record<string, string>,
 ): Record<string, string> {
   return {
     Accept: JSON_CONTENT_TYPE,
@@ -88,13 +124,13 @@ function createHeaders(
 
 function withXsrfHeader(
   headers: Record<string, string>,
-  method: HttpMethod
+  method: HttpMethod,
 ): Record<string, string> {
   if (isSafeMethod(method)) {
     return headers;
   }
 
-  const xsrfToken: string | null = readCookie(XSRF_COOKIE_NAME);
+  const xsrfToken = readCookie(XSRF_COOKIE_NAME);
 
   if (!xsrfToken) {
     return headers;
@@ -120,26 +156,52 @@ function getStatusCode(error: unknown): number | null {
   return null;
 }
 
+export function clearClientCookie(name: string): void {
+  if (!import.meta.client) {
+    return;
+  }
+
+  const domainCandidates = getCookieDomainCandidates(window.location.hostname);
+
+  for (const domain of domainCandidates) {
+    expireCookie(name, domain);
+  }
+}
+
+export function clearClientXsrfCookie(): void {
+  clearClientCookie(XSRF_COOKIE_NAME);
+}
+
+export function resetApiSessionState(options?: {
+  clearXsrfCookie?: boolean;
+}): void {
+  csrfCookiePromise = null;
+
+  if (options?.clearXsrfCookie) {
+    clearClientXsrfCookie();
+  }
+}
+
 export function useApi(defaultOptions: UseApiOptions = {}) {
   const runtimeConfig = useRuntimeConfig();
 
-  const apiBaseUrl: string = normalizeUrl(
+  const apiBaseUrl = normalizeUrl(
     String(runtimeConfig.public.apiUrl ?? DEFAULT_API_BASE_URL),
-    DEFAULT_API_BASE_URL
+    DEFAULT_API_BASE_URL,
   );
 
-  const sanctumCsrfUrl: string = normalizeUrl(
+  const sanctumCsrfUrl = normalizeUrl(
     String(runtimeConfig.public.sanctumCsrfUrl ?? DEFAULT_SANCTUM_CSRF_URL),
-    DEFAULT_SANCTUM_CSRF_URL
+    DEFAULT_SANCTUM_CSRF_URL,
   );
 
   function buildHeaders(
     method: HttpMethod,
-    options: UseApiOptions = {}
+    options: UseApiOptions = {},
   ): Record<string, string> {
-    const headers: Record<string, string> = createHeaders(
+    const headers = createHeaders(
       defaultOptions.headers ?? {},
-      options.headers
+      options.headers,
     );
 
     return withXsrfHeader(headers, method);
@@ -175,9 +237,9 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
 
   async function request<T>(
     path: string,
-    options: ApiRequestOptions = {}
+    options: ApiRequestOptions = {},
   ): Promise<T> {
-    const method: HttpMethod = getMethod(options.method);
+    const method = getMethod(options.method);
 
     if (!options.skipCsrf && !isSafeMethod(method)) {
       await ensureCsrfCookie();
@@ -207,7 +269,10 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
     }
   }
 
-  async function get<T>(path: string, options: UseApiOptions = {}): Promise<T> {
+  async function get<T>(
+    path: string,
+    options: UseApiOptions = {},
+  ): Promise<T> {
     return await request<T>(path, {
       ...options,
       method: "GET",
@@ -217,7 +282,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
   async function post<T>(
     path: string,
     body?: BodyInit | Record<string, unknown> | null,
-    options: UseApiOptions = {}
+    options: UseApiOptions = {},
   ): Promise<T> {
     return await request<T>(path, {
       ...options,
@@ -229,7 +294,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
   async function put<T>(
     path: string,
     body?: BodyInit | Record<string, unknown> | null,
-    options: UseApiOptions = {}
+    options: UseApiOptions = {},
   ): Promise<T> {
     return await request<T>(path, {
       ...options,
@@ -241,7 +306,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
   async function patch<T>(
     path: string,
     body?: BodyInit | Record<string, unknown> | null,
-    options: UseApiOptions = {}
+    options: UseApiOptions = {},
   ): Promise<T> {
     return await request<T>(path, {
       ...options,
@@ -252,7 +317,7 @@ export function useApi(defaultOptions: UseApiOptions = {}) {
 
   async function remove<T>(
     path: string,
-    options: UseApiOptions = {}
+    options: UseApiOptions = {},
   ): Promise<T> {
     return await request<T>(path, {
       ...options,

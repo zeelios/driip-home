@@ -38,6 +38,9 @@ class OrderResource extends JsonResource
                     'full_name' => $this->customer->fullName(),
                     'phone' => $this->customer->phone,
                     'email' => $this->customer->email,
+                    'total_orders' => $this->customer->total_orders,
+                    'total_spent' => $this->customer->total_spent,
+                    'last_ordered_at' => $this->customer->last_ordered_at?->toIso8601String(),
                 ]
             ),
             'guest_name' => $this->when($this->customer === null, $this->guest_name),

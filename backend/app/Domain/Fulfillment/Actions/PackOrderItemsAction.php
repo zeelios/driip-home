@@ -65,6 +65,7 @@ class PackOrderItemsAction
                 }
 
                 // Update all items in this order
+                /** @var \App\Domain\Order\Models\OrderItem $item */
                 foreach ($orderItems as $item) {
                     $item->update([
                         'status' => 'packed',
@@ -94,13 +95,13 @@ class PackOrderItemsAction
         $defaultCourier = $courierCode ?? config('couriers.default', 'ghtk');
 
         // Calculate total weight (default 500g per item if not specified)
-        $totalWeight = $items->sum(fn ($item) => $item->product?->weight_grams ?? 500);
+        $totalWeight = $items->sum(fn($item) => $item->product?->weight_grams ?? 500);
 
         return Shipment::create([
             'order_id' => $order->id,
             'courier_code' => $defaultCourier,
             'tracking_number' => null, // Will be filled after label generation
-            'status' => 'pending',
+            'status' => 'draft',
             'weight_grams' => $totalWeight,
             'package_count' => $items->count(),
             'label_url' => null,

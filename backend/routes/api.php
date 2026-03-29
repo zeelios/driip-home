@@ -167,6 +167,7 @@ Route::prefix('v1/panel')->group(function () {
         Route::get('purchase-requests', [PurchaseRequestController::class, 'index']);
         Route::get('purchase-requests/low-stock', [PurchaseRequestController::class, 'lowStock']);
         Route::get('purchase-requests/unfulfillable', [PurchaseRequestController::class, 'unfulfillable']);
+        Route::get('purchase-requests/selected-items', [PurchaseRequestController::class, 'getSelectedItems']);
         Route::get('purchase-requests/by-supplier', [PurchaseRequestController::class, 'bySupplier']);
         Route::post('purchase-requests/create-po', [PurchaseRequestController::class, 'createPurchaseOrders']);
         Route::post('purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve']);

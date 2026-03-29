@@ -62,7 +62,7 @@ abstract class AbstractCourierService
                     ->timeout(self::TIMEOUT)
                     ->acceptJson();
 
-                $response = strtolower($method) === 'get'
+                $response = strtolower((string) $method) === 'get'
                     ? $http->get($url, $query)
                     : $http->send(strtoupper($method), $url, [
                         'json' => $payload,

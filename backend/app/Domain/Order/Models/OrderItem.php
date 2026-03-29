@@ -42,8 +42,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read SizeOption|null  $sizeOption
  * @property-read Inventory|null   $inventory
  * @property-read Shipment|null    $shipment
- * @property-read \App\Domain\User\Models\User|null $pickedBy
- * @property-read \App\Domain\User\Models\User|null $packedBy
+ * @property-read \App\Domain\Staff\Models\User|null $pickedBy
+ * @property-read \App\Domain\Staff\Models\User|null $packedBy
  */
 class OrderItem extends Model
 {
@@ -138,20 +138,20 @@ class OrderItem extends Model
     /**
      * Get the user who picked this item.
      *
-     * @return BelongsTo<\App\Domain\User\Models\User, OrderItem>
+     * @return BelongsTo<\App\Domain\Staff\Models\User, OrderItem>
      */
     public function pickedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Domain\User\Models\User::class, 'picked_by');
+        return $this->belongsTo(\App\Domain\Staff\Models\User::class, 'picked_by');
     }
 
     /**
      * Get the user who packed this item.
      *
-     * @return BelongsTo<\App\Domain\User\Models\User, OrderItem>
+     * @return BelongsTo<\App\Domain\Staff\Models\User, OrderItem>
      */
     public function packedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Domain\User\Models\User::class, 'packed_by');
+        return $this->belongsTo(\App\Domain\Staff\Models\User::class, 'packed_by');
     }
 }

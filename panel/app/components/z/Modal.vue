@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch } from "vue";
 
 type ModalSize = "sm" | "md" | "lg" | "xl";
 
@@ -89,6 +89,21 @@ const sizeClass = computed(() => {
 function onBackdropClick(): void {
   if (props.closeOnBackdrop) emit("update:modelValue", false);
 }
+
+// Lock body scroll when modal is open
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (typeof document !== "undefined") {
+      if (isOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>

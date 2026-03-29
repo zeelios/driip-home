@@ -296,14 +296,26 @@ export const useProductsStore = defineStore("products", () => {
     if (!query.trim()) return [];
 
     try {
+      // Try /products?search= first (more reliable), fallback to /products/search
       const params = new URLSearchParams({
-        q: query.trim(),
-        limit: String(limit),
+        search: query.trim(),
+        per_page: String(limit),
       });
-      const response = await api.get<ProductSearchResponse>(
-        `/products/search?${params.toString()}`
+      const listResponse = await api.get<ProductListResponse>(
+        `/products?${params.toString()}`
       );
-      return response.data ?? [];
+
+      // Map ProductModel to ProductSearchResult
+      return (listResponse.data ?? []).map((p: ProductModel) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        sku_base: (p as any).sku ?? null,
+        cost_price: (p as any).cost_price ?? null,
+        selling_price: (p as any).selling_price ?? null,
+        size_options: [],
+        variant_options: [],
+      })) as ProductSearchResult[];
     } catch (error) {
       // Silently fail - user can retry by typing
       return [];

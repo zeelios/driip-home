@@ -3,20 +3,36 @@
     <!-- Stats Cards - Mobile: 2 columns, Desktop: 4 columns -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
       <div class="bg-[#111111] border border-white/8 rounded-lg p-2.5 sm:p-3">
-        <p class="text-[11px] sm:text-xs text-white/50 mb-0.5 sm:mb-1">Chờ xử lý</p>
-        <p class="text-lg sm:text-xl font-bold text-white/90">{{ stats.pending }}</p>
+        <p class="text-[11px] sm:text-xs text-white/50 mb-0.5 sm:mb-1">
+          Chờ xử lý
+        </p>
+        <p class="text-lg sm:text-xl font-bold text-white/90">
+          {{ stats.pending }}
+        </p>
       </div>
       <div class="bg-[#111111] border border-white/8 rounded-lg p-2.5 sm:p-3">
-        <p class="text-[11px] sm:text-xs text-white/50 mb-0.5 sm:mb-1">Đã pick</p>
-        <p class="text-lg sm:text-xl font-bold text-amber-500">{{ stats.picked }}</p>
+        <p class="text-[11px] sm:text-xs text-white/50 mb-0.5 sm:mb-1">
+          Đã pick
+        </p>
+        <p class="text-lg sm:text-xl font-bold text-amber-500">
+          {{ stats.picked }}
+        </p>
       </div>
       <div class="bg-[#111111] border border-white/8 rounded-lg p-2.5 sm:p-3">
-        <p class="text-[11px] sm:text-xs text-white/50 mb-0.5 sm:mb-1">Đã đóng gói</p>
-        <p class="text-lg sm:text-xl font-bold text-blue-500">{{ stats.packed_today }}</p>
+        <p class="text-[11px] sm:text-xs text-white/50 mb-0.5 sm:mb-1">
+          Đã đóng gói
+        </p>
+        <p class="text-lg sm:text-xl font-bold text-blue-500">
+          {{ stats.packed_today }}
+        </p>
       </div>
       <div class="bg-[#111111] border border-white/8 rounded-lg p-2.5 sm:p-3">
-        <p class="text-[11px] sm:text-xs text-white/50 mb-0.5 sm:mb-1">Đã giao</p>
-        <p class="text-lg sm:text-xl font-bold text-green-500">{{ stats.shipped_today }}</p>
+        <p class="text-[11px] sm:text-xs text-white/50 mb-0.5 sm:mb-1">
+          Đã giao
+        </p>
+        <p class="text-lg sm:text-xl font-bold text-green-500">
+          {{ stats.shipped_today }}
+        </p>
       </div>
     </div>
 
@@ -33,49 +49,79 @@
           @input="onSearchInput"
         >
           <template #prefix>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
             </svg>
           </template>
         </ZInput>
-        <ZSelect v-model="statusFilter" size="sm" class="w-full sm:w-36 shrink-0">
-          <option value="">Tất cả trạng thái</option>
-          <option value="pending">Chờ xử lý</option>
-          <option value="picked">Đã pick</option>
-          <option value="packed">Đã đóng gói</option>
-        </ZSelect>
+        <ZSelect
+          v-model="statusFilter"
+          size="sm"
+          class="w-full sm:w-36 shrink-0"
+          :options="statusOptions"
+        />
       </div>
-      
+
       <!-- Export Button (Mobile: Full width) -->
-      <ZButton 
-        size="sm" 
-        variant="outline" 
-        @click="showExportModal = true" 
+      <ZButton
+        size="sm"
+        variant="outline"
+        @click="showExportModal = true"
         :disabled="selectedItems.length === 0"
         class="w-full sm:w-auto"
       >
         <template #prefix>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
         </template>
-        Xuất {{ selectedItems.length > 0 ? `(${selectedItems.length})` : '' }}
+        Xuất {{ selectedItems.length > 0 ? `(${selectedItems.length})` : "" }}
       </ZButton>
     </div>
 
     <!-- Mobile-Optimized Bulk Actions Bar -->
-    <div v-if="selectedItems.length > 0" class="sticky top-14 z-10 mb-3 p-2.5 bg-blue-500/10 border border-blue-500/30 rounded-lg backdrop-blur-sm">
+    <div
+      v-if="selectedItems.length > 0"
+      class="sticky top-14 z-10 mb-3 p-2.5 bg-blue-500/10 border border-blue-500/30 rounded-lg backdrop-blur-sm"
+    >
       <div class="flex items-center justify-between gap-2">
-        <span class="text-sm text-white/80 font-medium">{{ selectedItems.length }} mục</span>
+        <span class="text-sm text-white/80 font-medium"
+          >{{ selectedItems.length }} mục</span
+        >
         <div class="flex items-center gap-2">
-          <ZButton size="sm" variant="outline" @click="handlePick" :loading="pickPending" class="px-3 py-1.5 min-h-[36px]">
+          <ZButton
+            size="sm"
+            variant="outline"
+            @click="handlePick"
+            :loading="pickPending"
+            class="px-3 py-1.5 min-h-9"
+          >
             <span class="hidden sm:inline">Đánh dấu đã pick</span>
             <span class="sm:hidden">Pick</span>
           </ZButton>
-          <ZButton size="sm" variant="primary" @click="showPackModal = true" class="px-3 py-1.5 min-h-[36px]">
+          <ZButton
+            size="sm"
+            variant="primary"
+            @click="showPackModal = true"
+            class="px-3 py-1.5 min-h-9"
+          >
             <span class="hidden sm:inline">Đóng gói</span>
             <span class="sm:hidden">Pack</span>
           </ZButton>
@@ -84,7 +130,10 @@
     </div>
 
     <!-- Error -->
-    <div v-if="listState === 'error'" class="flex items-center justify-between gap-3 py-3 px-4 mb-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-500">
+    <div
+      v-if="listState === 'error'"
+      class="flex items-center justify-between gap-3 py-3 px-4 mb-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-500"
+    >
       <span>{{ listError }}</span>
       <ZButton variant="ghost" size="sm" @click="fetchItems()">Thử lại</ZButton>
     </div>
@@ -92,54 +141,92 @@
     <!-- Mobile: Card-based layout | Desktop: Table -->
     <div class="block sm:hidden space-y-2">
       <!-- Mobile Cards -->
-      <div 
-        v-for="item in items" 
-        :key="item.id" 
+      <div
+        v-for="item in items"
+        :key="item.id"
         class="bg-[#111111] border border-white/8 rounded-lg p-3"
         :class="{ 'border-blue-500/30 bg-blue-500/5': isSelected(item) }"
         @click="toggleSelect(item)"
       >
         <div class="flex items-start justify-between gap-2 mb-2">
           <div class="flex-1 min-w-0">
-            <NuxtLink 
-              :to="`/orders/${item.order?.id}`" 
+            <NuxtLink
+              :to="`/orders/${item.order?.id}`"
               class="font-medium text-white/90 text-sm hover:text-blue-400 block truncate"
               @click.stop
             >
-              {{ item.order?.order_number ?? '—' }}
+              {{ item.order?.order_number ?? "—" }}
             </NuxtLink>
-            <span class="text-xs text-white/40">{{ formatDatetime(item.order?.created_at) }}</span>
+            <span class="text-xs text-white/40">{{
+              formatDatetime(item.order?.created_at)
+            }}</span>
           </div>
           <ZBadge :variant="statusVariant(item.status)" size="xs">
             {{ statusLabelShort(item.status) }}
           </ZBadge>
         </div>
-        
+
         <div class="flex items-center gap-2 mb-2">
-          <div class="w-4 h-4 rounded border border-white/20 flex items-center justify-center shrink-0" :class="{ 'bg-blue-500 border-blue-500': isSelected(item) }">
-            <svg v-if="isSelected(item)" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-white">
-              <polyline points="20 6 9 17 4 12"/>
+          <div
+            class="w-4 h-4 rounded border border-white/20 flex items-center justify-center shrink-0"
+            :class="{ 'bg-blue-500 border-blue-500': isSelected(item) }"
+          >
+            <svg
+              v-if="isSelected(item)"
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              class="text-white"
+            >
+              <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-sm text-white/85 truncate">{{ item.name }}</p>
             <p class="text-xs text-white/50 font-mono">{{ item.sku }}</p>
           </div>
-          <span v-if="item.size_display" class="text-xs text-white/70 bg-white/10 px-2 py-0.5 rounded">{{ item.size_display }}</span>
+          <span
+            v-if="item.size_display"
+            class="text-xs text-white/70 bg-white/10 px-2 py-0.5 rounded"
+            >{{ item.size_display }}</span
+          >
         </div>
-        
-        <div class="flex items-center justify-between pt-2 border-t border-white/5">
+
+        <div
+          class="flex items-center justify-between pt-2 border-t border-white/5"
+        >
           <div class="text-xs text-white/50">
-            {{ item.inventory?.warehouse?.name ?? '—' }}
+            {{ item.inventory?.warehouse?.name ?? "—" }}
           </div>
           <div class="flex items-center gap-1">
-            <ZButton v-if="item.status === 'pending'" size="xs" variant="outline" @click.stop="pickSingle(item)" class="min-h-[32px] px-2.5">
+            <ZButton
+              v-if="item.status === 'pending'"
+              size="sm"
+              variant="outline"
+              @click.stop="pickSingle(item)"
+              class="min-h-9 px-2.5"
+            >
               Pick
             </ZButton>
-            <ZButton v-if="item.status === 'picked'" size="xs" variant="primary" @click.stop="packSingle(item)" class="min-h-[32px] px-2.5">
+            <ZButton
+              v-if="item.status === 'picked'"
+              size="sm"
+              variant="primary"
+              @click.stop="packSingle(item)"
+              class="min-h-9 px-2.5"
+            >
               Pack
             </ZButton>
-            <ZButton v-if="item.shipment?.tracking_number" size="xs" variant="ghost" @click.stop="printLabel(item.shipment.tracking_number)" class="min-h-[32px] px-2">
+            <ZButton
+              v-if="item.shipment?.tracking_number"
+              size="sm"
+              variant="ghost"
+              @click.stop="printLabel(item.shipment.tracking_number)"
+              class="min-h-8 px-2"
+            >
               In
             </ZButton>
           </div>
@@ -161,44 +248,81 @@
       >
         <template #cell-order="{ row }">
           <div class="flex flex-col">
-            <NuxtLink :to="`/orders/${(row as FulfillmentItem).order?.id}`" class="font-medium text-white/90 hover:text-blue-400">
-              {{ (row as FulfillmentItem).order?.order_number ?? '—' }}
+            <NuxtLink
+              :to="`/orders/${(row as FulfillmentItem).order?.id}`"
+              class="font-medium text-white/90 hover:text-blue-400"
+            >
+              {{ (row as FulfillmentItem).order?.order_number ?? "—" }}
             </NuxtLink>
-            <span class="text-xs text-white/40">{{ formatDatetime((row as FulfillmentItem).order?.created_at) }}</span>
+            <span class="text-xs text-white/40">{{
+              formatDatetime((row as FulfillmentItem).order?.created_at)
+            }}</span>
           </div>
         </template>
         <template #cell-product="{ row }">
           <div class="flex flex-col">
-            <span class="font-medium text-white/85">{{ (row as FulfillmentItem).name }}</span>
-            <span class="text-xs text-white/50 font-mono">{{ (row as FulfillmentItem).sku }}</span>
+            <span class="font-medium text-white/85">{{
+              (row as FulfillmentItem).name
+            }}</span>
+            <span class="text-xs text-white/50 font-mono">{{
+              (row as FulfillmentItem).sku
+            }}</span>
           </div>
         </template>
         <template #cell-size="{ row }">
-          <span class="text-sm text-white/70">{{ (row as FulfillmentItem).size_display ?? '—' }}</span>
+          <span class="text-sm text-white/70">{{
+            (row as FulfillmentItem).size_display ?? "—"
+          }}</span>
         </template>
         <template #cell-status="{ row }">
-          <ZBadge :variant="statusVariant((row as FulfillmentItem).status)" size="sm">
+          <ZBadge
+            :variant="statusVariant((row as FulfillmentItem).status)"
+            size="sm"
+          >
             {{ statusLabel((row as FulfillmentItem).status) }}
           </ZBadge>
         </template>
         <template #cell-warehouse="{ row }">
-          <span class="text-sm text-white/70">{{ (row as FulfillmentItem).inventory?.warehouse?.name ?? '—' }}</span>
+          <span class="text-sm text-white/70">{{
+            (row as FulfillmentItem).inventory?.warehouse?.name ?? "—"
+          }}</span>
         </template>
         <template #cell-shipping="{ row }">
           <div class="flex flex-col text-xs">
-            <span class="text-white/70">{{ (row as FulfillmentItem).order?.shipping_name }}</span>
-            <span class="text-white/40">{{ (row as FulfillmentItem).order?.shipping_province }}</span>
+            <span class="text-white/70">{{
+              (row as FulfillmentItem).order?.shipping_name
+            }}</span>
+            <span class="text-white/40">{{
+              (row as FulfillmentItem).order?.shipping_province
+            }}</span>
           </div>
         </template>
         <template #cell-actions="{ row }">
           <div class="flex items-center gap-1">
-            <ZButton v-if="(row as FulfillmentItem).status === 'pending'" size="xs" variant="ghost" @click="pickSingle(row as FulfillmentItem)">
+            <ZButton
+              v-if="(row as FulfillmentItem).status === 'pending'"
+              size="sm"
+              variant="ghost"
+              @click="pickSingle(row as FulfillmentItem)"
+            >
               Pick
             </ZButton>
-            <ZButton v-if="(row as FulfillmentItem).status === 'picked'" size="xs" variant="primary" @click="packSingle(row as FulfillmentItem)">
+            <ZButton
+              v-if="(row as FulfillmentItem).status === 'picked'"
+              size="sm"
+              variant="primary"
+              @click="packSingle(row as FulfillmentItem)"
+            >
               Pack
             </ZButton>
-            <ZButton v-if="(row as FulfillmentItem).shipment" size="xs" variant="ghost" @click="printLabel((row as FulfillmentItem).shipment?.tracking_number)">
+            <ZButton
+              v-if="(row as FulfillmentItem).shipment"
+              size="sm"
+              variant="ghost"
+              @click="
+                printLabel((row as FulfillmentItem).shipment?.tracking_number)
+              "
+            >
               In tem
             </ZButton>
           </div>
@@ -208,40 +332,63 @@
 
     <!-- Mobile Pagination (Load More) -->
     <div class="block sm:hidden mt-4">
-      <div v-if="meta.current_page < meta.last_page" class="flex justify-center">
-        <ZButton size="sm" variant="outline" @click="loadMore" :loading="listState === 'loading'" class="w-full">
+      <div
+        v-if="meta.current_page < meta.last_page"
+        class="flex justify-center"
+      >
+        <ZButton
+          size="sm"
+          variant="outline"
+          @click="loadMore"
+          :loading="listState === 'loading'"
+          class="w-full"
+        >
           Tải thêm
         </ZButton>
       </div>
-      <p class="text-center text-xs text-white/40 mt-2">{{ items.length }} / {{ meta.total }} mục</p>
+      <p class="text-center text-xs text-white/40 mt-2">
+        {{ items.length }} / {{ meta.total }} mục
+      </p>
     </div>
 
-    <!-- Desktop Pagination -->
-    <div class="hidden sm:flex items-center justify-between gap-3 pt-4 flex-wrap">
-      <p class="m-0 text-[0.8125rem] text-white/40">{{ meta.total }} mục</p>
-      <ZPagination :current-page="meta.current_page" :total-pages="meta.last_page" @change="onPageChange" />
-    </div>
-
-    <!-- Pack Modal - Mobile Optimized -->
-    <ZModal v-model="showPackModal" title="Đóng gói & Tạo vận đơn" size="md">
+    <!-- Pack Modal -->
+    <ZModal v-model="showPackModal" title="Đóng gói sản phẩm" size="sm">
       <div class="flex flex-col gap-4">
-        <p class="text-sm text-white/70">Đóng gói {{ selectedItems.length }} sản phẩm</p>
-        <ZSelect v-model="packCourier" label="Đơn vị vận chuyển">
-          <option value="">Mặc định (GHTK)</option>
-          <option value="ghtk">GHTK</option>
-          <option value="ghn">GHN</option>
-          <option value="viettel_post">Viettel Post</option>
-        </ZSelect>
+        <ZSelect
+          v-model="packCourier"
+          label="Chọn đơn vị vận chuyển"
+          :options="courierOptions"
+        />
         <div class="bg-white/5 rounded-lg p-3 max-h-40 overflow-y-auto">
-          <div v-for="item in selectedItems" :key="item.id" class="flex justify-between py-1 text-sm">
-            <span class="text-white/70 truncate flex-1 mr-2">{{ item.sku }}</span>
-            <span class="text-white/50 shrink-0">{{ item.order?.order_number }}</span>
+          <div
+            v-for="item in selectedItems"
+            :key="item.id"
+            class="flex justify-between py-1 text-sm"
+          >
+            <span class="text-white/70 truncate flex-1 mr-2">{{
+              item.sku
+            }}</span>
+            <span class="text-white/50 shrink-0">{{
+              item.order?.order_number
+            }}</span>
           </div>
         </div>
       </div>
       <template #footer>
-        <ZButton variant="outline" size="sm" @click="showPackModal = false" class="flex-1 sm:flex-none">Hủy</ZButton>
-        <ZButton variant="primary" size="sm" :loading="packPending" @click="handlePack" class="flex-1 sm:flex-none">
+        <ZButton
+          variant="outline"
+          size="sm"
+          @click="showPackModal = false"
+          class="flex-1 sm:flex-none"
+          >Hủy</ZButton
+        >
+        <ZButton
+          variant="primary"
+          size="sm"
+          :loading="packPending"
+          @click="handlePack"
+          class="flex-1 sm:flex-none"
+        >
           Xác nhận
         </ZButton>
       </template>
@@ -250,15 +397,30 @@
     <!-- Export Modal -->
     <ZModal v-model="showExportModal" title="Xuất danh sách đóng gói" size="sm">
       <div class="flex flex-col gap-4">
-        <p class="text-sm text-white/70">Xuất {{ selectedItems.length }} mục đã chọn</p>
-        <ZSelect v-model="exportFormat" label="Định dạng">
-          <option value="csv">CSV</option>
-          <option value="pdf">PDF</option>
-        </ZSelect>
+        <p class="text-sm text-white/70">
+          Xuất {{ selectedItems.length }} mục đã chọn
+        </p>
+        <ZSelect
+          v-model="exportFormat"
+          label="Định dạng"
+          :options="exportFormatOptions"
+        />
       </div>
       <template #footer>
-        <ZButton variant="outline" size="sm" @click="showExportModal = false" class="flex-1 sm:flex-none">Hủy</ZButton>
-        <ZButton variant="primary" size="sm" :loading="exportPending" @click="handleExport" class="flex-1 sm:flex-none">
+        <ZButton
+          variant="outline"
+          size="sm"
+          @click="showExportModal = false"
+          class="flex-1 sm:flex-none"
+          >Hủy</ZButton
+        >
+        <ZButton
+          variant="primary"
+          size="sm"
+          :loading="exportPending"
+          @click="handleExport"
+          class="flex-1 sm:flex-none"
+        >
           Xuất
         </ZButton>
       </template>
@@ -315,7 +477,12 @@ const toast = useToast();
 const listState = ref<"idle" | "loading" | "loaded" | "error">("idle");
 const listError = ref<string | null>(null);
 const items = ref<FulfillmentItem[]>([]);
-const meta = ref<ListMeta>({ current_page: 1, last_page: 1, total: 0, per_page: 20 });
+const meta = ref<ListMeta>({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  per_page: 20,
+});
 const search = ref("");
 const statusFilter = ref("");
 const currentPage = ref(1);
@@ -335,6 +502,25 @@ const exportFormat = ref("csv");
 const pickPending = ref(false);
 const packPending = ref(false);
 const exportPending = ref(false);
+
+const courierOptions = [
+  { value: "", label: "Tự chọn sau" },
+  { value: "ghtk", label: "GHTK" },
+  { value: "ghn", label: "GHN" },
+  { value: "viettel_post", label: "Viettel Post" },
+];
+
+const statusOptions = [
+  { value: "", label: "Tất cả trạng thái" },
+  { value: "pending", label: "Chờ xử lý" },
+  { value: "picked", label: "Đã pick" },
+  { value: "packed", label: "Đã đóng gói" },
+];
+
+const exportFormatOptions = [
+  { value: "csv", label: "CSV" },
+  { value: "pdf", label: "PDF" },
+];
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -361,9 +547,16 @@ async function fetchItems(): Promise<void> {
     if (statusFilter.value) params["filter[status]"] = statusFilter.value;
 
     const q = new URLSearchParams(params).toString();
-    const response = await api.get<{ data: FulfillmentItem[]; meta: ListMeta }>(`/fulfillment/items?${q}`);
+    const response = await api.get<{ data: FulfillmentItem[]; meta: ListMeta }>(
+      `/fulfillment/items?${q}`
+    );
     items.value = response.data ?? [];
-    meta.value = response.meta ?? { current_page: 1, last_page: 1, total: 0, per_page: 20 };
+    meta.value = response.meta ?? {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+      per_page: 20,
+    };
     listState.value = "loaded";
   } catch (error) {
     listState.value = "error";
@@ -388,9 +581,16 @@ async function fetchMoreItems(): Promise<void> {
     if (statusFilter.value) params["filter[status]"] = statusFilter.value;
 
     const q = new URLSearchParams(params).toString();
-    const response = await api.get<{ data: FulfillmentItem[]; meta: ListMeta }>(`/fulfillment/items?${q}`);
+    const response = await api.get<{ data: FulfillmentItem[]; meta: ListMeta }>(
+      `/fulfillment/items?${q}`
+    );
     items.value.push(...(response.data ?? []));
-    meta.value = response.meta ?? { current_page: 1, last_page: 1, total: 0, per_page: 20 };
+    meta.value = response.meta ?? {
+      current_page: 1,
+      last_page: 1,
+      total: 0,
+      per_page: 20,
+    };
     listState.value = "loaded";
   } catch (error) {
     listState.value = "error";
@@ -400,7 +600,9 @@ async function fetchMoreItems(): Promise<void> {
 
 async function fetchStats(): Promise<void> {
   try {
-    const response = await api.get<{ data: typeof stats }>("/fulfillment/stats");
+    const response = await api.get<{ data: typeof stats }>(
+      "/fulfillment/stats"
+    );
     Object.assign(stats, response.data);
   } catch (error) {
     console.error("Failed to fetch stats", error);
@@ -437,11 +639,16 @@ function onPageChange(page: number): void {
   fetchItems();
 }
 
-function statusVariant(status: string): string {
-  const map: Record<string, string> = {
+function statusVariant(
+  status: string
+): "default" | "success" | "warning" | "danger" | "info" | "neutral" | "amber" {
+  const map: Record<
+    string,
+    "default" | "success" | "warning" | "danger" | "info" | "neutral" | "amber"
+  > = {
     pending: "warning",
     picked: "info",
-    packed: "primary",
+    packed: "default",
     shipped: "success",
     delivered: "success",
     cancelled: "neutral",
@@ -490,7 +697,10 @@ async function handlePick(): Promise<void> {
 async function executePick(ids: string[]): Promise<void> {
   pickPending.value = true;
   try {
-    const response = await api.post<{ success: boolean; data: { picked_count: number } }>("/fulfillment/pick", {
+    const response = await api.post<{
+      success: boolean;
+      data: { picked_count: number };
+    }>("/fulfillment/pick", {
       item_ids: ids,
     });
     if (response.success) {
@@ -518,7 +728,13 @@ async function handlePack(): Promise<void> {
     });
     if (response.success) {
       const labelCount = response.data.labels?.length ?? 0;
-      toast.success(`Đã đóng gói ${response.data.packed_count} sản phẩm, tạo ${labelCount} vận đơn`);
+      toast.success(
+        `Đã đóng gói ${response.data.packed_count} sản phẩm, tạo ${labelCount} vận đơn`
+      );
+      // Save selected courier to cookie for next session
+      if (packCourier.value) {
+        setCookie("last_selected_courier", packCourier.value, 30);
+      }
       showPackModal.value = false;
       selectedItems.value = [];
       packCourier.value = "";
@@ -548,6 +764,21 @@ async function handleExport(): Promise<void> {
   }
 }
 
+// Cookie helper functions for persisting last selected courier
+function setCookie(name: string, value: string, days: number): void {
+  if (typeof document === "undefined") return;
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(
+    value
+  )}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match?.[2] ? decodeURIComponent(match[2]) : null;
+}
+
 function printLabel(trackingNumber: string | null | undefined): void {
   if (!trackingNumber) {
     toast.error("Không có mã vận đơn");
@@ -555,6 +786,16 @@ function printLabel(trackingNumber: string | null | undefined): void {
   }
   window.open(`/api/v1/panel/ghtk/orders/${trackingNumber}/label`, "_blank");
 }
+
+watch(showPackModal, (open) => {
+  if (open) {
+    // Load last selected courier from cookie when modal opens
+    const lastCourier = getCookie("last_selected_courier");
+    if (lastCourier && courierOptions.some((o) => o.value === lastCourier)) {
+      packCourier.value = lastCourier;
+    }
+  }
+});
 
 watch(statusFilter, () => {
   currentPage.value = 1;

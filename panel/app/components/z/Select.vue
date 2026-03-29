@@ -313,10 +313,12 @@ const selectId = computed(
 );
 
 const selectedOption = computed(() => {
+  if (!props.options) return null;
   return props.options.find((o) => o.value === props.modelValue) ?? null;
 });
 
 const selectedLabel = computed(() => {
+  if (!props.options) return "";
   const opt = props.options.find((o) => o.value === props.modelValue);
   return opt?.label || "";
 });

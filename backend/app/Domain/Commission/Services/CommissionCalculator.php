@@ -36,8 +36,8 @@ class CommissionCalculator
         if (!$salesRep) {
             return [
                 'amount' => 0,
-                'rate'   => 0.0,
-                'base'   => 0,
+                'rate' => 0.0,
+                'base' => 0,
             ];
         }
 
@@ -52,8 +52,8 @@ class CommissionCalculator
 
         return [
             'amount' => $amount,
-            'rate'   => $rate,
-            'base'   => $base,
+            'rate' => $rate,
+            'base' => $base,
         ];
     }
 
@@ -71,11 +71,11 @@ class CommissionCalculator
             $salesRep = $this->resolveSalesRep($order);
 
             $order->update([
-                'referral_code'      => $order->referral_code,
-                'sales_rep_id'       => $salesRep?->id,
-                'commission_amount'  => $calculation['amount'],
-                'commission_rate'    => $calculation['rate'],
-                'commission_status'  => 'pending',
+                'referral_code' => $order->referral_code,
+                'sales_rep_id' => $salesRep?->id,
+                'commission_amount' => $calculation['amount'],
+                'commission_rate' => $calculation['rate'],
+                'commission_status' => 'pending',
             ]);
         }
 
@@ -98,8 +98,8 @@ class CommissionCalculator
         // If order has referral_code, try to find matching staff
         if ($order->referral_code) {
             // Map referral codes to staff employee_codes
-            $staff = User::where('employee_code', strtoupper($order->referral_code))
-                ->orWhere('employee_code', strtolower($order->referral_code))
+            $staff = User::where('employee_code', strtoupper((string) $order->referral_code))
+                ->orWhere('employee_code', strtolower((string) $order->referral_code))
                 ->first();
 
             if ($staff) {
@@ -131,7 +131,7 @@ class CommissionCalculator
 
         // Check for category-specific rates
         $categoryRates = $config->category_rates ?? [];
-        
+
         // For now, return base rate. Category-specific logic can be added
         // when orders have category-level breakdowns.
 
@@ -153,10 +153,10 @@ class CommissionCalculator
             ->get();
 
         return [
-            'pending'  => $orders->where('commission_status', 'pending')->sum('commission_amount'),
+            'pending' => $orders->where('commission_status', 'pending')->sum('commission_amount'),
             'approved' => $orders->where('commission_status', 'approved')->sum('commission_amount'),
-            'paid'     => $orders->where('commission_status', 'paid')->sum('commission_amount'),
-            'total'    => $orders->sum('commission_amount'),
+            'paid' => $orders->where('commission_status', 'paid')->sum('commission_amount'),
+            'total' => $orders->sum('commission_amount'),
         ];
     }
 }

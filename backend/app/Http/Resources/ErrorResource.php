@@ -183,7 +183,7 @@ class ErrorResource extends JsonResource
         foreach ($payload as $key => $value) {
             if (is_array($value)) {
                 $payload[$key] = $this->sanitizePayload($value);
-            } elseif (in_array(strtolower($key), $sensitiveKeys, true)) {
+            } elseif (in_array(strtolower((string) $key), $sensitiveKeys, true)) {
                 $payload[$key] = '[REDACTED]';
             }
         }

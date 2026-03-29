@@ -60,17 +60,15 @@ class FulfillmentController extends BaseApiController implements HasMiddleware
     {
         try {
             $items = QueryBuilder::for(OrderItem::class)
-                ->allowedFilters([
+                ->allowedFilters(
                     'status',
-                    'warehouse_id',
-                    'order_id',
                     AllowedFilter::callback('created_after', function ($query, $value) {
                         $query->where('created_at', '>=', $value);
                     }),
                     AllowedFilter::callback('created_before', function ($query, $value) {
                         $query->where('created_at', '<=', $value);
                     }),
-                ])
+                )
                 ->allowedSorts('created_at', 'status')
                 ->with(['order', 'product', 'sizeOption', 'inventory', 'shipment', 'pickedBy', 'packedBy'])
                 ->whereIn('status', ['pending', 'picked', 'packed'])

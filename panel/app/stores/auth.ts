@@ -10,7 +10,7 @@ import type {
   ResetPasswordResponseDto,
 } from "~~/types/dto/auth.dto";
 import type { PublicStaffUserModel } from "~~/types/generated/backend-models.generated";
-import { useApi } from "~/composables/useApi";
+import { resetApiSessionState, useApi } from "~/composables/useApi";
 import { useToast } from "~/composables/useToast";
 
 type AuthStatus =
@@ -68,6 +68,7 @@ const LOGIN_ROUTE = "/login";
 const DEFAULT_AUTHENTICATED_ROUTE = "/";
 const FORGOT_PASSWORD_ROUTE = "/forgot-password";
 const RESET_PASSWORD_ROUTE = "/reset-password";
+
 const EXPIRED_SESSION_MESSAGE =
   "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
 const SESSION_RECOVERY_ERROR_MESSAGE = "Không thể khôi phục phiên làm việc.";
@@ -80,6 +81,9 @@ const INVALID_LOGIN_RESPONSE_MESSAGE =
 const INVALID_ME_RESPONSE_MESSAGE =
   "Dữ liệu người dùng từ /auth/me không hợp lệ.";
 const EXPIRED_SESSION_TOAST_COOLDOWN_MS = 5_000;
+
+const AUTH_HINT_COOKIE = "panel-auth-hint";
+const REDIRECT_AFTER_LOGIN_COOKIE = "panel-redirect-after-login";
 
 const PUBLIC_ROUTES = new Set<string>([
   LOGIN_ROUTE,
@@ -113,7 +117,7 @@ function normalizeRoles(value: unknown): string[] | undefined {
   }
 
   const roles: string[] = value.filter(
-    (item: unknown): item is string => typeof item === "string"
+    (item: unknown): item is string => typeof item === "string",
   );
 
   return roles.length > 0 ? roles : undefined;
@@ -185,6 +189,105 @@ function shouldIgnoreSessionExpiryOnRoute(path: string): boolean {
   return PUBLIC_ROUTES.has(path);
 }
 
+function isLocalLikeHostname(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)
+  );
+}
+
+function getCookieDomainCandidates(hostname: string): Array<string | null> {
+  const candidates = new Set<string | null>([null]);
+
+  if (!hostname || isLocalLikeHostname(hostname)) {
+    return Array.from(candidates);
+  }
+
+  const parts = hostname.split(".").filter(Boolean);
+
+  for (let index = 0; index < parts.length - 1; index += 1) {
+    const domain = parts.slice(index).join(".");
+    candidates.add(domain);
+    candidates.add(`.${domain}`);
+  }
+
+  return Array.from(candidates);
+}
+
+function expireCookie(name: string, domain: string | null = null): void {
+  if (!import.meta.client) {
+    return;
+  }
+
+  const encodedName = encodeURIComponent(name);
+  const base = `${encodedName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; path=/`;
+
+  document.cookie = domain ? `${base}; domain=${domain}` : base;
+}
+
+function clearCookieEverywhere(name: string): void {
+  if (!import.meta.client) {
+    return;
+  }
+
+  for (const domain of getCookieDomainCandidates(window.location.hostname)) {
+    expireCookie(name, domain);
+  }
+}
+
+function clearAllAccessibleCookies(): void {
+  if (!import.meta.client || !document.cookie) {
+    return;
+  }
+
+  const cookieNames = document.cookie
+    .split(";")
+    .map((part) => decodeURIComponent(part.split("=")[0]?.trim() ?? ""))
+    .filter(Boolean);
+
+  for (const cookieName of cookieNames) {
+    clearCookieEverywhere(cookieName);
+  }
+
+  clearCookieEverywhere(AUTH_HINT_COOKIE);
+  clearCookieEverywhere(REDIRECT_AFTER_LOGIN_COOKIE);
+  clearCookieEverywhere("XSRF-TOKEN");
+}
+
+function clearBrowserStorage(): void {
+  if (!import.meta.client) {
+    return;
+  }
+
+  try {
+    window.localStorage.clear();
+  } catch {
+    // Ignore storage access errors.
+  }
+
+  try {
+    window.sessionStorage.clear();
+  } catch {
+    // Ignore storage access errors.
+  }
+}
+
+function buildLoginUrl(redirectPath: string | null): string {
+  if (!import.meta.client) {
+    return LOGIN_ROUTE;
+  }
+
+  const url = new URL(LOGIN_ROUTE, window.location.origin);
+
+  if (redirectPath) {
+    url.searchParams.set("redirect", redirectPath);
+  }
+
+  return url.toString();
+}
+
 export const useAuthStore = defineStore("auth", () => {
   const status = ref<AuthStatus>("idle");
   const user = ref<PublicStaffUserModel | null>(null);
@@ -195,14 +298,14 @@ export const useAuthStore = defineStore("auth", () => {
   const loginPending = ref<boolean>(false);
   const logoutPending = ref<boolean>(false);
   const redirectAfterLoginCookie = useCookie<string | null>(
-    "panel-redirect-after-login",
+    REDIRECT_AFTER_LOGIN_COOKIE,
     {
       sameSite: "lax",
       default: (): null => null,
-    }
+    },
   );
   const redirectAfterLogin = ref<string | null>(
-    normalizeInternalPath(redirectAfterLoginCookie.value)
+    normalizeInternalPath(redirectAfterLoginCookie.value),
   );
   const error = ref<string | null>(null);
   const lastExpiredSessionToastAt = ref<number>(0);
@@ -210,7 +313,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const api = useApi();
   const toast = useToast();
-  const authHint = useCookie<string | null>("panel-auth-hint", {
+  const authHint = useCookie<string | null>(AUTH_HINT_COOKIE, {
     sameSite: "lax",
     default: (): null => null,
   });
@@ -260,6 +363,10 @@ export const useAuthStore = defineStore("auth", () => {
 
   function resetSessionFlags(): void {
     sessionRecoveryLocked.value = false;
+    bootstrapping.value = false;
+    bootstrapPromise.value = null;
+    loginPending.value = false;
+    logoutPending.value = false;
   }
 
   function applyAuthenticatedUser(nextUser: PublicStaffUserModel): void {
@@ -296,48 +403,95 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  async function redirectToLoginIfNeeded(): Promise<void> {
-    if (import.meta.server) {
+  function resetPiniaState(): void {
+    try {
+      const pinia = usePinia();
+      pinia.state.value = {};
+    } catch {
+      // Ignore Pinia access errors during teardown.
+    }
+  }
+
+  function purgeFrontendSessionState(
+    reason: string | null = null,
+    redirectPath: string | null = null,
+  ): void {
+    clearSession(reason);
+    initialized.value = true;
+    sessionProbeDone.value = true;
+    setAuthHint(false);
+    setRedirectAfterLogin(null);
+    resetSessionFlags();
+
+    if (!import.meta.client) {
       return;
+    }
+
+    clearAllAccessibleCookies();
+    clearBrowserStorage();
+    resetApiSessionState({ clearXsrfCookie: true });
+    resetPiniaState();
+
+    authHint.value = null;
+    redirectAfterLoginCookie.value = null;
+    redirectAfterLogin.value = null;
+    syncRedirectAfterLoginCookie();
+
+    if (redirectPath) {
+      setRedirectAfterLogin(redirectPath);
+    }
+  }
+
+  function hardRedirectToLogin(redirectPath: string | null = null): void {
+    if (!import.meta.client) {
+      return;
+    }
+
+    window.location.replace(buildLoginUrl(redirectPath));
+  }
+
+  function resolveProtectedRedirectPath(): string | null {
+    if (import.meta.server) {
+      return null;
     }
 
     const currentPath = getCurrentRoutePath();
 
     if (!currentPath || shouldIgnoreSessionExpiryOnRoute(currentPath)) {
+      return null;
+    }
+
+    try {
+      const router = useRouter();
+      return normalizeInternalPath(router.currentRoute.value.fullPath);
+    } catch {
+      return normalizeInternalPath(currentPath);
+    }
+  }
+
+  async function redirectToLoginIfNeeded(
+    redirectPath: string | null = null,
+  ): Promise<void> {
+    if (import.meta.server) {
       return;
     }
 
-    const router = useRouter();
-    const normalizedRedirect = normalizeInternalPath(
-      router.currentRoute.value.fullPath
-    );
-
-    if (normalizedRedirect) {
-      setRedirectAfterLogin(normalizedRedirect);
-    }
-
-    await navigateTo({
-      path: LOGIN_ROUTE,
-      query: normalizedRedirect ? { redirect: normalizedRedirect } : undefined,
-      replace: true,
-    });
+    hardRedirectToLogin(redirectPath);
   }
 
   async function handleExpiredSession(
-    message: string = EXPIRED_SESSION_MESSAGE
+    message: string = EXPIRED_SESSION_MESSAGE,
   ): Promise<void> {
     if (sessionRecoveryLocked.value) {
-      clearSessionSilently();
-      setAuthHint(false);
       return;
     }
 
     sessionRecoveryLocked.value = true;
 
     const shouldNotify = shouldNotifyExpiredSession();
+    const redirectPath = resolveProtectedRedirectPath();
 
-    clearSession(shouldNotify ? message : null);
-    setAuthHint(false);
+    purgeFrontendSessionState(shouldNotify ? message : null, redirectPath);
 
     if (shouldNotify) {
       const now = Date.now();
@@ -351,12 +505,12 @@ export const useAuthStore = defineStore("auth", () => {
       }
     }
 
-    await redirectToLoginIfNeeded();
+    await redirectToLoginIfNeeded(redirectPath);
   }
 
   async function apiFetch<T>(
     path: string,
-    options: AuthRequestOptions = {}
+    options: AuthRequestOptions = {},
   ): Promise<T> {
     try {
       return await api.request<T>(path, {
@@ -364,6 +518,7 @@ export const useAuthStore = defineStore("auth", () => {
         body: options.body,
         headers: options.headers,
         auth: options.auth,
+        skipSessionExpiry: options.skipSessionExpiry,
       });
     } catch (requestError) {
       const statusCode = getStatusCode(requestError);
@@ -382,7 +537,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   function getFetchMeFailureState(
     requestError: unknown,
-    isInitialProbe: boolean
+    isInitialProbe: boolean,
   ): AuthFailureState {
     const statusCode = getStatusCode(requestError);
 
@@ -404,7 +559,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function fetchMe(
-    isInitialProbe: boolean = false
+    isInitialProbe: boolean = false,
   ): Promise<PublicStaffUserModel | null> {
     try {
       const response = await apiFetch<MeResponseDto>("/auth/me", {
@@ -421,7 +576,10 @@ export const useAuthStore = defineStore("auth", () => {
 
       return nextUser;
     } catch (requestError) {
-      const failureState = getFetchMeFailureState(requestError, isInitialProbe);
+      const failureState = getFetchMeFailureState(
+        requestError,
+        isInitialProbe,
+      );
 
       if (failureState.shouldHandleExpiredSession) {
         await handleExpiredSession(failureState.message);
@@ -430,8 +588,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       if (failureState.shouldClearSession) {
         if (isInitialProbe) {
-          clearSessionSilently();
-          setAuthHint(false);
+          purgeFrontendSessionState(null, null);
         } else {
           clearSession(failureState.message);
         }
@@ -553,13 +710,7 @@ export const useAuthStore = defineStore("auth", () => {
     } catch {
       // Ignore transport/logout response errors. Local session cleanup is authoritative.
     } finally {
-      clearSessionSilently();
-      setAuthHint(false);
-      setRedirectAfterLogin(null);
-      resetSessionFlags();
-      initialized.value = true;
-      sessionProbeDone.value = true;
-      logoutPending.value = false;
+      purgeFrontendSessionState(null, null);
       toast.success("Đã đăng xuất", "Phiên làm việc đã được xóa.");
     }
 
@@ -567,7 +718,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function handleRouteAccess(
-    to: RouteLocationNormalized
+    to: RouteLocationNormalized,
   ): Promise<RedirectInstruction | null> {
     const requiresBootstrap =
       shouldProtectRoute(to.path) ||
@@ -622,14 +773,14 @@ export const useAuthStore = defineStore("auth", () => {
 
       toast.success(
         "Đã gửi liên kết đặt lại mật khẩu",
-        "Vui lòng kiểm tra hộp thư của bạn."
+        "Vui lòng kiểm tra hộp thư của bạn.",
       );
 
       return { ok: true };
     } catch (requestError) {
       const message = getErrorMessage(
         requestError,
-        FORGOT_PASSWORD_ERROR_MESSAGE
+        FORGOT_PASSWORD_ERROR_MESSAGE,
       );
 
       toast.error("Không thể gửi liên kết đặt lại mật khẩu", message);
@@ -642,7 +793,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function resetPassword(
-    payload: ResetPasswordRequestDto
+    payload: ResetPasswordRequestDto,
   ): Promise<ActionResult> {
     try {
       await api.ensureCsrfCookie(true);
@@ -660,14 +811,14 @@ export const useAuthStore = defineStore("auth", () => {
 
       toast.success(
         "Mật khẩu đã được cập nhật",
-        "Bạn có thể đăng nhập ngay bây giờ."
+        "Bạn có thể đăng nhập ngay bây giờ.",
       );
 
       return { ok: true };
     } catch (requestError) {
       const message = getErrorMessage(
         requestError,
-        RESET_PASSWORD_ERROR_MESSAGE
+        RESET_PASSWORD_ERROR_MESSAGE,
       );
 
       toast.error("Không thể đặt lại mật khẩu", message);

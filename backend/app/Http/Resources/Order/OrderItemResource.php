@@ -63,6 +63,16 @@ class OrderItemResource extends JsonResource
                     'courier_code' => $this->shipment->courier_code,
                 ]
             ),
+            'order' => $this->when(
+                $this->order !== null,
+                fn() => [
+                    'id' => $this->order->id,
+                    'order_number' => $this->order->order_number,
+                    'created_at' => $this->order->created_at?->toIso8601String(),
+                    'shipping_name' => $this->order->shipping_name,
+                    'shipping_province' => $this->order->shipping_province,
+                ]
+            ),
         ];
     }
 }

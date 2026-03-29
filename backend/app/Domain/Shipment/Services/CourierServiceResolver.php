@@ -42,7 +42,7 @@ final class CourierServiceResolver
      */
     public function register(string $courierCode, string $serviceClass): void
     {
-        $this->services[strtolower($courierCode)] = $serviceClass;
+        $this->services[strtolower((string) $courierCode)] = $serviceClass;
     }
 
     /**
@@ -60,7 +60,7 @@ final class CourierServiceResolver
      */
     public function serviceClassFor(string $courierCode): string
     {
-        $code = strtolower(trim($courierCode));
+        $code = strtolower(trim((string) $courierCode));
 
         if (!isset($this->services[$code])) {
             throw new \RuntimeException("Unsupported courier code: {$courierCode}");

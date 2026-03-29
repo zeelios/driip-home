@@ -53,8 +53,16 @@ class GHTKService implements CourierServiceInterface
 
     public function __construct()
     {
-        $this->baseUrl = config('courier.ghtk.api_endpoint', 'https://services.giaohangtietkiem.vn');
-        $this->apiToken = config('courier.ghtk.api_key', '');
+        $sandboxMode = config('courier.ghtk.sandbox_mode', false);
+
+        if ($sandboxMode) {
+            $this->baseUrl = config('courier.ghtk.sandbox_endpoint', 'https://services-staging.ghtk.vn');
+            $this->apiToken = config('courier.ghtk.sandbox_api_key', '');
+        } else {
+            $this->baseUrl = config('courier.ghtk.api_endpoint', 'https://services.giaohangtietkiem.vn');
+            $this->apiToken = config('courier.ghtk.api_key', '');
+        }
+
         $this->partnerCode = config('courier.ghtk.partner_code', '');
     }
 
@@ -474,7 +482,7 @@ class GHTKService implements CourierServiceInterface
                     'Content-Type' => 'application/json',
                 ])->timeout(self::TIMEOUT);
 
-                $response = strtolower($method) === 'get'
+                $response = strtolower((string) $method) === 'get'
                     ? $http->get($url, $query)
                     : $http->post($url, $payload);
 
