@@ -343,9 +343,14 @@
                 cart.formattedGrandFinalTotal
               }}</span>
             </div>
-            <button class="quick-order-btn" @click="$emit('go-to-order')">
-              {{ $t("ck.products.goToCart") }}
-            </button>
+            <div class="quick-order-actions">
+              <button class="quick-order-clear" @click="clearCart">
+                Xóa giỏ hàng
+              </button>
+              <button class="quick-order-btn" @click="$emit('go-to-order')">
+                {{ $t("ck.products.goToCart") }}
+              </button>
+            </div>
           </div>
         </Transition>
       </div>
@@ -465,6 +470,10 @@ function applySizeGuide(size: string): void {
   }
 
   boxerDraft.size = size;
+}
+
+function clearCart(): void {
+  cart.clear();
 }
 </script>
 
