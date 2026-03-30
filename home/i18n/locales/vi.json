@@ -54,23 +54,24 @@
       "stock": "SỐ LƯỢNG GIỚI HẠN"
     },
     "products": {
-      "label": "CALVIN KLEIN",
-      "title": "SỐ LƯỢNG CÓ HẠN — ĐẶT NGAY",
-      "from": "TỪ",
-      "policyLabel": "CHÍNH SÁCH",
-      "policyCopy": "Đổi trả 30 ngày, bảo hành 90-180 ngày cho từng dòng sản phẩm.",
-      "brief": {
-        "desc": "Phiên bản kinh điển, tối giản và thiết yếu. Dáng lưng thấp mang lại sự thoải mái suốt cả ngày, với đường nét thanh lịch.",
-        "specs": ["Dáng lưng thấp", "Chất liệu cotton modal cao cấp", "Dây lưng CK biểu tượng"]
-      },
+      "addToCart": "THÊM VÀO GIỎ HÀNG +",
       "boxer": {
         "desc": "Che phủ tối ưu, form ôm vừa vặn và hạn chế di chuyển, lý tưởng cho lối sống năng động.",
         "specs": ["Ống chân dài", "Hỗ trợ tối đa", "Thiết kế theo đường cong cơ thể"]
       },
-      "orderThis": "ĐẶT NGAY →",
-      "addToCart": "THÊM VÀO GIỎ HÀNG +",
+      "brief": {
+        "desc": "Phiên bản kinh điển, tối giản và thiết yếu. Dáng lưng thấp mang lại sự thoải mái suốt cả ngày, với đường nét thanh lịch.",
+        "specs": ["Dáng lưng thấp", "Chất liệu cotton modal cao cấp", "Dây lưng CK biểu tượng"]
+      },
       "chooseSizeColor": "CHỌN SIZE & MÀU ĐỂ THÊM",
-      "goToCart": "XEM GIỎ HÀNG →"
+      "clearCart": "CHỌN LẠI",
+      "from": "TỪ",
+      "goToCart": "XEM GIỎ HÀNG →",
+      "label": "CALVIN KLEIN",
+      "orderThis": "ĐẶT NGAY →",
+      "policyCopy": "Đổi trả 30 ngày, bảo hành 90-180 ngày cho từng dòng sản phẩm.",
+      "policyLabel": "CHÍNH SÁCH",
+      "title": "SỐ LƯỢNG CÓ HẠN — ĐẶT NGAY"
     },
     "fabric": {
       "modal": "95% cotton modal",

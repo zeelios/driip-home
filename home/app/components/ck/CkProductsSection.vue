@@ -345,7 +345,7 @@
             </div>
             <div class="quick-order-actions">
               <button class="quick-order-clear" @click="clearCart">
-                Xóa giỏ hàng
+                {{ $t("ck.products.clearCart") }}
               </button>
               <button class="quick-order-btn" @click="$emit('go-to-order')">
                 {{ $t("ck.products.goToCart") }}

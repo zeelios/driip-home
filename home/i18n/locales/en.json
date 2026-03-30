@@ -54,23 +54,24 @@
       "stock": "LIMITED STOCK"
     },
     "products": {
-      "label": "THE COLLECTION",
-      "title": "TWO FITS.\nONE STANDARD.",
-      "from": "FROM",
-      "policyLabel": "POLICIES",
-      "policyCopy": "30-day returns, plus 90-180 day warranty coverage depending on the line.",
-      "orderThis": "ORDER THIS →",
-      "brief": {
-        "desc": "The original. The essential. Classic low-rise cut for all-day comfort.",
-        "specs": ["Low-rise silhouette", "Modal-cotton blend", "Signature CK waistband"]
-      },
+      "addToCart": "Add To Cart +",
       "boxer": {
         "desc": "Full coverage. Anatomical fit. Zero ride-up guarantee.",
         "specs": ["Extended leg coverage", "Anti-ride-up hem", "Contoured support"]
       },
-      "addToCart": "Add To Cart +",
+      "brief": {
+        "desc": "The original. The essential. Classic low-rise cut for all-day comfort.",
+        "specs": ["Low-rise silhouette", "Modal-cotton blend", "Signature CK waistband"]
+      },
       "chooseSizeColor": "Select Size & Color",
-      "goToCart": "View Cart →"
+      "clearCart": "Clear Cart",
+      "from": "FROM",
+      "goToCart": "View Cart →",
+      "label": "THE COLLECTION",
+      "orderThis": "ORDER THIS →",
+      "policyCopy": "30-day returns, plus 90-180 day warranty coverage depending on the line.",
+      "policyLabel": "POLICIES",
+      "title": "TWO FITS.\nONE STANDARD."
     },
     "fabric": {
       "modal": "95% MODAL COTTON",
