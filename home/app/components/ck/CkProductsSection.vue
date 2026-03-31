@@ -343,8 +343,8 @@
                 cart.formattedGrandFinalTotal
               }}</span>
             </div>
-            <div class="quick-order-actions">
-              <button class="quick-order-clear" @click="clearCart">
+            <div class="flex items-center gap-3">
+              <button class="btn-clear-order" @click="clearCart">
                 {{ $t("ck.products.clearCart") }}
               </button>
               <button class="quick-order-btn" @click="$emit('go-to-order')">
@@ -1194,6 +1194,26 @@ function clearCart(): void {
   letter-spacing: 0.04em;
   color: var(--black);
 }
+
+.btn-clear-order {
+  background: transparent;
+  color: rgba(0, 0, 0, 0.58);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  padding: 12px 20px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.btn-clear-order:hover {
+  color: var(--black);
+  border-color: rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .quick-order-btn {
   flex-shrink: 0;
   min-height: 48px;
