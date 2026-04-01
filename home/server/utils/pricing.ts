@@ -8,9 +8,9 @@ export const EXTRA_PROMO_RATE = 0.2;
 export const BOX_TIERS: BoxTier[] = [
   { boxes: 1, total: 980000 },
   { boxes: 2, total: 1580000 },
-  { boxes: 3, total: 2100000 },
-  { boxes: 4, total: 2550000 },
-  { boxes: 5, total: 3000000 },
+  { boxes: 3, total: 2160000 },
+  { boxes: 4, total: 2920000 },
+  { boxes: 5, total: 3430000 },
 ];
 
 function getTierPriceByBundle(boxes: number): number {
