@@ -22,8 +22,12 @@
           <div v-for="item in returnItems" :key="item.key" class="card">
             <span class="card-icon" aria-hidden="true">{{ item.icon }}</span>
             <div class="card-body">
-              <h3 class="card-title">{{ t(`policies.returns.items.${item.key}.title`) }}</h3>
-              <p class="card-text">{{ t(`policies.returns.items.${item.key}.text`) }}</p>
+              <h3 class="card-title">
+                {{ t(`policies.returns.items.${item.key}.title`) }}
+              </h3>
+              <p class="card-text">
+                {{ t(`policies.returns.items.${item.key}.text`) }}
+              </p>
             </div>
           </div>
         </div>
@@ -49,11 +53,17 @@
         <div class="warranty-grid reveal">
           <!-- Standard 90-day -->
           <div class="warranty-card standard">
-            <div class="warranty-badge">{{ t("policies.warranty.standard.badge") }}</div>
+            <div class="warranty-badge">
+              {{ t("policies.warranty.standard.badge") }}
+            </div>
             <p class="warranty-days">90</p>
             <p class="warranty-unit">{{ t("policies.warranty.unit") }}</p>
-            <h3 class="warranty-name">{{ t("policies.warranty.standard.name") }}</h3>
-            <p class="warranty-desc">{{ t("policies.warranty.standard.desc") }}</p>
+            <h3 class="warranty-name">
+              {{ t("policies.warranty.standard.name") }}
+            </h3>
+            <p class="warranty-desc">
+              {{ t("policies.warranty.standard.desc") }}
+            </p>
             <ul class="warranty-list">
               <li v-for="point in standardWarrantyPoints" :key="point">
                 <span aria-hidden="true">—</span>
@@ -64,10 +74,14 @@
 
           <!-- Driip original 180-day -->
           <div class="warranty-card premium">
-            <div class="warranty-badge premium-badge">{{ t("policies.warranty.driip.badge") }}</div>
+            <div class="warranty-badge premium-badge">
+              {{ t("policies.warranty.driip.badge") }}
+            </div>
             <p class="warranty-days">180</p>
             <p class="warranty-unit">{{ t("policies.warranty.unit") }}</p>
-            <h3 class="warranty-name">{{ t("policies.warranty.driip.name") }}</h3>
+            <h3 class="warranty-name">
+              {{ t("policies.warranty.driip.name") }}
+            </h3>
             <p class="warranty-desc">{{ t("policies.warranty.driip.desc") }}</p>
             <ul class="warranty-list">
               <li v-for="point in driipWarrantyPoints" :key="point">
@@ -96,10 +110,20 @@
           <p class="section-lead">{{ t("policies.exchange.lead") }}</p>
         </div>
         <div class="exchange-grid reveal">
-          <div v-for="item in exchangeItems" :key="item.key" class="exchange-item">
-            <span class="exchange-icon" aria-hidden="true">{{ item.icon }}</span>
-            <h3 class="exchange-title">{{ t(`policies.exchange.items.${item.key}.title`) }}</h3>
-            <p class="exchange-text">{{ t(`policies.exchange.items.${item.key}.text`) }}</p>
+          <div
+            v-for="item in exchangeItems"
+            :key="item.key"
+            class="exchange-item"
+          >
+            <span class="exchange-icon" aria-hidden="true">{{
+              item.icon
+            }}</span>
+            <h3 class="exchange-title">
+              {{ t(`policies.exchange.items.${item.key}.title`) }}
+            </h3>
+            <p class="exchange-text">
+              {{ t(`policies.exchange.items.${item.key}.text`) }}
+            </p>
           </div>
         </div>
       </div>
@@ -134,8 +158,14 @@ watchEffect(() => {
     title: locale.value === "vi" ? "CHÍNH SÁCH" : "POLICIES",
     links: [
       { id: "returns", label: locale.value === "vi" ? "ĐỔI TRẢ" : "RETURNS" },
-      { id: "warranty", label: locale.value === "vi" ? "BẢO HÀNH" : "WARRANTY" },
-      { id: "exchange", label: locale.value === "vi" ? "ĐỔI SẢN PHẨM" : "EXCHANGE" },
+      {
+        id: "warranty",
+        label: locale.value === "vi" ? "BẢO HÀNH" : "WARRANTY",
+      },
+      {
+        id: "exchange",
+        label: locale.value === "vi" ? "ĐỔI SẢN PHẨM" : "EXCHANGE",
+      },
     ],
   });
 });
@@ -169,7 +199,8 @@ const driipWarrantyPoints = ["p1", "p2", "p3", "p4"];
 function scrollToSection(id: string): void {
   const el = document.getElementById(id);
   if (!el) return;
-  const navHeight = window.innerWidth >= 1024 ? 60 : window.innerWidth >= 640 ? 58 : 52;
+  const navHeight =
+    window.innerWidth >= 1024 ? 60 : window.innerWidth >= 640 ? 58 : 52;
   const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 20;
   window.scrollTo({ top, behavior: "smooth" });
 }
@@ -211,7 +242,11 @@ useHead({
           ? "Chính sách đổi trả 30 ngày không cần lý do, bảo hành 90 ngày toàn bộ sản phẩm và 180 ngày cho sản phẩm driip chính hãng."
           : "30-day no-question returns, 90-day standard warranty on all products, and 180-day warranty on driip originals.",
     },
-    { property: "og:title", content: locale.value === "vi" ? "driip- | Chính sách" : "driip- | Policies" },
+    {
+      property: "og:title",
+      content:
+        locale.value === "vi" ? "driip- | Chính sách" : "driip- | Policies",
+    },
     { property: "og:type", content: "website" },
     { property: "og:site_name", content: "driip-" },
   ],
