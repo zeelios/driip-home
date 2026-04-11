@@ -74,9 +74,9 @@
       <ZButton
         size="sm"
         variant="outline"
-        @click="showExportModal = true"
         :disabled="selectedItems.length === 0"
         class="w-full sm:w-auto"
+        @click="showExportModal = true"
       >
         <template #prefix>
           <svg
@@ -109,9 +109,9 @@
           <ZButton
             size="sm"
             variant="outline"
-            @click="handlePick"
             :loading="pickPending"
             class="px-3 py-1.5 min-h-9"
+            @click="handlePick"
           >
             <span class="hidden sm:inline">Đánh dấu đã pick</span>
             <span class="sm:hidden">Pick</span>
@@ -119,8 +119,8 @@
           <ZButton
             size="sm"
             variant="primary"
-            @click="showPackModal = true"
             class="px-3 py-1.5 min-h-9"
+            @click="showPackModal = true"
           >
             <span class="hidden sm:inline">Đóng gói</span>
             <span class="sm:hidden">Pack</span>
@@ -206,8 +206,8 @@
               v-if="item.status === 'pending'"
               size="sm"
               variant="outline"
-              @click.stop="pickSingle(item)"
               class="min-h-9 px-2.5"
+              @click.stop="pickSingle(item)"
             >
               Pick
             </ZButton>
@@ -215,8 +215,8 @@
               v-if="item.status === 'picked'"
               size="sm"
               variant="primary"
-              @click.stop="packSingle(item)"
               class="min-h-9 px-2.5"
+              @click.stop="packSingle(item)"
             >
               Pack
             </ZButton>
@@ -224,8 +224,8 @@
               v-if="item.shipment?.tracking_number"
               size="sm"
               variant="ghost"
-              @click.stop="printLabel(item.shipment.tracking_number)"
               class="min-h-8 px-2"
+              @click.stop="printLabel(item.shipment.tracking_number)"
             >
               In
             </ZButton>
@@ -339,9 +339,9 @@
         <ZButton
           size="sm"
           variant="outline"
-          @click="loadMore"
           :loading="listState === 'loading'"
           class="w-full"
+          @click="loadMore"
         >
           Tải thêm
         </ZButton>
@@ -378,16 +378,16 @@
         <ZButton
           variant="outline"
           size="sm"
-          @click="showPackModal = false"
           class="flex-1 sm:flex-none"
+          @click="showPackModal = false"
           >Hủy</ZButton
         >
         <ZButton
           variant="primary"
           size="sm"
           :loading="packPending"
-          @click="handlePack"
           class="flex-1 sm:flex-none"
+          @click="handlePack"
         >
           Xác nhận
         </ZButton>
@@ -410,16 +410,16 @@
         <ZButton
           variant="outline"
           size="sm"
-          @click="showExportModal = false"
           class="flex-1 sm:flex-none"
+          @click="showExportModal = false"
           >Hủy</ZButton
         >
         <ZButton
           variant="primary"
           size="sm"
           :loading="exportPending"
-          @click="handleExport"
           class="flex-1 sm:flex-none"
+          @click="handleExport"
         >
           Xuất
         </ZButton>
@@ -609,8 +609,23 @@ async function fetchStats(): Promise<void> {
   }
 }
 
-function onSelectionChange(selection: FulfillmentItem[]): void {
-  selectedItems.value = selection;
+function isFulfillmentItem(value: unknown): value is FulfillmentItem {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Partial<FulfillmentItem>;
+
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.sku === "string" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.status === "string"
+  );
+}
+
+function onSelectionChange(selection: unknown[]): void {
+  selectedItems.value = selection.filter(isFulfillmentItem);
 }
 
 function isSelected(item: FulfillmentItem): boolean {
@@ -632,11 +647,6 @@ function onSearchInput(): void {
     currentPage.value = 1;
     fetchItems();
   }, 350);
-}
-
-function onPageChange(page: number): void {
-  currentPage.value = page;
-  fetchItems();
 }
 
 function statusVariant(
