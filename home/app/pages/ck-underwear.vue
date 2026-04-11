@@ -18,13 +18,21 @@ import { useSiteNavStore } from "~/stores/site-nav";
 
 const { locale, t, mergeLocaleMessage } = useI18n();
 
-// Load page-specific translations
-onMounted(async () => {
+// Preload all page translation modules
+const ckTranslations = import.meta.glob(
+  "../../i18n/locales/pages/ck-underwear.*.json"
+);
+
+// Load page-specific translations (SSR-safe)
+await useAsyncData(`ck-i18n-${locale.value}`, async () => {
   const currentLocale = locale.value;
-  const messages = await import(
-    `~/i18n/locales/pages/ck-underwear.${currentLocale}.json`
-  );
-  mergeLocaleMessage(currentLocale, messages.default);
+  const modulePath = `../../i18n/locales/pages/ck-underwear.${currentLocale}.json`;
+  const loader = ckTranslations[modulePath];
+  if (loader) {
+    const messages = (await loader()) as { default: Record<string, unknown> };
+    mergeLocaleMessage(currentLocale, messages.default);
+  }
+  return true;
 });
 
 const { setupScrollDepth, trackPageView } = useMetaEvents();

@@ -799,14 +799,23 @@ import { vietnamProvinces } from "~/data/vietnam-addresses";
 
 const { locale, t, mergeLocaleMessage } = useI18n();
 
-// Load page-specific translations
-onMounted(async () => {
+// Preload all page translation modules
+const slideTranslations = import.meta.glob(
+  "../../i18n/locales/pages/slide.*.json"
+);
+
+// Load page-specific translations (SSR-safe)
+await useAsyncData(`slide-i18n-${locale.value}`, async () => {
   const currentLocale = locale.value;
-  const messages = await import(
-    `~/i18n/locales/pages/slide.${currentLocale}.json`
-  );
-  mergeLocaleMessage(currentLocale, messages.default);
+  const modulePath = `../../i18n/locales/pages/slide.${currentLocale}.json`;
+  const loader = slideTranslations[modulePath];
+  if (loader) {
+    const messages = (await loader()) as { default: Record<string, unknown> };
+    mergeLocaleMessage(currentLocale, messages.default);
+  }
+  return true;
 });
+
 const { setupScrollDepth, trackPageView } = useMetaEvents();
 const store = useDriipSlideStore();
 const siteNavStore = useSiteNavStore();
