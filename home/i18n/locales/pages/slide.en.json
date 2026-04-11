@@ -1,0 +1,179 @@
+{
+  "slide": {
+    "hero": {
+      "pre": "DRIIP ORIGINAL — SS26",
+      "eyebrow": "THE OFFICIAL DRIIP SLIDE",
+      "title": "FASHION.\nBUT COMFORT.",
+      "sub": "Bánh Mì style from Vietnam. Premium EVA material. Anti-slip grip. Crocs quality confirmed. Ergonomic design that really fits, really comfy.",
+      "cta": "EXPLORE THE SLIDE",
+      "secondary": "BACK TO HOME",
+      "metrics": {
+        "material": "MATERIAL",
+        "materialValue": "EVA FOAM",
+        "style": "STYLE",
+        "styleValue": "BÁNH MÌ",
+        "comfort": "COMFORT",
+        "comfortValue": "ERGONOMIC"
+      }
+    },
+    "strip": {
+      "eva": "PREMIUM EVA MATERIAL",
+      "antislip": "ANTI-SLIP GRIP",
+      "ergonomic": "ERGONOMIC DESIGN",
+      "crocs": "CROCS QUALITY CONFIRMED"
+    },
+    "features": {
+      "label": "THE FEATURES",
+      "title": "BUILT DIFFERENT.\nBUILT BETTER.",
+      "body": "Every detail of the Driip Slide is engineered for those who refuse to compromise between style and comfort. From the streets of Vietnam to your feet.",
+      "items": {
+        "banhMi": {
+          "title": "Bánh Mì Style",
+          "desc": "Inspired by the iconic Vietnamese sandwich shape — bold, chunky, instantly recognizable."
+        },
+        "eva": {
+          "title": "Premium EVA Material",
+          "desc": "Lightweight, durable, and waterproof foam that cushions every step."
+        },
+        "antislip": {
+          "title": "Anti-Slip Design",
+          "desc": "Engineered grip pattern keeps you steady on any surface, wet or dry."
+        },
+        "crocs": {
+          "title": "Crocs Quality",
+          "desc": "Same level of quality and comfort that made Crocs a global phenomenon."
+        },
+        "fashion": {
+          "title": "Fashion First",
+          "desc": "It's fashion. Bold colors, statement design, unmistakably driip."
+        },
+        "ergonomic": {
+          "title": "Ergonomic Fit",
+          "desc": "Really fit. Really comfy. Contoured footbed that molds to your stride."
+        }
+      }
+    },
+    "colors": {
+      "label": "OPTIONS",
+      "title": "TWO COLORS. TWO MOODS.",
+      "hotPink": "HOT PINK EDITION",
+      "cyanBlue": "CYAN BLUE EDITION",
+      "sizeRange": "AVAILABLE SIZES",
+      "specs": {
+        "eva": "Premium EVA construction",
+        "antislip": "Anti-slip sole pattern",
+        "ergonomic": "Ergonomic footbed design"
+      }
+    },
+    "gallery": {
+      "label": "LOOKBOOK",
+      "title": "THE DRIP SLIDE",
+      "sub": "Hot Pink & Cyan Blue — Two moods, one slide",
+      "cta": "SHOP NOW",
+      "tabPink": "Hot Pink",
+      "tabBlue": "Cyan Blue",
+      "captions": {
+        "collection": "THE COLLECTION — HOT PINK & CYAN BLUE",
+        "pinkDetail": "HOT PINK DETAIL",
+        "blueDetail": "CYAN BLUE DETAIL"
+      }
+    },
+    "manifesto": {
+      "label": "THE DRIIP STANDARD",
+      "quote": "Fashion, it's fashion.\nBut it's comfort.\nThat's the driip way."
+    },
+    "products": {
+      "label": "OPTIONS",
+      "title": "CHOOSE YOUR COLOR & SIZE",
+      "choose": "Select color and size to add to cart",
+      "color": "COLOR",
+      "size": "SIZE",
+      "quantity": "QUANTITY",
+      "addToCart": "ADD TO CART +",
+      "addReady": "ADD TO CART +",
+      "added": "Added to cart ✓",
+      "onePair": "1 PAIR — 286,000đ",
+      "twoPairs": "2 PAIRS — 500,000đ (Save 72,000đ)",
+      "warranty": "180-DAY WARRANTY"
+    },
+    "cart": {
+      "label": "CART",
+      "title": "YOUR SELECTION",
+      "empty": "Your cart is empty",
+      "emptySub": "Select color and size above to add Driip Slide to your cart.",
+      "continueShopping": "← CONTINUE SHOPPING",
+      "total": "TOTAL",
+      "save": "You save",
+      "savings": "Savings",
+      "next": "NEXT: SHIPPING INFO →"
+    },
+    "order": {
+      "label": "LIMITED DROP — ORDER NOW",
+      "title": "CHECKOUT",
+      "sub": "Complete your order. Hot Pink: EU 36-42 | Cyan Blue: EU 40-45.",
+      "step1": "CART",
+      "step2": "SHIPPING",
+      "step3": "CONFIRM",
+      "firstName": "FIRST NAME",
+      "firstNamePlaceholder": "First name",
+      "lastName": "LAST NAME",
+      "lastNamePlaceholder": "Last name",
+      "phone": "PHONE",
+      "phonePlaceholder": "+84 9XX XXX XXX",
+      "province": "PROVINCE / CITY",
+      "provincePlaceholder": "Select province",
+      "address": "STREET ADDRESS",
+      "addressPlaceholder": "House number, street name",
+      "email": "EMAIL (Optional)",
+      "emailPlaceholder": "your email com",
+      "dob": "DATE OF BIRTH",
+      "dobPlaceholder": "DD/MM/YYYY",
+      "gender": "GENDER",
+      "male": "MALE",
+      "female": "FEMALE",
+      "optional": "Optional",
+      "back": "← BACK",
+      "review": "REVIEW ORDER →",
+      "placeOrder": "PLACE ORDER — {price}",
+      "fine": "Payment on delivery · Free shipping Vietnam-wide · 180-day warranty",
+      "successTitle": "ORDER CONFIRMED",
+      "successMessage": "Thank you {name}! Your order has been successfully placed.",
+      "successBody": "{name}, your order for {items} has been received. We'll contact you within 24 hours.",
+      "orderSummary": "ORDER SUMMARY",
+      "stepConfirm": "Order Confirmed",
+      "stepContact": "We'll Contact You",
+      "stepDelivery": "Fast Delivery",
+      "backHome": "BACK TO HOME",
+      "newOrder": "PLACE NEW ORDER",
+      "validate": {
+        "firstName": "Please enter your first name",
+        "lastName": "Please enter your last name",
+        "phone": "Please enter a valid phone number",
+        "province": "Please select your province",
+        "address": "Please enter your street address"
+      },
+      "reviewTitle": "REVIEW YOUR ORDER",
+      "cartSummary": "CART SUMMARY",
+      "shippingInfo": "SHIPPING INFO",
+      "edit": "← EDIT"
+    },
+    "sizechart": {
+      "label": "SIZE CHART",
+      "title": "Driip Slide Size Guide",
+      "unit": "Unit: CM",
+      "labelSize": "Size",
+      "fitSize": "Fit Size",
+      "insoleLength": "Insole Length",
+      "heelWidth": "Heel Width",
+      "heelHeight": "Heel Height",
+      "footTypeTitle": "Foot Type Recommendations",
+      "standardFoot": "Standard",
+      "wideFoot": "Wide Foot",
+      "narrowFoot": "Narrow Foot",
+      "highInstep": "High Instep",
+      "recommendedSize": "Choose recommended",
+      "sizeUp": "Size up",
+      "note": "Note: Slight measurement error may occur. Please refer to the actual product received."
+    }
+  }
+}

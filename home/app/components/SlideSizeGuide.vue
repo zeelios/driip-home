@@ -1,19 +1,42 @@
 <template>
   <Teleport to="body">
     <Transition name="sg-fade">
-      <div v-if="open" class="sg-overlay" @click.self="$emit('update:open', false)">
+      <div
+        v-if="open"
+        class="sg-overlay"
+        @click.self="$emit('update:open', false)"
+      >
         <Transition name="sg-slide">
           <div v-if="open" class="sg-card" role="dialog" aria-modal="true">
             <!-- Header -->
             <div class="sg-header">
               <div>
-                <p class="sg-label">{{ t('slide.sizechart.label') }}</p>
-                <h3 class="sg-title">{{ t('slide.sizechart.title') }}</h3>
+                <p class="sg-label">{{ t("slide.sizechart.label") }}</p>
+                <h3 class="sg-title">{{ t("slide.sizechart.title") }}</h3>
               </div>
-              <button class="sg-close" type="button" @click="$emit('update:open', false)" aria-label="Close">
+              <button
+                class="sg-close"
+                type="button"
+                @click="$emit('update:open', false)"
+                aria-label="Close"
+              >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <line x1="1" y1="1" x2="17" y2="17" stroke="currentColor" stroke-width="1.5"/>
-                  <line x1="17" y1="1" x2="1" y2="17" stroke="currentColor" stroke-width="1.5"/>
+                  <line
+                    x1="1"
+                    y1="1"
+                    x2="17"
+                    y2="17"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <line
+                    x1="17"
+                    y1="1"
+                    x2="1"
+                    y2="17"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
                 </svg>
               </button>
             </div>
@@ -23,17 +46,30 @@
               <table class="sg-table">
                 <thead>
                   <tr>
-                    <th>{{ t('slide.sizechart.labelSize') }}</th>
-                    <th>{{ t('slide.sizechart.fitSize') }}</th>
-                    <th>{{ t('slide.sizechart.insoleLength') }}</th>
-                    <th>{{ t('slide.sizechart.heelWidth') }}</th>
-                    <th>{{ t('slide.sizechart.heelHeight') }}</th>
+                    <th>{{ t("slide.sizechart.labelSize") }}</th>
+                    <th>
+                      {{ t("slide.sizechart.insoleLength") }}<br /><span
+                        class="sg-unit-sub"
+                        >(cm)</span
+                      >
+                    </th>
+                    <th>
+                      {{ t("slide.sizechart.heelWidth") }}<br /><span
+                        class="sg-unit-sub"
+                        >(cm)</span
+                      >
+                    </th>
+                    <th>
+                      {{ t("slide.sizechart.heelHeight") }}<br /><span
+                        class="sg-unit-sub"
+                        >(cm)</span
+                      >
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="row in sizeChart" :key="row.labelSize">
                     <td class="sg-size-cell">{{ row.labelSize }}</td>
-                    <td>{{ row.fitSize }}</td>
                     <td>{{ row.insoleLength }}</td>
                     <td>{{ row.heelWidth }}</td>
                     <td>{{ row.heelHeight }}</td>
@@ -42,38 +78,49 @@
               </table>
             </div>
 
-            <!-- Unit Note -->
-            <p class="sg-unit-note">{{ t('slide.sizechart.unit') }}</p>
-
             <!-- Foot Type Guide -->
             <div class="sg-foot-guide">
-              <p class="sg-foot-title">{{ t('slide.sizechart.footTypeTitle') }}</p>
+              <p class="sg-foot-title">
+                {{ t("slide.sizechart.footTypeTitle") }}
+              </p>
               <div class="sg-foot-grid">
                 <div class="sg-foot-item">
                   <div class="sg-foot-icon">🦶</div>
-                  <p class="sg-foot-label">{{ t('slide.sizechart.standardFoot') }}</p>
-                  <p class="sg-foot-desc">{{ t('slide.sizechart.recommendedSize') }}</p>
+                  <p class="sg-foot-label">
+                    {{ t("slide.sizechart.standardFoot") }}
+                  </p>
+                  <p class="sg-foot-desc">
+                    {{ t("slide.sizechart.recommendedSize") }}
+                  </p>
                 </div>
                 <div class="sg-foot-item">
                   <div class="sg-foot-icon">👣</div>
-                  <p class="sg-foot-label">{{ t('slide.sizechart.wideFoot') }}</p>
-                  <p class="sg-foot-desc">{{ t('slide.sizechart.sizeUp') }}</p>
+                  <p class="sg-foot-label">
+                    {{ t("slide.sizechart.wideFoot") }}
+                  </p>
+                  <p class="sg-foot-desc">{{ t("slide.sizechart.sizeUp") }}</p>
                 </div>
                 <div class="sg-foot-item">
                   <div class="sg-foot-icon">🦶</div>
-                  <p class="sg-foot-label">{{ t('slide.sizechart.narrowFoot') }}</p>
-                  <p class="sg-foot-desc">{{ t('slide.sizechart.recommendedSize') }}</p>
+                  <p class="sg-foot-label">
+                    {{ t("slide.sizechart.narrowFoot") }}
+                  </p>
+                  <p class="sg-foot-desc">
+                    {{ t("slide.sizechart.recommendedSize") }}
+                  </p>
                 </div>
                 <div class="sg-foot-item">
                   <div class="sg-foot-icon">👟</div>
-                  <p class="sg-foot-label">{{ t('slide.sizechart.highInstep') }}</p>
-                  <p class="sg-foot-desc">{{ t('slide.sizechart.sizeUp') }}</p>
+                  <p class="sg-foot-label">
+                    {{ t("slide.sizechart.highInstep") }}
+                  </p>
+                  <p class="sg-foot-desc">{{ t("slide.sizechart.sizeUp") }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Footnote -->
-            <p class="sg-footnote">{{ t('slide.sizechart.note') }}</p>
+            <p class="sg-footnote">{{ t("slide.sizechart.note") }}</p>
           </div>
         </Transition>
       </div>
@@ -84,21 +131,92 @@
 <script setup lang="ts">
 const { t } = useI18n();
 
-defineProps<{
+const props = defineProps<{
   open: boolean;
 }>();
 
 const emit = defineEmits<{
-  'update:open': [value: boolean];
+  "update:open": [value: boolean];
 }>();
 
+function closeModal(): void {
+  emit("update:open", false);
+}
+
+function onKeydown(event: KeyboardEvent): void {
+  if (event.key === "Escape" && props.open) {
+    closeModal();
+  }
+}
+
+function onPopstate(): void {
+  if (props.open) {
+    closeModal();
+  }
+}
+
+// Manage history state for back button handling
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen) {
+      // Push a history entry so back button closes modal instead of navigating
+      history.pushState({ modal: "size-guide" }, "", location.href);
+      // Add event listeners
+      window.addEventListener("keydown", onKeydown);
+      window.addEventListener("popstate", onPopstate);
+    } else {
+      // Clean up listeners
+      window.removeEventListener("keydown", onKeydown);
+      window.removeEventListener("popstate", onPopstate);
+    }
+  },
+  { immediate: true }
+);
+
+// Clean up on unmount
+onUnmounted(() => {
+  window.removeEventListener("keydown", onKeydown);
+  window.removeEventListener("popstate", onPopstate);
+});
+
 const sizeChart = [
-  { labelSize: '36-37', fitSize: '35-36', insoleLength: '25.0', heelWidth: '7.0', heelHeight: '4.5' },
-  { labelSize: '38-39', fitSize: '37-38', insoleLength: '26.0', heelWidth: '7.5', heelHeight: '4.5' },
-  { labelSize: '40-41', fitSize: '39-40', insoleLength: '27.0', heelWidth: '8.0', heelHeight: '4.5' },
-  { labelSize: '42-43', fitSize: '41-42', insoleLength: '28.0', heelWidth: '8.5', heelHeight: '4.5' },
-  { labelSize: '44-45', fitSize: '43-44', insoleLength: '29.0', heelWidth: '8.5', heelHeight: '4.5' },
-  { labelSize: '46-47', fitSize: '45-46', insoleLength: '30.0', heelWidth: '8.5', heelHeight: '4.5' },
+  {
+    labelSize: "36-37",
+    insoleLength: "25.0",
+    heelWidth: "7.0",
+    heelHeight: "4.5",
+  },
+  {
+    labelSize: "38-39",
+    insoleLength: "26.0",
+    heelWidth: "7.5",
+    heelHeight: "4.5",
+  },
+  {
+    labelSize: "40-41",
+    insoleLength: "27.0",
+    heelWidth: "8.0",
+    heelHeight: "4.5",
+  },
+  {
+    labelSize: "42-43",
+    insoleLength: "28.0",
+    heelWidth: "8.5",
+    heelHeight: "4.5",
+  },
+  {
+    labelSize: "44-45",
+    insoleLength: "29.0",
+    heelWidth: "8.5",
+    heelHeight: "4.5",
+  },
+  {
+    labelSize: "46-47",
+    insoleLength: "30.0",
+    heelWidth: "8.5",
+    heelHeight: "4.5",
+  },
 ];
 </script>
 
@@ -205,15 +323,24 @@ const sizeChart = [
 
 .sg-table th {
   background: rgba(255, 255, 255, 0.04);
-  padding: 12px 8px;
+  padding: 10px 8px;
   text-align: center;
+  font-size: 11px;
   font-weight: 600;
-  font-size: 10px;
   letter-spacing: 0.05em;
   color: var(--grey-400);
   text-transform: uppercase;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   white-space: nowrap;
+  line-height: 1.4;
+}
+
+.sg-unit-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--grey-500);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .sg-table td {
@@ -230,14 +357,6 @@ const sizeChart = [
 .sg-size-cell {
   font-weight: 600;
   color: var(--white) !important;
-}
-
-/* ── Unit Note ────────────────────────────────────────────────────── */
-.sg-unit-note {
-  font-size: 12px;
-  color: var(--grey-500);
-  text-align: right;
-  margin-bottom: 24px;
 }
 
 /* ── Foot Type Guide ──────────────────────────────────────────────── */

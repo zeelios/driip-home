@@ -1,0 +1,149 @@
+{
+  "ck": {
+    "hero": {
+      "pre": "CALVIN KLEIN ESSENTIALS · SS26",
+      "sub": "ENGINEERED FOR THE MAN\nWHO REFUSES TO COMPROMISE",
+      "cta": "BUY ONLINE — EXTRA 20% OFF",
+      "priceLabel": "PRICE",
+      "priceValue": "FROM 740K VND",
+      "configLabel": "CONFIG",
+      "configValue": "BRIEF / BOXER",
+      "previewLabel": "PREVIEW",
+      "previewTitle": "SEE THE FIT BEFORE YOU BUY",
+      "previewBody": "A tighter preview block gives the landing page more proof, more clarity, and a stronger reason to keep scrolling."
+    },
+    "strip": {
+      "shipping": "FREE SHIPPING",
+      "offer": "BUY THROUGH WEB — EXTRA 20% OFF",
+      "stock": "LIMITED STOCK"
+    },
+    "products": {
+      "addToCart": "Add To Cart +",
+      "boxer": {
+        "desc": "Full coverage. Anatomical fit. Zero ride-up guarantee.",
+        "specs": ["Extended leg coverage", "Anti-ride-up hem", "Contoured support"]
+      },
+      "brief": {
+        "desc": "The original. The essential. Classic low-rise cut for all-day comfort.",
+        "specs": ["Low-rise silhouette", "Modal-cotton blend", "Signature CK waistband"]
+      },
+      "chooseSizeColor": "Select Size & Color",
+      "clearCart": "Clear Cart",
+      "from": "FROM",
+      "goToCart": "View Cart →",
+      "label": "THE COLLECTION",
+      "orderThis": "ORDER THIS →",
+      "policyCopy": "30-day returns, plus 90-180 day warranty coverage depending on the line.",
+      "policyLabel": "POLICIES",
+      "title": "TWO FITS.\nONE STANDARD."
+    },
+    "fabric": {
+      "modal": "95% MODAL COTTON",
+      "elastane": "5% ELASTANE",
+      "rideUp": "ZERO RIDE-UP",
+      "waistband": "SIGNATURE WAISTBAND"
+    },
+    "offer": {
+      "label": "WEB EXCLUSIVE",
+      "title": "EXTRA 20% OFF\nYOUR ORDER",
+      "body": "Available now through our website. One code per customer. Applied automatically at checkout.",
+      "yourCode": "YOUR CODE",
+      "validity": "Available now · Single use · CK Boxer & Brief",
+      "copy": "COPY",
+      "copied": "COPIED ✓"
+    },
+    "manifesto": "\"The foundation of every outfit\nis what nobody sees.\nGet that right first.\"",
+    "access": {
+      "label": "STAY UPDATED",
+      "title": "THE CLASSIC PACK.\nNOW ONLINE.",
+      "sub": "Drop your details and we'll keep you posted on restocks, updates, and web-only offers.",
+      "name": "FULL NAME",
+      "namePlaceholder": "Your name",
+      "email": "EMAIL ADDRESS",
+      "emailPlaceholder": "your email com",
+      "phone": "PHONE",
+      "phonePlaceholder": "+84 9XX XXX XXX",
+      "optional": "(OPTIONAL)",
+      "submit": "NOTIFY ME + LOCK MY CODE",
+      "fine": "By submitting you agree to receive updates and web-only offers from driip-",
+      "successTitle": "YOU'RE ON THE LIST",
+      "successBody": "Code {code} is locked in. We'll message you when it goes live."
+    },
+    "gallery": {
+      "pre": "LOOKBOOK — SS26",
+      "title": "THE COLLECTION",
+      "sub": "BOXER & BRIEF · THREE COLOURWAYS"
+    },
+    "order": {
+      "label": "LIMITED STOCK — ORDER NOW",
+      "title": "CLAIM YOUR PACK",
+      "sub": "Fill in your delivery details. We'll confirm your order within 24 hours and send tracking once dispatched.",
+      "details": "YOUR DETAILS",
+      "firstName": "FIRST NAME",
+      "firstNamePlaceholder": "First name",
+      "lastName": "LAST NAME",
+      "lastNamePlaceholder": "Last name",
+      "phone": "PHONE NUMBER",
+      "phonePlaceholder": "+84 9XX XXX XXX",
+      "province": "PROVINCE / CITY",
+      "provincePlaceholder": "Search province / city",
+      "district": "DISTRICT",
+      "districtPlaceholder": "Select district",
+      "districtTextPlaceholder": "Enter district",
+      "ward": "WARD / COMMUNE",
+      "wardPlaceholder": "Ward / commune name",
+      "street": "STREET ADDRESS",
+      "streetPlaceholder": "e.g. 123 Nguyen Trai Street",
+      "dob": "DATE OF BIRTH",
+      "dobPlaceholder": "DD/MM/YYYY",
+      "gender": "GENDER",
+      "genderMale": "MALE",
+      "genderFemale": "FEMALE",
+      "optionalTag": "(OPTIONAL)",
+      "selection": "YOUR SELECTION",
+      "product": "PRODUCT",
+      "boxes": "BOXES",
+      "boxCount": "{count} BOXES",
+      "perBox": "{price} / BOX",
+      "size": "SIZE",
+      "colorPack": "COLOUR PACK",
+      "colorPackSub": "3-PIECE SET",
+      "colors": {
+        "black": "3× BLACK",
+        "white": "3× WHITE",
+        "grey": "3× GREY",
+        "mix": "MIX PACK"
+      },
+      "submit": "PLACE MY ORDER → {price}",
+      "fine": "Payment on delivery · Free shipping Vietnam-wide · 3-piece set per order",
+      "codeApplied": "CODE DRIIP20 APPLIED — 20% OFF",
+      "originalTotal": "ORIGINAL PRICE",
+      "salePrice": "PROGRAM PRICE",
+      "extraDiscount": "EXTRA WEBSITE OFF",
+      "finalPerBox": "FINAL PRICE / BOX",
+      "validate": {
+        "firstName": "Please enter the recipient's first name.",
+        "lastName": "Please enter the recipient's last name.",
+        "phone": "Please enter a phone number.",
+        "fullAddress": "Please enter the full delivery address.",
+        "province": "Please select a province or city.",
+        "sku": "Please select a product.",
+        "size": "Please select a size.",
+        "color": "Please select a colour pack."
+      },
+      "reviewOrder": "REVIEW ORDER",
+      "successTitle": "ORDER CONFIRMED",
+      "successBody": "{name}, your order for {sku} · {size} · {color} has been received. We'll confirm within 24 hours.",
+      "step1": "CART",
+      "step2": "INFO",
+      "step3": "CONFIRM",
+      "emptyTitle": "Your cart is empty",
+      "emptySub": "Return to the product section to add Briefs or Boxers to your cart.",
+      "goProducts": "← VIEW PRODUCTS",
+      "next": "NEXT",
+      "shippingInfo": "SHIPPING DETAILS",
+      "back": "← BACK",
+      "editInfo": "← EDIT INFO"
+    }
+  }
+}

@@ -797,7 +797,16 @@ import { useDriipSlideStore } from "~/stores/driip-slide";
 import { useSiteNavStore } from "~/stores/site-nav";
 import { vietnamProvinces } from "~/data/vietnam-addresses";
 
-const { locale, t } = useI18n();
+const { locale, t, mergeLocaleMessage } = useI18n();
+
+// Load page-specific translations
+onMounted(async () => {
+  const currentLocale = locale.value;
+  const messages = await import(
+    `~/i18n/locales/pages/slide.${currentLocale}.json`
+  );
+  mergeLocaleMessage(currentLocale, messages.default);
+});
 const { setupScrollDepth, trackPageView } = useMetaEvents();
 const store = useDriipSlideStore();
 const siteNavStore = useSiteNavStore();

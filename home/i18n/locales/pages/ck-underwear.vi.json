@@ -1,0 +1,155 @@
+{
+  "ck": {
+    "hero": {
+      "pre": "CALVIN KLEIN ESSENTIALS · SS26",
+      "sub": "DÀNH RIÊNG CHO NGƯỜI ĐÀN ÔNG THEO ĐUỔI SỰ HOÀN HẢO",
+      "cta": "MUA TRỰC TUYẾN VÀ GIẢM THÊM 20%",
+      "priceLabel": "GIÁ BÁN",
+      "priceValue": "TỪ 740.000 VNĐ",
+      "configLabel": "TÙY CHỈNH",
+      "configValue": "BRIEF HOẶC BOXER",
+      "previewLabel": "XEM TRƯỚC",
+      "previewTitle": "KHÁM PHÁ HÌNH DÁNG TRƯỚC KHI MUA",
+      "previewBody": "Một khối preview tinh gọn giúp trang landing trở nên thuyết phục hơn, với nhiều bằng chứng rõ ràng."
+    },
+    "strip": {
+      "shipping": "MIỄN PHÍ VẬN CHUYỂN",
+      "offer": "MUA TRÊN WEBSITE — GIẢM THÊM 20%",
+      "stock": "SỐ LƯỢNG GIỚI HẠN"
+    },
+    "products": {
+      "addToCart": "THÊM VÀO GIỎ HÀNG +",
+      "boxer": {
+        "desc": "Che phủ tối ưu, form ôm vừa vặn và hạn chế di chuyển, lý tưởng cho lối sống năng động.",
+        "specs": ["Ống chân dài", "Hỗ trợ tối đa", "Thiết kế theo đường cong cơ thể"]
+      },
+      "brief": {
+        "desc": "Phiên bản kinh điển, tối giản và thiết yếu. Dáng lưng thấp mang lại sự thoải mái suốt cả ngày, với đường nét thanh lịch.",
+        "specs": ["Dáng lưng thấp", "Chất liệu cotton modal cao cấp", "Dây lưng CK biểu tượng"]
+      },
+      "chooseSizeColor": "CHỌN SIZE & MÀU ĐỂ THÊM",
+      "clearCart": "CHỌN LẠI",
+      "from": "TỪ",
+      "goToCart": "XEM GIỎ HÀNG →",
+      "label": "CALVIN KLEIN",
+      "orderThis": "ĐẶT NGAY →",
+      "policyCopy": "Đổi trả 30 ngày, bảo hành 90-180 ngày cho từng dòng sản phẩm.",
+      "policyLabel": "CHÍNH SÁCH",
+      "title": "SỐ LƯỢNG CÓ HẠN — ĐẶT NGAY"
+    },
+    "fabric": {
+      "modal": "95% cotton modal",
+      "elastane": "5% sợi đàn hồi",
+      "rideUp": "Hạn chế xê dịch",
+      "waistband": "Dây lưng đặc trưng"
+    },
+    "offer": {
+      "label": "ƯU ĐÃI TRỰC TUYẾN",
+      "title": "Giảm thêm 20% cho đơn hàng của bạn",
+      "body": "Ưu đãi độc quyền trên website, với mã giảm giá cá nhân hóa được áp dụng tự động khi thanh toán.",
+      "yourCode": "Mã của bạn",
+      "validity": "Áp dụng ngay · Dùng một lần · Dành cho Boxer & Brief",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép ✓"
+    },
+    "manifesto": "Nền tảng của phong cách đích thực nằm ở những gì không ai thấy. Hãy chọn sự hoàn hảo từ đầu.",
+    "access": {
+      "label": "CẬP NHẬT MỚI NHẤT",
+      "title": "Phong cách kinh điển, nay có trên nền tảng kỹ thuật số.",
+      "sub": "Để lại thông tin để nhận cập nhật về hàng mới, tin tức và ưu đãi dành riêng cho cộng đồng trực tuyến.",
+      "name": "Họ và tên",
+      "namePlaceholder": "Nhập họ và tên",
+      "email": "Địa chỉ email",
+      "emailPlaceholder": "email tại example.com",
+      "phone": "Số điện thoại",
+      "phonePlaceholder": "+84 9XX XXX XXX hoặc 09x xxx xxxx",
+      "optional": "(Tùy chọn)",
+      "submit": "ĐĂNG KÝ VÀ GIỮ MÃ GIẢM GIÁ",
+      "fine": "Bằng cách gửi thông tin, bạn đồng ý nhận bản tin và ưu đãi từ driip-. Chúng tôi cam kết bảo mật dữ liệu.",
+      "successTitle": "Đăng ký thành công",
+      "successBody": "Cảm ơn {name}. Mã giảm giá của bạn đã được bảo lưu. Chúng tôi sẽ gửi thông tin khi sản phẩm sẵn sàng."
+    },
+    "gallery": {
+      "pre": "LOOKBOOK — SS26",
+      "title": "BỘ SƯU TẬP",
+      "sub": "Boxer & Brief trong ba tông màu tinh tế"
+    },
+    "order": {
+      "label": "SỐ LƯỢNG GIỚI HẠN — ĐẶT NGAY",
+      "title": "ĐẶT HÀNG",
+      "sub": "Vui lòng cung cấp thông tin giao hàng. Đội ngũ chúng tôi sẽ xác nhận đơn trong 24 giờ và cập nhật tình trạng sau khi xử lý.",
+      "details": "THÔNG TIN CÁ NHÂN",
+      "firstName": "Họ",
+      "firstNamePlaceholder": "Nhập họ",
+      "lastName": "Tên",
+      "lastNamePlaceholder": "Nhập tên",
+      "phone": "Số điện thoại",
+      "phonePlaceholder": "+84 9XX XXX XXX / 09x xxx xxxx",
+      "province": "Tỉnh / thành phố",
+      "provincePlaceholder": "Tìm kiếm tỉnh / thành phố",
+      "district": "Quận / huyện",
+      "districtPlaceholder": "Chọn quận / huyện",
+      "districtTextPlaceholder": "Nhập quận / huyện",
+      "ward": "Phường / xã",
+      "wardPlaceholder": "Nhập phường / xã",
+      "street": "Địa chỉ chi tiết",
+      "streetPlaceholder": "Số nhà, tên đường, ví dụ: 123 Nguyễn Trãi",
+      "dob": "Ngày sinh",
+      "dobPlaceholder": "DD/MM/YYYY",
+      "gender": "Giới tính",
+      "genderMale": "Nam",
+      "genderFemale": "Nữ",
+      "optionalTag": "(Tùy chọn)",
+      "selection": "LỰA CHỌN SẢN PHẨM",
+      "product": "Sản phẩm",
+      "boxes": "Số hộp",
+      "boxCount": "{count} hộp",
+      "perBox": "{price} mỗi hộp",
+      "size": "Size",
+      "colorPack": "Gói màu",
+      "colorPackSub": "Bộ 3 chiếc",
+      "colors": {
+        "black": "3× Đen",
+        "white": "3× Trắng",
+        "grey": "3× Xám",
+        "mix": "Mix"
+      },
+      "submit": "XÁC NHẬN ĐƠN HÀNG — {price}đ",
+      "fine": "Thanh toán khi nhận · Vận chuyển miễn phí toàn quốc · Mỗi hộp bao gồm 3 sản phẩm",
+      "codeApplied": "Đã áp dụng mã giảm giá — giảm 20%",
+      "originalTotal": "Giá gốc",
+      "salePrice": "Giá khuyến mãi",
+      "extraDiscount": "Giảm thêm từ website",
+      "finalPerBox": "Giá cuối cùng mỗi hộp",
+      "validate": {
+        "firstName": "Vui lòng nhập tên người nhận.",
+        "lastName": "Vui lòng nhập họ người nhận.",
+        "phone": "Vui lòng nhập số điện thoại.",
+        "fullAddress": "Vui lòng nhập địa chỉ giao hàng cụ thể.",
+        "province": "Vui lòng chọn tỉnh hoặc thành phố.",
+        "sku": "Vui lòng chọn sản phẩm.",
+        "size": "Vui lòng chọn size.",
+        "color": "Vui lòng chọn phối màu."
+      },
+      "reviewOrder": "XÁC NHẬN ĐƠN",
+      "successTitle": "Đơn hàng đã được ghi nhận",
+      "successBody": "{name}, đơn hàng {sku} · {size} · {color} của bạn đã được ghi nhận. Đơn sẽ được giao trong vòng 3–10 ngày.",
+      "step1": "GIỎ HÀNG",
+      "step2": "THÔNG TIN",
+      "step3": "XÁC NHẬN",
+      "emptyTitle": "Giỏ hàng chưa có sản phẩm",
+      "emptySub": "Quay lại phần sản phẩm để thêm Brief hoặc Boxer.",
+      "goProducts": "← TRỞ VỀ SẢN PHẨM",
+      "next": "TIẾP TỤC",
+      "shippingInfo": "THÔNG TIN GIAO HÀNG",
+      "back": "← QUAY LẠI",
+      "editInfo": "← CHỈNH SỬA THÔNG TIN"
+    },
+    "sizechart": {
+      "label": "BẢNG SIZE",
+      "note": "Dựa trên vòng hông và cân nặng",
+      "measurement": "Cách đo: Đo vòng hông tại vị trí rộng nhất, giữ thước song song với mặt đất.",
+      "modalButton": "Tìm size theo cân nặng"
+    }
+  }
+}

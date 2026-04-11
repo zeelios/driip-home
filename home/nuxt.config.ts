@@ -46,6 +46,8 @@ export default defineNuxtConfig({
       cookieKey: "driip_locale",
       redirectOn: "root",
     },
+    // Enable langDir for modular translation files
+    langDir: "locales/",
   },
 
   // ── Head defaults ─────────────────────────────────────────────────
@@ -122,8 +124,6 @@ export default defineNuxtConfig({
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap",
         },
-        { rel: "preload", as: "image", href: "/products/Brief/Black.png" },
-        { rel: "preload", as: "image", href: "/products/Brief/Gray.png" },
         { rel: "canonical", href: "https://driip.com/" },
       ],
     },

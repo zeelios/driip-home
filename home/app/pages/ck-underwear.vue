@@ -16,7 +16,17 @@ import { useMetaEvents } from "~/composables/useMetaEvents";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
 import { useSiteNavStore } from "~/stores/site-nav";
 
-const { locale, t } = useI18n();
+const { locale, t, mergeLocaleMessage } = useI18n();
+
+// Load page-specific translations
+onMounted(async () => {
+  const currentLocale = locale.value;
+  const messages = await import(
+    `~/i18n/locales/pages/ck-underwear.${currentLocale}.json`
+  );
+  mergeLocaleMessage(currentLocale, messages.default);
+});
+
 const { setupScrollDepth, trackPageView } = useMetaEvents();
 const ckStore = useCkUnderwearStore();
 const siteNavStore = useSiteNavStore();
