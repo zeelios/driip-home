@@ -109,6 +109,8 @@ interface MetaPixelApi {
 const SKU_PRICES: Record<string, number> = {
   "ck-brief": getFinalTotal(1),
   "ck-boxer": getFinalTotal(1),
+  "driip-slide-pink": 299000,
+  "driip-slide-blue": 299000,
 };
 
 const FB_LOGIN_ID_COOKIE_KEY = "driip_meta_fb_login_id";

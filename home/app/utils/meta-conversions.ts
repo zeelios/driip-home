@@ -150,6 +150,9 @@ export function normalizeMetaDob(raw: string): string {
 export function buildMetaPurchaseContentName(sku?: string): string {
   if (sku === "ck-brief") return "CK Brief";
   if (sku === "ck-boxer") return "CK Boxer";
+  if (sku === "driip-slide-pink") return "Driip Slide Hot Pink";
+  if (sku === "driip-slide-blue") return "Driip Slide Cyan Blue";
+  if (sku?.startsWith("driip-slide")) return "Driip Slide";
   return "CK Boxer & Brief";
 }
 

@@ -37,16 +37,16 @@ useHead({
           ? "Bộ sưu tập CK Boxer & Brief với giá website và ưu đãi tốt hơn khi mua nhiều hộp."
           : "CK Boxer & Brief collection with website pricing and better rates on multi-box orders.",
     },
-    { property: "og:image", content: "https://driip.com/driip-cover.jpg" },
+    { property: "og:image", content: "https://driip.io/logo.png" },
     {
       property: "og:image:secure_url",
-      content: "https://driip.com/driip-cover.jpg",
+      content: "https://driip.io/logo.png",
     },
-    { property: "og:image:type", content: "image/jpeg" },
-    { property: "og:image:width", content: "8484" },
-    { property: "og:image:height", content: "4512" },
-    { property: "og:image:alt", content: "driip- brand cover image" },
-    { property: "og:url", content: "https://driip.com/" },
+    { property: "og:image:type", content: "image/png" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:image:alt", content: "driip- logo" },
+    { property: "og:url", content: "https://driip.io/" },
     { name: "twitter:title", content: "driip- | SS26 First Drop" },
     {
       name: "twitter:description",
@@ -55,7 +55,7 @@ useHead({
           ? "Bộ sưu tập CK Boxer & Brief với giá website và ưu đãi tốt hơn khi mua nhiều hộp."
           : "CK Boxer & Brief collection with website pricing and better rates on multi-box orders.",
     },
-    { name: "twitter:image", content: "https://driip.com/driip-cover.jpg" },
+    { name: "twitter:image", content: "https://driip.io/logo.png" },
   ],
 });
 

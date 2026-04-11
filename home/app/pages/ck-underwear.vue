@@ -68,14 +68,14 @@ useHead({
     { property: "og:type", content: "website" },
     { property: "og:site_name", content: "driip-" },
     { property: "og:locale", content: "vi_VN" },
-    { property: "og:url", content: "https://driip.com/ck-underwear" },
+    { property: "og:url", content: "https://driip.io/ck-underwear" },
     {
       property: "og:image",
-      content: "https://driip.com/driip-cover.jpg",
+      content: "https://driip.io/driip-cover.jpg",
     },
     {
       property: "og:image:secure_url",
-      content: "https://driip.com/driip-cover.jpg",
+      content: "https://driip.io/driip-cover.jpg",
     },
     { property: "og:image:type", content: "image/jpeg" },
     { property: "og:image:width", content: "8484" },
@@ -90,7 +90,7 @@ useHead({
     },
     {
       name: "twitter:image",
-      content: "https://driip.com/driip-cover.jpg",
+      content: "https://driip.io/driip-cover.jpg",
     },
   ],
 });

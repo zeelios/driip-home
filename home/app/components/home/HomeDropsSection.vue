@@ -43,6 +43,31 @@
           </div>
         </NuxtLinkLocale>
         <NuxtLinkLocale
+          to="/driip-slide"
+          class="drop-card drop-card--live reveal"
+        >
+          <div class="drop-img drop-img--slide">
+            <NuxtImg
+              src="/products/dSlide/master.jpg"
+              :width="640"
+              :height="800"
+              format="webp"
+              quality="85"
+              fit="cover"
+              alt="Driip Slide"
+              loading="lazy"
+              class="drop-img-main"
+            />
+            <div class="drop-badge">{{ t("home.drops.live") }}</div>
+          </div>
+          <div class="drop-body">
+            <p class="drop-collection">SS26 · FOOTWEAR</p>
+            <p class="drop-name">DRIP<br />SLIDE</p>
+            <p class="drop-price">BÁNH MÌ STYLE · EVA · ANTI-SLIP</p>
+            <span class="drop-cta">{{ t("home.drops.shopNow") }}</span>
+          </div>
+        </NuxtLinkLocale>
+        <NuxtLinkLocale
           to="/driip-tee"
           class="drop-card drop-card--soon reveal"
         >
@@ -185,6 +210,23 @@ const launchPrice = formatVndCurrency(getFinalUnitPrice(5));
 .drop-img--lacoste {
   position: relative;
   overflow: hidden;
+}
+
+.drop-img--slide {
+  position: relative;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.drop-img--slide .drop-img-main {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.drop-card:hover .drop-img--slide .drop-img-main {
+  transform: scale(1.03);
 }
 .drop-card--preview {
   opacity: 0.6;
