@@ -2,73 +2,73 @@
   "slide": {
     "hero": {
       "pre": "DRIIP ORIGINAL — SS26",
-      "eyebrow": "SẢN PHẨM CHÍNH THỨC CỦA DRIIP",
-      "title": "THỜI TRANG.\nNHƯNG THOẢI MÁI.",
-      "sub": "Phong cách Bánh Mì Việt Nam. Chất liệu EVA cao cấp. Chống trượt. Chất lượng Crocs đã kiểm chứng. Thiết kế ergonomic vừa vặn, cực kỳ thoải mái.",
-      "cta": "KHÁM PHÁ SLIDE",
-      "secondary": "VỀ TRANG CHỦ",
+      "eyebrow": "THIẾT KẾ ĐỘC QUYỀN TỪ DRIIP",
+      "title": "THỜI TRANG.\nVÀ CỰC KỲ THOẢI MÁI.",
+      "sub": "Lấy cảm hứng từ hình dáng chiếc bánh mì Việt Nam. Đúc nguyên khối từ bọt EVA cao cấp mang lại độ êm ái chuẩn Crocs, cùng form dáng công thái học ôm trọn lòng bàn chân giúp bạn thoải mái sải bước suốt cả ngày.",
+      "cta": "KHÁM PHÁ NGAY",
+      "secondary": "TRỞ VỀ TRANG CHỦ",
       "metrics": {
         "material": "CHẤT LIỆU",
-        "materialValue": "EVA FOAM",
+        "materialValue": "BỌT EVA FOAM",
         "style": "PHONG CÁCH",
-        "styleValue": "BÁNH MÌ",
+        "styleValue": "CHUNKY BÁNH MÌ",
         "comfort": "THOẢI MÁI",
-        "comfortValue": "ERGONOMIC"
+        "comfortValue": "CÔNG THÁI HỌC"
       }
     },
     "strip": {
-      "eva": "CHẤT LIỆU EVA CAO CẤP",
-      "antislip": "THIẾT KẾ CHỐNG TRƯỢT",
-      "ergonomic": "THIẾT KẾ ERGONOMIC",
-      "crocs": "CHẤT LƯỢNG CROCS ĐÃ KIỂM CHỨNG"
+      "eva": "BỌT EVA CAO CẤP",
+      "antislip": "ĐẾ CHỐNG TRƯỢT TỐI ƯU",
+      "ergonomic": "FORM DÁNG CÔNG THÁI HỌC",
+      "crocs": "CHẤT LƯỢNG CHUẨN CROCS"
     },
     "features": {
-      "label": "TÍNH NĂNG NỔI BẬT",
-      "title": "KHÁC BIỆT.\nTỐT HƠN.",
-      "body": "Mỗi chi tiết của Driip Slide được thiết kế dành cho những người không chấp nhận sự thỏa hiệp giữa phong cách và sự thoải mái. Từ đường phố Việt Nam đến đôi chân bạn.",
+      "label": "CHI TIẾT THIẾT KẾ",
+      "title": "KHÁC BIỆT.\nVÀ ĐẲNG CẤP HƠN.",
+      "body": "Từng đường nét trên Driip Slide được tinh chỉnh để tôn lên cá tính của bạn mà không cần phải đánh đổi sự thoải mái. Một thiết kế mang âm hưởng đường phố Việt, sinh ra để nâng niu từng bước chân.",
       "items": {
         "banhMi": {
-          "title": "Phong Cách Bánh Mì",
-          "desc": "Lấy cảm hứng từ hình dáng biểu tượng của bánh mì Việt Nam — độc đáo, ấn tượng, dễ nhận biết."
+          "title": "Phom Dáng Bánh Mì",
+          "desc": "Mượn cảm hứng từ chiếc bánh mì Việt Nam thân thuộc — tạo nên phom dáng chunky độc bản, ấn tượng và cực kỳ nổi bật."
         },
         "eva": {
           "title": "Chất Liệu EVA Cao Cấp",
-          "desc": "Xốp nhẹ, bền, chống nước, đệm êm mỗi bước chân."
+          "desc": "Đúc nguyên khối từ bọt EVA siêu nhẹ, chống thấm nước hoàn toàn và mang lại độ đàn hồi cực đã."
         },
         "antislip": {
-          "title": "Thiết Kế Chống Trượt",
-          "desc": "Hoa văn đế được thiết kế giúp bạn vững vàng trên mọi bề mặt, khô hay ướt."
+          "title": "Bất Chấp Mọi Địa Hình",
+          "desc": "Hệ thống rãnh đế sâu giúp bám đường cực tốt, cho bạn tự tin sải bước bất kể nắng mưa."
         },
         "crocs": {
-          "title": "Chất Lượng Crocs",
-          "desc": "Đạt tiêu chuẩn chất lượng và độ thoải mái tương đương Crocs toàn cầu."
+          "title": "Độ Bền Chuẩn Crocs",
+          "desc": "Trải nghiệm sự êm ái và độ bền bỉ đã được bảo chứng, chất lượng không thua kém bất kỳ thương hiệu quốc tế nào."
         },
         "fashion": {
-          "title": "Thời Trang Là Trên Hết",
-          "desc": "Thời trang là thời trang. Màu sắc táo bạo, thiết kế khác biệt, đậm chất driip."
+          "title": "Phá Vỡ Khuôn Mẫu",
+          "desc": "Không thỏa hiệp với sự an toàn. Bảng màu cá tính cùng đường nét góc cạnh tạo nên tuyên ngôn thời trang đậm chất Driip."
         },
         "ergonomic": {
-          "title": "Vừa Vặn Ergonomic",
-          "desc": "Thực sự vừa vặn. Thực sự thoải mái. Đế lõm ôm theo hình dáng bàn chân."
+          "title": "Nâng Đỡ Tuyệt Đối",
+          "desc": "Sự thoải mái đến từ những tính toán tỉ mỉ. Lòng dép đúc trũng tinh tế ôm trọn theo khuôn chân, giúp giảm mỏi tối đa."
         }
       }
     },
     "colors": {
-      "label": "TÙY CHỌN",
-      "title": "HAI MÀU. HAI CÁ TÍNH.",
-      "hotPink": "HOT PINK EDITION",
-      "cyanBlue": "CYAN BLUE EDITION",
-      "sizeRange": "SIZE CÓ SẴN",
+      "label": "BẢNG MÀU",
+      "title": "HAI PHỐI MÀU. HAI CÁ TÍNH.",
+      "hotPink": "PHIÊN BẢN HOT PINK",
+      "cyanBlue": "PHIÊN BẢN CYAN BLUE",
+      "sizeRange": "SIZE HIỆN CÓ",
       "specs": {
-        "eva": "Cấu trúc EVA cao cấp",
-        "antislip": "Hoa văn đế chống trượt",
-        "ergonomic": "Thiết kế đế ergonomic"
+        "eva": "Đúc nguyên khối từ bọt EVA",
+        "antislip": "Mặt đế rãnh chống trượt",
+        "ergonomic": "Form đúc theo khuôn chân"
       }
     },
     "gallery": {
       "label": "LOOKBOOK",
       "title": "DRIIP SLIDE",
-      "sub": "Hot Pink & Cyan Blue — Hai màu, một phong cách",
+      "sub": "Hot Pink & Cyan Blue — Hai tông màu, một tinh thần",
       "cta": "MUA NGAY",
       "tabPink": "Hot Pink",
       "tabBlue": "Cyan Blue",
@@ -80,100 +80,100 @@
     },
     "manifesto": {
       "label": "TIÊU CHUẨN DRIIP",
-      "quote": "Thời trang là thời trang.\nNhưng phải thoải mái.\nĐó là cách của driip."
+      "quote": "Phong cách là lời tuyên ngôn của bạn.\nCòn sự thoải mái là cam kết của Driip."
     },
     "products": {
-      "label": "TÙY CHỌN",
-      "title": "CHỌN MÀU & SIZE",
-      "choose": "Chọn màu và size để thêm vào giỏ hàng",
+      "label": "LỰA CHỌN CỦA BẠN",
+      "title": "CHỌN PHỐI MÀU & SIZE",
+      "choose": "Lựa chọn phối màu và size phù hợp với bạn nhé",
       "color": "MÀU SẮC",
-      "size": "SIZE",
+      "size": "KÍCH CỠ (SIZE)",
       "quantity": "SỐ LƯỢNG",
-      "addToCart": "CHỌN SIZE & MÀU ĐỂ THÊM",
+      "addToCart": "CHỌN SIZE & MÀU ĐỂ TIẾP TỤC",
       "addReady": "THÊM VÀO GIỎ HÀNG +",
       "added": "Đã thêm vào giỏ ✓",
       "onePair": "1 ĐÔI — 286.000đ",
-      "twoPairs": "2 ĐÔI — 500.000đ (Tiết kiệm 72.000đ)",
+      "twoPairs": "COMBO 2 ĐÔI — 500.000đ (Tiết kiệm 72.000đ)",
       "warranty": "BẢO HÀNH 180 NGÀY"
     },
     "cart": {
-      "label": "GIỎ HÀNG",
+      "label": "GIỎ HÀNG CỦA BẠN",
       "title": "SẢN PHẨM ĐÃ CHỌN",
-      "empty": "Giỏ hàng trống",
-      "emptySub": "Chọn màu và size ở trên để thêm Driip Slide vào giỏ hàng.",
+      "empty": "Giỏ hàng đang trống",
+      "emptySub": "Bạn chưa chọn sản phẩm nào. Hãy thử thêm một đôi Driip Slide vào giỏ nhé.",
       "continueShopping": "← TIẾP TỤC MUA SẮM",
       "total": "TỔNG CỘNG",
-      "save": "Bạn tiết kiệm",
+      "save": "Bạn tiết kiệm được",
       "savings": "Tiết kiệm",
       "next": "TIẾP THEO: THÔNG TIN GIAO HÀNG →"
     },
     "order": {
       "label": "DROP GIỚI HẠN — ĐẶT NGAY",
       "title": "THANH TOÁN",
-      "sub": "Hoàn tất đơn hàng. Hot Pink: EU 36-42 | Cyan Blue: EU 40-45.",
+      "sub": "Chỉ cần vài bước để hoàn tất. Hot Pink hiện có size EU 36-42 | Cyan Blue có size EU 40-45.",
       "step1": "GIỎ HÀNG",
       "step2": "GIAO HÀNG",
       "step3": "XÁC NHẬN",
       "firstName": "TÊN",
-      "firstNamePlaceholder": "Tên",
+      "firstNamePlaceholder": "Nhập tên của bạn",
       "lastName": "HỌ",
-      "lastNamePlaceholder": "Họ",
+      "lastNamePlaceholder": "Nhập họ của bạn",
       "phone": "SỐ ĐIỆN THOẠI",
-      "phonePlaceholder": "09xx xxx xxx",
+      "phonePlaceholder": "Ví dụ: 0912 345 678",
       "province": "TỈNH / THÀNH PHỐ",
       "provincePlaceholder": "Chọn tỉnh/thành",
-      "address": "ĐỊA CHỈ",
-      "addressPlaceholder": "Số nhà, tên đường",
+      "address": "ĐỊA CHỈ CHI TIẾT",
+      "addressPlaceholder": "Số nhà, tên đường, tòa nhà...",
       "email": "EMAIL (Tùy chọn)",
-      "emailPlaceholder": "email tại example.com",
+      "emailPlaceholder": "Nhập email để nhận thông báo",
       "dob": "NGÀY SINH",
-      "dobPlaceholder": "DD/MM/YYYY",
+      "dobPlaceholder": "Ngày/Tháng/Năm",
       "gender": "GIỚI TÍNH",
       "male": "NAM",
       "female": "NỮ",
       "optional": "Tùy chọn",
       "back": "← QUAY LẠI",
       "review": "XÁC NHẬN ĐƠN HÀNG →",
-      "placeOrder": "ĐẶT HÀNG — {price}",
-      "fine": "Thanh toán khi nhận hàng · Vận chuyển miễn phí toàn quốc · Bảo hành 180 ngày",
-      "successTitle": "ĐƠN HÀNG ĐÃ XÁC NHẬN",
-      "successMessage": "Cảm ơn {name}! Đơn hàng của bạn đã được đặt thành công.",
-      "successBody": "{name}, đơn hàng {items} của bạn đã được ghi nhận. Chúng tôi sẽ liên hệ trong 24 giờ.",
+      "placeOrder": "HOÀN TẤT ĐẶT HÀNG — {price}",
+      "fine": "Thanh toán khi nhận hàng (COD) · Miễn phí vận chuyển toàn quốc · Bảo hành 180 ngày",
+      "successTitle": "ĐẶT HÀNG THÀNH CÔNG",
+      "successMessage": "Cảm ơn {name}! Đơn hàng của bạn đã được hệ thống ghi nhận.",
+      "successBody": "Chào {name}, đơn hàng gồm {items} của bạn đã được đặt thành công. Team Driip sẽ liên hệ với bạn trong vòng 24 giờ tới để xác nhận nhé.",
       "orderSummary": "TÓM TẮT ĐƠN HÀNG",
-      "stepConfirm": "Đơn Đã Xác Nhận",
-      "stepContact": "Liên Hệ Bạn",
-      "stepDelivery": "Giao Hàng Nhanh",
-      "backHome": "VỀ TRANG CHỦ",
-      "newOrder": "ĐẶT HÀNG MỚI",
+      "stepConfirm": "Hệ thống xác nhận",
+      "stepContact": "Team Driip liên hệ",
+      "stepDelivery": "Giao hàng tận tay",
+      "backHome": "TRỞ VỀ TRANG CHỦ",
+      "newOrder": "ĐẶT ĐƠN KHÁC",
       "validate": {
-        "firstName": "Vui lòng nhập tên",
-        "lastName": "Vui lòng nhập họ",
-        "phone": "Vui lòng nhập số điện thoại hợp lệ",
-        "province": "Vui lòng chọn tỉnh/thành",
-        "address": "Vui lòng nhập địa chỉ"
+        "firstName": "Bạn quên nhập tên rồi này",
+        "lastName": "Bạn quên nhập họ rồi này",
+        "phone": "Vui lòng nhập số điện thoại hợp lệ để Driip liên hệ nhé",
+        "province": "Vui lòng chọn khu vực giao hàng",
+        "address": "Đừng quên điền địa chỉ giao hàng cụ thể nhé"
       },
-      "reviewTitle": "XEM LẠI ĐƠN HÀNG",
-      "cartSummary": "TÓM TẮT GIỎ HÀNG",
-      "shippingInfo": "THÔNG TIN GIAO HÀNG",
+      "reviewTitle": "KIỂM TRA LẠI ĐƠN HÀNG",
+      "cartSummary": "ĐƠN HÀNG CỦA BẠN",
+      "shippingInfo": "THÔNG TIN NHẬN HÀNG",
       "edit": "← CHỈNH SỬA"
     },
     "sizechart": {
       "label": "BẢNG SIZE",
-      "title": "Hướng Dẫn Size Driip Slide",
+      "title": "Hướng Dẫn Chọn Size Driip Slide",
       "unit": "Đơn vị: CM",
       "labelSize": "Size",
       "fitSize": "Size Phù Hợp",
-      "insoleLength": "Dài Trong",
-      "heelWidth": "Rộng Gót",
-      "heelHeight": "Cao Gót",
-      "footTypeTitle": "Gợi Ý Theo Loại Chân",
-      "standardFoot": "Chân Thường",
-      "wideFoot": "Chân Rộng",
-      "narrowFoot": "Chân Hẹp",
-      "highInstep": "Lưng Chân Cao",
-      "recommendedSize": "Chọn size đúng",
-      "sizeUp": "Chọn size lớn hơn",
-      "note": "Lưu ý: Có thể có sai số nhỏ khi đo. Vui lòng tham khảo sản phẩm thực tế."
+      "insoleLength": "Chiều Dài Lòng Dép",
+      "heelWidth": "Độ Rộng Gót",
+      "heelHeight": "Độ Cao Đế",
+      "footTypeTitle": "Gợi Ý Theo Form Chân",
+      "standardFoot": "Chân Tiêu Chuẩn",
+      "wideFoot": "Bề Ngang Rộng",
+      "narrowFoot": "Chân Thon Mỏng",
+      "highInstep": "Mu Bàn Chân Cao",
+      "recommendedSize": "Đi đúng size",
+      "sizeUp": "Tăng lên 1 size",
+      "note": "Mẹo nhỏ: Sẽ có chút sai số khi đo thủ công. Nếu bạn băn khoăn giữa hai size, hãy chọn size lớn hơn để đi cho thoải mái nhé."
     }
   }
 }
