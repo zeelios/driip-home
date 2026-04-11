@@ -46,8 +46,6 @@ export default defineNuxtConfig({
       cookieKey: "driip_locale",
       redirectOn: "root",
     },
-    // Enable langDir for modular translation files
-    langDir: "locales/",
   },
 
   // ── Head defaults ─────────────────────────────────────────────────
