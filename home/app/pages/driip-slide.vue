@@ -783,9 +783,9 @@
     </section>
 
     <SharedSiteFooter />
-  </div>
 
-  <SlideSizeGuide v-model:open="sizeGuideOpen" />
+    <SlideSizeGuide v-model:open="sizeGuideOpen" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -1058,75 +1058,90 @@ useHead({
           ? "Driip Slide — Phong cách Bánh Mì, chất liệu EVA, chống trượt. Hot Pink và Cyan Blue. 1 đôi 286.000đ, 2 đôi 500.000đ. Bảo hành 180 ngày."
           : "Driip Slide — Bánh Mì style, EVA material, anti-slip. Hot Pink and Cyan Blue. 1 pair 286,000đ, 2 pairs 500,000đ. 180-day warranty.",
     },
-    { property: "og:title", content: "driip- | Driip Slide" },
+    { name: "viewport", content: "width=device-width, initial-scale=1" },
+    { name: "theme-color", content: "#0a0a0a" },
+    // Open Graph
+    { property: "og:title", content: "driip- | Driip Slide — SS26" },
     {
       property: "og:description",
       content:
-        "Bánh Mì style. EVA material. Anti-slip. 1 pair 286,000đ | 2 pairs 500,000đ. Hot Pink & Cyan Blue.",
+        locale.value === "vi"
+          ? "Driip Slide — Phong cách Bánh Mì, chất liệu EVA. Hot Pink & Cyan Blue. 1 đôi 286.000đ, 2 đôi 500.000đ."
+          : "Driip Slide — Bánh Mì style, EVA material. Hot Pink & Cyan Blue. 1 pair 286,000đ, 2 pairs 500,000đ.",
     },
-    { property: "og:type", content: "website" },
+    { property: "og:type", content: "product" },
     { property: "og:site_name", content: "driip-" },
-    { property: "og:locale", content: "vi_VN" },
+    {
+      property: "og:locale",
+      content: computed(() => (locale.value === "vi" ? "vi_VN" : "en_US")),
+    },
     { property: "og:url", content: "https://driip.com/driip-slide" },
+    // OG Image
     {
       property: "og:image",
       content: "https://driip.com/products/dSlide/master.jpg",
     },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:image:type", content: "image/jpeg" },
+    {
+      property: "og:image:alt",
+      content: "Driip Slide — Hot Pink & Cyan Blue Bánh Mì Style Slides",
+    },
+    // Product OG
+    { property: "product:price:amount", content: "286000" },
+    { property: "product:price:currency", content: "VND" },
+    { property: "product:availability", content: "in stock" },
+    { property: "product:condition", content: "new" },
+    // Twitter Card
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:title", content: "driip- | Driip Slide" },
+    { name: "twitter:site", content: "@driip_" },
+    { name: "twitter:creator", content: "@driip_" },
+    { name: "twitter:title", content: "driip- | Driip Slide — SS26" },
     {
       name: "twitter:description",
       content:
-        "Bánh Mì style. EVA material. 1 pair 286,000đ | 2 pairs 500,000đ.",
+        locale.value === "vi"
+          ? "Phong cách Bánh Mì, chất liệu EVA. Hot Pink & Cyan Blue. 1 đôi 286.000đ, 2 đôi 500.000đ."
+          : "Bánh Mì style, EVA material. Hot Pink & Cyan Blue. 1 pair 286,000đ, 2 pairs 500,000đ.",
     },
     {
       name: "twitter:image",
       content: "https://driip.com/products/dSlide/master.jpg",
     },
+    {
+      name: "twitter:image:alt",
+      content: "Driip Slide — Hot Pink & Cyan Blue Bánh Mì Style Slides",
+    },
   ],
+  link: [{ rel: "canonical", href: "https://driip.com/driip-slide" }],
 });
 
 // Lifecycle
+// Store observers for cleanup
+let sectionObserver: IntersectionObserver | null = null;
+let viewContentObserver: IntersectionObserver | null = null;
+let revealObserver: IntersectionObserver | null = null;
+
 onMounted(() => {
   trackPageView();
   setupScrollDepth();
-  setupRevealObserver();
-  setupSectionNav();
-  window.addEventListener("keydown", onGalleryKeydown);
 
-  // Track view content when products section is visible
-  const observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry?.isIntersecting) {
-        store.trackProductsViewed();
-        observer.disconnect();
-      }
-    },
-    { threshold: 0.25 }
-  );
-  const productsSection = document.getElementById("products");
-  if (productsSection) observer.observe(productsSection);
-  onUnmounted(() => {
-    observer.disconnect();
-    window.removeEventListener("keydown", onGalleryKeydown);
-    document.body.style.overflow = "";
-  });
-});
-
-function setupRevealObserver(): void {
-  const observer = new IntersectionObserver(
+  // Setup reveal observer
+  revealObserver = new IntersectionObserver(
     (entries) =>
       entries.forEach((entry) => {
         if (entry.isIntersecting) entry.target.classList.add("is-visible");
       }),
     { threshold: 0.12 }
   );
-  document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
-}
+  document
+    .querySelectorAll(".reveal")
+    .forEach((el) => revealObserver?.observe(el));
 
-function setupSectionNav(): void {
+  // Setup section nav observer
   const ids = ["products", "gallery", "checkout"];
-  const observer = new IntersectionObserver(
+  sectionObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -1138,10 +1153,44 @@ function setupSectionNav(): void {
   );
   ids.forEach((id) => {
     const element = document.getElementById(id);
-    if (element) observer.observe(element);
+    if (element) sectionObserver?.observe(element);
   });
-  onUnmounted(() => observer.disconnect());
-}
+
+  // Track view content when products section is visible
+  viewContentObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (entry?.isIntersecting) {
+        store.trackProductsViewed();
+        viewContentObserver?.disconnect();
+        viewContentObserver = null;
+      }
+    },
+    { threshold: 0.25 }
+  );
+  const productsSection = document.getElementById("products");
+  if (productsSection) viewContentObserver?.observe(productsSection);
+
+  window.addEventListener("keydown", onGalleryKeydown);
+});
+
+onUnmounted(() => {
+  // Clean up all observers
+  sectionObserver?.disconnect();
+  sectionObserver = null;
+  viewContentObserver?.disconnect();
+  viewContentObserver = null;
+  revealObserver?.disconnect();
+  revealObserver = null;
+
+  // Clean up event listeners
+  window.removeEventListener("keydown", onGalleryKeydown);
+
+  // Reset body overflow
+  document.body.style.overflow = "";
+
+  // Clear site nav active section to prevent issues on other pages
+  siteNavStore.setActiveSection("");
+});
 </script>
 
 <style scoped>
