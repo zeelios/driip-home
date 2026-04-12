@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* ─── TAILWIND V4 THEME ─────────────────────────────────────────── */
+@theme {
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-body: "Be Vietnam Pro", sans-serif;
+  --container-350: 1400px;
+}
+
 /* ─── RESET & BASE ─────────────────────────────────────────────── */
 *,
 *::before,

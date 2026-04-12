@@ -1,0 +1,220 @@
+{
+  "tee": {
+    "meta": {
+      "title": "driip- | Driip Tee — The New Mainstream",
+      "description": "Premium oversized tees crafted from US Sorona fiber. Made in Italy. Fixed price 890,000đ. Timeless quality, no sales."
+    },
+    "nav": {
+      "product": "Product",
+      "craftsmanship": "Craftsmanship",
+      "material": "Material",
+      "checkout": "Order"
+    },
+    "hero": {
+      "badge": "The New Mainstream",
+      "title": "Driip Tee",
+      "subtitle": "Premium Oversized",
+      "description": "Crafted from US Sorona fiber. Made in Italy. A timeless piece that transcends trends.",
+      "scroll": "Explore",
+      "price": "890,000đ",
+      "priceNote": "Fixed Price — No Sales, Ever"
+    },
+    "philosophy": {
+      "title": "Our Philosophy",
+      "fixedPrice": {
+        "title": "Fixed Price",
+        "desc": "No flash sales. No discount codes. No seasonal markdowns. One fair price, year-round."
+      },
+      "timeless": {
+        "title": "Timeless Quality",
+        "desc": "Designed to last. Premium materials that age gracefully, not disposable fashion."
+      },
+      "minimal": {
+        "title": "Essential Minimalism",
+        "desc": "No logos. No noise. Pure form and function for those who appreciate subtlety."
+      }
+    },
+    "material": {
+      "sectionLabel": "The Science",
+      "title": "Sorona® Molecular Structure",
+      "description": "37% plant-based polymer chains engineered for shape memory and sustainable performance.",
+      "shapeMemory": {
+        "title": "Shape Memory",
+        "desc": "Molecular structure returns to original form after stretching. The fabric maintains its silhouette through 10,000+ wear cycles."
+      },
+      "bioBased": {
+        "title": "Bio-Based 37%",
+        "desc": "Derived from renewable plant sugars instead of petroleum. 30% less energy, 63% less greenhouse gas than nylon 6."
+      },
+      "softer": {
+        "title": "3x Softer",
+        "desc": "Unique molecular bonding creates a cotton-like hand feel with the durability of synthetic performance fibers."
+      },
+      "stats": {
+        "plantBased": "Plant Based",
+        "gsm": "GSM Weight",
+        "energy": "Less Energy",
+        "shape": "Shape Memory"
+      }
+    },
+    "print": {
+      "sectionLabel": "The Technology",
+      "title": "Molecular Ink-Lock™",
+      "description": "Direct-to-Garment printing at 1200 DPI resolution. Water-based inks penetrate the Sorona® fiber structure, creating a permanent molecular bond.",
+      "steps": {
+        "pre": {
+          "title": "Pre-Treatment",
+          "desc": "Fiber surface activation for optimal ink adhesion"
+        },
+        "ink": {
+          "title": "Ink Injection",
+          "desc": "Micro-droplets penetrate fiber core at 1200 DPI"
+        },
+        "heat": {
+          "title": "Heat Fixation",
+          "desc": "Molecular bond formation at 165°C"
+        }
+      },
+      "traditional": {
+        "label": "Traditional Screen Print",
+        "sublabel": "Sits on surface",
+        "desc": "Heavy · Cracks · Blocks breathability"
+      },
+      "dtg": {
+        "label": "DTG Molecular Lock",
+        "badge": "DRIP",
+        "desc": "Integrated · Breathable · Permanent"
+      }
+    },
+    "craft": {
+      "sectionLabel": "The Craft",
+      "title": "Italian Tailoring",
+      "description": "Every stitch calculated. Every seam reinforced. Italian craftsmanship meets molecular engineering.",
+      "stats": {
+        "stitches": {
+          "value": "14",
+          "title": "Stitches Per Inch",
+          "desc": "Industrial-grade precision for unbreakable seams"
+        },
+        "collar": {
+          "value": "2x",
+          "title": "Collar Reinforcement",
+          "desc": "Double-needle construction prevents stretching"
+        },
+        "threads": {
+          "value": "0",
+          "title": "Loose Threads",
+          "desc": "Clean-finish interior construction throughout"
+        }
+      },
+      "badge": "Made in Italy",
+      "tailoring": "Precision Tailoring Since 1987"
+    },
+    "fabric": {
+      "badge": "Material Excellence",
+      "title": "US Sorona® Fiber",
+      "subtitle": "37% Plant-Based, 100% Performance",
+      "description": "Sorona® is a breakthrough material from DuPont, derived from renewable plant-based ingredients. It offers exceptional softness, natural stretch, and superior shape retention compared to conventional polyester.",
+      "stats": {
+        "plantBased": "37% Plant-Based",
+        "softness": "3x Softer",
+        "stretch": "Natural Stretch",
+        "durability": "Shape Retention"
+      }
+    },
+    "craftsmanship": {
+      "badge": "Made in Italy",
+      "title": "Italian Craftsmanship",
+      "description": "Each Driip Tee is meticulously crafted in Italy by skilled artisans who have perfected their craft over generations. From pattern cutting to final stitching, every detail reflects our commitment to excellence.",
+      "details": {
+        "sewing": {
+          "title": "Precision Sewing",
+          "desc": "Single-needle stitching with 12 stitches per inch"
+        },
+        "finish": {
+          "title": "Refined Finish",
+          "desc": "Hand-pressed seams and reinforced stress points"
+        },
+        "origin": {
+          "title": "Italian Origin",
+          "desc": "Made in certified ateliers in Northern Italy"
+        }
+      }
+    },
+    "product": {
+      "badge": "The Collection",
+      "title": "Oversized Tees",
+      "description": "Two essential colors. One perfect fit. The oversized silhouette offers relaxed comfort while maintaining a refined, structured drape.",
+      "colors": {
+        "title": "Select Color",
+        "black": "Midnight Black",
+        "white": "Pure White"
+      },
+      "sizeGuide": {
+        "title": "Size Guide",
+        "note": "Oversized fit. Size down for a regular fit.",
+        "chest": "Chest",
+        "length": "Length",
+        "shoulder": "Shoulder"
+      },
+      "addToCart": "Add to Cart",
+      "selectOptions": "Select Options"
+    },
+    "specs": {
+      "badge": "Technical Details",
+      "title": "Specifications",
+      "material": {
+        "label": "Material",
+        "value": "63% Sorona® / 37% Cotton"
+      },
+      "weight": {
+        "label": "Fabric Weight",
+        "value": "280 GSM"
+      },
+      "origin": {
+        "label": "Origin",
+        "value": "Made in Italy"
+      },
+      "care": {
+        "label": "Care",
+        "value": "Machine wash cold, hang dry"
+      }
+    },
+    "cart": {
+      "title": "Your Selection",
+      "empty": "Your cart is empty",
+      "quantity": "Qty",
+      "remove": "Remove",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping calculated at checkout",
+      "continue": "Continue to Shipping",
+      "addMore": "Add More Items"
+    },
+    "order": {
+      "title": "Shipping Information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phone": "Phone Number",
+      "email": "Email (Optional)",
+      "province": "Province / City",
+      "fullAddress": "Full Address",
+      "back": "Back to Cart",
+      "review": "Review Order",
+      "placeOrder": "Place Order",
+      "secure": "Secure Checkout",
+      "errorEmptyCart": "Your cart is empty",
+      "errorFirstName": "Please enter your first name",
+      "errorLastName": "Please enter your last name",
+      "errorPhone": "Please enter a valid phone number",
+      "errorProvince": "Please select your province",
+      "errorAddress": "Please enter your full address"
+    },
+    "success": {
+      "title": "Order Confirmed",
+      "message": "Thank you for choosing Driip Tee.",
+      "orderId": "Order ID",
+      "nextSteps": "We will contact you within 24 hours to confirm your order and arrange delivery.",
+      "continue": "Continue Shopping"
+    }
+  }
+}

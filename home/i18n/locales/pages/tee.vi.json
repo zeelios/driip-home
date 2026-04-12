@@ -1,0 +1,220 @@
+{
+  "tee": {
+    "meta": {
+      "title": "driip- | Driip Tee — The New Mainstream",
+      "description": "Áo thun oversized cao cấp từ sợi Sorona Mỹ. Sản xuất tại Ý. Giá cố định 890.000đ. Chất lượng vượt thời gian."
+    },
+    "nav": {
+      "product": "Sản Phẩm",
+      "craftsmanship": "Thủ Công",
+      "material": "Chất Liệu",
+      "checkout": "Đặt Hàng"
+    },
+    "hero": {
+      "badge": "The New Mainstream",
+      "title": "Driip Tee",
+      "subtitle": "Oversized Cao Cấp",
+      "description": "Được chế tác từ sợi Sorona Mỹ. Sản xuất tại Ý. Một tuyệt tác vượt qua xu hướng thời trang.",
+      "scroll": "Khám Phá",
+      "price": "890.000đ",
+      "priceNote": "Giá Cố Định — Không Giảm Giá"
+    },
+    "philosophy": {
+      "title": "Triết Lý Của Chúng Tôi",
+      "fixedPrice": {
+        "title": "Giá Cố Định",
+        "desc": "Không giảm giá chớp nhoáng. Không mã khuyến mãi. Không giảm giá theo mùa. Một mức giá hợp lý, quanh năm."
+      },
+      "timeless": {
+        "title": "Chất Lượng Vượt Thời Gian",
+        "desc": "Thiết kế bền vững. Chất liệu cao cấp lão hóa đẹp theo thời gian, không phải thời trang dùng một lần."
+      },
+      "minimal": {
+        "title": "Tối Giản Tinh Tế",
+        "desc": "Không logo. Không rườm rà. Hình thức và chức năng thuần túy dành cho người trân trọng sự tinh tế."
+      }
+    },
+    "material": {
+      "sectionLabel": "Khoa Học",
+      "title": "Cấu Trúc Phân Tử Sorona®",
+      "description": "Chuỗi polymer 37% nguồn gốc thực vật được thiết kế để có khả năng ghi nhớ hình dạng và hiệu suất bền vững.",
+      "shapeMemory": {
+        "title": "Ghi Nhớ Hình Dạng",
+        "desc": "Cấu trúc phân tử trở về hình dạng ban đầu sau khi giãn. Vải duy trì dáng vẻ qua 10,000+ lần sử dụng."
+      },
+      "bioBased": {
+        "title": "Nguồn Gốc Sinh Học 37%",
+        "desc": "Chiết xuất từ đường thực vật tái tạo thay vì dầu mỏ. Tiết kiệm 30% năng lượng, giảm 63% khí nhà kính so với nylon 6."
+      },
+      "softer": {
+        "title": "Mềm Gấp 3 Lần",
+        "desc": "Liên kết phân tử độc đáo tạo cảm giác như cotton với độ bền của sợi hiệu suất tổng hợp."
+      },
+      "stats": {
+        "plantBased": "Nguồn Gốc Thực Vật",
+        "gsm": "Trọng Lượng GSM",
+        "energy": "Tiết Kiệm Năng Lượng",
+        "shape": "Ghi Nhớ Hình Dạng"
+      }
+    },
+    "print": {
+      "sectionLabel": "Công Nghệ",
+      "title": "Molecular Ink-Lock™",
+      "description": "In trực tiếp lên vải với độ phân giải 1200 DPI. Mực nước thấm vào cấu trúc sợi Sorona®, tạo liên kết phân tử vĩnh cửu.",
+      "steps": {
+        "pre": {
+          "title": "Xử Lý Bề Mặt",
+          "desc": "Kích hoạt bề mặt sợi để mực bám tối ưu"
+        },
+        "ink": {
+          "title": "Phun Mực",
+          "desc": "Giọt mực vi mô thâm nhập lõi sợi ở 1200 DPI"
+        },
+        "heat": {
+          "title": "Cố Định Nhiệt",
+          "desc": "Hình thành liên kết phân tử ở 165°C"
+        }
+      },
+      "traditional": {
+        "label": "In Lụa Truyền Thống",
+        "sublabel": "Nằm trên bề mặt",
+        "desc": "Nặng · Nứt · Bí hơi"
+      },
+      "dtg": {
+        "label": "DTG Molecular Lock",
+        "badge": "DRIP",
+        "desc": "Tích Hợp · Thoáng Khí · Vĩnh Cửu"
+      }
+    },
+    "craft": {
+      "sectionLabel": "Thủ Công",
+      "title": "May Đo Ý",
+      "description": "Mỗi đường kim tính toán. Mỗi đường may gia cố. Thủ công Ý gặp gỡ kỹ thuật phân tử.",
+      "stats": {
+        "stitches": {
+          "value": "14",
+          "title": "Mũi Kim/Inch",
+          "desc": "Độ chính xác công nghiệp cho đường may bền chắc"
+        },
+        "collar": {
+          "value": "2x",
+          "title": "Gia Cố Cổ Áo",
+          "desc": "Cấu trúc kim đôi ngăn giãn"
+        },
+        "threads": {
+          "value": "0",
+          "title": "Chỉ Thừa",
+          "desc": "Hoàn thiện sạch sẽ bên trong"
+        }
+      },
+      "badge": "Sản Xuất Tại Ý",
+      "tailoring": "May Đo Chính Xác Từ 1987"
+    },
+    "fabric": {
+      "badge": "Chất Liệu Xuất Sắc",
+      "title": "Sợi Sorona® Mỹ",
+      "subtitle": "37% Nguồn Gốc Thực Vật, 100% Hiệu Suất",
+      "description": "Sorona® là vật liệu đột phá từ DuPont, có nguồn gốc từ thành phần thực vật tái tạo. Mang đến độ mềm vượt trội, đàn hồi tự nhiên và khả năng giữ form tốt hơn so với polyester thông thường.",
+      "stats": {
+        "plantBased": "37% Thực Vật",
+        "softness": "Mềm Gấp 3x",
+        "stretch": "Đàn Hồi Tự Nhiên",
+        "durability": "Giữ Form"
+      }
+    },
+    "craftsmanship": {
+      "badge": "Sản Xuất Tại Ý",
+      "title": "Thủ Công Ý",
+      "description": "Mỗi chiếc Driip Tee được chế tác tỉ mỉ tại Ý bởi các nghệ nhân lành nghề, những người đã hoàn thiện kỹ nghệ qua nhiều thế hệ. Từ cắt pattern đến đường may cuối cùng, mỗi chi tiết phản ánh cam kết của chúng tôi về sự xuất sắc.",
+      "details": {
+        "sewing": {
+          "title": "Đường May Chính Xác",
+          "desc": "May đơn kim với 12 mũi mỗi inch"
+        },
+        "finish": {
+          "title": "Hoàn Thiện Tinh Xảo",
+          "desc": "Ép đường may bằng tay và gia cố điểm chịu lực"
+        },
+        "origin": {
+          "title": "Xuất Xứ Ý",
+          "desc": "Sản xuất tại các xưởng chứng nhận ở Bắc Ý"
+        }
+      }
+    },
+    "product": {
+      "badge": "Bộ Sưu Tập",
+      "title": "Tees Oversized",
+      "description": "Hai màu sắc thiết yếu. Một form hoàn hảo. Silhouette oversized mang đến sự thoải mái phóng khoáng trong khi vẫn giữ được dáng vẻ thanh lịch, có cấu trúc.",
+      "colors": {
+        "title": "Chọn Màu",
+        "black": "Đen Huyền Bí",
+        "white": "Trắng Tinh Khiết"
+      },
+      "sizeGuide": {
+        "title": "Hướng Dẫn Size",
+        "note": "Form oversized. Chọn size nhỏ hơn nếu muốn fit thường.",
+        "chest": "Vòng Ngực",
+        "length": "Dài Áo",
+        "shoulder": "Vai"
+      },
+      "addToCart": "Thêm Vào Giỏ",
+      "selectOptions": "Chọn Tùy Chọn"
+    },
+    "specs": {
+      "badge": "Thông Số Kỹ Thuật",
+      "title": "Thông Số",
+      "material": {
+        "label": "Chất Liệu",
+        "value": "63% Sorona® / 37% Cotton"
+      },
+      "weight": {
+        "label": "Định Lượng Vải",
+        "value": "280 GSM"
+      },
+      "origin": {
+        "label": "Xuất Xứ",
+        "value": "Sản Xuất Tại Ý"
+      },
+      "care": {
+        "label": "Bảo Quản",
+        "value": "Giặt máy nước lạnh, phơi khô tự nhiên"
+      }
+    },
+    "cart": {
+      "title": "Lựa Chọn Của Bạn",
+      "empty": "Giỏ hàng trống",
+      "quantity": "SL",
+      "remove": "Xóa",
+      "subtotal": "Tạm Tính",
+      "shipping": "Phí vận chuyển tính khi thanh toán",
+      "continue": "Tiếp Tục Thông Tin",
+      "addMore": "Thêm Sản Phẩm"
+    },
+    "order": {
+      "title": "Thông Tin Giao Hàng",
+      "firstName": "Tên",
+      "lastName": "Họ",
+      "phone": "Số Điện Thoại",
+      "email": "Email (Tùy Chọn)",
+      "province": "Tỉnh / Thành Phố",
+      "fullAddress": "Địa Chỉ Đầy Đủ",
+      "back": "Quay Lại Giỏ",
+      "review": "Xem Lại Đơn",
+      "placeOrder": "Đặt Hàng",
+      "secure": "Thanh Toán An Toàn",
+      "errorEmptyCart": "Giỏ hàng trống",
+      "errorFirstName": "Vui lòng nhập tên",
+      "errorLastName": "Vui lòng nhập họ",
+      "errorPhone": "Vui lòng nhập số điện thoại hợp lệ",
+      "errorProvince": "Vui lòng chọn tỉnh/thành",
+      "errorAddress": "Vui lòng nhập địa chỉ đầy đủ"
+    },
+    "success": {
+      "title": "Đã Xác Nhận Đơn Hàng",
+      "message": "Cảm ơn bạn đã chọn Driip Tee.",
+      "orderId": "Mã Đơn",
+      "nextSteps": "Chúng tôi sẽ liên hệ trong vòng 24 giờ để xác nhận đơn hàng và sắp xếp giao hàng.",
+      "continue": "Tiếp Tục Mua Sắm"
+    }
+  }
+}

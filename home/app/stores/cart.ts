@@ -8,7 +8,7 @@ import {
   getTierTotal,
 } from "~/utils/pricing";
 
-export interface CartItem {
+interface CartItem {
   id: string;
   sku: "ck-brief" | "ck-boxer";
   skuLabel: string;
@@ -119,7 +119,8 @@ export const useCartStore = defineStore("cart", () => {
     >
   ): void {
     const existing = items.value.find(
-      (i) => i.sku === item.sku && i.size === item.size && i.color === item.color
+      (i) =>
+        i.sku === item.sku && i.size === item.size && i.color === item.color
     );
     if (existing) {
       existing.boxes += item.boxes;
