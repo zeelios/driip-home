@@ -72,6 +72,7 @@ export default defineEventHandler(async (event) => {
     referal,
     referral,
     sales,
+    total,
     // Cart-based payload (new)
     cartItems,
     // Legacy single-item payload (kept for backwards compat)
@@ -137,18 +138,38 @@ export default defineEventHandler(async (event) => {
     let totalTier = 0;
     let totalFinal = 0;
 
+    // Normal price per pair (non-deal pricing) for compare column
+    const SLIDE_NORMAL_PRICE_PER_PAIR = 480000;
+
     if (isDriipSlideOrder) {
-      // Driip Slide: Use provided price per item
+      // Driip Slide: pricing is tier-based across the whole cart
+      // item.price per cart line may not reflect cross-item bundle discounts,
+      // so use the authoritative `total` sent by the store when available.
+      const totalPairs = items.reduce(
+        (sum, item) => sum + (Number(item.quantity) || Number(item.boxes) || 1),
+        0
+      );
+      const grandFinalTotal =
+        Number(total) ||
+        items.reduce((sum, item) => sum + (Number(item.price) || 0), 0) ||
+        SLIDE_NORMAL_PRICE_PER_PAIR * totalPairs;
+      const grandCompareTotal = SLIDE_NORMAL_PRICE_PER_PAIR * totalPairs;
+      const grandDiscount = grandCompareTotal - grandFinalTotal;
+
+      totalCompare = grandCompareTotal;
+      totalTier = grandFinalTotal;
+      totalFinal = grandFinalTotal;
+
+      // Allocate totals evenly across ALL individual pair rows
+      const comparePerPair = allocateEvenly(grandCompareTotal, totalPairs);
+      const discountPerPair = allocateEvenly(grandDiscount, totalPairs);
+      const finalPerPair = allocateEvenly(grandFinalTotal, totalPairs);
+
+      let pairCursor = 0;
+
       for (const item of items) {
         const quantity = Number(item.quantity) || Number(item.boxes) || 1;
-        const itemPrice = Number(item.price) || 286000;
-        const totalItemPrice = itemPrice * quantity;
 
-        totalCompare += totalItemPrice;
-        totalTier += totalItemPrice;
-        totalFinal += totalItemPrice;
-
-        // Use productName if provided, otherwise format SKU
         const productName =
           item.productName ||
           item.sku
@@ -160,7 +181,9 @@ export default defineEventHandler(async (event) => {
 
         for (let i = 0; i < quantity; i++) {
           const isFirstRow = isFirstCustomerRow && i === 0;
-          const rowPrice = i === 0 ? totalItemPrice : 0; // Only first row shows price
+          const rowCompare = comparePerPair[pairCursor] ?? 0;
+          const rowDiscount = discountPerPair[pairCursor] ?? 0;
+          const rowFinal = finalPerPair[pairCursor] ?? 0;
 
           rows.push([
             orderId, // A: Mã Đơn
@@ -173,10 +196,10 @@ export default defineEventHandler(async (event) => {
             isFirstRow ? cleanPhone : "", // H: SĐT
             isFirstRow ? fullName : "", // I: Tên
             isFirstRow ? address : "", // J: Địa Chỉ
-            rowPrice, // K: Tổng Tiền (full amount on first row)
-            "0", // L: Chiết Khấu
+            rowCompare, // K: Tổng Tiền (normal price per pair)
+            rowDiscount, // L: Chiết Khấu
             "0", // M: Đặt Cọc
-            rowPrice, // N: Dư Nợ
+            rowFinal, // N: Dư Nợ (actual charged per pair)
             isFirstRow ? note ?? "" : "", // O: Note
             salesSource, // P: Sales
             "", // Q: Comestic Tracking
@@ -185,6 +208,7 @@ export default defineEventHandler(async (event) => {
             isFirstRow ? gender ?? "" : "", // T: Gender
           ]);
 
+          pairCursor += 1;
           if (i === 0) isFirstCustomerRow = false;
         }
       }
