@@ -441,9 +441,7 @@
                 class="slide-order-item"
               >
                 <div class="slide-order-item-info">
-                  <span class="slide-order-item-name"
-                    >Driip Slide — {{ item.colorLabel }}</span
-                  >
+                  <span class="slide-order-item-name">Driip Slide</span>
                   <span class="slide-order-item-meta"
                     >Size {{ item.size }} · {{ item.quantity }}
                     {{ item.quantity > 1 ? "pairs" : "pair" }}</span

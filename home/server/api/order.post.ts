@@ -14,7 +14,10 @@ interface CartItemPayload {
   sku: string;
   size: string;
   color: string;
-  boxes: number;
+  boxes?: number;
+  quantity?: number;
+  productName?: string;
+  price?: number;
 }
 
 function normalizeSalesSource(raw: unknown): string {
@@ -124,68 +127,132 @@ export default defineEventHandler(async (event) => {
     const rows: (string | number)[][] = [];
     let isFirstCustomerRow = true;
 
-    const totalBoxes = items.reduce(
-      (sum, item) => sum + (Number(item.boxes) || 1),
-      0
+    // Check if this is a Driip Slide order (uses custom pricing per item)
+    const isDriipSlideOrder = items.some((item) =>
+      item.sku?.startsWith("driip-slide")
     );
-    const totalCompare = BASE_BOX_COMPARE_PRICE * totalBoxes;
-    const totalTier = getTierTotal(totalBoxes);
-    const totalFinal = getFinalTotal(totalBoxes);
-    const totalDiscount = totalCompare - totalFinal;
 
-    const comparePerBox = allocateEvenly(totalCompare, totalBoxes);
-    const discountPerBox = allocateEvenly(totalDiscount, totalBoxes);
-    const finalPerBox = allocateEvenly(totalFinal, totalBoxes);
+    // Calculate totals based on order type
+    let totalCompare = 0;
+    let totalTier = 0;
+    let totalFinal = 0;
 
-    let boxCursor = 0;
+    if (isDriipSlideOrder) {
+      // Driip Slide: Use provided price per item
+      for (const item of items) {
+        const quantity = Number(item.quantity) || Number(item.boxes) || 1;
+        const itemPrice = Number(item.price) || 286000;
+        const totalItemPrice = itemPrice * quantity;
 
-    for (const item of items) {
-      const quantity = Number(item.boxes) || 1;
+        totalCompare += totalItemPrice;
+        totalTier += totalItemPrice;
+        totalFinal += totalItemPrice;
 
-      const formattedSku = item.sku
-        .replace("ck-", "cK ")
-        .replace(/\b\w/g, (c: string) => c.toUpperCase());
-      const formattedSize = item.size ? item.size.toUpperCase() : "";
+        // Use productName if provided, otherwise format SKU
+        const productName =
+          item.productName ||
+          item.sku
+            .replace("driip-", "Driip ")
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (c: string) => c.toUpperCase());
+        const formattedSize = item.size ? item.size.toUpperCase() : "";
+        const formattedColor = item.color || "";
 
-      let formattedColor = item.color ?? "";
-      if (formattedColor.includes("-")) {
-        formattedColor = formattedColor.split("-")[1] ?? formattedColor;
+        for (let i = 0; i < quantity; i++) {
+          const isFirstRow = isFirstCustomerRow && i === 0;
+          const rowPrice = i === 0 ? totalItemPrice : 0; // Only first row shows price
+
+          rows.push([
+            orderId, // A: Mã Đơn
+            productName, // B: Sản Phẩm
+            formattedColor, // C: Option
+            formattedSize, // D: Size
+            "Chờ Mua", // E: Tình Trạng
+            "", // F: Facebook
+            isFirstRow ? email ?? "" : "", // G: Email
+            isFirstRow ? cleanPhone : "", // H: SĐT
+            isFirstRow ? fullName : "", // I: Tên
+            isFirstRow ? address : "", // J: Địa Chỉ
+            rowPrice, // K: Tổng Tiền (full amount on first row)
+            "0", // L: Chiết Khấu
+            "0", // M: Đặt Cọc
+            rowPrice, // N: Dư Nợ
+            isFirstRow ? note ?? "" : "", // O: Note
+            salesSource, // P: Sales
+            "", // Q: Comestic Tracking
+            "", // R: Global Tracking
+            isFirstRow ? dob ?? "" : "", // S: DoB
+            isFirstRow ? gender ?? "" : "", // T: Gender
+          ]);
+
+          if (i === 0) isFirstCustomerRow = false;
+        }
       }
-      formattedColor =
-        formattedColor.charAt(0).toUpperCase() + formattedColor.slice(1);
+    } else {
+      // CK Underwear: Use tier-based pricing
+      const totalBoxes = items.reduce(
+        (sum, item) => sum + (Number(item.boxes) || 1),
+        0
+      );
+      totalCompare = BASE_BOX_COMPARE_PRICE * totalBoxes;
+      totalTier = getTierTotal(totalBoxes);
+      totalFinal = getFinalTotal(totalBoxes);
+      const totalDiscount = totalCompare - totalFinal;
 
-      for (let i = 0; i < quantity; i++) {
-        const isFirstRow = isFirstCustomerRow && i === 0;
-        const rowCompare = comparePerBox[boxCursor] ?? 0;
-        const rowDiscount = discountPerBox[boxCursor] ?? 0;
-        const rowFinal = finalPerBox[boxCursor] ?? 0;
+      const comparePerBox = allocateEvenly(totalCompare, totalBoxes);
+      const discountPerBox = allocateEvenly(totalDiscount, totalBoxes);
+      const finalPerBox = allocateEvenly(totalFinal, totalBoxes);
 
-        rows.push([
-          orderId, // A: Mã Đơn
-          formattedSku, // B: Sản Phẩm
-          formattedColor, // C: Option
-          formattedSize, // D: Size
-          "Chờ Mua", // E: Tình Trạng
-          "", // F: Facebook
-          isFirstRow ? email ?? "" : "", // G: Email
-          isFirstRow ? cleanPhone : "", // H: SĐT
-          isFirstRow ? fullName : "", // I: Tên
-          isFirstRow ? address : "", // J: Địa Chỉ
-          rowCompare, // K: Tổng Tiền
-          rowDiscount, // L: Chiết Khấu
-          "0", // M: Đặt Cọc
-          rowFinal, // N: Dư Nợ
-          isFirstRow ? note ?? "" : "", // O: Note
-          salesSource, // P: Sales
-          "", // Q: Comestic Tracking
-          "", // R: Global Tracking
-          isFirstRow ? dob ?? "" : "", // S: DoB
-          isFirstRow ? gender ?? "" : "", // T: Gender
-        ]);
+      let boxCursor = 0;
 
-        boxCursor += 1;
+      for (const item of items) {
+        const quantity = Number(item.boxes) || 1;
 
-        if (i === 0) isFirstCustomerRow = false;
+        const formattedSku = item.sku
+          .replace("ck-", "cK ")
+          .replace(/\b\w/g, (c: string) => c.toUpperCase());
+        const formattedSize = item.size ? item.size.toUpperCase() : "";
+
+        let formattedColor = item.color ?? "";
+        if (formattedColor.includes("-")) {
+          formattedColor = formattedColor.split("-")[1] ?? formattedColor;
+        }
+        formattedColor =
+          formattedColor.charAt(0).toUpperCase() + formattedColor.slice(1);
+
+        for (let i = 0; i < quantity; i++) {
+          const isFirstRow = isFirstCustomerRow && i === 0;
+          const rowCompare = comparePerBox[boxCursor] ?? 0;
+          const rowDiscount = discountPerBox[boxCursor] ?? 0;
+          const rowFinal = finalPerBox[boxCursor] ?? 0;
+
+          rows.push([
+            orderId, // A: Mã Đơn
+            formattedSku, // B: Sản Phẩm
+            formattedColor, // C: Option
+            formattedSize, // D: Size
+            "Chờ Mua", // E: Tình Trạng
+            "", // F: Facebook
+            isFirstRow ? email ?? "" : "", // G: Email
+            isFirstRow ? cleanPhone : "", // H: SĐT
+            isFirstRow ? fullName : "", // I: Tên
+            isFirstRow ? address : "", // J: Địa Chỉ
+            rowCompare, // K: Tổng Tiền
+            rowDiscount, // L: Chiết Khấu
+            "0", // M: Đặt Cọc
+            rowFinal, // N: Dư Nợ
+            isFirstRow ? note ?? "" : "", // O: Note
+            salesSource, // P: Sales
+            "", // Q: Comestic Tracking
+            "", // R: Global Tracking
+            isFirstRow ? dob ?? "" : "", // S: DoB
+            isFirstRow ? gender ?? "" : "", // T: Gender
+          ]);
+
+          boxCursor += 1;
+
+          if (i === 0) isFirstCustomerRow = false;
+        }
       }
     }
 

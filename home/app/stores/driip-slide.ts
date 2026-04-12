@@ -7,9 +7,7 @@ import {
   type MetaOrderProfileCookie,
 } from "~/utils/meta-conversions";
 
-// Pricing for Driip Slide
-const PRICE_ONE_PAIR = 286000;
-const PRICE_TWO_PAIRS = 500000;
+// Use PRODUCT_CONFIG for pricing
 
 // Available options with grouped sizes
 const COLORS = [
@@ -29,8 +27,18 @@ const COLORS = [
 
 export type FormState = "idle" | "loading" | "success" | "error";
 
+// Product configuration for Driip Slide
+const PRODUCT_CONFIG = {
+  name: "Driip Slide",
+  line: "driip-slide",
+  baseSku: "driip-slide",
+  priceOne: 286000,
+  priceTwo: 500000,
+} as const;
+
 export interface CartItem {
   id: string;
+  sku: string;
   color: string;
   colorLabel: string;
   colorLabelVi: string;
@@ -42,7 +50,7 @@ export interface CartItem {
 interface CartCookieItem
   extends Pick<
     CartItem,
-    "id" | "color" | "colorLabel" | "colorLabelVi" | "size" | "quantity"
+    "id" | "sku" | "color" | "colorLabel" | "colorLabelVi" | "size" | "quantity"
   > {}
 
 const VIETNAM_PHONE_REGEX = /^0\d{9}$/;
@@ -71,7 +79,12 @@ function normalizeVietnamPhoneInput(input: string): string {
 
 export const useDriipSlideStore = defineStore("driip-slide", () => {
   const { t, locale } = useI18n();
-  const { trackViewContent, trackPurchase } = useMetaEvents();
+  const {
+    trackViewContent,
+    trackPurchase,
+    trackAddToCart,
+    trackInitiateCheckout,
+  } = useMetaEvents();
 
   const orderProfileCookie = useCookie<MetaOrderProfileCookie | null>(
     META_ORDER_PROFILE_COOKIE_KEY,
@@ -104,6 +117,13 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
   const currentStep = ref(1);
   const viewContentFired = ref(false);
 
+  // Track InitiateCheckout when entering checkout step
+  watch(currentStep, (newStep, oldStep) => {
+    if (newStep === 2 && oldStep === 1) {
+      trackInitiateCheckout(grandTotal.value);
+    }
+  });
+
   // Product selection draft
   const draft = ref({
     color: "",
@@ -118,6 +138,8 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     return (
       cartCookie.value?.map((entry) => ({
         ...entry,
+        // Add sku for backward compatibility with old cookie data
+        sku: entry.sku || `${PRODUCT_CONFIG.baseSku}-${entry.color}`,
         price: calculatePrice(entry.quantity),
       })) ?? []
     );
@@ -127,9 +149,12 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     if (quantity >= 2) {
       const setsOfTwo = Math.floor(quantity / 2);
       const remainder = quantity % 2;
-      return setsOfTwo * PRICE_TWO_PAIRS + remainder * PRICE_ONE_PAIR;
+      return (
+        setsOfTwo * PRODUCT_CONFIG.priceTwo +
+        remainder * PRODUCT_CONFIG.priceOne
+      );
     }
-    return quantity * PRICE_ONE_PAIR;
+    return quantity * PRODUCT_CONFIG.priceOne;
   }
 
   // Sync order profile cookie
@@ -157,8 +182,9 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
   watch(
     () =>
       items.value.map(
-        ({ id, color, colorLabel, colorLabelVi, size, quantity }) => ({
+        ({ id, sku, color, colorLabel, colorLabelVi, size, quantity }) => ({
           id,
+          sku,
           color,
           colorLabel,
           colorLabelVi,
@@ -279,13 +305,17 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
         item.color === draft.value.color && item.size === draft.value.size
     );
 
+    let finalQty: number;
     if (existing) {
       existing.quantity += draft.value.quantity;
       existing.price = calculatePrice(existing.quantity);
+      finalQty = existing.quantity;
     } else {
       const id = `${draft.value.color}-${draft.value.size}-${Date.now()}`;
+      const sku = `${PRODUCT_CONFIG.baseSku}-${colorOption.value}`;
       items.value.push({
         id,
+        sku,
         color: draft.value.color,
         colorLabel, // Always English for data consistency
         colorLabelVi,
@@ -293,10 +323,15 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
         quantity: draft.value.quantity,
         price: calculatePrice(draft.value.quantity),
       });
+      finalQty = draft.value.quantity;
     }
 
     // Reset draft
     draft.value.size = "";
+
+    // Track AddToCart event with SKU
+    const itemSku = `${PRODUCT_CONFIG.baseSku}-${colorOption.value}`;
+    trackAddToCart(itemSku, calculatePrice(finalQty));
   }
 
   function removeItem(id: string): void {
@@ -351,8 +386,8 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
           province: order.value.province,
           fullAddress: order.value.fullAddress,
           cartItems: items.value.map((item) => ({
-            productName: "Driip Slide",
-            sku: `driip-slide-${item.color}`,
+            productName: PRODUCT_CONFIG.name,
+            sku: item.sku,
             color: item.colorLabel, // English: Hot Pink / Cyan Blue
             size: item.size,
             quantity: item.quantity,
@@ -361,10 +396,13 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
           total: grandTotal.value,
           dob: order.value.dob || undefined,
           gender: order.value.gender || undefined,
-          productLine: "driip-slide",
+          productLine: PRODUCT_CONFIG.line,
           timestamp: new Date().toISOString(),
         },
       });
+
+      // Get first item SKU for Meta purchase tracking
+      const firstItemSku = items.value[0]?.sku ?? "driip-slide";
 
       const purchasePayload: OrderData = {
         first_name: order.value.firstName,
@@ -376,6 +414,7 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
         country: "VN",
         street: order.value.fullAddress,
         value: grandTotal.value,
+        sku: firstItemSku,
       };
 
       trackPurchase(purchasePayload);
@@ -438,7 +477,6 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     submitOrder,
     resetOrder,
     trackProductsViewed,
-    PRICE_ONE_PAIR,
-    PRICE_TWO_PAIRS,
+    PRODUCT_CONFIG,
   };
 });
