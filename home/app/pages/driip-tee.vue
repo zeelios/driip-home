@@ -13,11 +13,16 @@
 import "~/assets/css/driip-tee.css";
 import teeEn from "../../i18n/locales/pages/tee.en.json";
 import teeVi from "../../i18n/locales/pages/tee.vi.json";
+import { useSiteNavStore } from "~/stores/site-nav";
 
 const { t, locale, mergeLocaleMessage } = useI18n();
+const siteNavStore = useSiteNavStore();
 
 // Merge page-scoped translations synchronously
-const translations: Record<string, Record<string, unknown>> = { en: teeEn, vi: teeVi };
+const translations: Record<string, Record<string, unknown>> = {
+  en: teeEn,
+  vi: teeVi,
+};
 const msgs = translations[locale.value] || translations.en;
 if (msgs) mergeLocaleMessage(locale.value, msgs);
 
@@ -27,8 +32,35 @@ watch(locale, (lang) => {
   if (m) mergeLocaleMessage(lang, m);
 });
 
+// Register nav links for shared SiteNav + TeeNav active state
+watchEffect(() => {
+  siteNavStore.setNav({
+    title: "DRIIP TEE",
+    links: [
+      { id: "material", label: t("tee.material.sectionLabel") },
+      { id: "print", label: t("tee.print.sectionLabel") },
+      { id: "craft", label: t("tee.craft.sectionLabel") },
+      { id: "product", label: "890.000đ" },
+    ],
+    ctaLabel: "890.000đ",
+    ctaTarget: "product",
+  });
+});
+
+// Handle scroll requests from SiteNav clicks
+watch(
+  () => siteNavStore.scrollRequest,
+  (id) => {
+    if (id) {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      siteNavStore.clearScrollRequest();
+    }
+  }
+);
+
 // Scroll-reveal IntersectionObserver
 let revealObserver: IntersectionObserver | null = null;
+let sectionObserver: IntersectionObserver | null = null;
 
 onMounted(() => {
   revealObserver = new IntersectionObserver(
@@ -39,10 +71,32 @@ onMounted(() => {
     },
     { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
   );
-  document.querySelectorAll(".reveal").forEach((el) => revealObserver?.observe(el));
+  document
+    .querySelectorAll(".reveal")
+    .forEach((el) => revealObserver?.observe(el));
+
+  // Section highlight observer — same pattern as ck-underwear
+  const sectionIds = ["material", "print", "craft", "product"];
+  sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          siteNavStore.setActiveSection(entry.target.id);
+        }
+      });
+    },
+    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
+  );
+  sectionIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) sectionObserver?.observe(el);
+  });
 });
 
-onUnmounted(() => revealObserver?.disconnect());
+onUnmounted(() => {
+  revealObserver?.disconnect();
+  sectionObserver?.disconnect();
+});
 
 useHead(() => ({
   title: t("tee.meta.title"),

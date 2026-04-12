@@ -1,26 +1,43 @@
 <template>
   <nav class="tee-nav">
     <div class="tee-nav-inner">
-      <a href="#hero" class="tee-nav-brand">DRIIP</a>
+      <button class="tee-nav-brand" @click="scrollTo('hero')">DRIIP</button>
       <div class="tee-nav-links">
-        <a href="#material" class="tee-nav-link">{{
-          t("tee.material.sectionLabel")
-        }}</a>
-        <a href="#print" class="tee-nav-link">{{
-          t("tee.print.sectionLabel")
-        }}</a>
-        <a href="#craft" class="tee-nav-link">{{
-          t("tee.craft.sectionLabel")
-        }}</a>
-        <a href="#product" class="tee-nav-cta">890.000đ</a>
+        <button
+          v-for="link in navLinks"
+          :key="link.id"
+          class="tee-nav-link"
+          :class="{ active: navStore.activeSection === link.id }"
+          @click="scrollTo(link.id)"
+        >
+          {{ link.label }}
+        </button>
+        <button class="tee-nav-cta" @click="scrollTo('product')">
+          890.000đ
+        </button>
       </div>
-      <a href="#product" class="tee-nav-cta-mobile">890.000đ</a>
+      <button class="tee-nav-cta-mobile" @click="scrollTo('product')">
+        890.000đ
+      </button>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
+import { useSiteNavStore } from "~/stores/site-nav";
+
 const { t } = useI18n();
+const navStore = useSiteNavStore();
+
+const navLinks = [
+  { id: "material", label: t("tee.material.sectionLabel") },
+  { id: "print", label: t("tee.print.sectionLabel") },
+  { id: "craft", label: t("tee.craft.sectionLabel") },
+];
+
+function scrollTo(id: string): void {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+}
 </script>
 
 <style scoped>
@@ -52,6 +69,10 @@ const { t } = useI18n();
   letter-spacing: -0.02em;
   color: var(--white);
   text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .tee-nav-links {
@@ -61,17 +82,46 @@ const { t } = useI18n();
 }
 
 .tee-nav-link {
+  position: relative;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.4);
   text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
   transition: color 0.2s ease;
 }
 
+.tee-nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--white);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
 .tee-nav-link:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tee-nav-link.active {
   color: var(--white);
+}
+
+.tee-nav-link.active::after {
+  transform: scaleX(1);
 }
 
 .tee-nav-cta {
@@ -82,7 +132,8 @@ const { t } = useI18n();
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-decoration: none;
+  border: none;
+  cursor: pointer;
   transition: background 0.2s ease;
 }
 
@@ -94,7 +145,9 @@ const { t } = useI18n();
   font-size: 13px;
   font-weight: 600;
   color: var(--white);
-  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
   letter-spacing: 0.04em;
 }
 

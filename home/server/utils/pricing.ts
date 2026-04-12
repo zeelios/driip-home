@@ -3,6 +3,26 @@ export interface BoxTier {
   total: number;
 }
 
+// ─── DRIIP SLIDE ─────────────────────────────────────────────────────────────
+// Server-authoritative pricing. Never trust client-submitted prices.
+
+export const SLIDE_NORMAL_PRICE_PER_PAIR = 480000; // regular / compare price
+export const SLIDE_DEAL_PRICE_ONE = 286000; // 1 pair deal
+export const SLIDE_DEAL_PRICE_TWO = 500000; // 2 pairs deal (bundle)
+
+export function getSlideFinalTotal(totalPairs: number): number {
+  if (totalPairs <= 0) return 0;
+  const setsOfTwo = Math.floor(totalPairs / 2);
+  const remainder = totalPairs % 2;
+  return setsOfTwo * SLIDE_DEAL_PRICE_TWO + remainder * SLIDE_DEAL_PRICE_ONE;
+}
+
+export function getSlideCompareTotal(totalPairs: number): number {
+  return SLIDE_NORMAL_PRICE_PER_PAIR * totalPairs;
+}
+
+// ─── CK UNDERWEAR ────────────────────────────────────────────────────────────
+
 export const BASE_BOX_COMPARE_PRICE = 2300000;
 export const EXTRA_PROMO_RATE = 0.2;
 export const BOX_TIERS: BoxTier[] = [

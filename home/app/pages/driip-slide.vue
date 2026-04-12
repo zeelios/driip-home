@@ -77,16 +77,56 @@
               </span>
             </div>
 
+            <!-- Experience Pricing -->
             <div class="slide-hero-pricing reveal">
-              <div class="slide-pricing-item">
-                <span class="slide-pricing-label">1 ĐÔI</span>
-                <span class="slide-pricing-value">286.000đ</span>
+              <div class="slide-pricing-context">
+                <span class="slide-pricing-tag">GIÁ TRẢI NGHIỆM</span>
+                <span class="slide-pricing-normal"
+                  >Giá gốc: <s>480.000đ</s>/đôi</span
+                >
               </div>
-              <div class="slide-pricing-divider" />
-              <div class="slide-pricing-item slide-pricing-item--highlight">
-                <span class="slide-pricing-label">2 ĐÔI</span>
-                <span class="slide-pricing-value">500.000đ</span>
-                <span class="slide-pricing-save">Tiết kiệm 72.000đ</span>
+              <div class="slide-pricing-tiers">
+                <div class="slide-pricing-item">
+                  <span class="slide-pricing-label">1 ĐÔI</span>
+                  <span class="slide-pricing-value">286.000đ</span>
+                </div>
+                <div class="slide-pricing-divider" />
+                <div class="slide-pricing-item slide-pricing-item--highlight">
+                  <span class="slide-pricing-label">2 ĐÔI</span>
+                  <span class="slide-pricing-value">500.000đ</span>
+                  <span class="slide-pricing-save">Tiết kiệm 72.000đ</span>
+                </div>
+              </div>
+              <!-- Countdown to April 20 price revert -->
+              <div v-if="!dealExpired" class="slide-countdown">
+                <span class="slide-countdown-label">Hoàn giá 480k sau</span>
+                <div class="slide-countdown-clock">
+                  <div class="slide-countdown-unit">
+                    <span class="slide-countdown-num">{{ pad(days) }}</span>
+                    <span class="slide-countdown-seg">NGÀY</span>
+                  </div>
+                  <span class="slide-countdown-colon">:</span>
+                  <div class="slide-countdown-unit">
+                    <span class="slide-countdown-num">{{ pad(hours) }}</span>
+                    <span class="slide-countdown-seg">GIỜ</span>
+                  </div>
+                  <span class="slide-countdown-colon">:</span>
+                  <div class="slide-countdown-unit">
+                    <span class="slide-countdown-num">{{ pad(minutes) }}</span>
+                    <span class="slide-countdown-seg">PHÚT</span>
+                  </div>
+                  <span class="slide-countdown-colon">:</span>
+                  <div class="slide-countdown-unit">
+                    <span class="slide-countdown-num">{{ pad(seconds) }}</span>
+                    <span class="slide-countdown-seg">GIÂY</span>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="slide-countdown slide-countdown--expired">
+                <span class="slide-countdown-label"
+                  >Giá trải nghiệm đã kết thúc — giá hiện tại:
+                  480.000đ/đôi</span
+                >
               </div>
             </div>
 
@@ -791,9 +831,21 @@ definePageMeta({ layout: "default" });
 
 import { computed, ref, watch } from "vue";
 import { useMetaEvents } from "~/composables/useMetaEvents";
+import { useCountdown } from "~/composables/useCountdown";
 import { useDriipSlideStore } from "~/stores/driip-slide";
 import { useSiteNavStore } from "~/stores/site-nav";
 import { vietnamProvinces } from "~/data/vietnam-addresses";
+
+// Experience pricing ends 20 Apr 2026 00:00 UTC+7
+const DEAL_END = new Date("2026-04-19T17:00:00.000Z");
+const {
+  days,
+  hours,
+  minutes,
+  seconds,
+  pad,
+  isExpired: dealExpired,
+} = useCountdown(DEAL_END);
 
 const { locale, t, mergeLocaleMessage } = useI18n();
 
@@ -1391,13 +1443,48 @@ onUnmounted(() => {
 /* Hero Pricing */
 .slide-hero-pricing {
   display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 20px 32px;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin: 16px 0;
+  overflow: hidden;
+}
+
+.slide-pricing-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.slide-pricing-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
+.slide-pricing-normal {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.slide-pricing-normal s {
+  color: rgba(255, 255, 255, 0.3);
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+}
+
+.slide-pricing-tiers {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 20px;
 }
 
 .slide-pricing-item {
@@ -1434,6 +1521,69 @@ onUnmounted(() => {
   width: 1px;
   height: 50px;
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Countdown */
+.slide-countdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.slide-countdown--expired .slide-countdown-label {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+}
+
+.slide-countdown-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.slide-countdown-clock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.slide-countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 36px;
+}
+
+.slide-countdown-num {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+
+.slide-countdown-seg {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.slide-countdown-colon {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
+  line-height: 1;
+  margin-bottom: 14px;
 }
 
 /* Warranty Badge */
@@ -3026,11 +3176,11 @@ onUnmounted(() => {
   }
 
   .slide-hero-pricing {
-    flex-direction: row;
-    gap: 12px;
+    max-width: 360px;
+  }
+
+  .slide-pricing-tiers {
     padding: 16px 20px;
-    width: 100%;
-    max-width: 340px;
   }
 
   .slide-pricing-item {
@@ -3267,8 +3417,7 @@ onUnmounted(() => {
 
 /* Small Mobile: 320px - 374px */
 @media (max-width: 374px) {
-  .slide-hero-pricing {
-    flex-direction: column;
+  .slide-pricing-tiers {
     gap: 12px;
   }
 

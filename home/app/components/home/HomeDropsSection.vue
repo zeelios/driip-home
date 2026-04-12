@@ -62,7 +62,7 @@
           </div>
           <div class="drop-body">
             <p class="drop-collection">SS26 · FOOTWEAR</p>
-            <p class="drop-name">DRIP<br />SLIDE</p>
+            <p class="drop-name">DRIIP<br />SLIDE</p>
             <p class="drop-price">BÁNH MÌ STYLE · EVA · ANTI-SLIP</p>
             <span class="drop-cta">{{ t("home.drops.shopNow") }}</span>
           </div>
@@ -163,9 +163,10 @@ const launchPrice = formatVndCurrency(getFinalUnitPrice(5));
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s ease;
+  transition: transform 0.6s ease, filter 0.5s ease;
   display: block;
   opacity: 0.95;
+  filter: grayscale(1) saturate(0);
   animation: fade-in 0.6s ease forwards;
 }
 .drop-card--live:hover .drop-img-main {
@@ -222,7 +223,8 @@ const launchPrice = formatVndCurrency(getFinalUnitPrice(5));
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s ease;
+  transition: transform 0.6s ease, filter 0.5s ease;
+  filter: grayscale(1) saturate(0);
 }
 
 .drop-card:hover .drop-img--slide .drop-img-main {
@@ -357,6 +359,16 @@ const launchPrice = formatVndCurrency(getFinalUnitPrice(5));
   opacity: 1;
   transform: translateY(0);
 }
+/* Desktop hover: reveal colour. Mobile stays grayscale. */
+@media (hover: hover) and (pointer: fine) {
+  .drop-card--live:hover .drop-img-main {
+    filter: grayscale(0) saturate(1);
+  }
+  .drop-card:hover .drop-img--slide .drop-img-main {
+    filter: grayscale(0) saturate(1);
+  }
+}
+
 @media (min-width: 640px) {
   .drops-grid {
     grid-template-columns: 1fr 1fr;

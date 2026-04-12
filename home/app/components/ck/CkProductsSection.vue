@@ -4,6 +4,12 @@
       <div class="products-inner">
         <p class="label reveal">{{ t("ck.products.label") }}</p>
         <h2 class="products-title reveal">{{ t("ck.products.title") }}</h2>
+        <div class="ck-stock-banner reveal">
+          <span class="ck-stock-dot" />
+          <span class="ck-stock-text"
+            >SỐ LƯỢNG CÒN ÍT — Size S đã hết hàng</span
+          >
+        </div>
 
         <!-- ── Mobile tab switcher (hidden on desktop via CSS) ──── -->
         <div class="product-tabs">
@@ -106,10 +112,16 @@
                       :key="sz"
                       type="button"
                       class="atc-size"
-                      :class="{ active: briefDraft.size === sz }"
-                      @click="briefDraft.size = sz"
+                      :class="{
+                        active: briefDraft.size === sz,
+                        'atc-size--oos': sz === 'S',
+                      }"
+                      :disabled="sz === 'S'"
+                      :title="sz === 'S' ? 'Size S đã hết hàng' : undefined"
+                      @click="sz !== 'S' && (briefDraft.size = sz)"
                     >
                       {{ sz }}
+                      <span v-if="sz === 'S'" class="atc-size-oos-mark">✕</span>
                     </button>
                   </div>
                 </div>
@@ -253,10 +265,16 @@
                       :key="sz"
                       type="button"
                       class="atc-size"
-                      :class="{ active: boxerDraft.size === sz }"
-                      @click="boxerDraft.size = sz"
+                      :class="{
+                        active: boxerDraft.size === sz,
+                        'atc-size--oos': sz === 'S',
+                      }"
+                      :disabled="sz === 'S'"
+                      :title="sz === 'S' ? 'Size S đã hết hàng' : undefined"
+                      @click="sz !== 'S' && (boxerDraft.size = sz)"
                     >
                       {{ sz }}
+                      <span v-if="sz === 'S'" class="atc-size-oos-mark">✕</span>
                     </button>
                   </div>
                 </div>
@@ -837,6 +855,68 @@ function clearCart(): void {
   border-color: var(--white);
   color: var(--white);
   background: rgba(255, 255, 255, 0.08);
+}
+
+.atc-size--oos {
+  opacity: 0.3;
+  cursor: not-allowed;
+  position: relative;
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+}
+
+.atc-size--oos:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.atc-size-oos-mark {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1;
+}
+
+/* Low stock banner */
+.ck-stock-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(251, 191, 36, 0.07);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  margin-bottom: 32px;
+  width: fit-content;
+}
+
+.ck-stock-dot {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fbbf24;
+  flex-shrink: 0;
+  animation: stock-pulse 2s ease-in-out infinite;
+}
+
+.ck-stock-text {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
+@keyframes stock-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* Color tiles */

@@ -8,6 +8,8 @@ import {
   BASE_BOX_COMPARE_PRICE,
   getFinalTotal,
   getTierTotal,
+  getSlideFinalTotal,
+  getSlideCompareTotal,
 } from "../utils/pricing";
 
 interface CartItemPayload {
@@ -17,7 +19,7 @@ interface CartItemPayload {
   boxes?: number;
   quantity?: number;
   productName?: string;
-  price?: number;
+  // NOTE: price is intentionally excluded — all pricing is computed server-side
 }
 
 function normalizeSalesSource(raw: unknown): string {
@@ -72,7 +74,6 @@ export default defineEventHandler(async (event) => {
     referal,
     referral,
     sales,
-    total,
     // Cart-based payload (new)
     cartItems,
     // Legacy single-item payload (kept for backwards compat)
@@ -138,22 +139,15 @@ export default defineEventHandler(async (event) => {
     let totalTier = 0;
     let totalFinal = 0;
 
-    // Normal price per pair (non-deal pricing) for compare column
-    const SLIDE_NORMAL_PRICE_PER_PAIR = 480000;
-
     if (isDriipSlideOrder) {
-      // Driip Slide: pricing is tier-based across the whole cart
-      // item.price per cart line may not reflect cross-item bundle discounts,
-      // so use the authoritative `total` sent by the store when available.
+      // Driip Slide: recompute pricing server-side from quantity only.
+      // Client-submitted price/total values are intentionally ignored.
       const totalPairs = items.reduce(
         (sum, item) => sum + (Number(item.quantity) || Number(item.boxes) || 1),
         0
       );
-      const grandFinalTotal =
-        Number(total) ||
-        items.reduce((sum, item) => sum + (Number(item.price) || 0), 0) ||
-        SLIDE_NORMAL_PRICE_PER_PAIR * totalPairs;
-      const grandCompareTotal = SLIDE_NORMAL_PRICE_PER_PAIR * totalPairs;
+      const grandFinalTotal = getSlideFinalTotal(totalPairs);
+      const grandCompareTotal = getSlideCompareTotal(totalPairs);
       const grandDiscount = grandCompareTotal - grandFinalTotal;
 
       totalCompare = grandCompareTotal;
