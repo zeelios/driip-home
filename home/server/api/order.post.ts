@@ -284,6 +284,12 @@ export default defineEventHandler(async (event) => {
 
     // Send confirmation email — non-blocking, never fails the order
     const config = useRuntimeConfig(event);
+    console.log(
+      `[Order] Email check: hasKey=${!!config.resendApiKey}, email=${
+        email || "missing"
+      }`
+    );
+
     if (config.resendApiKey && email) {
       const emailItems = items.map((item) => ({
         productName: item.productName || item.sku,
@@ -292,6 +298,8 @@ export default defineEventHandler(async (event) => {
         color: item.color,
         quantity: Number(item.quantity) || Number(item.boxes) || 1,
       }));
+
+      console.log(`[Order] Triggering email send for order ${publicOrderId}`);
 
       sendOrderConfirmationEmail(
         {
@@ -304,9 +312,20 @@ export default defineEventHandler(async (event) => {
           phone: normalizeVietnamSheetPhone(String(phone)),
         },
         config.resendApiKey
-      ).catch((err: unknown) => {
-        console.error("[Email] Failed to send order confirmation:", err);
-      });
+      )
+        .then(() => {
+          console.log(
+            `[Order] Email send completed for order ${publicOrderId}`
+          );
+        })
+        .catch((err: unknown) => {
+          console.error(
+            `[Order] Email send failed for order ${publicOrderId}:`,
+            err
+          );
+        });
+    } else {
+      console.log("[Order] Email NOT sent: missing apiKey or email");
     }
 
     return {

@@ -15,13 +15,13 @@ const COLORS = [
     value: "hot-pink",
     label: "Hot Pink",
     labelVi: "Hồng Nóng",
-    sizes: ["36-37", "38-39", "40-41", "41-42"],
+    sizes: ["36-37", "38-39", "40-41"],
   },
   {
     value: "cyan-blue",
     label: "Cyan Blue",
     labelVi: "Xanh Cyan",
-    sizes: ["40-41", "41-42", "42-43", "44-45"],
+    sizes: ["40-41", "42-43", "44-45"],
   },
 ];
 

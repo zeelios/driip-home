@@ -200,14 +200,26 @@ export async function sendOrderConfirmationEmail(
   params: OrderEmailParams,
   apiKey: string
 ): Promise<void> {
-  if (!params.to || !params.to.includes("@")) return;
+  console.log(`[Email] Sending to: ${params.to}, order: ${params.orderId}`);
+
+  if (!params.to || !params.to.includes("@")) {
+    console.log("[Email] SKIPPED: invalid email address");
+    return;
+  }
 
   const resend = new Resend(apiKey);
+  console.log("[Email] Resend client initialized");
 
-  await resend.emails.send({
-    from: "driip- <noreply@driip.io>",
-    to: params.to,
-    subject: `Đơn hàng #${params.orderId} đã được xác nhận – driip-`,
-    html: buildOrderEmailHtml(params),
-  });
+  try {
+    const result = await resend.emails.send({
+      from: "driip- <noreply@driip.io>",
+      to: params.to,
+      subject: `Đơn hàng #${params.orderId} đã được xác nhận – driip-`,
+      html: buildOrderEmailHtml(params),
+    });
+    console.log(`[Email] SENT successfully, id: ${result?.id ?? "unknown"}`);
+  } catch (err: unknown) {
+    console.error(`[Email] FAILED to send:`, err);
+    throw err;
+  }
 }
