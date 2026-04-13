@@ -156,19 +156,19 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
                 <tr>
                   <td style="padding-bottom:12px;">
                     <span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">01</span>
-                    <span style="font-size:13px;color:#888;">Team driip- sẽ gọi xác nhận đơn trong 24h</span>
+                    <span style="font-size:13px;color:#888;">Team driip- đã xác nhận đơn hàng kể từ lúc bạn nhận được email này</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding-bottom:12px;">
                     <span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">02</span>
-                    <span style="font-size:13px;color:#888;">Hàng được đóng gói và bàn giao cho đơn vị vận chuyển</span>
+                    <span style="font-size:13px;color:#888;">Sản phẩm được đóng gói và bàn giao cho đơn vị vận chuyển</span>
                   </td>
                 </tr>
                 <tr>
                   <td>
                     <span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">03</span>
-                    <span style="font-size:13px;color:#888;">Nhận hàng và thanh toán COD — freeship toàn quốc</span>
+                    <span style="font-size:13px;color:#888;">Nhận sản phẩm và thanh toán COD — freeship toàn quốc</span>
                   </td>
                 </tr>
               </table>
