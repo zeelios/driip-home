@@ -180,7 +180,7 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
             <td style="padding-top:32px;">
               <p style="margin:0 0 8px 0;font-size:12px;color:#444;">
                 Có thắc mắc? Liên hệ tụi mình qua
-                <a href="https://www.facebook.com/profile.php?id=61586812299701" style="color:#888;text-decoration:none;">Facebook Messenger</a>.
+                <a href="https://www.facebook.com/profile.php?id=61585105804316" style="color:#888;text-decoration:none;">Facebook Messenger</a>.
               </p>
               <p style="margin:0;font-size:11px;color:#333;letter-spacing:0.05em;">
                 © 2026 DRIIP. driip.io
@@ -217,7 +217,8 @@ export async function sendOrderConfirmationEmail(
       subject: `Đơn hàng #${params.orderId} đã được xác nhận – driip-`,
       html: buildOrderEmailHtml(params),
     });
-    console.log(`[Email] SENT successfully, id: ${result?.id ?? "unknown"}`);
+    const emailId = result.data?.id ?? "unknown";
+    console.log(`[Email] SENT successfully, id: ${emailId}`);
   } catch (err: unknown) {
     console.error(`[Email] FAILED to send:`, err);
     throw err;
