@@ -6,6 +6,94 @@ const ORDER_FLUSH_MAX_WAIT_MS = 60_000;
 const ORDER_FLUSH_RETRY_MS = 60_000;
 const SHEET_RANGE = "Web!A:T";
 
+// ── Public Order ID ──────────────────────────────────────────────
+// Format: driip-ODXXXX-YY  (XXXX = 4 base-36 uppercase chars, YY = 2-digit year)
+// Guarantees uniqueness within a year by checking column F before finalising.
+const PUBLIC_ID_CHARSET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I, O, 0, 1 — visually unambiguous
+const PUBLIC_ID_LENGTH = 4;
+const PUBLIC_ID_YEAR_SUFFIX_LENGTH = 2;
+
+const usedPublicIdsThisYear = new Set<string>();
+let publicIdSeededYear = -1;
+let publicIdSeedPromise: Promise<void> | null = null;
+
+function getYearSuffix(date = new Date()): string {
+  return String(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      year: "2-digit",
+    }).format(date)
+  ).padStart(PUBLIC_ID_YEAR_SUFFIX_LENGTH, "0");
+}
+
+function randomPublicId(yearSuffix: string): string {
+  let code = "";
+  const buf = new Uint32Array(PUBLIC_ID_LENGTH);
+  // NOTE: crypto.getRandomValues not available in Node — use Math.random fallback
+  for (let i = 0; i < PUBLIC_ID_LENGTH; i++) {
+    buf[i] = Math.floor(Math.random() * PUBLIC_ID_CHARSET.length);
+  }
+  for (const idx of buf) {
+    code += PUBLIC_ID_CHARSET[idx % PUBLIC_ID_CHARSET.length];
+  }
+  return `driip-OD${code}-${yearSuffix}`;
+}
+
+async function seedPublicIds(yearSuffix: string): Promise<void> {
+  const year = Number(yearSuffix);
+  if (publicIdSeededYear === year) return;
+  if (publicIdSeedPromise) return publicIdSeedPromise;
+
+  publicIdSeedPromise = (async () => {
+    try {
+      const rows = await readGoogleSheetValues("Web!F:F");
+      const suffix = `-${yearSuffix}`;
+      for (const row of rows) {
+        const val = String(row[0] ?? "").trim();
+        if (val.startsWith("driip-OD") && val.endsWith(suffix)) {
+          usedPublicIdsThisYear.add(val);
+        }
+      }
+      publicIdSeededYear = year;
+    } catch (err) {
+      console.warn(
+        "[PublicOrderId] Could not seed from sheet, relying on in-memory set.",
+        err
+      );
+    }
+  })().finally(() => {
+    publicIdSeedPromise = null;
+  });
+
+  return publicIdSeedPromise;
+}
+
+export async function generatePublicOrderId(
+  date = new Date()
+): Promise<string> {
+  const yearSuffix = getYearSuffix(date);
+  await seedPublicIds(yearSuffix);
+
+  const MAX_ATTEMPTS = 20;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const id = randomPublicId(yearSuffix);
+    if (!usedPublicIdsThisYear.has(id)) {
+      usedPublicIdsThisYear.add(id);
+      return id;
+    }
+  }
+
+  // Extremely unlikely — but extend to 5 chars as safety fallback
+  let fallback = "";
+  for (let i = 0; i < PUBLIC_ID_LENGTH + 1; i++) {
+    fallback +=
+      PUBLIC_ID_CHARSET[Math.floor(Math.random() * PUBLIC_ID_CHARSET.length)];
+  }
+  const id = `driip-OD${fallback}-${yearSuffix}`;
+  usedPublicIdsThisYear.add(id);
+  return id;
+}
+
 const pendingRows: SheetRow[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let flushPromise: Promise<void> | null = null;

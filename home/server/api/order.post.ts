@@ -1,6 +1,7 @@
 import { getCookie } from "h3";
 import {
   flushOrderQueue,
+  generatePublicOrderId,
   queueOrderRows,
   reserveOrderId,
 } from "../utils/order-queue";
@@ -11,6 +12,7 @@ import {
   getSlideFinalTotal,
   getSlideCompareTotal,
 } from "../utils/pricing";
+import { sendOrderConfirmationEmail } from "../utils/email";
 
 interface CartItemPayload {
   sku: string;
@@ -125,7 +127,10 @@ export default defineEventHandler(async (event) => {
   );
 
   try {
-    const orderId = await reserveOrderId();
+    const [orderId, publicOrderId] = await Promise.all([
+      reserveOrderId(),
+      generatePublicOrderId(),
+    ]);
     const rows: (string | number)[][] = [];
     let isFirstCustomerRow = true;
 
@@ -185,7 +190,7 @@ export default defineEventHandler(async (event) => {
             formattedColor, // C: Option
             formattedSize, // D: Size
             "Chờ Mua", // E: Tình Trạng
-            "", // F: Facebook
+            isFirstRow ? publicOrderId : "", // F: Public Order ID
             isFirstRow ? email ?? "" : "", // G: Email
             isFirstRow ? cleanPhone : "", // H: SĐT
             isFirstRow ? fullName : "", // I: Tên
@@ -250,7 +255,7 @@ export default defineEventHandler(async (event) => {
             formattedColor, // C: Option
             formattedSize, // D: Size
             "Chờ Mua", // E: Tình Trạng
-            "", // F: Facebook
+            isFirstRow ? publicOrderId : "", // F: Public Order ID
             isFirstRow ? email ?? "" : "", // G: Email
             isFirstRow ? cleanPhone : "", // H: SĐT
             isFirstRow ? fullName : "", // I: Tên
@@ -276,6 +281,33 @@ export default defineEventHandler(async (event) => {
 
     queueOrderRows(rows);
     await flushOrderQueue();
+
+    // Send confirmation email — non-blocking, never fails the order
+    const config = useRuntimeConfig(event);
+    if (config.resendApiKey && email) {
+      const emailItems = items.map((item) => ({
+        productName: item.productName || item.sku,
+        sku: item.sku,
+        size: item.size,
+        color: item.color,
+        quantity: Number(item.quantity) || Number(item.boxes) || 1,
+      }));
+
+      sendOrderConfirmationEmail(
+        {
+          to: String(email),
+          orderId: publicOrderId,
+          fullName,
+          items: emailItems,
+          finalTotal: totalFinal,
+          address,
+          phone: normalizeVietnamSheetPhone(String(phone)),
+        },
+        config.resendApiKey
+      ).catch((err: unknown) => {
+        console.error("[Email] Failed to send order confirmation:", err);
+      });
+    }
 
     return {
       ok: true,

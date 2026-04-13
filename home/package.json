@@ -17,6 +17,7 @@
     "fuse.js": "^7.0.0",
     "googleapis": "^171.4.0",
     "pinia": "^3.0.4",
+    "resend": "^6.10.0",
     "tailwindcss": "^4.2.1",
     "vite": "^8.0.0"
   },

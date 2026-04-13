@@ -724,6 +724,56 @@
               />
             </div>
 
+            <div class="slide-field-row">
+              <div class="slide-field">
+                <label>
+                  {{ t("slide.order.dob") }}
+                  <span class="slide-field-optional">{{
+                    t("slide.order.optional")
+                  }}</span>
+                </label>
+                <input
+                  v-model="store.order.dob"
+                  type="text"
+                  :placeholder="t('slide.order.dobPlaceholder')"
+                  inputmode="numeric"
+                  maxlength="10"
+                />
+              </div>
+              <div class="slide-field">
+                <label>
+                  {{ t("slide.order.gender") }}
+                  <span class="slide-field-optional">{{
+                    t("slide.order.optional")
+                  }}</span>
+                </label>
+                <div class="slide-gender-row">
+                  <button
+                    type="button"
+                    class="slide-gender-btn"
+                    :class="{ active: store.order.gender === 'male' }"
+                    @click="
+                      store.order.gender =
+                        store.order.gender === 'male' ? '' : 'male'
+                    "
+                  >
+                    {{ t("slide.order.male") }}
+                  </button>
+                  <button
+                    type="button"
+                    class="slide-gender-btn"
+                    :class="{ active: store.order.gender === 'female' }"
+                    @click="
+                      store.order.gender =
+                        store.order.gender === 'female' ? '' : 'female'
+                    "
+                  >
+                    {{ t("slide.order.female") }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div class="slide-panel-actions">
               <button
                 type="button"
@@ -784,6 +834,9 @@
                   >{{ store.order.fullAddress }},
                   {{ store.order.province }}</span
                 >
+              </div>
+              <div v-if="store.order.dob" class="slide-review-row">
+                <span>{{ t("slide.order.dob") }}: {{ store.order.dob }}</span>
               </div>
             </div>
 
@@ -2993,6 +3046,46 @@ onUnmounted(() => {
 .slide-field-error {
   font-size: 12px;
   color: #ef4444;
+}
+
+.slide-field-optional {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  color: rgba(255, 255, 255, 0.25);
+  margin-left: 6px;
+}
+
+.slide-gender-row {
+  display: flex;
+  gap: 8px;
+}
+
+.slide-gender-btn {
+  flex: 1;
+  padding: 12px 8px;
+  background: var(--grey-900);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.slide-gender-btn:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--white);
+}
+
+.slide-gender-btn.active {
+  border-color: var(--white);
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* Panel Actions */

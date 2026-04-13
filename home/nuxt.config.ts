@@ -136,6 +136,7 @@ export default defineNuxtConfig({
     googleSheetId: process.env.GOOGLE_SHEET_ID || "",
     googleServiceAccountJson: process.env.GOOGLE_SERVICE_ACCOUNT_JSON || "",
     metaCAPIAccessToken: process.env.META_CAPI_ACCESS_TOKEN || "",
+    resendApiKey: process.env.RESEND_API_KEY || "",
     metaTestEventCode:
       process.env.META_TEST_EVENT_CODE ||
       process.env.NUXT_META_TEST_EVENT_CODE ||
