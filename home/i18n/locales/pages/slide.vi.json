@@ -105,7 +105,10 @@
       "total": "TỔNG CỘNG",
       "save": "Bạn tiết kiệm được",
       "savings": "Tiết kiệm",
-      "next": "TIẾP THEO: THÔNG TIN GIAO HÀNG →"
+      "next": "TIẾP THEO: THÔNG TIN GIAO HÀNG →",
+      "goToCart": "XEM GIỎ HÀNG →",
+      "clearCart": "XÓA GIỎ",
+      "itemsInCart": "{count} sản phẩm trong giỏ"
     },
     "order": {
       "label": "DROP GIỚI HẠN — ĐẶT NGAY",

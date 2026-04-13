@@ -1,7 +1,11 @@
 <template>
   <div class="slide-page">
     <SlideHeroSection @scroll-to="scrollToSection" />
-    <SlideProductsSection @scroll-to="scrollToSection" @size-guide="sizeGuideOpen = true" />
+    <SlideProductsSection
+      @scroll-to="scrollToSection"
+      @size-guide="sizeGuideOpen = true"
+      @go-to-cart="scrollToSection('checkout')"
+    />
     <SlideGallerySection ref="galleryRef" @scroll-to="scrollToSection" />
     <SlideCheckoutSection @scroll-to="scrollToSection" />
     <SharedSiteFooter />
@@ -15,6 +19,7 @@ definePageMeta({ layout: "default" });
 import { computed, ref, watch } from "vue";
 import { useMetaEvents } from "~/composables/useMetaEvents";
 import { useSiteNavStore } from "~/stores/site-nav";
+import { useDriipSlideStore } from "~/stores/driip-slide";
 
 const { locale, t, mergeLocaleMessage } = useI18n();
 
@@ -35,6 +40,7 @@ await useAsyncData(`slide-i18n-${locale.value}`, async () => {
 
 const { setupScrollDepth, trackPageView } = useMetaEvents();
 const siteNavStore = useSiteNavStore();
+const store = useDriipSlideStore();
 
 const sizeGuideOpen = ref(false);
 const galleryRef = ref<{ onKeydown: (e: KeyboardEvent) => void } | null>(null);
@@ -81,13 +87,16 @@ onMounted(() => {
       }),
     { threshold: 0.12 }
   );
-  document.querySelectorAll(".reveal").forEach((el) => revealObserver?.observe(el));
+  document
+    .querySelectorAll(".reveal")
+    .forEach((el) => revealObserver?.observe(el));
 
   const ids = ["products", "gallery", "checkout"];
   sectionObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) siteNavStore.setActiveSection(entry.target.id);
+        if (entry.isIntersecting)
+          siteNavStore.setActiveSection(entry.target.id);
       });
     },
     { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
@@ -97,11 +106,10 @@ onMounted(() => {
     if (el) sectionObserver?.observe(el);
   });
 
-  const { trackProductsViewed } = useMetaEvents();
   viewContentObserver = new IntersectionObserver(
     ([entry]) => {
       if (entry?.isIntersecting) {
-        trackProductsViewed();
+        store.trackProductsViewed();
         viewContentObserver?.disconnect();
         viewContentObserver = null;
       }
@@ -155,13 +163,22 @@ useHead({
     },
     { property: "og:type", content: "product" },
     { property: "og:site_name", content: "driip-" },
-    { property: "og:locale", content: computed(() => (locale.value === "vi" ? "vi_VN" : "en_US")) },
+    {
+      property: "og:locale",
+      content: computed(() => (locale.value === "vi" ? "vi_VN" : "en_US")),
+    },
     { property: "og:url", content: "https://driip.com/driip-slide" },
-    { property: "og:image", content: "https://driip.com/products/dSlide/master.jpg" },
+    {
+      property: "og:image",
+      content: "https://driip.com/products/dSlide/master.jpg",
+    },
     { property: "og:image:width", content: "1200" },
     { property: "og:image:height", content: "630" },
     { property: "og:image:type", content: "image/jpeg" },
-    { property: "og:image:alt", content: "Driip Slide — Hot Pink & Cyan Blue Bánh Mì Style Slides" },
+    {
+      property: "og:image:alt",
+      content: "Driip Slide — Hot Pink & Cyan Blue Bánh Mì Style Slides",
+    },
     { property: "product:price:amount", content: "286000" },
     { property: "product:price:currency", content: "VND" },
     { property: "product:availability", content: "in stock" },
@@ -178,8 +195,14 @@ useHead({
           : "Bánh Mì style, EVA material. Hot Pink & Cyan Blue. 1 pair 286,000đ, 2 pairs 500,000đ."
       ),
     },
-    { name: "twitter:image", content: "https://driip.com/products/dSlide/master.jpg" },
-    { name: "twitter:image:alt", content: "Driip Slide — Hot Pink & Cyan Blue Bánh Mì Style Slides" },
+    {
+      name: "twitter:image",
+      content: "https://driip.com/products/dSlide/master.jpg",
+    },
+    {
+      name: "twitter:image:alt",
+      content: "Driip Slide — Hot Pink & Cyan Blue Bánh Mì Style Slides",
+    },
   ],
   link: [{ rel: "canonical", href: "https://driip.com/driip-slide" }],
 });

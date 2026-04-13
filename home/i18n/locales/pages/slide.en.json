@@ -105,7 +105,10 @@
       "total": "TOTAL",
       "save": "You save",
       "savings": "Savings",
-      "next": "NEXT: SHIPPING INFO →"
+      "next": "NEXT: SHIPPING INFO →",
+      "goToCart": "VIEW CART →",
+      "clearCart": "CLEAR",
+      "itemsInCart": "{count} item in cart | {count} items in cart"
     },
     "order": {
       "label": "LIMITED DROP — ORDER NOW",
