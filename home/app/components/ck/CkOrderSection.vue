@@ -431,78 +431,52 @@
              STEP 3 — XÁC NHẬN & ĐẶT HÀNG
         ════════════════════════════════════════════════════ -->
         <div v-show="currentStep === 3" class="os-panel">
-          <!-- Cart summary -->
-          <div class="os-confirm">
-            <p class="os-confirm-heading">GIỎ HÀNG</p>
-            <div
-              v-for="item in cart.items"
-              :key="item.id"
-              class="os-confirm-row"
-            >
-              <span class="os-confirm-key">CK {{ item.skuLabel }}</span>
-              <span class="os-confirm-val">
-                Size {{ item.size }} · {{ item.colorLabel }} ·
-                {{ item.boxes }} hộp —
-                {{ formatVndCurrency(item.finalTotal) }}
-              </span>
-            </div>
-            <div class="os-confirm-divider" />
-            <p class="os-confirm-heading" style="margin-top: 16px">
-              THÔNG TIN GIAO HÀNG
-            </p>
-            <div class="os-confirm-row">
-              <span class="os-confirm-key">NGƯỜI NHẬN</span>
-              <span class="os-confirm-val"
-                >{{ order.firstName }} {{ order.lastName }}</span
-              >
-            </div>
-            <div class="os-confirm-row">
-              <span class="os-confirm-key">SỐ ĐIỆN THOẠI</span>
-              <span class="os-confirm-val">{{ order.phone }}</span>
-            </div>
-            <div class="os-confirm-row">
-              <span class="os-confirm-key">ĐỊA CHỈ</span>
-              <span class="os-confirm-val"
-                >{{ order.fullAddress }}, {{ order.province }}</span
-              >
-            </div>
-          </div>
-
-          <!-- Price breakdown — 4-level -->
-          <div class="os-price">
-            <div class="os-price-row">
-              <span class="os-total-label">Giá gốc</span>
-              <span class="os-total-val os-strikethrough muted">{{
-                cart.formattedGrandCompareTotal
-              }}</span>
-            </div>
-            <div class="os-price-row">
-              <span class="os-total-label">
-                Giảm theo bộ
-                <span class="os-total-badge yellow">BUNDLE</span>
-              </span>
-              <span class="os-total-val yellow"
-                >−{{ formatVndCurrency(cart.grandTierDiscount) }}</span
-              >
-            </div>
-            <div class="os-price-row">
-              <span class="os-total-label">
-                Giảm thêm {{ extraPromoPercent }}
-                <span class="os-total-badge green">EXTRA SALE</span>
-              </span>
-              <span class="os-total-val green"
-                >−{{ formatVndCurrency(cart.grandExtraDiscount) }}</span
-              >
-            </div>
-
-            <div class="os-price-divider" />
-            <div class="os-price-row total">
-              <span>TỔNG CỘNG</span>
-              <span class="os-price-big">{{
-                cart.formattedGrandFinalTotal
-              }}</span>
-            </div>
-          </div>
+          <SharedOrderReview
+            :items="
+              cart.items.map((item) => ({
+                label: `CK ${item.skuLabel}`,
+                meta: `Size ${item.size} · ${item.colorLabel} · ${item.boxes} hộp`,
+                price: formatVndCurrency(item.finalTotal),
+              }))
+            "
+            :order="order"
+            total-label="TỔNG CỘNG"
+            :total-value="cart.formattedGrandFinalTotal"
+          >
+            <template #pricing>
+              <div class="os-price-row">
+                <span class="os-total-label">Giá gốc</span>
+                <span class="os-total-val muted">{{
+                  cart.formattedGrandCompareTotal
+                }}</span>
+              </div>
+              <div class="os-price-row">
+                <span class="os-total-label">
+                  Giảm theo bộ
+                  <span class="os-total-badge yellow">BUNDLE</span>
+                </span>
+                <span class="os-total-val yellow"
+                  >−{{ formatVndCurrency(cart.grandTierDiscount) }}</span
+                >
+              </div>
+              <div class="os-price-row">
+                <span class="os-total-label">
+                  Giảm thêm {{ extraPromoPercent }}
+                  <span class="os-total-badge green">EXTRA SALE</span>
+                </span>
+                <span class="os-total-val green"
+                  >−{{ formatVndCurrency(cart.grandExtraDiscount) }}</span
+                >
+              </div>
+              <div class="os-price-divider" />
+              <div class="os-price-row total">
+                <span>TỔNG CỘNG</span>
+                <span class="os-price-big">{{
+                  cart.formattedGrandFinalTotal
+                }}</span>
+              </div>
+            </template>
+          </SharedOrderReview>
 
           <div v-if="orderState === 'error'" class="os-error">
             {{ t("common.error") }}
@@ -1489,78 +1463,19 @@ function scrollToProducts(): void {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* ── STEP 3 CONFIRM ──────────────────────────────────────────────── */
-.os-confirm {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  padding: 24px;
-  margin-bottom: 16px;
-}
-
-.os-confirm-heading {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
-  margin-bottom: 16px;
-}
-
-.os-confirm-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.os-confirm-row:last-child {
-  border-bottom: none;
-}
-
-.os-confirm-key {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
-  flex-shrink: 0;
-}
-
-.os-confirm-val {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--white);
-  text-align: right;
-  line-height: 1.4;
-}
-
-.os-confirm-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 8px 0;
-}
-
-/* ── PRICE BREAKDOWN ─────────────────────────────────────────────── */
-.os-price {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
+/* ── PRICE BREAKDOWN (inside SharedOrderReview #pricing slot) ────── */
 .os-price-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 8px 0;
+  padding: 7px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 .os-price-row:last-child {
   border-bottom: none;
 }
+
 .os-price-row.total {
   padding-top: 12px;
   font-size: 13px;
