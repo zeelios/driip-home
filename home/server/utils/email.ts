@@ -180,7 +180,7 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
             <td style="padding-top:32px;">
               <p style="margin:0 0 8px 0;font-size:12px;color:#444;">
                 Có thắc mắc? Liên hệ tụi mình qua
-                <a href="https://facebook.com/driip.io" style="color:#888;text-decoration:none;">Facebook Messenger</a>.
+                <a href="https://www.facebook.com/profile.php?id=61586812299701" style="color:#888;text-decoration:none;">Facebook Messenger</a>.
               </p>
               <p style="margin:0;font-size:11px;color:#333;letter-spacing:0.05em;">
                 © 2026 DRIIP. driip.io
