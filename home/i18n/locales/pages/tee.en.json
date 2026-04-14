@@ -2,7 +2,7 @@
   "tee": {
     "meta": {
       "title": "driip- | Driip Tee — The New Mainstream",
-      "description": "Premium oversized tees crafted from US Sorona fiber. Made in Italy. Fixed price 890,000đ. Timeless quality, no sales."
+      "description": "Oversized tees in US Sorona® fibre, made in Italy and offered at a fixed price. Quiet, enduring quality — no markdowns."
     },
     "nav": {
       "product": "Product",
@@ -13,8 +13,8 @@
     "hero": {
       "badge": "The New Mainstream",
       "title": "Driip Tee",
-      "subtitle": "Premium Oversized",
-      "description": "Crafted from US Sorona fiber. Made in Italy. A timeless piece that transcends trends.",
+      "subtitle": "Oversized, Refined",
+      "description": "Woven from US Sorona® fibre and cut in Italy, designed to hold its shape with quiet precision.",
       "scroll": "Explore",
       "price": "890,000đ",
       "priceNote": "Fixed Price — No Sales, Ever"
@@ -23,21 +23,21 @@
       "title": "Our Philosophy",
       "fixedPrice": {
         "title": "Fixed Price",
-        "desc": "No flash sales. No discount codes. No seasonal markdowns. One fair price, year-round."
+        "desc": "No flash sales. No discount codes. No seasonal markdowns. One considered price, year-round."
       },
       "timeless": {
         "title": "Timeless Quality",
-        "desc": "Designed to last. Premium materials that age gracefully, not disposable fashion."
+        "desc": "Designed to last. Materials chosen to age gracefully, not disappear after a season."
       },
       "minimal": {
         "title": "Essential Minimalism",
-        "desc": "No logos. No noise. Pure form and function for those who appreciate subtlety."
+        "desc": "No logos. No noise. Just form, function, and restraint for those who value subtlety."
       }
     },
     "material": {
       "sectionLabel": "The Science",
       "title": "Sorona® Molecular Structure",
-      "description": "37% plant-based polymer chains engineered for shape memory and sustainable performance.",
+      "description": "37% plant-based polymer chains engineered for shape memory, comfort, and long-term performance.",
       "shapeMemory": {
         "title": "Shape Memory",
         "desc": "Molecular structure returns to original form after stretching. The fabric maintains its silhouette through 10,000+ wear cycles."
@@ -60,7 +60,7 @@
     "print": {
       "sectionLabel": "The Technology",
       "title": "Molecular Ink-Lock™",
-      "description": "Direct-to-Garment printing at 1200 DPI resolution. Water-based inks penetrate the Sorona® fiber structure, creating a permanent molecular bond.",
+      "description": "Direct-to-Garment printing at 1200 DPI. Water-based inks settle into the Sorona® fibre structure for exceptional clarity and permanence.",
       "steps": {
         "pre": {
           "title": "Pre-Treatment",
@@ -89,7 +89,7 @@
     "craft": {
       "sectionLabel": "The Craft",
       "title": "Italian Tailoring",
-      "description": "Every stitch calculated. Every seam reinforced. Italian craftsmanship meets molecular engineering.",
+      "description": "Every stitch measured. Every seam reinforced. Italian tailoring meets material engineering.",
       "stats": {
         "stitches": {
           "value": "14",
@@ -144,7 +144,7 @@
     "product": {
       "badge": "The Collection",
       "title": "Oversized Tees",
-      "description": "Two essential colors. One perfect fit. The oversized silhouette offers relaxed comfort while maintaining a refined, structured drape.",
+      "description": "Two essential colours. One refined silhouette. The oversized cut stays relaxed, composed, and structured.",
       "colors": {
         "title": "Select Color",
         "black": "Midnight Black",
@@ -213,7 +213,7 @@
       "title": "Order Confirmed",
       "message": "Thank you for choosing Driip Tee.",
       "orderId": "Order ID",
-      "nextSteps": "We will contact you within 24 hours to confirm your order and arrange delivery.",
+      "nextSteps": "We will contact you within 24 hours to confirm the order and arrange delivery.",
       "continue": "Continue Shopping"
     }
   }
