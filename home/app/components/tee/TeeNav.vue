@@ -1,7 +1,9 @@
 <template>
   <nav class="tee-nav">
     <div class="tee-nav-inner">
-      <button class="tee-nav-brand" @click="scrollTo('hero')">DRIIP</button>
+      <button class="tee-nav-brand" @click="scrollTo('hero')">
+        {{ navStore.title || "DRIIP" }}
+      </button>
       <div class="tee-nav-links">
         <button
           v-for="link in navLinks"
@@ -12,12 +14,18 @@
         >
           {{ link.label }}
         </button>
-        <button class="tee-nav-cta" @click="scrollTo('product')">
-          890.000đ
+        <button
+          class="tee-nav-cta"
+          @click="scrollTo(navStore.ctaTarget || 'product')"
+        >
+          {{ navStore.ctaLabel || "890.000đ" }}
         </button>
       </div>
-      <button class="tee-nav-cta-mobile" @click="scrollTo('product')">
-        890.000đ
+      <button
+        class="tee-nav-cta-mobile"
+        @click="scrollTo(navStore.ctaTarget || 'product')"
+      >
+        {{ navStore.ctaLabel || "890.000đ" }}
       </button>
     </div>
   </nav>

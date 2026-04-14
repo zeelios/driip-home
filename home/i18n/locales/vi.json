@@ -105,9 +105,9 @@
     },
     "access": {
       "label": "EARLY ACCESS",
-      "title": "Vibe kinh điển, nay đã có mặt trên web.",
-      "sub": "Đâm info vào đây để nhận tin restock sớm nhất và hốt deal kín từ cộng đồng driip-.",
-      "name": "Tên bro là gì?",
+      "title": "Phong cách kinh điển, nay đã có mặt trên web.",
+      "sub": "Điền thông tin để nhận tin restock sớm nhất và ưu đãi dành riêng từ Driip.",
+      "name": "Tên của bạn là gì?",
       "namePlaceholder": "Nhập họ và tên",
       "email": "Email liên hệ",
       "emailPlaceholder": "email@example.com",
@@ -115,19 +115,19 @@
       "phonePlaceholder": "09xx xxx xxx",
       "optional": "(Không bắt buộc)",
       "submit": "ĐĂNG KÝ & LẤY MÃ GIẢM GIÁ",
-      "fine": "Gửi info đồng nghĩa với việc bạn đồng ý gia nhập hội driip- để nhận news. Data của bạn được bảo mật tuyệt đối.",
-      "successTitle": "Đăng ký ngon lành",
-      "successBody": "Cảm ơn {name}. Mã giảm giá đã lưu vào hệ thống. Tụi mình sẽ ping bạn ngay khi hàng lên kệ."
+      "fine": "Việc gửi thông tin đồng nghĩa với việc bạn đồng ý nhận tin từ Driip. Dữ liệu của bạn được bảo mật tuyệt đối.",
+      "successTitle": "Đăng ký thành công",
+      "successBody": "Cảm ơn {name}. Mã giảm giá đã được lưu vào hệ thống. Driip sẽ liên hệ bạn ngay khi hàng lên kệ."
     },
     "gallery": {
       "pre": "LOOKBOOK — SS26",
       "title": "THE COLLECTION",
-      "sub": "Boxer & Brief phối ba màu cực cháy"
+      "sub": "Boxer & Brief phối ba màu tinh gọn và hiện đại"
     },
     "order": {
-      "label": "SỐ LƯỢNG GIỚI HẠN — CHỐT NGAY",
+      "label": "SỐ LƯỢNG GIỚI HẠN — ĐẶT HÀNG",
       "title": "THANH TOÁN",
-      "sub": "Bơm thông tin giao hàng vào đây. Team driip- sẽ confirm đơn trong 24h và update tình trạng ship cho bạn.",
+      "sub": "Điền thông tin giao hàng tại đây. Driip sẽ xác nhận đơn trong 24h và cập nhật trạng thái giao hàng cho bạn.",
       "details": "THÔNG TIN NGƯỜI NHẬN",
       "firstName": "Tên",
       "firstNamePlaceholder": "Nhập tên",
@@ -172,23 +172,23 @@
       "extraDiscount": "Giảm thêm từ website",
       "finalPerBox": "Giá chốt mỗi hộp",
       "validate": {
-        "firstName": "Thiếu tên người nhận rùi bro.",
-        "lastName": "Thiếu họ kìa bro.",
-        "phone": "Điền số điện thoại để shipper còn gọi nhé.",
+        "firstName": "Vui lòng nhập tên người nhận.",
+        "lastName": "Vui lòng nhập họ người nhận.",
+        "phone": "Vui lòng nhập số điện thoại.",
         "fullAddress": "Ghi cụ thể số nhà, tên đường để giao cho chuẩn.",
         "province": "Chưa chọn tỉnh/thành phố.",
         "sku": "Chưa chọn sản phẩm.",
-        "size": "Chọn size đi bro.",
+        "size": "Vui lòng chọn size.",
         "color": "Chưa chọn phối màu."
       },
       "reviewOrder": "KIỂM TRA LẠI ĐƠN",
-      "successTitle": "CHỐT ĐƠN THÀNH CÔNG",
-      "successBody": "Cảm ơn {name}, đơn hàng {sku} · {size} · {color} của bro đã vào hệ thống. Hàng sẽ tới tay trong vòng 3–10 ngày.",
+      "successTitle": "ĐƠN HÀNG ĐÃ ĐƯỢC GHI NHẬN",
+      "successBody": "Cảm ơn {name}, đơn hàng {sku} · {size} · {color} đã được ghi nhận. Sản phẩm sẽ được giao trong vòng 3–10 ngày.",
       "step1": "GIỎ HÀNG",
       "step2": "THÔNG TIN",
       "step3": "XÁC NHẬN",
       "emptyTitle": "Giỏ hàng đang trống trơn",
-      "emptySub": "Trở lại săn đồ ngay đi bro.",
+      "emptySub": "Vui lòng quay lại phần sản phẩm để tiếp tục.",
       "goProducts": "← TRỞ LẠI SHOP",
       "next": "TIẾP TỤC",
       "shippingInfo": "THÔNG TIN GIAO HÀNG",
@@ -209,7 +209,7 @@
       "pre": "DRIIP ORIGINAL — SS26",
       "eyebrow": "SẢN PHẨM CHÍNH THỨC CỦA DRIIP",
       "title": "HƠN CẢ MỘT CHIẾC ÁO THUN.",
-      "sub": "Sợi Sorona™ từ Mỹ, gia công tại Pháp, form dáng định hình tại Việt Nam — Sự kết hợp cháy nhất giữa độ êm ái và chất đường phố.",
+      "sub": "Sợi Sorona™ từ Mỹ, gia công tại Pháp, form dáng định hình tại Việt Nam — Sự kết hợp giữa độ êm ái và tính thẩm mỹ hiện đại.",
       "cta": "XEM QUÁ TRÌNH LÀM RA NÓ",
       "secondary": "VỀ TRANG CHỦ",
       "metrics": {
@@ -230,7 +230,7 @@
     "origin": {
       "label": "CÂU CHUYỆN",
       "title": "BA QUỐC GIA, MỘT SIÊU PHẨM.",
-      "body": "Tụi mình không thỏa hiệp với hàng mass. Sợi Sorona™ siêu mềm, cực bền từ DuPont (Mỹ). Cắt may chuẩn từng milimet tại Pháp. Và cái hồn đường phố được thổi vào từ Việt Nam. Một chiếc áo, ba nền tảng."
+      "body": "Driip không thỏa hiệp với hàng mass. Sợi Sorona™ siêu mềm, cực bền từ DuPont (Mỹ). Cắt may chuẩn từng milimet tại Pháp. Và cái hồn đường phố được thổi vào từ Việt Nam. Một chiếc áo, ba nền tảng."
     },
     "sorona": {
       "label": "CHẤT LIỆU",
@@ -262,11 +262,11 @@
     "feel": {
       "label": "TRẢI NGHIỆM",
       "title": "CẢM GIÁC LÀ MỌI THỨ.",
-      "body": "Nói thật thì phải mặc lên người mới hiểu được độ mượt. Áo nhẹ tênh, rũ tự nhiên, cân từ những buổi dạo phố tàng tàng đến lúc cần lên đồ đi quẩy."
+      "body": "Chỉ khi mặc lên người mới cảm nhận đầy đủ sự mượt mà. Chất áo nhẹ, rũ tự nhiên và phù hợp từ những buổi dạo phố đến các dịp cần chỉn chu hơn."
     },
     "manifesto": "DNA Việt Nam, xưởng Pháp, sợi vải Mỹ — Tầm nhìn toàn cầu.",
     "manifestoLabel": "TIÊU CHUẨN DRIIP",
-    "footerText": "Driip Tee đại diện cho cái tôi của thương hiệu: chất liệu xịn, bền vững và đậm tính cá nhân.",
+    "footerText": "Driip Tee đại diện cho tinh thần thương hiệu: chất liệu cao cấp, bền vững và đậm tính cá nhân.",
     "backToDrops": "VỀ LẠI DROPS"
   },
   "lacostePolo": {
@@ -305,19 +305,19 @@
     "material": {
       "label": "CHẤT LIỆU",
       "title": "ĐO NI ĐÓNG GIÀY CHO DÒNG POLO",
-      "body": "Cấu trúc web này được build sẵn cực cháy, chỉ chờ hàng thật xuất xưởng là khớp vô luôn."
+      "body": "Cấu trúc sản phẩm này được thiết kế sẵn để giữ trọn form dáng và chất lượng khi ra mắt phiên bản thực tế."
     },
     "fit": {
       "label": "FORM DÁNG",
       "title": "GỌN GÀNG, TỐI GIẢN VÀ ĐA DỤNG",
-      "body": "Giữ đúng tinh thần basic để nhìn phát biết ngay hàng xịn, lên đồ cực nét."
+      "body": "Giữ đúng tinh thần basic để tạo cảm giác tinh gọn, rõ nét và dễ phối đồ."
     },
     "drop": {
       "label": "TÌNH TRẠNG DROP",
       "title": "MỌI THỨ ĐÃ SẴN SÀNG",
-      "body": "Website đã build xong. Khi asset thật về tới tay, tụi mình sẽ kích hoạt full bản chính thức ngay."
+      "body": "Website đã build xong. Khi asset thật về tới tay, Driip sẽ kích hoạt full bản chính thức ngay."
     },
-    "footerText": "Trang Lacoste Polo đang ở mode chờ. Update phát là chạy rầm rầm.",
+    "footerText": "Trang Lacoste Polo đang ở trạng thái chờ. Bản cập nhật sẽ được triển khai ngay khi sẵn sàng.",
     "backToDrops": "VỀ LẠI DROPS"
   },
   "sizechart": {
@@ -330,36 +330,36 @@
     "hero": {
       "eyebrow": "DRIIP — UY TÍN TẠO NÊN CHẤT",
       "title": "CHÍNH SÁCH\nĐỔI TRẢ &\nBẢO HÀNH",
-      "sub": "Đồ ra khỏi kho driip là phải chuẩn. Mọi chính sách lập ra để anh em yên tâm cop đồ mà không lăn tăn."
+      "sub": "Sản phẩm rời khỏi kho Driip phải đạt tiêu chuẩn hoàn thiện cao nhất. Mọi chính sách được xây dựng để đảm bảo trải nghiệm yên tâm và rõ ràng."
     },
     "returns": {
       "eyebrow": "CHÍNH SÁCH ĐỔI TRẢ",
       "title": "30 NGÀY\nĐỔI TRẢ KHÔNG CẦN TRÌNH BÀY.",
-      "lead": "Không thủ tục lằng nhằng. Mua về mặc không ưng? Được đổi hoặc trả thẳng tay trong vòng 30 ngày. Thế thôi.",
+      "lead": "Không thủ tục phức tạp. Mua về mặc không phù hợp? Quý khách có thể đổi hoặc trả trong vòng 30 ngày.",
       "items": {
         "window": {
           "title": "30 NGÀY TÍNH TỪ LÚC NHẬN HÀNG",
-          "text": "Đồng hồ tính giờ từ ngày shipper giao tới tay bro. 30 ngày là quá đủ để anh em test form, test vải."
+          "text": "30 ngày tính từ thời điểm hàng được giao đến tay quý khách."
         },
         "noReason": {
           "title": "KHÔNG CẦN LÝ DO",
-          "text": "Không hợp vibe? Màu không tôn da? Hay tự nhiên hết thích? Trả hàng thoải mái, tụi mình không bao giờ hỏi khó."
+          "text": "Không phù hợp phong cách? Màu sắc chưa ưng? Driip hỗ trợ đổi trả mà không yêu cầu lý do."
         },
         "shipping": {
           "title": "PHÍ SHIP ĐỔI TRẢ",
-          "text": "Bro thanh toán phí ship gửi hàng về kho driip. Đổi lại, tụi mình bao luôn phí ship gửi con hàng mới tinh đến tận cửa nhà."
+          "text": "Quý khách thanh toán phí gửi hàng về kho Driip. Driip hỗ trợ chi phí gửi sản phẩm mới đến tận nơi."
         },
         "condition": {
           "title": "TÌNH TRẠNG MÓN ĐỒ",
-          "text": "Hàng gửi lại phải còn nguyên tem mác, chưa xuống nước, bao bì gốc còn đủ. Hàng đã giặt thì xin phép từ chối nhé bro."
+          "text": "Sản phẩm gửi lại cần còn nguyên tem mác, chưa qua sử dụng và giữ đầy đủ bao bì gốc."
         }
       },
-      "note": "Muốn pass lại hàng? Cứ ping team hỗ trợ qua Facebook Messenger hoặc gọi thẳng số hotline trên box. Hàng về kho 3–5 ngày là tiền về ví."
+      "note": "Để được hỗ trợ, vui lòng liên hệ Driip qua Facebook Messenger hoặc số hotline trên hộp sản phẩm. Hoàn tiền sẽ được xử lý trong 3–5 ngày sau khi hàng về kho."
     },
     "warranty": {
       "eyebrow": "CHÍNH SÁCH BẢO HÀNH",
       "title": "BẢO HÀNH\nRÕ RÀNG,\nNÓI LÀ LÀM.",
-      "lead": "Chơi đẹp sòng phẳng: Hàng nhập ngoài thì bảo hành 90 ngày. Hàng do driip tự sản xuất (Originals) thì bảo hành hẳn 180 ngày cho cháy.",
+      "lead": "Hàng nhập khẩu được bảo hành 90 ngày. Hàng do Driip sản xuất được bảo hành 180 ngày.",
       "unit": "NGÀY BẢO HÀNH",
       "standard": {
         "badge": "SẢN PHẨM DISTRIBUTE",
@@ -382,31 +382,31 @@
           "p4": "Pass ưu tiên qua kênh support VIP"
         }
       },
-      "note": "Tụi mình không bảo hành cho những pha phá áo, giặt hóa chất mạnh, hay tự ý sửa đồ. Nhớ lưu lại mã đơn hàng để được support nhanh nhất nha bro."
+      "note": "Driip không bảo hành cho sản phẩm bị sử dụng sai cách, giặt hóa chất mạnh hoặc tự ý sửa đổi. Vui lòng lưu lại mã đơn hàng để được hỗ trợ nhanh nhất."
     },
     "exchange": {
       "eyebrow": "ĐỔI SẢN PHẨM",
       "title": "ĐỔI HÀNG\nLUÔN SẴN SÀNG.",
-      "lead": "Thấy săn sale rẻ quá nên lỡ múc nhầm size? Yên tâm, quyền đổi hàng vẫn auto mở không cần điều kiện.",
+      "lead": "Nếu cần đổi size hoặc màu, Driip luôn sẵn sàng hỗ trợ trong thời hạn quy định.",
       "items": {
         "always": {
           "title": "ĐỔI BẤT CỨ LÚC NÀO",
-          "text": "Đang trong hạn đổi trả là bro được quyền xin đổi size, màu, hoặc sang item khác. Tụi mình chiều tới bến."
+          "text": "Trong thời hạn đổi trả, quý khách có thể yêu cầu đổi size, màu hoặc sang sản phẩm khác."
         },
         "sale": {
           "title": "HÀNG SALE CŨNG ĐỔI TẤT",
-          "text": "Flash sale hay clearance xả kho gì cũng áp dụng chung một luật. Không phân biệt mua giá hype hay giá bèo."
+          "text": "Sản phẩm trong chương trình ưu đãi vẫn được áp dụng chính sách đổi trả."
         },
         "process": {
           "title": "THỦ TỤC 1 PHÚT",
-          "text": "Ping admin, chốt món muốn đổi, đẩy hàng cũ về kho. Nhận hàng xong 3–5 ngày sau món mới sẽ có mặt trước cửa."
+          "text": "Liên hệ Driip, xác nhận sản phẩm cần đổi và gửi hàng cũ về kho. Sản phẩm mới sẽ được chuyển đi sau khi hoàn tất xử lý."
         }
       }
     },
     "manifesto": {
-      "label": "CAM KẾT CỦA TỤI MÌNH",
-      "quote": "Mỗi item trước khi đến tay bro đều phải qua ải kiểm định gắt gao nhất: Tiêu chuẩn của driip.",
-      "sub": "Từ sợi vải tơ đến từng đường kim, tất cả đều được test bạo lực để đảm bảo chất lượng. Với driip, uy tín không phải là văn mẫu — nó là máu."
+      "label": "CAM KẾT DRIIP",
+      "quote": "Mỗi sản phẩm trước khi đến tay quý khách đều trải qua quy trình kiểm định nghiêm ngặt nhất.",
+      "sub": "Từ chất liệu đến từng đường may, tất cả đều được kiểm tra để bảo đảm chất lượng. Với Driip, uy tín được thể hiện qua tiêu chuẩn thực tế."
     }
   },
   "footer": {
@@ -418,9 +418,9 @@
     "hero": {
       "pre": "DRIIP ORIGINAL — SS26",
       "eyebrow": "SẢN PHẨM CHÍNH THỨC CỦA DRIIP",
-      "title": "THỜI TRANG.\nNHƯNG PHẢI ÊM.",
-      "sub": "Phong cách Bánh Mì Việt Nam signature. Form đúc EVA nguyên khối. Chống trượt đỉnh cao. Chất lượng đọ ngang Crocs nhưng mang đậm vibe đường phố. Mang cực bốc, đi cực êm.",
-      "cta": "LÊN CHÂN THỬ SLIDE NGAY",
+      "title": "HƠN CẢ MỘT CHIẾC ÁO THUN.",
+      "sub": "Thiết kế lấy cảm hứng từ tinh thần Việt Nam, đúc nguyên khối từ EVA cao cấp, chống trượt tốt và giữ cảm giác thoải mái suốt ngày dài.",
+      "cta": "KHÁM PHÁ SLIDE NGAY",
       "secondary": "VỀ TRANG CHỦ",
       "metrics": {
         "material": "CHẤT LIỆU",
@@ -433,38 +433,38 @@
     },
     "strip": {
       "eva": "ĐÚC EVA FOAM NGUYÊN KHỐI",
-      "antislip": "ĐẾ BÁM ĐƯỜNG CỰC GẮT",
+      "antislip": "ĐẾ BÁM ĐƯỜNG TỐT",
       "ergonomic": "ĐẾ LÕM THUẬN CHÂN",
-      "crocs": "CHẤT LƯỢNG NGANG HÀNG CROCS"
+      "crocs": "TIÊU CHUẨN CHẤT LƯỢNG CAO"
     },
     "features": {
+      "body": "Mọi đường nét của Driip Slide được tạo ra để cân bằng giữa cảm giác êm ái và tính thẩm mỹ. Thiết kế phù hợp với nhịp sống đô thị hiện đại.",
       "label": "VŨ KHÍ BÍ MẬT",
-      "title": "KHÁC BIỆT.\nNGẦU HƠN.",
-      "body": "Mọi góc cạnh của con Driip Slide này sinh ra để phục vụ những cái tôi không muốn phải hy sinh độ êm cho độ ngầu. Từ lòng đường Sài Gòn thẳng tiến lên chân bạn.",
+      "title": "KHÁC BIỆT.\nNGÀY CÀNG TỐT HƠN.",
       "items": {
         "banhMi": {
           "title": "Dáng Bánh Mì Signature",
-          "desc": "Lấy cảm hứng từ dáng bánh mì quen thuộc — nhìn phát là nhận ra ngay, cực chunky, cực hype."
+          "desc": "Lấy cảm hứng từ dáng bánh mì quen thuộc — nhận diện rõ ràng, cân đối và nổi bật."
         },
         "eva": {
-          "title": "EVA Foam Xịn",
-          "desc": "Chất xốp siêu nhẹ, đàn hồi tốt, bơi lội thoải mái, nâng niu bàn chân trên từng nốt nhạc."
+          "title": "EVA Foam Cao Cấp",
+          "desc": "Chất xốp siêu nhẹ, đàn hồi tốt và hỗ trợ chuyển động thoải mái suốt ngày dài."
         },
         "antislip": {
           "title": "Chống Trượt Tuyệt Đối",
-          "desc": "Texture mặt đế thiết kế riêng để đi mưa không bị xòe. Bám sàn như keo dán."
+          "desc": "Bề mặt đế được thiết kế riêng để tăng độ bám và giảm trơn trượt trong nhiều điều kiện di chuyển."
         },
         "crocs": {
           "title": "Độ Bền Chuẩn Crocs",
-          "desc": "Đập đi gõ lại mười mấy lần để ra được chất lượng đọ ngang với chuẩn Crocs quốc tế."
+          "desc": "Kiểm chứng độ bền theo tiêu chuẩn cao, hướng đến trải nghiệm ổn định và lâu dài."
         },
         "fashion": {
           "title": "Mang Là Phải Chất",
-          "desc": "Dép nhưng vẫn là thời trang. Phối màu gắt, form dáng bự, đậm vibe đường phố của driip."
+          "desc": "Thiết kế mang tính thời trang rõ nét với form dáng cân đối và phối màu tinh gọn."
         },
         "ergonomic": {
           "title": "Công Thái Học Ôm Chân",
-          "desc": "Mang vào là dính. Lòng dép làm lõm khéo léo để khớp trọn với form bàn chân, đi bộ cả ngày không mỏi."
+          "desc": "Đệm lòng dép được định hình để ôm chân tự nhiên, hỗ trợ sự thoải mái khi sử dụng lâu dài."
         }
       }
     },
@@ -483,10 +483,10 @@
     "gallery": {
       "label": "LOOKBOOK",
       "title": "DRIIP SLIDE SS26",
-      "sub": "Hot Pink & Cyan Blue — Nhìn là cuốn",
-      "cta": "XÚC LUÔN",
-      "tabPink": "Hot Pink Cháy",
-      "tabBlue": "Cyan Blue Cool",
+      "sub": "Hot Pink & Cyan Blue — Hai phối màu chủ đạo",
+      "cta": "KHÁM PHÁ",
+      "tabPink": "Hot Pink",
+      "tabBlue": "Cyan Blue",
       "captions": {
         "collection": "TOÀN CẢNH BỘ ĐÔI",
         "pinkDetail": "ZOOM CẬN HOT PINK",
@@ -495,51 +495,51 @@
     },
     "manifesto": {
       "label": "TIÊU CHUẨN DRIIP",
-      "quote": "Thời trang phải chất.\nNhưng đi phải êm.\nĐó là cách tụi này làm đồ."
+      "quote": "Thời trang phải chất.\nNhưng trải nghiệm cũng phải êm.\nĐó là cách Driip tạo nên sản phẩm."
     },
     "products": {
       "label": "THÊM VÀO TỦ ĐỒ",
       "title": "CHỐT MÀU & SIZE",
-      "choose": "Kéo màu và size bro thích để đẩy vào giỏ",
+      "choose": "Chọn màu và size phù hợp để thêm vào giỏ",
       "color": "BẢN MÀU",
       "size": "CHỌN SIZE",
       "quantity": "SỐ LƯỢNG",
-      "addToCart": "CHỌN SIZE & MÀU ĐỂ ĐẨY VÀO GIỎ",
-      "addReady": "THÊM VÀO GIỎ HÀNG +",
+      "addToCart": "THÊM VÀO GIỎ",
+      "addReady": "THÊM VÀO GIỎ +",
       "added": "Đã bay vào giỏ ✓",
       "onePair": "1 ĐÔI — 286K",
       "twoPairs": "2 ĐÔI — 500K (Lưu luôn 72K)",
-      "warranty": "BẢO HÀNH BAO PHÊ 180 NGÀY"
+      "warranty": "BẢO HÀNH 180 NGÀY"
     },
     "cart": {
-      "label": "GIỎ HÀNG CỦA BRO",
+      "label": "GIỎ HÀNG",
       "title": "ĐANG CHỜ THANH TOÁN",
       "empty": "Giỏ hàng đang trống rỗng",
-      "emptySub": "Lựa màu và size ở trên để ném con Driip Slide vào giỏ đi bro.",
+      "emptySub": "Chọn màu và size ở trên để thêm Driip Slide vào giỏ.",
       "continueShopping": "← MUA THÊM ĐỒ",
       "total": "TỔNG THIỆT HẠI",
-      "save": "Bạn đã húp deal",
+      "save": "Tiết kiệm của bạn",
       "savings": "Tiết kiệm",
-      "next": "GHI ĐỊA CHỈ NHẬN HÀNG NÀO →"
+      "next": "NHẬP ĐỊA CHỈ NHẬN HÀNG →"
     },
     "order": {
-      "label": "HÀNG SẮP CHÁY — CHỐT NGAY",
+      "label": "ĐẶT HÀNG — SỐ LƯỢNG GIỚI HẠN",
       "title": "HOÀN TẤT ĐƠN",
-      "sub": "Điền đủ thông tin để tụi mình ship đồ. Hot Pink (EU 36-42) | Cyan Blue (EU 40-45).",
+      "sub": "Điền đủ thông tin để Driip tiến hành giao hàng. Hot Pink (EU 36-42) | Cyan Blue (EU 40-45).",
       "step1": "GIỎ HÀNG",
       "step2": "GIAO HÀNG",
       "step3": "XÁC NHẬN",
       "firstName": "TÊN",
-      "firstNamePlaceholder": "Tên bro",
+      "firstNamePlaceholder": "Tên của bạn",
       "lastName": "HỌ",
       "lastNamePlaceholder": "Họ",
-      "phone": "SĐT GỌI SHIP",
+      "phone": "SỐ ĐIỆN THOẠI",
       "phonePlaceholder": "09xx xxx xxx",
       "province": "TỈNH / THÀNH",
-      "provincePlaceholder": "Đang ở tỉnh nào?",
+      "provincePlaceholder": "Chọn tỉnh / thành phố",
       "address": "ĐỊA CHỈ",
-      "addressPlaceholder": "Số nhà, tên ngõ (cho shipper dễ tìm)",
-      "email": "EMAIL (Cho có cũng được)",
+      "addressPlaceholder": "Số nhà, tên đường, khu vực cụ thể",
+      "email": "EMAIL",
       "emailPlaceholder": "email@example.com",
       "dob": "NGÀY SINH",
       "dobPlaceholder": "DD/MM/YYYY",
@@ -548,29 +548,29 @@
       "female": "NỮ",
       "optional": "(Tùy chọn)",
       "back": "← QUAY LẠI",
-      "review": "CHÉC LẠI ĐƠN KẺO NHẦM →",
+      "review": "KIỂM TRA LẠI ĐƠN HÀNG →",
       "placeOrder": "CHỐT ĐƠN — {price}",
       "fine": "Thanh toán lúc nhận hàng (COD) · Freeship mọi miền Tổ Quốc · Bảo hành 180 ngày",
-      "successTitle": "TING TING, CHỐT XONG ĐƠN",
-      "successMessage": "Big thanks {name}! Lên đơn thành công rồi nhé.",
-      "successBody": "{name} ơi, món {items} của bro đã vào sổ. Tụi mình sẽ alo xác nhận chậm nhất trong 24h.",
+      "successTitle": "ĐƠN HÀNG ĐÃ ĐƯỢC GHI NHẬN",
+      "successMessage": "Cảm ơn {name}! Đơn hàng đã được ghi nhận thành công.",
+      "successBody": "{name}, sản phẩm {items} đã được ghi nhận. Driip sẽ liên hệ xác nhận chậm nhất trong 24h.",
       "orderSummary": "TÓM TẮT BILL",
-      "stepConfirm": "Đơn Lên Phôi",
-      "stepContact": "Chờ Alo",
-      "stepDelivery": "Đang Bay Đến",
-      "backHome": "LƯỢN TIẾP TRANG CHỦ",
-      "newOrder": "LÊN THÊM ĐƠN NỮA",
+      "stepConfirm": "Xác Nhận Đơn",
+      "stepContact": "Liên Hệ Xác Nhận",
+      "stepDelivery": "Đang Vận Chuyển",
+      "backHome": "VỀ TRANG CHỦ",
+      "newOrder": "ĐẶT ĐƠN MỚI",
       "validate": {
-        "firstName": "Thiếu tên kìa bro.",
-        "lastName": "Nhập nốt họ đi.",
-        "phone": "Thiếu SĐT shipper khóc đấy.",
-        "province": "Chưa chọn tỉnh/thành.",
-        "address": "Cho xin địa chỉ để còn ship đồ chứ."
+        "firstName": "Vui lòng nhập tên người nhận.",
+        "lastName": "Vui lòng nhập họ người nhận.",
+        "phone": "Vui lòng nhập số điện thoại.",
+        "province": "Vui lòng chọn tỉnh/thành phố.",
+        "address": "Vui lòng nhập địa chỉ giao hàng đầy đủ."
       },
-      "reviewTitle": "SOI LẠI ĐƠN HÀNG LẦN CUỐI",
+      "reviewTitle": "KIỂM TRA LẠI ĐƠN HÀNG",
       "cartSummary": "TÓM TẮT GIỎ HÀNG",
-      "shippingInfo": "THÔNG TIN SHIPPER",
-      "edit": "← SỬA LẠI ĐỊA CHỈ"
+      "shippingInfo": "THÔNG TIN GIAO HÀNG",
+      "edit": "← CHỈNH SỬA THÔNG TIN"
     },
     "sizechart": {
       "label": "BẢNG SIZE",
@@ -586,18 +586,18 @@
       "wideFoot": "Bàn chân bè",
       "narrowFoot": "Bàn chân ốm",
       "highInstep": "Mu bàn chân dày",
-      "recommendedSize": "Cứ quất đúng size",
+      "recommendedSize": "Chọn đúng size",
       "sizeUp": "Nên up lên 1 size",
-      "note": "Note nhỏ: Sẽ có sai số li ti xíu do đo đạc thủ công. Anh em lấy độ dài thực tế làm chuẩn nhé."
+      "note": "Lưu ý: Có thể có sai số nhỏ do đo thủ công. Vui lòng lấy số đo thực tế làm tiêu chuẩn."
     }
   },
   "common": {
-    "error": "Lỗi cmnr. Quất lại sau nhé bro."
+    "error": "Đã có lỗi xảy ra. Vui lòng thử lại sau."
   },
   "sg": {
-    "weightLabel": "Bro nặng bao nhiêu?",
+    "weightLabel": "Cân nặng của bạn là bao nhiêu?",
     "weightPlaceholder": "Vd: 65",
-    "recommended": "Size đẹp nhất cho bro",
+    "recommended": "Size phù hợp nhất cho bạn",
     "hip": "Vòng hông (cm)",
     "weight": "Cân nặng (kg)"
   }

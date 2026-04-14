@@ -88,12 +88,12 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
               <p style="margin:0 0 8px 0;font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#555;">
                 XÁC NHẬN ĐƠN HÀNG
               </p>
-              <h1 style="margin:0 0 16px 0;font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:1;color:#ffffff;">
-                Chốt xong rồi, ${fullName.split(" ").pop()}.
-              </h1>
+              <p style="margin:0 0 16px 0;font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:1;color:#ffffff;">
+                Đơn hàng đã được ghi nhận, ${fullName}.
+              </p>
               <p style="margin:0;font-size:14px;color:#888;line-height:1.6;">
-                Tụi mình đã nhận đơn <strong style="color:#d4d4d4;">#${orderId}</strong> của bạn.
-                Team sẽ xác nhận và cập nhật tình trạng giao hàng trong vòng 24h.
+                Driip đã nhận đơn <strong style="color:#d4d4d4;">#${orderId}</strong> của bạn.
+                Driip sẽ xác nhận và cập nhật tình trạng giao hàng trong vòng 24h.
               </p>
             </td>
           </tr>
@@ -179,7 +179,7 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
           <tr>
             <td style="padding-top:32px;">
               <p style="margin:0 0 8px 0;font-size:12px;color:#444;">
-                Có thắc mắc? Liên hệ tụi mình qua
+                Có thắc mắc? Liên hệ Driip qua
                 <a href="https://www.facebook.com/profile.php?id=61585105804316" style="color:#888;text-decoration:none;">Facebook Messenger</a>.
               </p>
               <p style="margin:0;font-size:11px;color:#333;letter-spacing:0.05em;">
