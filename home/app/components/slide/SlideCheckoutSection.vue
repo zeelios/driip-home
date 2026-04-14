@@ -53,6 +53,10 @@ function formatVnd(value: number): string {
   }).format(value);
 }
 
+function capitalizeWords(value: string): string {
+  return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function formatDobInput(event: Event): void {
   const input = event.target as HTMLInputElement;
   let digits = input.value.replace(/\D/g, "").slice(0, 8);
@@ -288,6 +292,9 @@ function handleSubmit(): void {
                 type="text"
                 :placeholder="t('slide.order.firstNamePlaceholder')"
                 required
+                @blur="
+                  store.order.firstName = capitalizeWords(store.order.firstName)
+                "
               />
             </div>
             <div class="slide-field">
@@ -297,6 +304,9 @@ function handleSubmit(): void {
                 type="text"
                 :placeholder="t('slide.order.lastNamePlaceholder')"
                 required
+                @blur="
+                  store.order.lastName = capitalizeWords(store.order.lastName)
+                "
               />
             </div>
           </div>
