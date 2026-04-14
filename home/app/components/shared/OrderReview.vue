@@ -31,13 +31,99 @@ const cookie = useCookie<MetaOrderProfileCookie | null>(
   META_ORDER_PROFILE_COOKIE_KEY
 );
 
+function parseAndValidateDob(raw: string): string {
+  if (!raw || typeof raw !== "string") return "";
+
+  // Normalize separators: 19/83, 19-83, 19 83, 01/09/1991, etc.
+  const normalized = raw.trim().replace(/[\s\-._]/g, "/");
+  const parts = normalized.split("/").filter((p) => p.length > 0);
+
+  if (parts.length === 0) return "";
+
+  // Parse numbers
+  const nums = parts.map((p) => parseInt(p, 10)).filter((n) => !isNaN(n));
+  if (nums.length === 0) return "";
+
+  const now = new Date().getFullYear();
+  const minYear = 1900;
+  const maxYear = now;
+
+  let day: number | undefined;
+  let month: number | undefined;
+  let year: number | undefined;
+
+  if (nums.length === 1) {
+    // Only year provided
+    year = nums[0]!;
+    if (year < 100) year += year < 30 ? 2000 : 1900; // 83 -> 1983, 25 -> 2025
+  } else if (nums.length >= 2) {
+    // Could be MM/YYYY, MM/YY, DD/MM/YYYY, or DD/MM
+    const a = nums[0]!;
+    const b = nums[1]!;
+
+    if (b > 31 || b >= 100) {
+      // Second number is year: MM/YYYY or MM/YY
+      month = a >= 1 && a <= 12 ? a : undefined;
+      year = b < 100 ? (b < 30 ? 2000 + b : 1900 + b) : b;
+    } else if (a > 12 && a <= 31 && b <= 12) {
+      // DD/MM format (day first, month second)
+      day = a;
+      month = b;
+      // Check for third part as year
+      if (nums.length >= 3) {
+        const c = nums[2]!;
+        year = c < 100 ? (c < 30 ? 2000 + c : 1900 + c) : c;
+      }
+    } else if (a <= 12 && b <= 31) {
+      // Could be MM/DD (month first) or valid DD/MM
+      month = a;
+      day = b;
+      // Check for third part as year
+      if (nums.length >= 3) {
+        const c = nums[2]!;
+        year = c < 100 ? (c < 30 ? 2000 + c : 1900 + c) : c;
+      }
+    } else {
+      // Fallback: assume MM/YY or MM/YYYY
+      month = a >= 1 && a <= 12 ? a : undefined;
+      year = b < 100 ? (b < 30 ? 2000 + b : 1900 + b) : b;
+    }
+  }
+
+  // Validate year
+  if (year !== undefined && (year < minYear || year > maxYear)) return "";
+
+  // Validate month
+  if (month !== undefined && (month < 1 || month > 12)) return "";
+
+  // Validate day based on month
+  if (day !== undefined && month !== undefined) {
+    const daysInMonth = new Date(year ?? 2000, month, 0).getDate();
+    if (day < 1 || day > daysInMonth) return "";
+  }
+
+  // Format output
+  if (day !== undefined && month !== undefined && year !== undefined) {
+    return `${String(day).padStart(2, "0")}/${String(month).padStart(
+      2,
+      "0"
+    )}/${year}`;
+  } else if (month !== undefined && year !== undefined) {
+    return `${String(month).padStart(2, "0")}/${year}`;
+  } else if (year !== undefined) {
+    return String(year);
+  }
+
+  return "";
+}
+
 const resolved = computed(() => ({
   firstName: props.order.firstName || cookie.value?.firstName || "",
   lastName: props.order.lastName || cookie.value?.lastName || "",
   phone: props.order.phone || cookie.value?.phone || "",
   fullAddress: props.order.fullAddress || cookie.value?.fullAddress || "",
   province: props.order.province || cookie.value?.province || "",
-  dob: props.order.dob || cookie.value?.dob || "",
+  dob: parseAndValidateDob(props.order.dob || cookie.value?.dob || ""),
 }));
 
 const fullName = computed(() =>

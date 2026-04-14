@@ -47,6 +47,58 @@ function normalizeVietnamSheetPhone(raw: string): string {
   return `0${digits}`;
 }
 
+function normalizeAndValidateDob(raw: unknown): string {
+  if (!raw || typeof raw !== "string") return "";
+
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length < 2) return "";
+
+  // Year only (2 digits): 83 -> 1983, 25 -> 2025
+  if (digits.length === 2) {
+    const year = parseInt(digits, 10);
+    if (year >= 30) return `19${digits}`;
+    return `20${digits}`;
+  }
+
+  // Year only (4 digits): 1991 -> 1991
+  if (digits.length === 4) {
+    const year = parseInt(digits, 10);
+    if (year >= 1900 && year <= 2025) return digits;
+    return "";
+  }
+
+  // Full date DDMMYYYY (8 digits): 01091991 -> DD/MM/YYYY
+  if (digits.length === 8) {
+    const day = parseInt(digits.slice(0, 2), 10);
+    const month = parseInt(digits.slice(2, 4), 10);
+    const year = parseInt(digits.slice(4), 10);
+
+    if (month < 1 || month > 12) return "";
+    if (day < 1 || day > 31) return "";
+    if (year < 1900 || year > 2025) return "";
+
+    return `${String(day).padStart(2, "0")}/${String(month).padStart(
+      2,
+      "0"
+    )}/${year}`;
+  }
+
+  // Partial dates - extract year from end
+  if (digits.length >= 4) {
+    const lastFour = digits.slice(-4);
+    const year = parseInt(lastFour, 10);
+    if (year >= 1900 && year <= 2025) return lastFour;
+
+    const lastTwo = digits.slice(-2);
+    const year2 = parseInt(lastTwo, 10);
+    if (year2 >= 0 && year2 <= 99) {
+      return year2 >= 30 ? `19${lastTwo}` : `20${lastTwo}`;
+    }
+  }
+
+  return "";
+}
+
 function allocateEvenly(total: number, parts: number): number[] {
   if (parts <= 0) return [];
   const base = Math.floor(total / parts);
@@ -84,6 +136,9 @@ export default defineEventHandler(async (event) => {
     size,
     color,
   } = body;
+
+  // Normalize DOB for both server storage and CAPI
+  const cleanDob = normalizeAndValidateDob(dob);
 
   if (
     !firstName ||
@@ -203,7 +258,7 @@ export default defineEventHandler(async (event) => {
             salesSource, // P: Sales
             "", // Q: Comestic Tracking
             "", // R: Global Tracking
-            isFirstRow ? dob ?? "" : "", // S: DoB
+            isFirstRow ? cleanDob : "", // S: DoB
             isFirstRow ? gender ?? "" : "", // T: Gender
           ]);
 
@@ -268,7 +323,7 @@ export default defineEventHandler(async (event) => {
             salesSource, // P: Sales
             "", // Q: Comestic Tracking
             "", // R: Global Tracking
-            isFirstRow ? dob ?? "" : "", // S: DoB
+            isFirstRow ? cleanDob : "", // S: DoB
             isFirstRow ? gender ?? "" : "", // T: Gender
           ]);
 

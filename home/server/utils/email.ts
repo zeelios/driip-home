@@ -168,7 +168,7 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
                 <tr>
                   <td>
                     <span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">03</span>
-                    <span style="font-size:13px;color:#888;">Nhận sản phẩm và thanh toán COD — freeship toàn quốc</span>
+                    <span style="font-size:13px;color:#888;">Giao hàng trong 3–10 ngày, miễn phí vận chuyển toàn quốc</span>
                   </td>
                 </tr>
               </table>

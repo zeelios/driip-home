@@ -141,10 +141,55 @@ export function normalizeMetaPhone(raw: string): string {
 
 export function normalizeMetaDob(raw: string): string {
   const digits = raw.replace(/\D/g, "");
-  if (digits.length !== 8) return digits;
 
-  // Input is collected as DD/MM/YYYY in the form.
-  return `${digits.slice(4)}${digits.slice(2, 4)}${digits.slice(0, 2)}`;
+  // Empty or invalid
+  if (digits.length < 2) return "";
+
+  // Year only (2 digits): 83 -> 1983, 25 -> 2025
+  if (digits.length === 2) {
+    const year = parseInt(digits, 10);
+    if (year >= 30) return `19${digits}`;
+    return `20${digits}`;
+  }
+
+  // Year only (4 digits): 1991 -> 1991
+  if (digits.length === 4) {
+    const year = parseInt(digits, 10);
+    // Validate reasonable year range (1900-2025)
+    if (year >= 1900 && year <= 2025) return digits;
+    return "";
+  }
+
+  // Full date DDMMYYYY (8 digits): 01091991 -> 19910901 (YYYYMMDD)
+  if (digits.length === 8) {
+    const day = parseInt(digits.slice(0, 2), 10);
+    const month = parseInt(digits.slice(2, 4), 10);
+    const year = parseInt(digits.slice(4), 10);
+
+    // Validate
+    if (month < 1 || month > 12) return "";
+    if (day < 1 || day > 31) return "";
+    if (year < 1900 || year > 2025) return "";
+
+    return `${digits.slice(4)}${digits.slice(2, 4)}${digits.slice(0, 2)}`;
+  }
+
+  // Partial dates (e.g., MMYYYY, DDMMYY) - try to extract year
+  if (digits.length >= 4) {
+    // Look for 4-digit year at end
+    const lastFour = digits.slice(-4);
+    const year = parseInt(lastFour, 10);
+    if (year >= 1900 && year <= 2025) return lastFour;
+
+    // Look for 2-digit year at end
+    const lastTwo = digits.slice(-2);
+    const year2 = parseInt(lastTwo, 10);
+    if (year2 >= 0 && year2 <= 99) {
+      return year2 >= 30 ? `19${lastTwo}` : `20${lastTwo}`;
+    }
+  }
+
+  return "";
 }
 
 export function buildMetaPurchaseContentName(sku?: string): string {
