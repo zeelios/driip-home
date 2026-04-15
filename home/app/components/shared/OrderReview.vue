@@ -117,9 +117,25 @@ function parseAndValidateDob(raw: string): string {
   return "";
 }
 
+function capitalizeFirstChar(value: string): string {
+  if (!value) return "";
+
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return "";
+
+  const firstChar = trimmed[0];
+  if (!firstChar) return "";
+
+  return `${firstChar.toUpperCase()}${trimmed.slice(1)}`;
+}
+
 const resolved = computed(() => ({
-  firstName: props.order.firstName || cookie.value?.firstName || "",
-  lastName: props.order.lastName || cookie.value?.lastName || "",
+  firstName: capitalizeFirstChar(
+    props.order.firstName || cookie.value?.firstName || ""
+  ),
+  lastName: capitalizeFirstChar(
+    props.order.lastName || cookie.value?.lastName || ""
+  ),
   phone: props.order.phone || cookie.value?.phone || "",
   fullAddress: props.order.fullAddress || cookie.value?.fullAddress || "",
   province: props.order.province || cookie.value?.province || "",
