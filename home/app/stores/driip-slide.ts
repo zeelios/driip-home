@@ -32,8 +32,8 @@ const PRODUCT_CONFIG = {
   name: "Driip Slide",
   line: "driip-slide",
   baseSku: "driip-slide",
-  priceOne: 286000,
-  priceTwo: 500000,
+  priceOne: 349000,
+  priceTwo: 262000,
 } as const;
 
 interface CartItem extends BaseCartItem {
@@ -142,15 +142,10 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
   }
 
   function calculatePrice(quantity: number): number {
-    if (quantity >= 2) {
-      const setsOfTwo = Math.floor(quantity / 2);
-      const remainder = quantity % 2;
-      return (
-        setsOfTwo * PRODUCT_CONFIG.priceTwo +
-        remainder * PRODUCT_CONFIG.priceOne
-      );
-    }
-    return quantity * PRODUCT_CONFIG.priceOne;
+    if (quantity <= 0) return 0;
+    if (quantity === 1) return PRODUCT_CONFIG.priceOne;
+
+    return quantity * PRODUCT_CONFIG.priceTwo;
   }
 
   // Sync order profile cookie

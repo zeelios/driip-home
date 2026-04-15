@@ -124,17 +124,17 @@ const selectedColorLabel = computed(() => {
             <div class="slide-pricing-tiers">
               <div class="slide-pricing-item">
                 <span class="slide-pricing-label">1 ĐÔI</span>
-                <span class="slide-pricing-value">286.000đ</span>
+                <span class="slide-pricing-value">349.000đ</span>
               </div>
               <div class="slide-pricing-divider" />
               <div class="slide-pricing-item slide-pricing-item--highlight">
                 <span class="slide-pricing-label">2 ĐÔI</span>
-                <span class="slide-pricing-value">500.000đ</span>
-                <span class="slide-pricing-save">Tiết kiệm 72.000đ</span>
+                <span class="slide-pricing-value">262.000đ</span>
+                <span class="slide-pricing-save">Từ 2 đôi</span>
               </div>
             </div>
             <!-- Countdown Timer -->
-            <div v-if="!dealExpired" class="slide-countdown">
+            <div class="slide-countdown" v-if="!dealExpired">
               <span class="slide-countdown-label">Hoàn giá 480k sau</span>
               <div class="slide-countdown-clock">
                 <div class="slide-countdown-unit">

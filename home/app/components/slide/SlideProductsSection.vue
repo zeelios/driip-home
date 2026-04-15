@@ -153,7 +153,7 @@ defineExpose({ added });
               @click="store.setDraftQuantity(1)"
             >
               <span class="slide-qty-count">1</span>
-              <span class="slide-qty-price">286.000đ</span>
+              <span class="slide-qty-price">349.000đ</span>
             </button>
             <button
               type="button"
@@ -163,8 +163,8 @@ defineExpose({ added });
             >
               <span class="slide-qty-badge">BEST</span>
               <span class="slide-qty-count">2</span>
-              <span class="slide-qty-price">500.000đ</span>
-              <span class="slide-qty-save">Tiết kiệm 72.000đ</span>
+              <span class="slide-qty-price">262.000đ</span>
+              <span class="slide-qty-save">Từ 2 đôi</span>
             </button>
           </div>
         </div>

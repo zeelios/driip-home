@@ -146,8 +146,8 @@ useHead({
       name: "description",
       content: computed(() =>
         locale.value === "vi"
-          ? "Driip Slide — Phong cách Bánh Mì, chất liệu EVA, chống trượt. Hot Pink và Cyan Blue. 1 đôi 286.000đ, 2 đôi 500.000đ. Bảo hành 180 ngày."
-          : "Driip Slide — Bánh Mì style, EVA material, anti-slip. Hot Pink and Cyan Blue. 1 pair 286,000đ, 2 pairs 500,000đ. 180-day warranty."
+          ? "Driip Slide — Phong cách Bánh Mì, chất liệu EVA, chống trượt. Hot Pink và Cyan Blue. 1 đôi 349.000đ, từ 2 đôi chỉ 262.000đ/đôi. Bảo hành 180 ngày."
+          : "Driip Slide — Bánh Mì style, EVA material, anti-slip. Hot Pink and Cyan Blue. 1 pair 349,000đ, 2+ pairs at 262,000đ per pair. 180-day warranty."
       ),
     },
     { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -157,8 +157,8 @@ useHead({
       property: "og:description",
       content: computed(() =>
         locale.value === "vi"
-          ? "Driip Slide — Phong cách Bánh Mì, chất liệu EVA. Hot Pink & Cyan Blue. 1 đôi 286.000đ, 2 đôi 500.000đ."
-          : "Driip Slide — Bánh Mì style, EVA material. Hot Pink & Cyan Blue. 1 pair 286,000đ, 2 pairs 500,000đ."
+          ? "Driip Slide — Phong cách Bánh Mì, chất liệu EVA. Hot Pink & Cyan Blue. 1 đôi 349.000đ, từ 2 đôi chỉ 262.000đ/đôi."
+          : "Driip Slide — Bánh Mì style, EVA material. Hot Pink & Cyan Blue. 1 pair 349,000đ, 2+ pairs at 262,000đ per pair."
       ),
     },
     { property: "og:type", content: "product" },
@@ -179,7 +179,7 @@ useHead({
       property: "og:image:alt",
       content: "Driip Slide — Hot Pink & Cyan Blue Bánh Mì Style Slides",
     },
-    { property: "product:price:amount", content: "286000" },
+    { property: "product:price:amount", content: "349000" },
     { property: "product:price:currency", content: "VND" },
     { property: "product:availability", content: "in stock" },
     { property: "product:condition", content: "new" },
@@ -191,8 +191,8 @@ useHead({
       name: "twitter:description",
       content: computed(() =>
         locale.value === "vi"
-          ? "Phong cách Bánh Mì, chất liệu EVA. Hot Pink & Cyan Blue. 1 đôi 286.000đ, 2 đôi 500.000đ."
-          : "Bánh Mì style, EVA material. Hot Pink & Cyan Blue. 1 pair 286,000đ, 2 pairs 500,000đ."
+          ? "Phong cách Bánh Mì, chất liệu EVA. Hot Pink & Cyan Blue. 1 đôi 349.000đ, từ 2 đôi chỉ 262.000đ/đôi."
+          : "Bánh Mì style, EVA material. Hot Pink & Cyan Blue. 1 pair 349,000đ, 2+ pairs at 262,000đ per pair."
       ),
     },
     {
