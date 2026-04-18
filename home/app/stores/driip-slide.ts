@@ -33,7 +33,7 @@ const PRODUCT_CONFIG = {
   line: "driip-slide",
   baseSku: "driip-slide",
   priceOne: 349000,
-  priceTwo: 262000,
+  priceMulti: 286000,
 } as const;
 
 interface CartItem extends BaseCartItem {
@@ -145,7 +145,7 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     if (quantity <= 0) return 0;
     if (quantity === 1) return PRODUCT_CONFIG.priceOne;
 
-    return quantity * PRODUCT_CONFIG.priceTwo;
+    return quantity * PRODUCT_CONFIG.priceMulti;
   }
 
   // Sync order profile cookie
@@ -471,6 +471,6 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     PRODUCT_CONFIG,
     // Individual price exports for template convenience
     PRICE_ONE_PAIR: PRODUCT_CONFIG.priceOne,
-    PRICE_TWO_PAIR: PRODUCT_CONFIG.priceTwo,
+    PRICE_MULTI_PAIR: PRODUCT_CONFIG.priceMulti,
   };
 });

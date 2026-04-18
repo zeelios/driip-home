@@ -129,8 +129,8 @@ const selectedColorLabel = computed(() => {
               <div class="slide-pricing-divider" />
               <div class="slide-pricing-item slide-pricing-item--highlight">
                 <span class="slide-pricing-label">2 ĐÔI</span>
-                <span class="slide-pricing-value">262.000đ</span>
-                <span class="slide-pricing-save">Từ 2 đôi</span>
+                <span class="slide-pricing-value">572.000đ</span>
+                <span class="slide-pricing-save">286k/đôi</span>
               </div>
             </div>
             <!-- Countdown Timer -->

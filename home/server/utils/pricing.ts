@@ -8,13 +8,13 @@ export interface BoxTier {
 
 export const SLIDE_NORMAL_PRICE_PER_PAIR = 480000; // regular / compare price
 export const SLIDE_DEAL_PRICE_ONE = 349000; // 1 pair price
-export const SLIDE_DEAL_PRICE_TWO = 262000; // 2+ pairs price per pair
+export const SLIDE_DEAL_PRICE_MULTI = 286000; // 2+ pairs price per pair
 
 export function getSlideFinalTotal(totalPairs: number): number {
   if (totalPairs <= 0) return 0;
   if (totalPairs === 1) return SLIDE_DEAL_PRICE_ONE;
 
-  return totalPairs * SLIDE_DEAL_PRICE_TWO;
+  return totalPairs * SLIDE_DEAL_PRICE_MULTI;
 }
 
 export function getSlideCompareTotal(totalPairs: number): number {

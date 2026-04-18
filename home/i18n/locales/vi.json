@@ -110,7 +110,7 @@
       "name": "Tên của bạn là gì?",
       "namePlaceholder": "Nhập họ và tên",
       "email": "Email liên hệ",
-      "emailPlaceholder": "email@example.com",
+      "emailPlaceholder": "your{'@'}example.com",
       "phone": "Số điện thoại",
       "phonePlaceholder": "09xx xxx xxx",
       "optional": "(Không bắt buộc)",
@@ -508,7 +508,7 @@
       "addReady": "THÊM VÀO GIỎ +",
       "added": "Đã bay vào giỏ ✓",
       "onePair": "1 ĐÔI — 349K",
-      "twoPairs": "TỪ 2 ĐÔI — 262K / ĐÔI",
+      "twoPairs": "2 ĐÔI — 572K (286k/đôi)",
       "warranty": "BẢO HÀNH 180 NGÀY"
     },
     "cart": {
@@ -520,7 +520,10 @@
       "total": "TỔNG THIỆT HẠI",
       "save": "Tiết kiệm của bạn",
       "savings": "Tiết kiệm",
-      "next": "NHẬP ĐỊA CHỈ NHẬN HÀNG →"
+      "next": "NHẬP ĐỊA CHỈ NHẬN HÀNG →",
+      "goToCart": "XEM GIỎ HÀNG →",
+      "clearCart": "XÓA GIỎ",
+      "itemsInCart": "{count} sản phẩm trong giỏ"
     },
     "order": {
       "label": "ĐẶT HÀNG — SỐ LƯỢNG GIỚI HẠN",
@@ -540,7 +543,7 @@
       "address": "ĐỊA CHỈ",
       "addressPlaceholder": "Số nhà, tên đường, khu vực cụ thể",
       "email": "EMAIL",
-      "emailPlaceholder": "email@example.com",
+      "emailPlaceholder": "your{'@'}example.com",
       "dob": "NGÀY SINH",
       "dobPlaceholder": "DD/MM/YYYY",
       "gender": "GIỚI TÍNH",

@@ -163,8 +163,8 @@ defineExpose({ added });
             >
               <span class="slide-qty-badge">BEST</span>
               <span class="slide-qty-count">2</span>
-              <span class="slide-qty-price">262.000đ</span>
-              <span class="slide-qty-save">Từ 2 đôi</span>
+              <span class="slide-qty-price">572.000đ</span>
+              <span class="slide-qty-save">286k/đôi</span>
             </button>
           </div>
         </div>
