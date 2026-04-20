@@ -5,6 +5,7 @@
     <TeeMaterial />
     <TeePrint />
     <TeeCraft />
+    <TeeGallery />
     <TeeProduct />
   </div>
 </template>
@@ -40,7 +41,8 @@ watchEffect(() => {
       { id: "material", label: t("tee.material.sectionLabel") },
       { id: "print", label: t("tee.print.sectionLabel") },
       { id: "craft", label: t("tee.craft.sectionLabel") },
-      { id: "product", label: "890.000đ" },
+      { id: "gallery", label: t("tee.gallery.navLabel") },
+      { id: "product", label: t("tee.product.navLabel") },
     ],
     ctaLabel: "890.000đ",
     ctaTarget: "product",
@@ -76,16 +78,18 @@ onMounted(() => {
     .forEach((el) => revealObserver?.observe(el));
 
   // Section highlight observer — same pattern as ck-underwear
-  const sectionIds = ["material", "print", "craft", "product"];
+  const sectionIds = ["material", "print", "craft", "gallery", "product"];
   sectionObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           siteNavStore.setActiveSection(entry.target.id);
+        } else if (siteNavStore.activeSection === entry.target.id) {
+          siteNavStore.setActiveSection("");
         }
       });
     },
-    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
+    { threshold: 0, rootMargin: "-40% 0px -40% 0px" }
   );
   sectionIds.forEach((id) => {
     const el = document.getElementById(id);

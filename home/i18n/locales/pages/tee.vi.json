@@ -34,8 +34,13 @@
         "desc": "Không logo. Không rườm rà. Hình thức và chức năng thuần túy dành cho những người trân trọng sự tinh tế."
       }
     },
+    "gallery": {
+      "navLabel": "Bộ Sưu Tập",
+      "label": "Hình ảnh",
+      "title": "Mặc Theo Cách Của Bạn"
+    },
     "material": {
-      "sectionLabel": "Khoa Học",
+      "sectionLabel": "Chất Liệu",
       "title": "Cấu Trúc Phân Tử Sorona®",
       "description": "Chuỗi polymer 37% nguồn gốc thực vật được thiết kế để ghi nhớ hình dạng, tạo sự thoải mái và duy trì hiệu suất lâu dài.",
       "shapeMemory": {
@@ -58,7 +63,7 @@
       }
     },
     "print": {
-      "sectionLabel": "Công Nghệ",
+      "sectionLabel": "In Ấn",
       "title": "Molecular Ink-Lock™",
       "description": "In trực tiếp lên vải với độ phân giải 1200 DPI. Mực nước thấm vào cấu trúc sợi Sorona®, cho độ sắc nét và độ bền cao.",
       "steps": {
@@ -87,7 +92,7 @@
       }
     },
     "craft": {
-      "sectionLabel": "Thủ Công",
+      "sectionLabel": "May Đo",
       "title": "May Đo Ý",
       "description": "Mỗi đường kim được tính toán. Mỗi đường may đều được gia cố. Thủ công Ý gặp gỡ kỹ thuật vật liệu hiện đại.",
       "stats": {
@@ -142,6 +147,7 @@
       }
     },
     "product": {
+      "navLabel": "Đặt Hàng",
       "badge": "Bộ Sưu Tập",
       "title": "Tees Oversized",
       "description": "Hai màu sắc thiết yếu. Một form dáng tinh gọn. Silhouette oversized đem lại sự thoải mái nhưng vẫn giữ cấu trúc thanh lịch.",

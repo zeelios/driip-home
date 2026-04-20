@@ -95,11 +95,14 @@ onMounted(() => {
   sectionObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting)
+        if (entry.isIntersecting) {
           siteNavStore.setActiveSection(entry.target.id);
+        } else if (siteNavStore.activeSection === entry.target.id) {
+          siteNavStore.setActiveSection("");
+        }
       });
     },
-    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
+    { threshold: 0, rootMargin: "-40% 0px -40% 0px" }
   );
   ids.forEach((id) => {
     const el = document.getElementById(id);

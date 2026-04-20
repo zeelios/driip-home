@@ -1,6 +1,16 @@
 <template>
   <section class="mat-section" id="material">
     <div class="mat-bg" />
+    <div class="mat-img-bg">
+      <img
+        :src="bgSrc"
+        alt=""
+        aria-hidden="true"
+        class="mat-img-bg-img"
+        loading="lazy"
+      />
+      <div class="mat-img-bg-overlay" />
+    </div>
     <div class="mat-inner">
       <!-- Header -->
       <div class="mat-header reveal">
@@ -93,6 +103,7 @@
 
 <script setup lang="ts">
 const { t } = useI18n();
+const bgSrc = "/tee/material-bg.jpg";
 </script>
 
 <style scoped>
@@ -101,6 +112,34 @@ const { t } = useI18n();
   background: var(--black);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
+}
+
+.mat-img-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.mat-img-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.12;
+  filter: grayscale(100%);
+  display: block;
+}
+
+.mat-img-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.35) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
 }
 
 .mat-bg {
@@ -115,10 +154,12 @@ const { t } = useI18n();
     transparent 55%
   );
   pointer-events: none;
+  z-index: 1;
 }
 
 .mat-inner {
   position: relative;
+  z-index: 2;
   width: min(1400px, 100%);
   margin: 0 auto;
   padding: 64px 20px;

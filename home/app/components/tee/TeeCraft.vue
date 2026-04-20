@@ -1,5 +1,15 @@
 <template>
   <section class="cft-section" id="craft">
+    <div class="cft-img-bg">
+      <img
+        :src="bgSrc"
+        alt=""
+        aria-hidden="true"
+        class="cft-img-bg-img"
+        loading="lazy"
+      />
+      <div class="cft-img-bg-overlay" />
+    </div>
     <div class="cft-inner">
       <div class="cft-layout">
         <!-- Left: content -->
@@ -77,22 +87,26 @@
           </div>
         </div>
 
-        <!-- Right: monogram -->
+        <!-- Right: image -->
         <div class="cft-visual reveal">
-          <div class="cft-monogram-wrap">
-            <div class="cft-corner cft-corner--tl" />
-            <div class="cft-corner cft-corner--tr" />
-            <div class="cft-corner cft-corner--bl" />
-            <div class="cft-corner cft-corner--br" />
-            <div class="cft-ring" />
-            <div class="cft-monogram-content">
-              <div class="cft-monogram-circle">
-                <span class="cft-monogram-text">IT</span>
+          <div class="cft-img-wrap">
+            <img
+              :src="detailSrc"
+              alt="Italian tailoring detail"
+              class="cft-img"
+              loading="lazy"
+            />
+            <div class="cft-img-overlay" />
+            <div class="cft-img-caption">
+              <span class="cft-img-caption-line" />
+              <div>
+                <p class="cft-img-caption-title">{{ t("tee.craft.badge") }}</p>
+                <p class="cft-img-caption-sub">
+                  {{ t("tee.craft.tailoring") }}
+                </p>
               </div>
-              <p class="cft-monogram-label">{{ t("tee.craft.badge") }}</p>
-              <p class="cft-monogram-sub">{{ t("tee.craft.tailoring") }}</p>
             </div>
-            <span class="cft-watermark">04</span>
+            <span class="cft-img-watermark">04</span>
           </div>
         </div>
       </div>
@@ -102,15 +116,49 @@
 
 <script setup lang="ts">
 const { t } = useI18n();
+const bgSrc = "/tee/craft-bg.jpg";
+const detailSrc = "/tee/craft-detail.jpg";
 </script>
 
 <style scoped>
 .cft-section {
+  position: relative;
   background: var(--black);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.cft-img-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cft-img-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.07;
+  filter: grayscale(100%);
+  display: block;
+}
+
+.cft-img-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.3) 60%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
 }
 
 .cft-inner {
+  position: relative;
+  z-index: 1;
   width: min(1400px, 100%);
   margin: 0 auto;
   padding: 64px 20px;
@@ -231,130 +279,88 @@ const { t } = useI18n();
   line-height: 1.6;
 }
 
-/* Monogram Visual */
-.cft-monogram-wrap {
+/* Image Visual */
+.cft-img-wrap {
   position: relative;
-  aspect-ratio: 1 / 1;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cft-corner {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-}
-
-.cft-corner::before,
-.cft-corner::after {
-  content: "";
-  position: absolute;
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.cft-corner::before {
-  width: 100%;
-  height: 1px;
-  top: 0;
-  left: 0;
-}
-.cft-corner::after {
-  width: 1px;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.cft-corner--tl {
-  top: 16px;
-  left: 16px;
-}
-.cft-corner--tr {
-  top: 16px;
-  right: 16px;
-  transform: scaleX(-1);
-}
-.cft-corner--bl {
-  bottom: 16px;
-  left: 16px;
-  transform: scaleY(-1);
-}
-.cft-corner--br {
-  bottom: 16px;
-  right: 16px;
-  transform: scale(-1);
-}
-
-.cft-ring {
-  position: absolute;
-  inset: 40px;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
 }
 
-.cft-monogram-content {
-  text-align: center;
-  position: relative;
-  z-index: 2;
+.cft-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  filter: grayscale(20%);
+  transition: transform 0.6s ease;
 }
 
-.cft-monogram-circle {
-  width: 140px;
-  height: 140px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
+.cft-img-wrap:hover .cft-img {
+  transform: scale(1.03);
+}
+
+.cft-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.15) 50%,
+    transparent 100%
+  );
+}
+
+.cft-img-caption {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
+  align-items: flex-start;
+  gap: 12px;
 }
 
-.cft-monogram-text {
-  font-family: var(--font-display);
-  font-size: 56px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.cft-img-caption-line {
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  margin-top: 6px;
 }
 
-.cft-monogram-label {
+.cft-img-caption-title {
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 4px;
 }
 
-.cft-monogram-sub {
+.cft-img-caption-sub {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.cft-watermark {
+.cft-img-watermark {
   position: absolute;
-  bottom: 16px;
-  right: 20px;
+  top: 12px;
+  right: 16px;
   font-family: var(--font-display);
   font-size: 72px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.06);
   line-height: 1;
   user-select: none;
+  pointer-events: none;
 }
 
 @media (min-width: 640px) {
   .cft-inner {
     padding: 80px 40px;
-  }
-  .cft-monogram-circle {
-    width: 180px;
-    height: 180px;
-  }
-  .cft-monogram-text {
-    font-size: 72px;
   }
 }
 
@@ -372,9 +378,6 @@ const { t } = useI18n();
   }
   .cft-visual {
     flex: 1;
-  }
-  .cft-ring {
-    inset: 56px;
   }
 }
 </style>

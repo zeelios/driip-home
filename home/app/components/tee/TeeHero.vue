@@ -1,5 +1,15 @@
 <template>
   <section class="tee-hero" id="hero">
+    <div class="tee-hero-img-bg">
+      <img
+        :src="heroBgSrc"
+        alt=""
+        aria-hidden="true"
+        class="tee-hero-img-bg-img"
+        loading="eager"
+      />
+      <div class="tee-hero-img-bg-overlay" />
+    </div>
     <div class="tee-hero-bg" />
 
     <div class="tee-hero-content parallax-content">
@@ -58,6 +68,7 @@
 
 <script setup lang="ts">
 const { t } = useI18n();
+const heroBgSrc = "/tee/hero-bg.jpg";
 </script>
 
 <style scoped>
@@ -72,12 +83,41 @@ const { t } = useI18n();
   padding-bottom: 60px;
 }
 
+.tee-hero-img-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.tee-hero-img-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  opacity: 0.18;
+  filter: grayscale(80%);
+}
+
+.tee-hero-img-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.2) 40%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+}
+
 .tee-hero-bg {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: radial-gradient(
     ellipse 80% 60% at 20% 40%,
-    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.04) 0%,
     transparent 60%
   );
   pointer-events: none;
@@ -99,7 +139,7 @@ const { t } = useI18n();
   font-weight: 600;
   letter-spacing: 0.35em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.65);
   margin-bottom: 24px;
 }
 
@@ -140,7 +180,7 @@ const { t } = useI18n();
   font-size: 14px;
   font-weight: 300;
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.75);
   line-height: 1.85;
   max-width: 420px;
   margin-bottom: 36px;
@@ -167,7 +207,7 @@ const { t } = useI18n();
   font-weight: 600;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .tee-spec-value {
@@ -192,7 +232,7 @@ const { t } = useI18n();
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.55);
   margin-bottom: 8px;
 }
 
@@ -207,7 +247,7 @@ const { t } = useI18n();
 
 .tee-price-note {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.55);
   margin-bottom: 28px;
 }
 
@@ -221,6 +261,7 @@ const { t } = useI18n();
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
   padding: 16px 28px;
   background: var(--white);
   color: var(--black);
@@ -239,9 +280,10 @@ const { t } = useI18n();
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
   padding: 14px 28px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.04em;

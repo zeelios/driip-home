@@ -34,8 +34,13 @@
         "desc": "No logos. No noise. Just form, function, and restraint for those who value subtlety."
       }
     },
+    "gallery": {
+      "navLabel": "Gallery",
+      "label": "The Collection",
+      "title": "Worn Two Ways"
+    },
     "material": {
-      "sectionLabel": "The Science",
+      "sectionLabel": "Material",
       "title": "Sorona® Molecular Structure",
       "description": "37% plant-based polymer chains engineered for shape memory, comfort, and long-term performance.",
       "shapeMemory": {
@@ -58,7 +63,7 @@
       }
     },
     "print": {
-      "sectionLabel": "The Technology",
+      "sectionLabel": "Print",
       "title": "Molecular Ink-Lock™",
       "description": "Direct-to-Garment printing at 1200 DPI. Water-based inks settle into the Sorona® fibre structure for exceptional clarity and permanence.",
       "steps": {
@@ -87,7 +92,7 @@
       }
     },
     "craft": {
-      "sectionLabel": "The Craft",
+      "sectionLabel": "Craft",
       "title": "Italian Tailoring",
       "description": "Every stitch measured. Every seam reinforced. Italian tailoring meets material engineering.",
       "stats": {
@@ -142,6 +147,7 @@
       }
     },
     "product": {
+      "navLabel": "Order",
       "badge": "The Collection",
       "title": "Oversized Tees",
       "description": "Two essential colours. One refined silhouette. The oversized cut stays relaxed, composed, and structured.",

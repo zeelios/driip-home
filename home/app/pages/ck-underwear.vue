@@ -168,10 +168,13 @@ function setupSectionNav(): void {
         if (entry.isIntersecting) {
           ckStore.setActiveSection(entry.target.id);
           siteNavStore.setActiveSection(entry.target.id);
+        } else if (siteNavStore.activeSection === entry.target.id) {
+          ckStore.setActiveSection("");
+          siteNavStore.setActiveSection("");
         }
       });
     },
-    { threshold: 0.25, rootMargin: "-64px 0px 0px 0px" }
+    { threshold: 0, rootMargin: "-40% 0px -40% 0px" }
   );
   ids.forEach((id) => {
     const element = document.getElementById(id);

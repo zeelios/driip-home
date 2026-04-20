@@ -1,5 +1,15 @@
 <template>
   <section class="prt-section" id="print">
+    <div class="prt-img-bg">
+      <img
+        :src="bgSrc"
+        alt=""
+        aria-hidden="true"
+        class="prt-img-bg-img"
+        loading="lazy"
+      />
+      <div class="prt-img-bg-overlay" />
+    </div>
     <div class="prt-inner">
       <!-- Header -->
       <div class="prt-header reveal">
@@ -73,6 +83,15 @@
             </div>
             <span class="prt-panel-tag prt-panel-tag--driip">DRIIP</span>
           </div>
+          <div class="prt-panel-img-wrap">
+            <img
+              :src="dtgSrc"
+              alt="DTG printing process"
+              class="prt-panel-img"
+              loading="lazy"
+            />
+            <div class="prt-panel-img-overlay" />
+          </div>
           <div class="prt-layers prt-layers--dtg">
             <div class="prt-layer prt-layer--fused">
               <span class="prt-layer-label prt-layer-label--bright"
@@ -90,15 +109,49 @@
 
 <script setup lang="ts">
 const { t } = useI18n();
+const bgSrc = "/tee/print-bg.jpg";
+const dtgSrc = "/tee/print-dtg.jpg";
 </script>
 
 <style scoped>
 .prt-section {
+  position: relative;
   background: var(--black);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.prt-img-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.prt-img-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.08;
+  filter: grayscale(100%);
+  display: block;
+}
+
+.prt-img-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
 }
 
 .prt-inner {
+  position: relative;
+  z-index: 1;
   width: min(1400px, 100%);
   margin: 0 auto;
   padding: 64px 20px;
@@ -208,6 +261,34 @@ const { t } = useI18n();
 .prt-panel--dtg {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.prt-panel-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.prt-panel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  filter: grayscale(60%);
+}
+
+.prt-panel-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
 }
 
 .prt-panel-head {
