@@ -36,6 +36,9 @@ const PRODUCT_CONFIG = {
   priceMulti: 286000,
 } as const;
 
+// Shipping fee: free for 2+ pairs, 35,000đ for 1 pair
+const SHIPPING_FEE = 35000;
+
 interface CartItem extends BaseCartItem {
   color: string;
   colorLabel: string;
@@ -211,7 +214,23 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     items.value.reduce((sum, item) => sum + item.quantity, 0)
   );
 
-  const grandTotal = computed(() => calculatePrice(totalPairs.value));
+  const shippingFee = computed(() => {
+    // Free shipping for 2+ pairs, 35,000đ for 1 pair
+    if (totalPairs.value >= 2) return 0;
+    return SHIPPING_FEE;
+  });
+
+  const formattedShippingFee = computed(() =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(shippingFee.value)
+  );
+
+  const grandTotal = computed(
+    () => calculatePrice(totalPairs.value) + shippingFee.value
+  );
 
   const formattedGrandTotal = computed(() =>
     new Intl.NumberFormat("vi-VN", {
@@ -384,6 +403,8 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
             quantity: item.quantity,
             price: item.price,
           })),
+          subtotal: grandTotal.value - shippingFee.value,
+          shippingFee: shippingFee.value,
           total: grandTotal.value,
           dob: order.value.dob || undefined,
           gender: order.value.gender || undefined,
@@ -450,6 +471,8 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     totalPairs,
     grandTotal,
     formattedGrandTotal,
+    shippingFee,
+    formattedShippingFee,
     isEmpty,
     itemCount,
     phoneValidationMsg,

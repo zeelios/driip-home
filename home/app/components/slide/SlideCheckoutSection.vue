@@ -261,6 +261,49 @@ function handleSubmit(): void {
             </div>
 
             <div class="slide-cart-total">
+              <!-- Subtotal -->
+              <div class="slide-cart-total-row slide-cart-subtotal">
+                <span>{{ t("slide.cart.subtotal") }}</span>
+                <span class="slide-cart-subtotal-value">{{
+                  formatVnd(store.grandTotal - store.shippingFee)
+                }}</span>
+              </div>
+
+              <!-- Shipping Fee -->
+              <div class="slide-cart-total-row slide-cart-shipping">
+                <span>
+                  {{ t("slide.cart.shipping") }}
+                  <span
+                    v-if="store.totalPairs === 1"
+                    class="slide-cart-shipping-note"
+                  >
+                    ({{ t("slide.cart.shippingNoteSingle") }})
+                  </span>
+                  <span
+                    v-else
+                    class="slide-cart-shipping-note slide-cart-shipping-free"
+                  >
+                    ({{ t("slide.cart.shippingNoteFree") }})
+                  </span>
+                </span>
+                <span
+                  class="slide-cart-shipping-value"
+                  :class="{
+                    'slide-cart-shipping-free': store.shippingFee === 0,
+                  }"
+                >
+                  <template v-if="store.shippingFee === 0">
+                    {{ t("slide.cart.freeShipping") }}
+                  </template>
+                  <template v-else>
+                    {{ store.formattedShippingFee }}
+                  </template>
+                </span>
+              </div>
+
+              <div class="slide-cart-total-divider" />
+
+              <!-- Grand Total -->
               <div class="slide-cart-total-row">
                 <span>{{ t("slide.cart.total") }}</span>
                 <span class="slide-cart-total-value">{{
@@ -1010,6 +1053,46 @@ function handleSubmit(): void {
   font-size: 12px;
   color: #4ade80;
   margin-top: 8px;
+}
+
+.slide-cart-subtotal {
+  font-size: 13px;
+  color: var(--grey-400);
+  margin-bottom: 8px;
+}
+
+.slide-cart-subtotal-value {
+  font-weight: 500;
+  color: var(--grey-300);
+}
+
+.slide-cart-shipping {
+  font-size: 13px;
+  color: var(--grey-400);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.slide-cart-shipping-value {
+  font-weight: 500;
+  color: var(--grey-300);
+}
+
+.slide-cart-shipping-free {
+  color: #4ade80;
+}
+
+.slide-cart-shipping-note {
+  font-size: 11px;
+  color: var(--grey-500);
+  font-weight: 400;
+}
+
+.slide-cart-total-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 12px 0;
 }
 
 /* Form */
