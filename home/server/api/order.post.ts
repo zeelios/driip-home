@@ -5,6 +5,7 @@ import {
   queueOrderRows,
   reserveOrderId,
 } from "../utils/order-queue";
+import { getSalesNameFromCode } from "../utils/referral";
 import {
   BASE_BOX_COMPARE_PRICE,
   getFinalTotal,
@@ -28,7 +29,11 @@ function normalizeSalesSource(raw: unknown): string {
   if (typeof raw !== "string") return "Website";
 
   const normalized = raw.trim().replace(/\s+/g, " ");
-  return normalized || "Website";
+  if (!normalized) return "Website";
+
+  // Convert referral codes (pa, kn, ze) to full names (Phuong Anh, Kim Ngoc, Zeelios)
+  // Falls back to "Website" if not a valid referral code
+  return getSalesNameFromCode(normalized);
 }
 
 function normalizeVietnamSheetPhone(raw: string): string {
