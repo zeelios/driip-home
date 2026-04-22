@@ -12,6 +12,8 @@ import {
   getTierTotal,
   getSlideFinalTotal,
   getSlideCompareTotal,
+  getSlideGrandTotal,
+  getSlideShippingFee,
 } from "../utils/pricing";
 import { sendOrderConfirmationEmail } from "../utils/email";
 
@@ -209,6 +211,7 @@ export default defineEventHandler(async (event) => {
     let totalCompare = 0;
     let totalTier = 0;
     let totalFinal = 0;
+    let shippingFee = 0;
 
     if (isDriipSlideOrder) {
       // Driip Slide: recompute pricing server-side from quantity only.
@@ -221,9 +224,12 @@ export default defineEventHandler(async (event) => {
       const grandCompareTotal = getSlideCompareTotal(totalPairs);
       const grandDiscount = grandCompareTotal - grandFinalTotal;
 
+      shippingFee = getSlideShippingFee(totalPairs);
+      const grandTotal = getSlideGrandTotal(totalPairs);
+
       totalCompare = grandCompareTotal;
       totalTier = grandFinalTotal;
-      totalFinal = grandFinalTotal;
+      totalFinal = grandTotal;
 
       // Allocate totals evenly across ALL individual pair rows
       const comparePerPair = allocateEvenly(grandCompareTotal, totalPairs);
@@ -265,7 +271,14 @@ export default defineEventHandler(async (event) => {
             rowDiscount, // L: Chiết Khấu
             "0", // M: Đặt Cọc
             rowFinal, // N: Dư Nợ (actual charged per pair)
-            isFirstRow ? note ?? "" : "", // O: Note
+            isFirstRow
+              ? `${note ?? ""}${
+                  shippingFee > 0
+                    ? (note ? " · " : "") +
+                      `Ship +${shippingFee.toLocaleString("vi-VN")}đ`
+                    : ""
+                }`.trim()
+              : "", // O: Note
             salesSource, // P: Sales
             "", // Q: Comestic Tracking
             "", // R: Global Tracking
@@ -403,6 +416,7 @@ export default defineEventHandler(async (event) => {
         compareTotal: totalCompare,
         tierTotal: totalTier,
         finalTotal: totalFinal,
+        shippingFee,
       },
     };
   } catch (error: unknown) {
