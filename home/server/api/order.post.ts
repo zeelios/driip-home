@@ -52,23 +52,28 @@ function normalizeVietnamSheetPhone(raw: string): string {
   return `0${digits}`;
 }
 
+const MIN_AGE = 16;
+const CURRENT_YEAR = new Date().getFullYear();
+const MAX_YEAR = CURRENT_YEAR - MIN_AGE; // Must be at least 16 years old
+
 function normalizeAndValidateDob(raw: unknown): string {
   if (!raw || typeof raw !== "string") return "";
 
   const digits = raw.replace(/\D/g, "");
   if (digits.length < 2) return "";
 
-  // Year only (2 digits): 83 -> 1983, 25 -> 2025
+  // Year only (2 digits): 83 -> 1983, 05 -> 2005
   if (digits.length === 2) {
     const year = parseInt(digits, 10);
-    if (year >= 30) return `19${digits}`;
-    return `20${digits}`;
+    const fullYear = year >= 30 ? 1900 + year : 2000 + year;
+    if (fullYear <= MAX_YEAR) return String(fullYear);
+    return "";
   }
 
   // Year only (4 digits): 1991 -> 1991
   if (digits.length === 4) {
     const year = parseInt(digits, 10);
-    if (year >= 1900 && year <= 2025) return digits;
+    if (year >= 1900 && year <= MAX_YEAR) return digits;
     return "";
   }
 
@@ -80,7 +85,7 @@ function normalizeAndValidateDob(raw: unknown): string {
 
     if (month < 1 || month > 12) return "";
     if (day < 1 || day > 31) return "";
-    if (year < 1900 || year > 2025) return "";
+    if (year < 1900 || year > MAX_YEAR) return "";
 
     return `${String(day).padStart(2, "0")}/${String(month).padStart(
       2,
@@ -92,12 +97,13 @@ function normalizeAndValidateDob(raw: unknown): string {
   if (digits.length >= 4) {
     const lastFour = digits.slice(-4);
     const year = parseInt(lastFour, 10);
-    if (year >= 1900 && year <= 2025) return lastFour;
+    if (year >= 1900 && year <= MAX_YEAR) return lastFour;
 
     const lastTwo = digits.slice(-2);
     const year2 = parseInt(lastTwo, 10);
     if (year2 >= 0 && year2 <= 99) {
-      return year2 >= 30 ? `19${lastTwo}` : `20${lastTwo}`;
+      const fullYear = year2 >= 30 ? 1900 + year2 : 2000 + year2;
+      if (fullYear <= MAX_YEAR) return String(fullYear);
     }
   }
 

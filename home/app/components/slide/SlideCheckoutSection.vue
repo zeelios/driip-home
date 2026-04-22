@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useDriipSlideStore } from "~/stores/driip-slide";
+import { formatDobInput as formatDobUtil } from "~/utils/dob";
 import { vietnamProvinces } from "~/data/vietnam-addresses";
 
 const { t } = useI18n();
@@ -59,15 +60,7 @@ function capitalizeWords(value: string): string {
 
 function formatDobInput(event: Event): void {
   const input = event.target as HTMLInputElement;
-  let digits = input.value.replace(/\D/g, "").slice(0, 8);
-  let formatted = digits;
-  if (digits.length > 4) {
-    formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(
-      4
-    )}`;
-  } else if (digits.length > 2) {
-    formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  }
+  const formatted = formatDobUtil(input.value);
   store.order.dob = formatted;
   input.value = formatted;
 }
@@ -414,11 +407,15 @@ function handleSubmit(): void {
               <input
                 :value="store.order.dob"
                 type="text"
+                :class="{ 'slide-dob-error': store.dobValidationMsg }"
                 :placeholder="t('slide.order.dobPlaceholder')"
                 inputmode="numeric"
                 maxlength="10"
                 @input="formatDobInput"
               />
+              <p v-if="store.dobValidationMsg" class="slide-field-error">
+                {{ store.dobValidationMsg }}
+              </p>
             </div>
             <div class="slide-field">
               <label>
@@ -1168,6 +1165,11 @@ function handleSubmit(): void {
 .slide-field-error {
   font-size: 12px;
   color: #ef4444;
+}
+
+.slide-dob-error {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
 }
 
 .slide-field-optional {

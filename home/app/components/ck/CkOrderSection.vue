@@ -372,6 +372,7 @@
                   v-model="order.dob"
                   type="text"
                   class="os-dob-field"
+                  :class="{ 'os-dob-field--error': dobValidation.error }"
                   :placeholder="t('ck.order.dobPlaceholder')"
                   maxlength="10"
                   inputmode="numeric"
@@ -381,6 +382,9 @@
                   "
                 />
               </div>
+              <p v-if="dobValidation.error" class="os-field-error">
+                {{ dobValidation.error }} (tối thiểu 16 tuổi)
+              </p>
             </div>
 
             <div class="os-field">
@@ -513,6 +517,7 @@ import { vietnamProvinces } from "~/data/vietnam-addresses";
 import { useMetaEvents } from "~/composables/useMetaEvents";
 import { useReferral } from "~/composables/useReferral";
 import { useCkUnderwearStore } from "~/stores/ck-underwear";
+import { validateDob, formatDobInput as formatDobUtil } from "~/utils/dob";
 import { useCartStore } from "~/stores/cart";
 import {
   EXTRA_PROMO_RATE,
@@ -534,16 +539,10 @@ const { order, orderState, phoneValidationMsg } = storeToRefs(store);
 
 const { normalizePhoneInput } = store;
 
+const dobValidation = computed(() => validateDob(order.value.dob));
+
 function formatDobInput(input: string): void {
-  let digits = input.replace(/\D/g, "").slice(0, 8);
-  let formatted = digits;
-  if (digits.length > 4) {
-    formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(
-      4
-    )}`;
-  } else if (digits.length > 2) {
-    formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  }
+  const formatted = formatDobUtil(input);
   order.value.dob = formatted;
 }
 
@@ -700,6 +699,13 @@ async function goToReviewStep(): Promise<void> {
 
   if (!step2Valid.value) {
     await showStep2ValidationState();
+    return;
+  }
+
+  // Validate DoB if provided
+  if (dobValidation.value.error) {
+    stepHint.value = dobValidation.value.error + " (tối thiểu 16 tuổi)";
+    scrollOrderSectionIntoView();
     return;
   }
 
@@ -1734,6 +1740,11 @@ function scrollToProducts(): void {
 }
 .os-dob-field:focus {
   border-color: rgba(255, 255, 255, 0.4);
+}
+
+.os-dob-field--error {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
 }
 
 /* ── GENDER TOGGLE ───────────────────────────────────────────────── */

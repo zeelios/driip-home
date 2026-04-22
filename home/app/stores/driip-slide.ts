@@ -1,11 +1,13 @@
 import { computed, ref, watch } from "vue";
 import { defineStore } from "pinia";
+import { useI18n } from "vue-i18n";
 import { useMetaEvents, type OrderData } from "~/composables/useMetaEvents";
 import {
   compactMetaObject,
   META_ORDER_PROFILE_COOKIE_KEY,
   type MetaOrderProfileCookie,
 } from "~/utils/meta-conversions";
+import { validateDob, MIN_AGE } from "~/utils/dob";
 
 // Use PRODUCT_CONFIG for pricing
 
@@ -257,6 +259,16 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     return "";
   });
 
+  const dobValidationMsg = computed<string>(() => {
+    const dobResult = validateDob(order.value.dob);
+    if (dobResult.error) {
+      return locale.value === "vi"
+        ? `${dobResult.error} (tối thiểu ${MIN_AGE} tuổi)`
+        : `${dobResult.error} (minimum ${MIN_AGE} years old)`;
+    }
+    return "";
+  });
+
   const orderValidationMsg = computed<string>(() => {
     if (phoneValidationMsg.value) return phoneValidationMsg.value;
     if (!order.value.firstName.trim())
@@ -275,6 +287,7 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
       return locale.value === "vi"
         ? "Vui lòng nhập địa chỉ."
         : "Please enter your address.";
+    if (dobValidationMsg.value) return dobValidationMsg.value;
     return "";
   });
 
@@ -477,6 +490,7 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     itemCount,
     phoneValidationMsg,
     orderValidationMsg,
+    dobValidationMsg,
     step2Valid,
     setDraftColor,
     setDraftSize,
