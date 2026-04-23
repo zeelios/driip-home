@@ -1,89 +1,39 @@
-export interface BoxTier {
-  boxes: number;
-  total: number;
-}
+/**
+ * SERVER PRICING - Re-export from unified client pricing
+ * Single source of truth: ~/utils/pricing.ts
+ */
 
-// ─── DRIIP SLIDE ─────────────────────────────────────────────────────────────
-// Server-authoritative pricing. Never trust client-submitted prices.
-
-export const SLIDE_NORMAL_PRICE_PER_PAIR = 480000; // regular / compare price
-export const SLIDE_DEAL_PRICE_ONE = 349000; // 1 pair price
-export const SLIDE_DEAL_PRICE_MULTI = 286000; // 2+ pairs price per pair
-export const SLIDE_SHIPPING_FEE = 35000; // shipping for 1 pair, free for 2+
-
-export function getSlideShippingFee(totalPairs: number): number {
-  if (totalPairs <= 0) return 0;
-  if (totalPairs >= 2) return 0;
-  return SLIDE_SHIPPING_FEE;
-}
-
-export function getSlideFinalTotal(totalPairs: number): number {
-  if (totalPairs <= 0) return 0;
-  if (totalPairs === 1) return SLIDE_DEAL_PRICE_ONE;
-
-  return totalPairs * SLIDE_DEAL_PRICE_MULTI;
-}
-
-export function getSlideGrandTotal(totalPairs: number): number {
-  return getSlideFinalTotal(totalPairs) + getSlideShippingFee(totalPairs);
-}
-
-export function getSlideCompareTotal(totalPairs: number): number {
-  return SLIDE_NORMAL_PRICE_PER_PAIR * totalPairs;
-}
-
-// ─── CK UNDERWEAR ────────────────────────────────────────────────────────────
-
-export const BASE_BOX_COMPARE_PRICE = 2300000;
-export const EXTRA_PROMO_RATE = 0.2;
-export const BOX_TIERS: BoxTier[] = [
-  { boxes: 1, total: 980000 },
-  { boxes: 2, total: 1580000 },
-  { boxes: 3, total: 2160000 },
-  { boxes: 4, total: 2920000 },
-  { boxes: 5, total: 3430000 },
-];
-
-function getTierPriceByBundle(boxes: number): number {
-  if (boxes <= 0) return 0;
-
-  const bestPrices = Array.from(
-    { length: boxes + 1 },
-    () => Number.POSITIVE_INFINITY
-  );
-  bestPrices[0] = 0;
-
-  for (let currentBoxes = 1; currentBoxes <= boxes; currentBoxes += 1) {
-    for (const tier of BOX_TIERS) {
-      if (tier.boxes > currentBoxes) continue;
-
-      const previousPrice = bestPrices[currentBoxes - tier.boxes]!;
-      if (!Number.isFinite(previousPrice)) continue;
-
-      const nextPrice = previousPrice + tier.total;
-      const currentBest = bestPrices[currentBoxes]!;
-      if (nextPrice < currentBest) {
-        bestPrices[currentBoxes] = nextPrice;
-      }
-    }
-  }
-
-  const total = bestPrices[boxes]!;
-  return Number.isFinite(total) ? total : 0;
-}
-
-export function getTierTotal(boxes: number): number {
-  return getTierPriceByBundle(boxes);
-}
-
-export function getCompareTotal(boxes: number): number {
-  return BASE_BOX_COMPARE_PRICE * boxes;
-}
-
-export function getExtraPromoDiscountAmount(boxes: number): number {
-  return Math.round(getTierTotal(boxes) * EXTRA_PROMO_RATE);
-}
-
-export function getFinalTotal(boxes: number): number {
-  return getTierTotal(boxes) - getExtraPromoDiscountAmount(boxes);
-}
+export {
+  // Driip Slide
+  SLIDE_NORMAL_PRICE_PER_PAIR,
+  SLIDE_DEAL_PRICE_ONE,
+  SLIDE_DEAL_PRICE_MULTI,
+  SLIDE_SHIPPING_FEE,
+  type SlidePriceBreakdown,
+  getSlideShippingFee,
+  getSlideSubtotal,
+  getSlideGrandTotal,
+  getSlideCompareTotal,
+  getSlidePriceBreakdown,
+  // CK Underwear
+  BASE_BOX_COMPARE_PRICE,
+  EXTRA_PROMO_RATE,
+  BOX_TIERS,
+  SKU_DISPLAY_BOXES,
+  type BoxTier,
+  type CkPriceBreakdown,
+  formatVnd,
+  formatVndCurrency,
+  getBoxTier,
+  getTierTotal,
+  getCompareTotal,
+  getExtraPromoDiscountAmount,
+  getFinalTotal,
+  getTierUnitPrice,
+  getFinalUnitPrice,
+  getSkuDisplayPrice,
+  getCkPriceBreakdown,
+  // SKU detection
+  isDriipSlideSku,
+  isCkUnderwearSku,
+} from "../../app/utils/pricing";

@@ -8,8 +8,16 @@ import {
   type MetaOrderProfileCookie,
 } from "~/utils/meta-conversions";
 import { validateDob, MIN_AGE } from "~/utils/dob";
+import {
+  getSlideSubtotal,
+  getSlideShippingFee,
+  getSlideGrandTotal,
+  SLIDE_DEAL_PRICE_ONE,
+  SLIDE_DEAL_PRICE_MULTI,
+  formatVndCurrency,
+} from "~/utils/pricing";
 
-// Use PRODUCT_CONFIG for pricing
+// Use unified pricing from ~/utils/pricing - single source of truth
 
 // Available options with grouped sizes
 const COLORS = [
@@ -29,17 +37,12 @@ const COLORS = [
 
 import type { FormState, BaseCartItem } from "~/types/shared";
 
-// Product configuration for Driip Slide
+// Product configuration for Driip Slide (pricing from ~/utils/pricing)
 const PRODUCT_CONFIG = {
   name: "Driip Slide",
   line: "driip-slide",
   baseSku: "driip-slide",
-  priceOne: 349000,
-  priceMulti: 286000,
 } as const;
-
-// Shipping fee: free for 2+ pairs, 35,000đ for 1 pair
-const SHIPPING_FEE = 35000;
 
 interface CartItem extends BaseCartItem {
   color: string;
@@ -147,10 +150,8 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
   }
 
   function calculatePrice(quantity: number): number {
-    if (quantity <= 0) return 0;
-    if (quantity === 1) return PRODUCT_CONFIG.priceOne;
-
-    return quantity * PRODUCT_CONFIG.priceMulti;
+    // Use unified pricing from ~/utils/pricing
+    return getSlideSubtotal(quantity);
   }
 
   // Sync order profile cookie
@@ -216,30 +217,22 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     items.value.reduce((sum, item) => sum + item.quantity, 0)
   );
 
-  const shippingFee = computed(() => {
-    // Free shipping for 2+ pairs, 35,000đ for 1 pair
-    if (totalPairs.value >= 2) return 0;
-    return SHIPPING_FEE;
-  });
-
-  const formattedShippingFee = computed(() =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(shippingFee.value)
+  const shippingFee = computed(() =>
+    // Use unified pricing from ~/utils/pricing
+    getSlideShippingFee(totalPairs.value)
   );
 
-  const grandTotal = computed(
-    () => calculatePrice(totalPairs.value) + shippingFee.value
+  const formattedShippingFee = computed(() =>
+    formatVndCurrency(shippingFee.value)
+  );
+
+  const grandTotal = computed(() =>
+    // Use unified pricing from ~/utils/pricing
+    getSlideGrandTotal(totalPairs.value)
   );
 
   const formattedGrandTotal = computed(() =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(grandTotal.value)
+    formatVndCurrency(grandTotal.value)
   );
 
   const isEmpty = computed(() => items.value.length === 0);
@@ -506,8 +499,8 @@ export const useDriipSlideStore = defineStore("driip-slide", () => {
     resetOrder,
     trackProductsViewed,
     PRODUCT_CONFIG,
-    // Individual price exports for template convenience
-    PRICE_ONE_PAIR: PRODUCT_CONFIG.priceOne,
-    PRICE_MULTI_PAIR: PRODUCT_CONFIG.priceMulti,
+    // Individual price exports for template convenience (from unified pricing)
+    PRICE_ONE_PAIR: SLIDE_DEAL_PRICE_ONE,
+    PRICE_MULTI_PAIR: SLIDE_DEAL_PRICE_MULTI,
   };
 });

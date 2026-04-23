@@ -16,21 +16,38 @@ interface OrderEmailParams {
   finalTotal: number;
   address: string;
   phone: string;
+  // Full price breakdown (optional, for driip-slide with shipping)
+  subtotal?: number;
+  shippingFee?: number;
 }
 
 function formatVnd(amount: number): string {
   return amount.toLocaleString("vi-VN") + "đ";
 }
 
+/**
+ * Capitalize each word using Unicode-aware regex.
+ * Handles Vietnamese characters (ễ, ư, ơ, etc.) properly.
+ */
+function toTitleCase(str: string): string {
+  // Match word boundaries with Unicode letters (\p{L}) and numbers
+  // The 'u' flag enables Unicode property escapes
+  return str.replace(
+    /(^|[^\p{L}\p{N}])(\p{L})/gu,
+    (_, prefix, letter) => prefix + letter.toLocaleUpperCase("vi-VN")
+  );
+}
+
 function formatProductLabel(item: OrderEmailItem): string {
-  return (item.productName || item.sku)
-    .replace("driip-", "Driip ")
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return toTitleCase(
+    (item.productName || item.sku)
+      .replace("driip-", "Driip ")
+      .replace(/-/g, " ")
+  );
 }
 
 function formatColorLabel(color: string): string {
-  return color.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return toTitleCase(color.replace(/-/g, " "));
 }
 
 function buildItemRows(items: OrderEmailItem[]): string {
@@ -54,10 +71,20 @@ function buildItemRows(items: OrderEmailItem[]): string {
 }
 
 function buildOrderEmailHtml(params: OrderEmailParams): string {
-  const { orderId, fullName, items, finalTotal, address, phone } = params;
+  const {
+    orderId,
+    fullName,
+    items,
+    finalTotal,
+    address,
+    phone,
+    subtotal,
+    shippingFee,
+  } = params;
   const firstName = fullName.split(" ").pop() ?? fullName;
   const totalFormatted = formatVnd(finalTotal);
   const year = new Date().getFullYear();
+  const showBreakdown = subtotal !== undefined && shippingFee !== undefined;
   const itemRows = buildItemRows(items);
 
   return `<!DOCTYPE html>
@@ -124,6 +151,35 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
           <tr>
             <td style="padding-top:24px;padding-bottom:32px;border-bottom:1px solid #1a1a1a;">
               <table width="100%" cellpadding="0" cellspacing="0">
+                ${
+                  showBreakdown
+                    ? `
+                <tr>
+                  <td style="font-size:13px;color:#888;padding-bottom:8px;">Tạm tính</td>
+                  <td style="font-size:13px;color:#d4d4d4;text-align:right;padding-bottom:8px;">
+                    ${formatVnd(subtotal)}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size:13px;color:#888;padding-bottom:12px;">
+                    Phí vận chuyển ${
+                      shippingFee === 0
+                        ? '<span style="color:#22c55e;">(Miễn phí)</span>'
+                        : ""
+                    }
+                  </td>
+                  <td style="font-size:13px;color:#${
+                    shippingFee === 0 ? "22c55e" : "d4d4d4"
+                  };text-align:right;padding-bottom:12px;">
+                    ${shippingFee === 0 ? "0đ" : formatVnd(shippingFee)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="border-top:1px solid #333;padding-top:12px;"></td>
+                </tr>
+                `
+                    : ""
+                }
                 <tr>
                   <td style="font-size:13px;color:#888;">Tổng thanh toán (COD)</td>
                   <td style="font-size:20px;font-weight:700;color:#ffffff;text-align:right;letter-spacing:-0.01em;">

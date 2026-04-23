@@ -10,7 +10,7 @@ import {
   BASE_BOX_COMPARE_PRICE,
   getFinalTotal,
   getTierTotal,
-  getSlideFinalTotal,
+  getSlideSubtotal,
   getSlideCompareTotal,
   getSlideGrandTotal,
   getSlideShippingFee,
@@ -212,6 +212,7 @@ export default defineEventHandler(async (event) => {
     let totalTier = 0;
     let totalFinal = 0;
     let shippingFee = 0;
+    let subtotal = 0; // Product-only total (without shipping) for email breakdown
 
     if (isDriipSlideOrder) {
       // Driip Slide: recompute pricing server-side from quantity only.
@@ -220,7 +221,7 @@ export default defineEventHandler(async (event) => {
         (sum, item) => sum + (Number(item.quantity) || Number(item.boxes) || 1),
         0
       );
-      const grandFinalTotal = getSlideFinalTotal(totalPairs);
+      const grandFinalTotal = getSlideSubtotal(totalPairs);
       const grandCompareTotal = getSlideCompareTotal(totalPairs);
       const grandDiscount = grandCompareTotal - grandFinalTotal;
 
@@ -230,6 +231,7 @@ export default defineEventHandler(async (event) => {
       totalCompare = grandCompareTotal;
       totalTier = grandFinalTotal;
       totalFinal = grandTotal;
+      subtotal = grandFinalTotal; // Product price only
 
       // Allocate totals evenly across ALL individual pair rows
       const comparePerPair = allocateEvenly(grandCompareTotal, totalPairs);
@@ -389,6 +391,8 @@ export default defineEventHandler(async (event) => {
           finalTotal: totalFinal,
           address,
           phone: normalizeVietnamSheetPhone(String(phone)),
+          subtotal,
+          shippingFee,
         },
         config.resendApiKey
       )

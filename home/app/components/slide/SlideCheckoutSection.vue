@@ -54,8 +54,15 @@ function formatVnd(value: number): string {
   }).format(value);
 }
 
+/**
+ * Capitalize each word using Unicode-aware regex.
+ * Handles Vietnamese characters (ễ, ư, ơ, etc.) properly.
+ */
 function capitalizeWords(value: string): string {
-  return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  return value.replace(
+    /(^|[^\p{L}\p{N}])(\p{L})/gu,
+    (_, prefix, letter) => prefix + letter.toLocaleUpperCase("vi-VN")
+  );
 }
 
 function formatDobInput(event: Event): void {
