@@ -35,7 +35,7 @@ impl OrderRepository {
             .fetch_optional(pool)
             .await
             .map_err(AppError::Database)?
-            .ok_or(AppError::NotFound)
+            .ok_or_else(|| AppError::NotFound("Record not found".into()))
     }
 
     pub async fn find_items(pool: &PgPool, order_id: Uuid) -> Result<Vec<OrderItem>, AppError> {
@@ -111,7 +111,7 @@ impl OrderRepository {
             .await
             .map_err(AppError::Database)?;
         if result.rows_affected() == 0 {
-            return Err(AppError::NotFound);
+            return Err(AppError::NotFound("Record not found".into()));
         }
         Ok(())
     }

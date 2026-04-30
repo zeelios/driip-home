@@ -26,7 +26,7 @@ impl ProductRepository {
             .fetch_optional(pool)
             .await
             .map_err(AppError::Database)?
-            .ok_or(AppError::NotFound)
+            .ok_or_else(|| AppError::NotFound("Record not found".into()))
     }
 
     pub async fn create(pool: &PgPool, input: CreateProduct) -> Result<Product, AppError> {
@@ -43,7 +43,13 @@ impl ProductRepository {
         .bind(input.stock_quantity)
         .fetch_one(pool)
         .await
-        .map_err(AppError::Database)
+        .map_err(|e| {
+            if e.to_string().contains("unique") {
+                AppError::Conflict("SKU already exists".into())
+            } else {
+                AppError::Database(e)
+            }
+        })
     }
 
     pub async fn update(
@@ -76,7 +82,7 @@ impl ProductRepository {
             .await
             .map_err(AppError::Database)?;
         if result.rows_affected() == 0 {
-            return Err(AppError::NotFound);
+            return Err(AppError::NotFound("Record not found".into()));
         }
         Ok(())
     }

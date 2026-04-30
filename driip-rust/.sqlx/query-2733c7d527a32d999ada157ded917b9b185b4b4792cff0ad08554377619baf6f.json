@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE orders SET operational_fee_cents = (\n                SELECT COALESCE(SUM(amount_cents), 0) FROM order_fee_lines WHERE order_id = $1\n             ), updated_at = NOW() WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2733c7d527a32d999ada157ded917b9b185b4b4792cff0ad08554377619baf6f"
+}

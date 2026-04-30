@@ -35,7 +35,7 @@ impl InventoryRepository {
             .fetch_optional(pool)
             .await
             .map_err(AppError::Database)?
-            .ok_or(AppError::NotFound)
+            .ok_or_else(|| AppError::NotFound("Record not found".into()))
     }
 
     pub async fn create(pool: &PgPool, input: CreateInventoryItem) -> Result<InventoryItem, AppError> {
@@ -85,7 +85,7 @@ impl InventoryRepository {
         .fetch_optional(pool)
         .await
         .map_err(AppError::Database)?
-        .ok_or(AppError::NotFound)
+        .ok_or_else(|| AppError::NotFound("Record not found".into()))
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid) -> Result<(), AppError> {
@@ -95,7 +95,7 @@ impl InventoryRepository {
             .await
             .map_err(AppError::Database)?;
         if result.rows_affected() == 0 {
-            return Err(AppError::NotFound);
+            return Err(AppError::NotFound("Record not found".into()));
         }
         Ok(())
     }

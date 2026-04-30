@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO shipment_status_events\n               (shipment_id, ghtk_status_id, status_text, reason, partner_id, occurred_at)\n               VALUES ($1, $2, $3, $4, $5, $6)\n               RETURNING id, shipment_id, ghtk_status_id, status_text, reason,\n                         partner_id, occurred_at, received_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "shipment_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "ghtk_status_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "status_text",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "reason",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "partner_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "occurred_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "received_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Text",
+        "Text",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "8581cdc13e0cb5d9db07db9269c43f8a28a120585cde92fc7a7aabdd9fd93ccd"
+}

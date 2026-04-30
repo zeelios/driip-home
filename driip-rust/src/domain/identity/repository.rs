@@ -47,7 +47,7 @@ impl StaffRepository {
         .fetch_optional(pool)
         .await
         .map_err(AppError::Database)?
-        .ok_or(AppError::NotFound)
+        .ok_or_else(|| AppError::NotFound("Record not found".into()))
     }
 
     /// Used internally for auth — returns full record including password_hash
@@ -141,7 +141,7 @@ impl StaffRepository {
             .fetch_optional(pool)
             .await
             .map_err(AppError::Database)?
-            .ok_or(AppError::NotFound)?;
+            .ok_or_else(|| AppError::NotFound("Record not found".into()))?;
 
         verify_password(current_password, &staff.password_hash)?;
         let new_hash = hash_password(new_password)?;
@@ -162,7 +162,7 @@ impl StaffRepository {
             .await
             .map_err(AppError::Database)?;
         if result.rows_affected() == 0 {
-            return Err(AppError::NotFound);
+            return Err(AppError::NotFound("Record not found".into()));
         }
         Ok(())
     }
@@ -184,6 +184,7 @@ impl RefreshTokenRepository {
             r#"
             INSERT INTO refresh_tokens (id, staff_id, token_hash, expires_at, created_at)
             VALUES ($1, $2, $3, $4, NOW())
+            ON CONFLICT (token_hash) DO NOTHING
             "#,
         )
         .bind(Uuid::new_v4())

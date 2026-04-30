@@ -1,0 +1,116 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE shipments SET\n                ghtk_order_id = $2,\n                ghtk_tracking_id = $3,\n                ghtk_charged_cents = $4,\n                status = 'booked',\n                raw_ghtk_response = $5,\n                updated_at = NOW()\n               WHERE id = $1\n               RETURNING id, order_id, ghtk_order_id, ghtk_tracking_id, status,\n                         customer_paid_shipping_cents, ghtk_charged_cents, shipping_diff_cents,\n                         weight_grams, pick_date, raw_ghtk_response,\n                         booked_by, cancelled_by, cancel_reason, created_at, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "ghtk_order_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "ghtk_tracking_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "customer_paid_shipping_cents",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "ghtk_charged_cents",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "shipping_diff_cents",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 8,
+        "name": "weight_grams",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "pick_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 10,
+        "name": "raw_ghtk_response",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 11,
+        "name": "booked_by",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 12,
+        "name": "cancelled_by",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "cancel_reason",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 14,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Int8",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "cb8991543c243db611b6a755ae94ce0b59047fe903b180bdd3d0ea5219d3d9c7"
+}

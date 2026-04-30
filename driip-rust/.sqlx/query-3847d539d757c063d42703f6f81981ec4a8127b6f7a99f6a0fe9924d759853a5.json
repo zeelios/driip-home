@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM order_fee_lines WHERE id = $1 AND order_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3847d539d757c063d42703f6f81981ec4a8127b6f7a99f6a0fe9924d759853a5"
+}

@@ -1,6 +1,8 @@
+use std::sync::Arc;
+
 use sqlx::PgPool;
 
-use crate::cache::AppCache;
+use crate::{cache::AppCache, integrations::ghtk::GhtkClient};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -10,4 +12,12 @@ pub struct AppState {
     pub jwt_secret: String,
     pub jwt_access_ttl_secs: u64,
     pub jwt_refresh_ttl_secs: u64,
+    /// GHTK courier client — None if GHTK_TOKEN not configured
+    pub ghtk: Option<Arc<GhtkClient>>,
+    // ── GHTK pickup (warehouse) address ───────────────────────────────────
+    pub ghtk_pick_name: Option<String>,
+    pub ghtk_pick_address: Option<String>,
+    pub ghtk_pick_province: Option<String>,
+    pub ghtk_pick_district: Option<String>,
+    pub ghtk_pick_tel: Option<String>,
 }

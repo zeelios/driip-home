@@ -1,0 +1,34 @@
+FROM rust:1.87-slim-bookworm
+
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install sqlx-cli for migrations + query caching
+RUN cargo install sqlx-cli --no-default-features --features postgres
+
+# Install cargo-watch for hot-reload
+RUN cargo install cargo-watch
+
+WORKDIR /app
+
+# Pre-fetch dependencies (layer cache)
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir -p src && echo 'fn main() {}' > src/main.rs \
+    && cargo build 2>/dev/null || true \
+    && rm -rf src
+
+COPY . .
+
+EXPOSE 3000
+
+# On start: run any pending migrations, generate sqlx cache, then run with hot-reload
+CMD ["sh", "-c", "\
+    echo 'Waiting for DB...' && \
+    until sqlx database create 2>/dev/null; do sleep 1; done && \
+    sqlx migrate run --source ./migrations && \
+    cargo sqlx prepare --check 2>/dev/null || cargo sqlx prepare && \
+    cargo watch -x 'run' \
+"]
