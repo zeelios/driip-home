@@ -90,7 +90,7 @@ const SAMPLE_PARAMS = {
       quantity: 1,
     },
   ],
-  finalTotal: 607000,
+  finalTotal: 572000,
   subtotal: 572000,
   shippingFee: 0,
   address: "123 Đường Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh",
@@ -242,7 +242,7 @@ const html = `<!DOCTYPE html>
             <td style="padding-top:32px;">
               <p style="margin:0 0 8px 0;font-size:12px;color:#444;">
                 Có thắc mắc? Liên hệ Driip qua
-                <a href="https://www.facebook.com/profile.php?id=61585105804316" style="color:#888;text-decoration:none;">Facebook Messenger</a>.
+                <a href="https://m.me/61586812299701" style="color:#888;text-decoration:none;">Messenger</a>.
               </p>
               <p style="margin:0;font-size:11px;color:#333;letter-spacing:0.05em;">© ${year} DRIIP. driip.io</p>
             </td>
