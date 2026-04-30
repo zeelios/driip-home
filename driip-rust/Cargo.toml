@@ -4,21 +4,47 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1"
-aws-config = "1"
-aws-sdk-sns = "1"
+# ── Core ──────────────────────────────────────────────────────────────────────
 axum = { version = "0.8", features = ["macros"] }
-chrono = { version = "0.4", features = ["serde"] }
-dotenvy = "0.15"
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "macros", "uuid", "chrono"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
 thiserror = "1"
-tokio = { version = "1", features = ["full"] }
-tower-http = { version = "0.6", features = ["cors", "trace"] }
+dotenvy = "0.15"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-uuid = { version = "1", features = ["v4", "serde"] }
+
+# ── AWS Lambda ─────────────────────────────────────────────────────────────────
+lambda_http = "0.13"
+aws-config = "1"
+aws-sdk-sns = "1"
+
+# ── Database ──────────────────────────────────────────────────────────────────
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "macros", "uuid", "chrono"] }
+
+# ── Auth ──────────────────────────────────────────────────────────────────────
+argon2 = "0.5"
+jsonwebtoken = "9"
+
+# ── Cache L1 (in-process, per Lambda instance) ────────────────────────────────
+moka = { version = "0.12", features = ["future"] }
+
+# ── Cache L2 (Upstash Redis via HTTP) ─────────────────────────────────────────
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# ── Validation ────────────────────────────────────────────────────────────────
+validator = { version = "0.18", features = ["derive"] }
+
+# ── Async ─────────────────────────────────────────────────────────────────────
+async-trait = "0.1"
+
+# ── Crypto ────────────────────────────────────────────────────────────────────
+sha2 = "0.10"
+hex = "0.4"
 
 [profile.release]
 opt-level = "s"
