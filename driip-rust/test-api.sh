@@ -32,22 +32,34 @@ echo "━━━━ 1. AUTH ━━━━━━━━━━━━━━━━━�
 
 echo "  [CLEANUP] Removing stale test data..."
 docker compose exec -T db psql -U driip -d driip -q -c "
-  DELETE FROM staff WHERE email = 'jane@driip.vn';
-  DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE notes = 'Test order');
-  DELETE FROM order_fee_lines WHERE order_id IN (SELECT id FROM orders WHERE notes = 'Test order');
-  DELETE FROM shipments WHERE order_id IN (SELECT id FROM orders WHERE notes = 'Test order');
-  DELETE FROM orders WHERE notes = 'Test order';
+  DELETE FROM notifications WHERE entity_type = 'purchase_order';
+  DELETE FROM purchase_order_items WHERE purchase_order_id IN (SELECT id FROM purchase_orders WHERE supplier_name = 'Test Supplier');
+  DELETE FROM purchase_orders WHERE supplier_name = 'Test Supplier';
+  DELETE FROM shipments WHERE order_id IN (SELECT id FROM orders WHERE customer_id IN (SELECT id FROM customers WHERE email = 'nguyenvana@test.vn'));
+  DELETE FROM order_fee_lines WHERE order_id IN (SELECT id FROM orders WHERE customer_id IN (SELECT id FROM customers WHERE email = 'nguyenvana@test.vn'));
+  DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE customer_id IN (SELECT id FROM customers WHERE email = 'nguyenvana@test.vn'));
+  DELETE FROM orders WHERE customer_id IN (SELECT id FROM customers WHERE email = 'nguyenvana@test.vn');
   DELETE FROM customers WHERE email = 'nguyenvana@test.vn';
   DELETE FROM inventory WHERE product_id IN (SELECT id FROM products WHERE sku = 'DS-BLK-001');
   DELETE FROM products WHERE sku = 'DS-BLK-001';
   DELETE FROM warehouses WHERE name LIKE '%Ho Chi Minh Warehouse%' OR name LIKE '%HCM Warehouse%';
   DELETE FROM fee_catalog WHERE name = 'Packaging Fee';
+  DELETE FROM staff WHERE email = 'jane@driip.vn';
   DELETE FROM refresh_tokens WHERE staff_id IN (SELECT id FROM staff WHERE email = 'test@driip.vn');
 " 2>/dev/null
-echo "  [SEED] Using seed-admin binary..."
+echo "  [SEED] Seeding admin (idempotent — resets password too)..."
 SQLX_OFFLINE=true DATABASE_URL=postgres://driip:driip_dev@localhost:5432/driip \
   ./target/debug/driip-rust seed-admin test@driip.vn password123 2>/dev/null
 echo "  [SEED] test@driip.vn / password123 ready"
+echo "  [RESTART] Bouncing server to reset in-process rate-limiter cache..."
+kill $(lsof -ti :3000) 2>/dev/null; sleep 1
+nohup env SQLX_OFFLINE=true \
+  DATABASE_URL=postgres://driip:driip_dev@localhost:5432/driip \
+  JWT_SECRET=test-secret PORT=3000 \
+  UPSTASH_URL=http://localhost UPSTASH_TOKEN=x \
+  "$(pwd)/target/debug/driip-rust" > /tmp/driip-server.log 2>&1 &
+sleep 2
+echo "  [SERVER] Ready (PID=$!)"
 
 s=$(post "$BASE/auth/login" '{"email":"test@driip.vn","password":"wrong"}')
 assert "POST /auth/login — wrong password → 401" "401" "$s"
@@ -262,6 +274,154 @@ assert "POST /auth/logout → 204" "204" "$s"
 # Logout only revokes the refresh token in DB. This is expected behaviour.
 s=$(aget "$BASE/staff/me")
 assert "GET /staff/me after logout — access token still valid until TTL → 200" "200" "$s"
+
+# Re-login for remaining tests (password was changed in section 2)
+s=$(post "$BASE/auth/login" '{"email":"test@driip.vn","password":"newpass456!"}')
+TOKEN=$(jfield access_token)
+
+# ── 13. INVENTORY — LOW STOCK ────────────────────────────────────────────────
+echo ""
+echo "━━━━ 13. INVENTORY — LOW STOCK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+s=$(aget "$BASE/inventory/low-stock?threshold=200")
+assert "GET /inventory/low-stock?threshold=200 → 200" "200" "$s"
+echo "  [LOW-STOCK] $(body | head -c 200)"
+
+s=$(aget "$BASE/inventory/low-stock?threshold=0")
+assert "GET /inventory/low-stock?threshold=0 → 200" "200" "$s"
+
+# ── 14. ORDERS — PRIORITY / QUEUE / CONFIRM / CANCEL ─────────────────────────
+echo ""
+echo "━━━━ 14. ORDERS — PRIORITY / QUEUE / CONFIRM / CANCEL ━━━━━━━━━━━━━"
+
+# Create a fresh order for this section (inventory was seeded with 105 units)
+ORDER2_JSON=$(python3 -c "
+import json; print(json.dumps({
+  'customer_id':'$CUST_ID','notes':'Test order',
+  'items':[{'product_id':'$PROD_ID','quantity':1,'unit_price_cents':480000}]
+}))")
+s=$(apost "$BASE/orders" "$ORDER2_JSON")
+assert "POST /orders (new for priority tests) → 201" "201" "$s"
+ORDER2_ID=$(jfield id)
+echo "  [ORDER2] id=$ORDER2_ID  inv_status=$(body | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('inventory_status','?'))" 2>/dev/null)"
+
+s=$(aget "$BASE/orders/queue")
+assert "GET /orders/queue → 200" "200" "$s"
+echo "  [QUEUE] $(body | head -c 200)"
+
+s=$(aput "$BASE/orders/$ORDER2_ID/priority" '{"priority":"high"}')
+assert "PUT /orders/:id/priority high → 200" "200" "$s"
+
+s=$(aput "$BASE/orders/$ORDER2_ID/priority" '{"priority":"invalid"}')
+assert "PUT /orders/:id/priority invalid → 422" "422" "$s"
+
+s=$(apost "$BASE/orders/$ORDER2_ID/confirm" '{"force":false}')
+echo "  [CONFIRM no-force] status=$s body=$(body | head -c 150)"
+assert "POST /orders/:id/confirm (force=false) → 200|422" "200|422" "$s"
+
+# Create a third order specifically to test force=true (needs a fresh pending order)
+ORDER_FORCE_JSON=$(python3 -c "
+import json; print(json.dumps({
+  'customer_id':'$CUST_ID','notes':'Test order',
+  'items':[{'product_id':'$PROD_ID','quantity':1,'unit_price_cents':480000}]
+}))")
+s=$(apost "$BASE/orders" "$ORDER_FORCE_JSON")
+ORDER_FORCE_ID=$(jfield id)
+s=$(apost "$BASE/orders/$ORDER_FORCE_ID/confirm" '{"force":true}')
+assert "POST /orders/:id/confirm (force=true on fresh order) → 200" "200" "$s"
+
+# Create another order to test cancel + reallocate
+ORDER3_JSON=$(python3 -c "
+import json; print(json.dumps({
+  'customer_id':'$CUST_ID','notes':'Test order',
+  'items':[{'product_id':'$PROD_ID','quantity':1,'unit_price_cents':480000}]
+}))")
+s=$(apost "$BASE/orders" "$ORDER3_JSON")
+assert "POST /orders (for cancel test) → 201" "201" "$s"
+ORDER3_ID=$(jfield id)
+
+s=$(apost "$BASE/orders/$ORDER3_ID/cancel" '{}')
+assert "POST /orders/:id/cancel → 200" "200" "$s"
+
+s=$(apost "$BASE/orders/$ORDER3_ID/cancel" '{}')
+assert "POST /orders/:id/cancel (already cancelled) → 422" "422" "$s"
+
+# ── 15. PURCHASE ORDERS ───────────────────────────────────────────────────────
+echo ""
+echo "━━━━ 15. PURCHASE ORDERS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+PO_JSON=$(python3 -c "
+import json; print(json.dumps({
+  'supplier_name': 'Test Supplier',
+  'expected_date': '2026-06-01',
+  'notes': 'Restock run',
+  'items': [{'product_id':'$PROD_ID','warehouse_id':'$WH_ID','ordered_qty':50,'unit_cost_cents':200000}]
+}))")
+s=$(apost "$BASE/purchase-orders" "$PO_JSON")
+assert "POST /purchase-orders → 201" "201" "$s"
+PO_ID=$(body | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('order',{}).get('id',''))" 2>/dev/null)
+echo "  [PO] id=$PO_ID"
+
+s=$(aget "$BASE/purchase-orders")
+assert "GET /purchase-orders → 200" "200" "$s"
+
+s=$(aget "$BASE/purchase-orders?status=draft")
+assert "GET /purchase-orders?status=draft → 200" "200" "$s"
+
+s=$(aget "$BASE/purchase-orders/$PO_ID")
+assert "GET /purchase-orders/:id → 200" "200" "$s"
+PO_ITEM_ID=$(body | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('items',[])[0].get('id',''))" 2>/dev/null)
+echo "  [PO_ITEM] id=$PO_ITEM_ID"
+
+s=$(aput "$BASE/purchase-orders/$PO_ID" '{"notes":"Updated notes"}')
+assert "PUT /purchase-orders/:id → 200" "200" "$s"
+
+RECEIVE_JSON=$(python3 -c "
+import json; print(json.dumps({
+  'items': [{'purchase_order_item_id':'$PO_ITEM_ID','received_qty':30}]
+}))")
+s=$(apost "$BASE/purchase-orders/$PO_ID/receive" "$RECEIVE_JSON")
+assert "POST /purchase-orders/:id/receive (30 units) → 200" "200" "$s"
+echo "  [PO STATUS] $(body | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('order',{}).get('status','?'))" 2>/dev/null)"
+
+s=$(apost "$BASE/purchase-orders/$PO_ID/receive" "$RECEIVE_JSON")
+assert "POST /purchase-orders/:id/receive (another 30 — over-receive) → 200" "200" "$s"
+
+# Create a second PO to test cancel
+PO2_JSON=$(python3 -c "
+import json; print(json.dumps({
+  'supplier_name': 'Test Supplier',
+  'items': [{'product_id':'$PROD_ID','warehouse_id':'$WH_ID','ordered_qty':10,'unit_cost_cents':100000}]
+}))")
+s=$(apost "$BASE/purchase-orders" "$PO2_JSON")
+assert "POST /purchase-orders (for cancel test) → 201" "201" "$s"
+PO2_ID=$(body | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('order',{}).get('id',''))" 2>/dev/null)
+
+s=$(apost "$BASE/purchase-orders/$PO2_ID/cancel" '{}')
+assert "POST /purchase-orders/:id/cancel → 200" "200" "$s"
+
+s=$(apost "$BASE/purchase-orders/$PO2_ID/cancel" '{}')
+assert "POST /purchase-orders/:id/cancel (already cancelled) → 422" "422" "$s"
+
+# ── 16. NOTIFICATIONS ────────────────────────────────────────────────────────
+echo ""
+echo "━━━━ 16. NOTIFICATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+s=$(aget "$BASE/notifications")
+assert "GET /notifications → 200" "200" "$s"
+echo "  [NOTIFS] count=$(body | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else '?')" 2>/dev/null)"
+
+s=$(aget "$BASE/notifications?unread_only=true")
+assert "GET /notifications?unread_only=true → 200" "200" "$s"
+
+s=$(apost "$BASE/notifications/read-all" '{}')
+assert "POST /notifications/read-all → 200" "200" "$s"
+echo "  [READ-ALL] $(body | head -c 100)"
+
+s=$(aget "$BASE/notifications?unread_only=true")
+assert "GET /notifications?unread_only=true (after read-all) → 200" "200" "$s"
+UNREAD=$(body | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else '?')" 2>/dev/null)
+echo "  [UNREAD after read-all] $UNREAD (expect 0)"
 
 # ── SUMMARY ───────────────────────────────────────────────────────────────────
 echo ""

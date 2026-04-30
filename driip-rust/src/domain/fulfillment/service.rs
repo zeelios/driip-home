@@ -41,16 +41,17 @@ pub struct GhtkFulfillmentService<'a> {
 }
 
 impl<'a> GhtkFulfillmentService<'a> {
-    pub fn new(
-        client: &'a Arc<GhtkClient>,
-        pool: &'a PgPool,
-        pickup: &'a PickupConfig,
-    ) -> Self {
-        Self { client, pool, pickup }
+    pub fn new(client: &'a Arc<GhtkClient>, pool: &'a PgPool, pickup: &'a PickupConfig) -> Self {
+        Self {
+            client,
+            pool,
+            pickup,
+        }
     }
 
     // ── Fee estimation ──────────────────────────────────────────────────────
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn estimate_fee(
         &self,
         customer_address: String,
@@ -74,7 +75,11 @@ impl<'a> GhtkFulfillmentService<'a> {
             deliver_option,
         };
 
-        let fee_data = self.client.estimate_fee(&req).await.map_err(AppError::from)?;
+        let fee_data = self
+            .client
+            .estimate_fee(&req)
+            .await
+            .map_err(AppError::from)?;
 
         Ok(FeeEstimateResponse {
             fee: fee_data.fee,
@@ -87,6 +92,7 @@ impl<'a> GhtkFulfillmentService<'a> {
 
     // ── Book shipment ───────────────────────────────────────────────────────
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn book_shipment(
         &self,
         order_id: Uuid,
@@ -196,19 +202,15 @@ impl<'a> GhtkFulfillmentService<'a> {
             .await
             .map_err(AppError::from)?;
 
-        let cancelled = ShipmentRepository::cancel(
-            self.pool,
-            shipment_id,
-            cancelled_by,
-            reason,
-        )
-        .await?;
+        let cancelled =
+            ShipmentRepository::cancel(self.pool, shipment_id, cancelled_by, reason).await?;
 
         Ok(cancelled)
     }
 
     // ── Rebook shipment ─────────────────────────────────────────────────────
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn rebook_shipment(
         &self,
         shipment_id: Uuid,
@@ -229,13 +231,8 @@ impl<'a> GhtkFulfillmentService<'a> {
         if let Some(ghtk_id) = &detail.shipment.ghtk_order_id {
             let _ = self.client.cancel_order(ghtk_id).await;
         }
-        ShipmentRepository::cancel(
-            self.pool,
-            shipment_id,
-            booked_by,
-            Some("Rebooked".into()),
-        )
-        .await?;
+        ShipmentRepository::cancel(self.pool, shipment_id, booked_by, Some("Rebooked".into()))
+            .await?;
 
         // Book fresh
         self.book_shipment(
@@ -257,21 +254,14 @@ impl<'a> GhtkFulfillmentService<'a> {
 
     // ── Ingest webhook ──────────────────────────────────────────────────────
 
-    pub async fn ingest_webhook(
-        &self,
-        raw_body: &[u8],
-        signature: &str,
-    ) -> Result<(), AppError> {
+    pub async fn ingest_webhook(&self, raw_body: &[u8], signature: &str) -> Result<(), AppError> {
         let payload: GhtkWebhookPayload = self
             .client
             .verify_webhook(raw_body, signature)
             .map_err(AppError::from)?;
 
         // Find shipment by GHTK label_id or partner_id
-        let ghtk_id = payload
-            .label_id
-            .as_deref()
-            .unwrap_or(&payload.partner_id);
+        let ghtk_id = payload.label_id.as_deref().unwrap_or(&payload.partner_id);
 
         let shipment = sqlx::query!(
             "SELECT id FROM shipments WHERE ghtk_order_id = $1 LIMIT 1",
@@ -291,12 +281,10 @@ impl<'a> GhtkFulfillmentService<'a> {
         let internal_status = ghtk_status_to_internal(payload.status_id);
 
         // Parse action_time
-        let occurred_at = chrono::NaiveDateTime::parse_from_str(
-            &payload.action_time,
-            "%Y-%m-%d %H:%M:%S",
-        )
-        .map(|dt| dt.and_utc())
-        .unwrap_or_else(|_| Utc::now());
+        let occurred_at =
+            chrono::NaiveDateTime::parse_from_str(&payload.action_time, "%Y-%m-%d %H:%M:%S")
+                .map(|dt| dt.and_utc())
+                .unwrap_or_else(|_| Utc::now());
 
         // Append immutable event
         ShipmentRepository::append_event(

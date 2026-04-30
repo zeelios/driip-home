@@ -1,14 +1,14 @@
-/// Input sanitization helpers.
-///
-/// Rules applied to every inbound string field before it reaches business logic:
-///   1. Trim leading/trailing whitespace
-///   2. Strip ASCII control characters (< 0x20, excluding TAB/LF/CR) and DEL (0x7F)
-///   3. Collapse internal runs of whitespace to a single space
-///   4. Enforce a hard maximum length (configurable per call-site)
-///
-/// These are **not** HTML-escaping — the DB layer uses parameterised queries (sqlx)
-/// which already prevent SQL injection. The goal here is data integrity: no garbage
-/// characters end up stored or reflected back in API responses.
+// Input sanitization helpers.
+//
+// Rules applied to every inbound string field before it reaches business logic:
+//   1. Trim leading/trailing whitespace
+//   2. Strip ASCII control characters (< 0x20, excluding TAB/LF/CR) and DEL (0x7F)
+//   3. Collapse internal runs of whitespace to a single space
+//   4. Enforce a hard maximum length (configurable per call-site)
+//
+// These are NOT HTML-escaping — the DB layer uses parameterised queries (sqlx)
+// which already prevent SQL injection. The goal here is data integrity: no garbage
+// characters end up stored or reflected back in API responses.
 
 // ── Public sanitize functions ────────────────────────────────────────────────
 
@@ -54,17 +54,29 @@ pub fn sanitize_phone(phone: &str) -> Option<String> {
         .filter(|c| c.is_ascii_digit() || matches!(c, '+' | '-' | ' ' | '(' | ')'))
         .collect();
     let trimmed = cleaned.trim().to_string();
-    if trimmed.is_empty() { None } else { Some(trimmed) }
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed)
+    }
 }
 
 /// Sanitize a price/amount integer. Rejects negative values.
 pub fn sanitize_amount_cents(v: i64) -> Option<i64> {
-    if v >= 0 { Some(v) } else { None }
+    if v >= 0 {
+        Some(v)
+    } else {
+        None
+    }
 }
 
 /// Sanitize a quantity integer. Rejects values <= 0.
 pub fn sanitize_quantity(v: i32) -> Option<i32> {
-    if v > 0 { Some(v) } else { None }
+    if v > 0 {
+        Some(v)
+    } else {
+        None
+    }
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -125,11 +137,17 @@ mod tests {
 
     #[test]
     fn email_lowercased() {
-        assert_eq!(sanitize_email("  Test@Driip.VN  "), Some("test@driip.vn".into()));
+        assert_eq!(
+            sanitize_email("  Test@Driip.VN  "),
+            Some("test@driip.vn".into())
+        );
     }
 
     #[test]
     fn phone_strips_letters() {
-        assert_eq!(sanitize_phone("0901 234 567 abc"), Some("0901 234 567".into()));
+        assert_eq!(
+            sanitize_phone("0901 234 567 abc"),
+            Some("0901 234 567".into())
+        );
     }
 }

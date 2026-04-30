@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE inventory\n            SET reserved_quantity = reserved_quantity + $2,\n                updated_at = NOW()\n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4cfbfde6b4f8cbcbced1f1eab3eae8eb4b7a5d6a46d2d287142d54ff3df212ac"
+}

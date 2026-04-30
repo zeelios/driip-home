@@ -1,7 +1,11 @@
-#![allow(dead_code)] // Phase 2+ will use infrastructure wired here
+#![warn(unused)]
+#![deny(clippy::all)]
 
-use axum::Router;
-use tower_http::{cors::CorsLayer, trace::TraceLayer};
+use axum::{middleware as axum_middleware, Router};
+use std::time::Duration;
+use tower_http::{
+    cors::CorsLayer, limit::RequestBodyLimitLayer, timeout::TimeoutLayer, trace::TraceLayer,
+};
 
 mod auth;
 mod cache;
@@ -10,6 +14,7 @@ mod db;
 mod domain;
 mod errors;
 mod integrations;
+mod middleware;
 mod state;
 
 #[tokio::main]
@@ -93,6 +98,7 @@ async fn main() {
         ghtk_pick_province: cfg.ghtk_pick_province.clone(),
         ghtk_pick_district: cfg.ghtk_pick_district.clone(),
         ghtk_pick_tel: cfg.ghtk_pick_tel.clone(),
+        rate_limiter: middleware::rate_limit::RateLimiter::new(),
     };
 
     let app = build_router(state);
@@ -122,8 +128,36 @@ async fn main() {
 }
 
 fn build_router(state: state::AppState) -> Router {
+    // ── Auth sub-router with tight rate limit ─────────────────────────────
+    let auth_router = axum::Router::new()
+        .nest("/api/v1", domain::auth_router())
+        .layer(axum_middleware::from_fn_with_state(
+            state.clone(),
+            middleware::rate_limit::auth_rate_limit,
+        ));
+
+    // ── All other routes with global rate limit ───────────────────────────
+    let api_router = axum::Router::new().nest("/api/v1", domain::router()).layer(
+        axum_middleware::from_fn_with_state(
+            state.clone(),
+            middleware::rate_limit::global_rate_limit,
+        ),
+    );
+
     Router::new()
-        .nest("/api/v1", domain::router())
+        .merge(auth_router)
+        .merge(api_router)
+        // Security response headers on every response
+        .layer(axum_middleware::from_fn(
+            middleware::security_headers::set_security_headers,
+        ))
+        // Hard cap: 1 MB request body
+        .layer(RequestBodyLimitLayer::new(1024 * 1024))
+        // Kill requests that take more than 30s — return 408 Request Timeout
+        .layer(TimeoutLayer::with_status_code(
+            axum::http::StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(30),
+        ))
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http())
         .with_state(state)

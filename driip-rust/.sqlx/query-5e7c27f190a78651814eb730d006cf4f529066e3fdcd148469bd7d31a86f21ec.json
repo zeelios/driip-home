@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM orders WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "customer_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "total_cents",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "notes",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "shipping_fee_cents",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 8,
+        "name": "operational_fee_cents",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 9,
+        "name": "grand_total_cents",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 10,
+        "name": "priority",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "inventory_status",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "5e7c27f190a78651814eb730d006cf4f529066e3fdcd148469bd7d31a86f21ec"
+}

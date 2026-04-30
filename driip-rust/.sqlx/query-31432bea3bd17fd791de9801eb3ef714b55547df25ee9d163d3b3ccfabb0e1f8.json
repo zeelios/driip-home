@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO orders (id, customer_id, status, priority, inventory_status, total_cents, notes, created_at, updated_at)\n             VALUES ($1, $2, 'pending', 'normal', 'unavailable', $3, $4, NOW(), NOW())",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "31432bea3bd17fd791de9801eb3ef714b55547df25ee9d163d3b3ccfabb0e1f8"
+}

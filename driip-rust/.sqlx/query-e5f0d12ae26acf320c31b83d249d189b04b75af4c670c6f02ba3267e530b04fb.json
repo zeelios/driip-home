@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE order_items SET reserved_qty = reserved_qty - $2 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e5f0d12ae26acf320c31b83d249d189b04b75af4c670c6f02ba3267e530b04fb"
+}

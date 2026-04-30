@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE inventory i\n            SET reserved_quantity = GREATEST(0, i.reserved_quantity - oi.reserved_qty),\n                updated_at = NOW()\n            FROM order_items oi\n            WHERE oi.order_id    = $1\n              AND oi.inventory_id = i.id\n              AND oi.reserved_qty > 0\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "801d1ffd2883ebca72475f79486eeac82b84e7b9c8ae626c476b89c879093135"
+}

@@ -9,8 +9,11 @@ use uuid::Uuid;
 use crate::{errors::AppError, state::AppState};
 
 use super::{
-    model::{AdjustStock, CreateInventoryItem, InventoryFilter, UpdateInventoryItem},
+    model::{
+        AdjustStock, CreateInventoryItem, InventoryFilter, LowStockFilter, UpdateInventoryItem,
+    },
     repository::InventoryRepository,
+    service::InventoryService,
 };
 
 pub async fn list(
@@ -61,4 +64,13 @@ pub async fn delete(
 ) -> Result<impl IntoResponse, AppError> {
     InventoryRepository::delete(&state.db, id).await?;
     Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn low_stock(
+    State(state): State<AppState>,
+    Query(filter): Query<LowStockFilter>,
+) -> Result<impl IntoResponse, AppError> {
+    let threshold = filter.threshold.unwrap_or(5);
+    let items = InventoryService::low_stock(&state.db, threshold).await?;
+    Ok(Json(serde_json::json!({ "items": items })))
 }

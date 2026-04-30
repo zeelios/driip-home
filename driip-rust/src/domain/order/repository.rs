@@ -1,9 +1,9 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::errors::AppError;
+use crate::{domain::inventory::service::InventoryService, errors::AppError};
 
-use super::model::{CreateOrder, Order, OrderFilter, OrderItem, UpdateOrder};
+use super::model::{CreateOrder, Order, OrderFilter, OrderItem, QueuedOrder, UpdateOrder};
 
 pub struct OrderRepository;
 
@@ -56,36 +56,95 @@ impl OrderRepository {
             .sum();
         let order_id = Uuid::new_v4();
 
-        let order = sqlx::query_as::<_, Order>(
-            "INSERT INTO orders (id, customer_id, status, total_cents, notes, created_at, updated_at)
-             VALUES ($1, $2, 'pending', $3, $4, NOW(), NOW())
-             RETURNING *",
+        sqlx::query_unchecked!(
+            "INSERT INTO orders (id, customer_id, status, priority, inventory_status, total_cents, notes, created_at, updated_at)
+             VALUES ($1, $2, 'pending', 'normal', 'unavailable', $3, $4, NOW(), NOW())",
+            order_id,
+            input.customer_id,
+            total_cents,
+            &input.notes,
         )
-        .bind(order_id)
-        .bind(input.customer_id)
-        .bind(total_cents)
-        .bind(input.notes)
-        .fetch_one(&mut *tx)
+        .execute(&mut *tx)
         .await
         .map_err(AppError::Database)?;
 
-        for item in input.items {
-            sqlx::query(
-                "INSERT INTO order_items (id, order_id, product_id, quantity, unit_price_cents)
-                 VALUES ($1, $2, $3, $4, $5)",
+        // Insert items and attempt inventory reservation for each
+        for item in &input.items {
+            let item_id = Uuid::new_v4();
+
+            // Reserve as much as possible from inventory
+            let (inv_id, reserved) =
+                InventoryService::reserve(&mut tx, item.product_id, item.quantity).await?;
+
+            sqlx::query_unchecked!(
+                "INSERT INTO order_items (id, order_id, product_id, quantity, unit_price_cents, reserved_qty, inventory_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                item_id,
+                order_id,
+                item.product_id,
+                item.quantity,
+                item.unit_price_cents,
+                reserved,
+                inv_id,
             )
-            .bind(Uuid::new_v4())
-            .bind(order_id)
-            .bind(item.product_id)
-            .bind(item.quantity)
-            .bind(item.unit_price_cents)
             .execute(&mut *tx)
             .await
             .map_err(AppError::Database)?;
         }
 
+        // Compute and store inventory_status
+        let inv_status =
+            InventoryService::compute_order_inventory_status(&mut tx, order_id).await?;
+
+        sqlx::query_unchecked!(
+            "UPDATE orders SET inventory_status = $2, updated_at = NOW() WHERE id = $1",
+            order_id,
+            inv_status,
+        )
+        .execute(&mut *tx)
+        .await
+        .map_err(AppError::Database)?;
+
+        // Re-fetch to get updated inventory_status
+        let order =
+            sqlx::query_as_unchecked!(Order, "SELECT * FROM orders WHERE id = $1", order_id)
+                .fetch_one(&mut *tx)
+                .await
+                .map_err(AppError::Database)?;
+
         tx.commit().await.map_err(AppError::Database)?;
         Ok(order)
+    }
+
+    /// Fulfillment queue: pending orders sorted by effective priority score (highest first).
+    ///
+    /// Score = base priority value + age bonus (auto-bump after 4h / 24h).
+    pub async fn queue(pool: &PgPool) -> Result<Vec<QueuedOrder>, AppError> {
+        sqlx::query_as::<_, QueuedOrder>(
+            r#"
+            SELECT
+                id, customer_id, status, priority, inventory_status,
+                total_cents, notes, created_at, updated_at,
+                CASE priority
+                    WHEN 'urgent' THEN 1000
+                    WHEN 'high'   THEN 500
+                    WHEN 'normal' THEN 0
+                    WHEN 'low'    THEN -200
+                    ELSE 0
+                END +
+                CASE
+                    WHEN EXTRACT(EPOCH FROM (NOW() - created_at))/3600 > 24 THEN 300
+                    WHEN EXTRACT(EPOCH FROM (NOW() - created_at))/3600 > 4  THEN 100
+                    ELSE 0
+                END AS priority_score
+            FROM orders
+            WHERE status = 'pending'
+            ORDER BY priority_score DESC, created_at ASC
+            "#,
+        )
+        .fetch_all(pool)
+        .await
+        .map_err(AppError::Database)
     }
 
     pub async fn update(pool: &PgPool, id: Uuid, input: UpdateOrder) -> Result<Order, AppError> {

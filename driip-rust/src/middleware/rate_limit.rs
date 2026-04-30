@@ -3,8 +3,8 @@
 /// Strategy:
 ///   - Each IP gets a sliding-window counter stored in the Moka L1 cache.
 ///   - Two independent buckets:
-///       • `auth`   — tight limit (20 req/min) for login/refresh endpoints
-///       • `global` — generous limit (300 req/min) for everything else
+///     - `auth`   — tight limit (20 req/min) for login/refresh endpoints
+///     - `global` — generous limit (300 req/min) for everything else
 ///   - On Lambda, each warm instance has its own counter. This is intentional:
 ///     the limit applies per-instance. For a shared global limit, replace with
 ///     Upstash Redis (AppCache L2) using atomic INCR + EXPIRE.
@@ -12,13 +12,11 @@
 ///
 /// Performance: Moka reads are O(1) concurrent — zero async overhead on the
 /// happy path (no DB, no network, no mutex contention).
-
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use axum::{
-    body::Body,
-    extract::{ConnectInfo, Request, State},
+    extract::{Request, State},
     http::{HeaderValue, StatusCode},
     middleware::Next,
     response::{IntoResponse, Response},
@@ -38,7 +36,10 @@ struct Window {
 
 impl Window {
     fn new() -> Self {
-        Self { count: 1, started_at: Instant::now() }
+        Self {
+            count: 1,
+            started_at: Instant::now(),
+        }
     }
 }
 
@@ -56,7 +57,9 @@ impl RateLimiter {
             .max_capacity(50_000)
             .time_to_idle(Duration::from_secs(120))
             .build();
-        Self { inner: Arc::new(cache) }
+        Self {
+            inner: Arc::new(cache),
+        }
     }
 
     /// Returns `true` if the request is allowed, `false` if the limit is exceeded.
@@ -89,11 +92,7 @@ impl RateLimiter {
 // ── Tower middleware functions ────────────────────────────────────────────────
 
 /// Tight limiter for auth endpoints: 20 requests per minute per IP.
-pub async fn auth_rate_limit(
-    State(state): State<AppState>,
-    req: Request,
-    next: Next,
-) -> Response {
+pub async fn auth_rate_limit(State(state): State<AppState>, req: Request, next: Next) -> Response {
     let ip = client_ip(&req);
     if !state.rate_limiter.check("auth", &ip, 20, 60).await {
         return rate_limited_response(&ip, "auth");

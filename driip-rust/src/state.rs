@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use sqlx::PgPool;
 
-use crate::{cache::AppCache, integrations::ghtk::GhtkClient};
+use crate::{cache::AppCache, integrations::ghtk::GhtkClient, middleware::rate_limit::RateLimiter};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -20,4 +20,6 @@ pub struct AppState {
     pub ghtk_pick_province: Option<String>,
     pub ghtk_pick_district: Option<String>,
     pub ghtk_pick_tel: Option<String>,
+    // ── Security ──────────────────────────────────────────────────────────
+    pub rate_limiter: RateLimiter,
 }

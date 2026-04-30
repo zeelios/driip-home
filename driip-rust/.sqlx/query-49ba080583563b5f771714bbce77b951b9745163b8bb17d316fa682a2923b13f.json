@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                oi.product_id,\n                p.name AS product_name,\n                oi.quantity,\n                oi.reserved_qty,\n                (oi.quantity - oi.reserved_qty) AS missing\n            FROM order_items oi\n            JOIN products p ON p.id = oi.product_id\n            WHERE oi.order_id = $1\n              AND oi.quantity > oi.reserved_qty\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "product_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "product_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "quantity",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "reserved_qty",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "missing",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "49ba080583563b5f771714bbce77b951b9745163b8bb17d316fa682a2923b13f"
+}
