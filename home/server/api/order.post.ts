@@ -5,7 +5,7 @@ import {
   queueOrderRows,
   reserveOrderId,
 } from "../utils/order-queue";
-import { getSalesNameFromCode } from "../utils/referral";
+import { getSalesNameFromCode, toTitleCase } from "../utils/referral";
 import {
   BASE_BOX_COMPARE_PRICE,
   getFinalTotal,
@@ -186,7 +186,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const fullName = `${lastName} ${firstName}`.trim();
+  const fullName = toTitleCase(`${lastName} ${firstName}`.trim());
   const addressParts = [fullAddress || street, province].filter(Boolean);
   const address = `${addressParts.join(", ")}${zipCode ? ` ${zipCode}` : ""}`;
   const cleanPhone = `'${normalizeVietnamSheetPhone(String(phone))}`;

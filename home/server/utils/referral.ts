@@ -3,6 +3,17 @@
  * Duplicated from app/utils/referral.ts for server API usage.
  */
 
+/**
+ * Capitalize each word using Unicode-aware regex.
+ * Handles Vietnamese characters (ễ, ư, ơ, etc.) correctly.
+ */
+export function toTitleCase(str: string): string {
+  return str.replace(
+    /(^|[^\p{L}\p{N}])(\p{L})/gu,
+    (_, prefix, letter) => prefix + letter.toLocaleUpperCase("vi-VN")
+  );
+}
+
 export interface ReferralMapping {
   code: string;
   name: string; // Full name for Google Sheets

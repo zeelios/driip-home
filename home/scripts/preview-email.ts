@@ -1,48 +1,29 @@
-import { Resend } from "resend";
+/**
+ * Email preview script
+ * Run: bun scripts/preview-email.ts
+ * Opens the email template in your default browser.
+ */
+// @ts-nocheck — standalone Bun script, not part of Nuxt tsconfig
+import { resolve } from "path";
+import { execSync } from "child_process";
 
-interface OrderEmailItem {
-  productName: string;
-  sku: string;
-  size: string;
-  color: string;
-  quantity: number;
-}
+// ── Inline the template logic (mirrors server/utils/email.ts) ──────────────
 
-interface OrderEmailParams {
-  to: string;
-  orderId: string;
-  fullName: string;
-  items: OrderEmailItem[];
-  finalTotal: number;
-  address: string;
-  phone: string;
-  // Full price breakdown (optional, for driip-slide with shipping)
-  subtotal?: number;
-  shippingFee?: number;
+function toTitleCase(str: string): string {
+  return str.replace(
+    /(^|[^\p{L}\p{N}])(\p{L})/gu,
+    (_, prefix: string, letter: string) =>
+      prefix + letter.toLocaleUpperCase("vi-VN")
+  );
 }
 
 function formatVnd(amount: number): string {
   return amount.toLocaleString("vi-VN") + "đ";
 }
 
-/**
- * Capitalize each word using Unicode-aware regex.
- * Handles Vietnamese characters (ễ, ư, ơ, etc.) properly.
- */
-function toTitleCase(str: string): string {
-  // Match word boundaries with Unicode letters (\p{L}) and numbers
-  // The 'u' flag enables Unicode property escapes
-  return str.replace(
-    /(^|[^\p{L}\p{N}])(\p{L})/gu,
-    (_, prefix, letter) => prefix + letter.toLocaleUpperCase("vi-VN")
-  );
-}
-
-function formatProductLabel(item: OrderEmailItem): string {
+function formatProductLabel(sku: string, productName?: string): string {
   return toTitleCase(
-    (item.productName || item.sku)
-      .replace("driip-", "Driip ")
-      .replace(/-/g, " ")
+    (productName || sku).replace("driip-", "Driip ").replace(/-/g, " ")
   );
 }
 
@@ -50,7 +31,15 @@ function formatColorLabel(color: string): string {
   return toTitleCase(color.replace(/-/g, " "));
 }
 
-function buildItemRows(items: OrderEmailItem[]): string {
+function buildItemRows(
+  items: Array<{
+    sku: string;
+    productName: string;
+    size: string;
+    color: string;
+    quantity: number;
+  }>
+): string {
   return items
     .map(
       (item) => `
@@ -60,7 +49,8 @@ function buildItemRows(items: OrderEmailItem[]): string {
           <tr>
             <td style="vertical-align:middle;">
               <p style="margin:0 0 4px 0;font-size:13px;font-weight:700;letter-spacing:0.03em;color:#e8e8e8;">${formatProductLabel(
-                item
+                item.sku,
+                item.productName
               )}</p>
               <p style="margin:0;font-size:11px;color:#555;letter-spacing:0.08em;text-transform:uppercase;">${item.size.toUpperCase()}&nbsp;&nbsp;·&nbsp;&nbsp;${formatColorLabel(
         item.color
@@ -79,31 +69,64 @@ function buildItemRows(items: OrderEmailItem[]): string {
     .join("");
 }
 
-function buildOrderEmailHtml(params: OrderEmailParams): string {
-  const {
-    orderId,
-    fullName,
-    items,
-    finalTotal,
-    address,
-    phone,
-    subtotal,
-    shippingFee,
-  } = params;
-  const firstName = fullName.split(" ").pop() ?? fullName;
-  const totalFormatted = formatVnd(finalTotal);
-  const year = new Date().getFullYear();
-  const showBreakdown = subtotal !== undefined && shippingFee !== undefined;
-  const itemRows = buildItemRows(items);
+// ── Sample data ─────────────────────────────────────────────────────────────
 
-  return `<!DOCTYPE html>
+const SAMPLE_PARAMS = {
+  orderId: "DR-2026-001",
+  fullName: toTitleCase("nguyễn cao nguyên"),
+  items: [
+    {
+      sku: "driip-slide",
+      productName: "Driip Slide",
+      size: "40-41",
+      color: "cyan-blue",
+      quantity: 2,
+    },
+    {
+      sku: "driip-slide",
+      productName: "Driip Slide",
+      size: "38-39",
+      color: "hot-pink",
+      quantity: 1,
+    },
+  ],
+  finalTotal: 607000,
+  subtotal: 572000,
+  shippingFee: 0,
+  address: "123 Đường Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh",
+  phone: "0901 234 567",
+};
+
+// ── Build HTML ───────────────────────────────────────────────────────────────
+
+const {
+  orderId,
+  fullName,
+  items,
+  finalTotal,
+  subtotal,
+  shippingFee,
+  address,
+  phone,
+} = SAMPLE_PARAMS;
+const showBreakdown = subtotal !== undefined && shippingFee !== undefined;
+const itemRows = buildItemRows(items);
+const year = new Date().getFullYear();
+
+const html = `<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Xác nhận đơn hàng – driip-</title>
+  <title>Xác nhận đơn hàng – driip- [PREVIEW]</title>
+  <style>
+    body { margin: 0; padding: 0; }
+    .preview-bar { background: #1a1a1a; color: #888; font-family: monospace; font-size: 12px; padding: 8px 16px; text-align: center; border-bottom: 1px solid #333; }
+    .preview-bar strong { color: #fff; }
+  </style>
 </head>
-<body style="margin:0;padding:0;background:#050505;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<body>
+  <div class="preview-bar">📧 <strong>Email Preview</strong> — driip- order confirmation — not a real send</div>
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#050505;padding:40px 16px;">
     <tr>
       <td align="center">
@@ -144,9 +167,7 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
                 items.length
               } sản phẩm</p>
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-top:1px solid #1a1a1a;">
-                <tbody>
-                  ${itemRows}
-                </tbody>
+                <tbody>${itemRows}</tbody>
               </table>
             </td>
           </tr>
@@ -160,9 +181,9 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
                     ? `
                 <tr>
                   <td style="font-size:13px;color:#888;padding-bottom:8px;">Tạm tính</td>
-                  <td style="font-size:13px;color:#d4d4d4;text-align:right;padding-bottom:8px;">
-                    ${formatVnd(subtotal)}
-                  </td>
+                  <td style="font-size:13px;color:#d4d4d4;text-align:right;padding-bottom:8px;">${formatVnd(
+                    subtotal
+                  )}</td>
                 </tr>
                 <tr>
                   <td style="font-size:13px;color:#888;padding-bottom:12px;">
@@ -186,9 +207,9 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
                 }
                 <tr>
                   <td style="font-size:13px;color:#888;">Tổng thanh toán (COD)</td>
-                  <td style="font-size:20px;font-weight:700;color:#ffffff;text-align:right;letter-spacing:-0.01em;">
-                    ${formatVnd(finalTotal)}
-                  </td>
+                  <td style="font-size:20px;font-weight:700;color:#ffffff;text-align:right;letter-spacing:-0.01em;">${formatVnd(
+                    finalTotal
+                  )}</td>
                 </tr>
               </table>
             </td>
@@ -197,9 +218,7 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
           <!-- Shipping -->
           <tr>
             <td style="padding-top:32px;padding-bottom:32px;border-bottom:1px solid #1a1a1a;">
-              <p style="margin:0 0 12px 0;font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#555;">
-                GIAO HÀNG
-              </p>
+              <p style="margin:0 0 12px 0;font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#555;">GIAO HÀNG</p>
               <p style="margin:0 0 6px 0;font-size:13px;color:#d4d4d4;">${fullName}</p>
               <p style="margin:0 0 6px 0;font-size:13px;color:#888;">${phone}</p>
               <p style="margin:0;font-size:13px;color:#888;">${address}</p>
@@ -209,28 +228,11 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
           <!-- What next -->
           <tr>
             <td style="padding-top:32px;padding-bottom:32px;border-bottom:1px solid #1a1a1a;">
-              <p style="margin:0 0 16px 0;font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#555;">
-                TIẾP THEO
-              </p>
+              <p style="margin:0 0 16px 0;font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#555;">TIẾP THEO</p>
               <table cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding-bottom:12px;">
-                    <span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">01</span>
-                    <span style="font-size:13px;color:#888;">Team driip- đã xác nhận đơn hàng kể từ lúc bạn nhận được email này</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding-bottom:12px;">
-                    <span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">02</span>
-                    <span style="font-size:13px;color:#888;">Sản phẩm được đóng gói và bàn giao cho đơn vị vận chuyển</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">03</span>
-                    <span style="font-size:13px;color:#888;">Giao hàng trong 3–10 ngày, miễn phí vận chuyển toàn quốc</span>
-                  </td>
-                </tr>
+                <tr><td style="padding-bottom:12px;"><span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">01</span><span style="font-size:13px;color:#888;">Team driip- đã xác nhận đơn hàng kể từ lúc bạn nhận được email này</span></td></tr>
+                <tr><td style="padding-bottom:12px;"><span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">02</span><span style="font-size:13px;color:#888;">Sản phẩm được đóng gói và bàn giao cho đơn vị vận chuyển</span></td></tr>
+                <tr><td><span style="display:inline-block;width:20px;font-size:11px;font-weight:700;color:#555;letter-spacing:0.1em;">03</span><span style="font-size:13px;color:#888;">Giao hàng trong 3–10 ngày, miễn phí vận chuyển toàn quốc</span></td></tr>
               </table>
             </td>
           </tr>
@@ -242,9 +244,7 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
                 Có thắc mắc? Liên hệ Driip qua
                 <a href="https://www.facebook.com/profile.php?id=61585105804316" style="color:#888;text-decoration:none;">Facebook Messenger</a>.
               </p>
-              <p style="margin:0;font-size:11px;color:#333;letter-spacing:0.05em;">
-                © 2026 DRIIP. driip.io
-              </p>
+              <p style="margin:0;font-size:11px;color:#333;letter-spacing:0.05em;">© ${year} DRIIP. driip.io</p>
             </td>
           </tr>
 
@@ -254,33 +254,14 @@ function buildOrderEmailHtml(params: OrderEmailParams): string {
   </table>
 </body>
 </html>`;
-}
 
-export async function sendOrderConfirmationEmail(
-  params: OrderEmailParams,
-  apiKey: string
-): Promise<void> {
-  console.log(`[Email] Sending to: ${params.to}, order: ${params.orderId}`);
+const outPath = resolve(import.meta.dir, "../.preview-email.html");
+await Bun.write(outPath, html);
+console.log(`✓ Preview written to: ${outPath}`);
 
-  if (!params.to || !params.to.includes("@")) {
-    console.log("[Email] SKIPPED: invalid email address");
-    return;
-  }
-
-  const resend = new Resend(apiKey);
-  console.log("[Email] Resend client initialized");
-
-  try {
-    const result = await resend.emails.send({
-      from: "driip- <noreply@driip.io>",
-      to: params.to,
-      subject: `Đơn hàng #${params.orderId} đã được xác nhận – driip-`,
-      html: buildOrderEmailHtml(params),
-    });
-    const emailId = result.data?.id ?? "unknown";
-    console.log(`[Email] SENT successfully, id: ${emailId}`);
-  } catch (err: unknown) {
-    console.error(`[Email] FAILED to send:`, err);
-    throw err;
-  }
+try {
+  execSync(`open "${outPath}"`);
+  console.log("✓ Opened in browser");
+} catch {
+  console.log("→ Open manually:", outPath);
 }
