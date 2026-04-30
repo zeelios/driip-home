@@ -226,17 +226,26 @@ export default defineEventHandler(async (event) => {
       const grandDiscount = grandCompareTotal - grandFinalTotal;
 
       shippingFee = getSlideShippingFee(totalPairs);
-      const grandTotal = getSlideGrandTotal(totalPairs);
+      const grandTotal = getSlideGrandTotal(totalPairs); // product + shipping
 
       totalCompare = grandCompareTotal;
       totalTier = grandFinalTotal;
       totalFinal = grandTotal;
-      subtotal = grandFinalTotal; // Product price only
+      subtotal = grandFinalTotal; // product-only, used for email breakdown
+
+      // K = compare total + shipping (full price the customer would have paid)
+      const compareWithShipping = grandCompareTotal + shippingFee;
+      // L = discount = K - N (compareWithShipping - grandTotal)
+      const grandDiscountWithShipping = compareWithShipping - grandTotal;
 
       // Allocate totals evenly across ALL individual pair rows
-      const comparePerPair = allocateEvenly(grandCompareTotal, totalPairs);
-      const discountPerPair = allocateEvenly(grandDiscount, totalPairs);
-      const finalPerPair = allocateEvenly(grandFinalTotal, totalPairs);
+      const comparePerPair = allocateEvenly(compareWithShipping, totalPairs);
+      const discountPerPair = allocateEvenly(
+        grandDiscountWithShipping,
+        totalPairs
+      );
+      // N: grandTotal (deal price + shipping) distributed evenly across pairs
+      const finalPerPair = allocateEvenly(grandTotal, totalPairs);
 
       let pairCursor = 0;
 
@@ -269,18 +278,11 @@ export default defineEventHandler(async (event) => {
             isFirstRow ? cleanPhone : "", // H: SĐT
             isFirstRow ? fullName : "", // I: Tên
             isFirstRow ? address : "", // J: Địa Chỉ
-            rowCompare, // K: Tổng Tiền (normal price per pair)
-            rowDiscount, // L: Chiết Khấu
+            rowCompare, // K: Tổng Tiền (full compare price + shipping, per pair)
+            rowDiscount, // L: Chiết Khấu (K - N)
             "0", // M: Đặt Cọc
-            rowFinal, // N: Dư Nợ (actual charged per pair)
-            isFirstRow
-              ? `${note ?? ""}${
-                  shippingFee > 0
-                    ? (note ? " · " : "") +
-                      `Ship +${shippingFee.toLocaleString("vi-VN")}đ`
-                    : ""
-                }`.trim()
-              : "", // O: Note
+            rowFinal, // N: Dư Nợ (grand total incl. shipping, split evenly across pairs)
+            isFirstRow ? note ?? "" : "", // O: Note
             salesSource, // P: Sales
             "", // Q: Comestic Tracking
             "", // R: Global Tracking

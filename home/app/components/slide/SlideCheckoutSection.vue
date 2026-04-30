@@ -488,9 +488,43 @@ function handleSubmit(): void {
               }))
             "
             :order="store.order"
-            :total-label="t('slide.cart.total')"
+            total-label="TỔNG CỘNG"
             :total-value="store.formattedGrandTotal"
-          />
+          >
+            <template #pricing>
+              <div class="slide-price-row">
+                <span class="slide-price-label">{{
+                  t("slide.cart.subtotal")
+                }}</span>
+                <span class="slide-price-val">{{
+                  formatVnd(store.grandTotal - store.shippingFee)
+                }}</span>
+              </div>
+              <div v-if="store.shippingFee > 0" class="slide-price-row">
+                <span class="slide-price-label">{{
+                  t("slide.cart.shipping")
+                }}</span>
+                <span class="slide-price-val"
+                  >+{{ store.formattedShippingFee }}</span
+                >
+              </div>
+              <div v-else class="slide-price-row">
+                <span class="slide-price-label">{{
+                  t("slide.cart.shipping")
+                }}</span>
+                <span class="slide-price-val free">{{
+                  t("slide.cart.freeShipping")
+                }}</span>
+              </div>
+              <div class="slide-price-divider" />
+              <div class="slide-price-row total">
+                <span>TỔNG CỘNG</span>
+                <span class="slide-price-big">{{
+                  store.formattedGrandTotal
+                }}</span>
+              </div>
+            </template>
+          </SharedOrderReview>
 
           <div v-if="store.orderState === 'error'" class="slide-error">
             {{ t("common.error") }}
@@ -1224,6 +1258,52 @@ function handleSubmit(): void {
   justify-content: space-between;
   gap: 16px;
   margin-top: 32px;
+}
+
+/* ── PRICE BREAKDOWN (inside SharedOrderReview #pricing slot) ────── */
+.slide-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.slide-price-row:last-child {
+  border-bottom: none;
+}
+.slide-price-row.total {
+  padding-top: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--white);
+}
+.slide-price-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+}
+.slide-price-val {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.75);
+}
+.slide-price-val.free {
+  color: #4ade80;
+}
+.slide-price-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 0;
+}
+.slide-price-big {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .slide-error {
