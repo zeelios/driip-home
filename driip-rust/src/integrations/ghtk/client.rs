@@ -47,10 +47,7 @@ impl GhtkClient {
 
     // ── Fee Estimation ──────────────────────────────────────────────────────
 
-    pub async fn estimate_fee(
-        &self,
-        req: &GhtkFeeRequest,
-    ) -> Result<GhtkFeeData, GhtkError> {
+    pub async fn estimate_fee(&self, req: &GhtkFeeRequest) -> Result<GhtkFeeData, GhtkError> {
         let url = format!(
             "{}/services/shipment/fee?pick_address={}&pick_province={}&pick_district={}\
              &address={}&province={}&district={}&weight={}&value={}&transport={}&deliver_option={}",
@@ -80,16 +77,12 @@ impl GhtkClient {
             return Err(GhtkError::Api { code, message });
         }
 
-        serde_json::from_value(resp["fee"].clone())
-            .map_err(|e| GhtkError::Parse(e.to_string()))
+        serde_json::from_value(resp["fee"].clone()).map_err(|e| GhtkError::Parse(e.to_string()))
     }
 
     // ── Create Shipment ─────────────────────────────────────────────────────
 
-    pub async fn create_order(
-        &self,
-        req: &GhtkOrderRequest,
-    ) -> Result<GhtkOrderData, GhtkError> {
+    pub async fn create_order(&self, req: &GhtkOrderRequest) -> Result<GhtkOrderData, GhtkError> {
         let url = format!("{}/services/shipment/order/?ver=1.5", self.base_url);
         let resp: Value = self.post_json(&url, req).await?;
 
@@ -100,8 +93,7 @@ impl GhtkClient {
             return Err(GhtkError::Api { code, message });
         }
 
-        serde_json::from_value(resp["order"].clone())
-            .map_err(|e| GhtkError::Parse(e.to_string()))
+        serde_json::from_value(resp["order"].clone()).map_err(|e| GhtkError::Parse(e.to_string()))
     }
 
     // ── Cancel Order ────────────────────────────────────────────────────────
@@ -142,8 +134,8 @@ impl GhtkClient {
     ) -> Result<GhtkWebhookPayload, GhtkError> {
         if let Some(secret) = &self.webhook_secret {
             type HmacSha256 = Hmac<Sha256>;
-            let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
-                .expect("HMAC accepts any key length");
+            let mut mac =
+                HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC accepts any key length");
             mac.update(raw_body);
             let expected = B64.encode(mac.finalize().into_bytes());
 
@@ -187,10 +179,7 @@ impl GhtkClient {
         self.check_and_parse(resp).await
     }
 
-    async fn check_and_parse(
-        &self,
-        resp: reqwest::Response,
-    ) -> Result<Value, GhtkError> {
+    async fn check_and_parse(&self, resp: reqwest::Response) -> Result<Value, GhtkError> {
         let status = resp.status();
         let text = resp.text().await.map_err(GhtkError::Http)?;
 
@@ -198,8 +187,7 @@ impl GhtkClient {
             return Err(GhtkError::NotFound);
         }
 
-        serde_json::from_str(&text).map_err(|e| {
-            GhtkError::Parse(format!("HTTP {status}, body: {text}, parse: {e}"))
-        })
+        serde_json::from_str(&text)
+            .map_err(|e| GhtkError::Parse(format!("HTTP {status}, body: {text}, parse: {e}")))
     }
 }

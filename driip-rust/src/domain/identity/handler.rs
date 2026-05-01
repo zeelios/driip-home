@@ -9,10 +9,11 @@ use validator::Validate;
 
 use crate::{
     auth::{
-        create_access_token, create_refresh_token, verify_token, AuthContext, RequireAdmin,
-        TokenKind,
+        check_permission, create_access_token, create_refresh_token, verify_token, AuthContext,
+        Permission, TokenKind,
     },
     errors::AppError,
+    middleware::sanitize::Sanitize,
     state::AppState,
 };
 
@@ -77,7 +78,7 @@ pub async fn refresh(
     }
 
     let token_hash = sha256_hex(&input.refresh_token);
-    let stored = RefreshTokenRepository::find_valid(&state.db, &token_hash)
+    let staff_id = RefreshTokenRepository::find_valid(&state.db, &token_hash)
         .await?
         .ok_or_else(|| AppError::Unauthorized("Token revoked or expired".into()))?;
 
@@ -85,26 +86,21 @@ pub async fn refresh(
     RefreshTokenRepository::revoke(&state.db, &token_hash).await?;
 
     let new_access = create_access_token(
-        stored.staff_id,
+        staff_id,
         &claims.role,
         &state.jwt_secret,
         state.jwt_access_ttl_secs,
     )?;
     let new_refresh = create_refresh_token(
-        stored.staff_id,
+        staff_id,
         &claims.role,
         &state.jwt_secret,
         state.jwt_refresh_ttl_secs,
     )?;
 
     let new_hash = sha256_hex(&new_refresh);
-    RefreshTokenRepository::create(
-        &state.db,
-        stored.staff_id,
-        &new_hash,
-        state.jwt_refresh_ttl_secs,
-    )
-    .await?;
+    RefreshTokenRepository::create(&state.db, staff_id, &new_hash, state.jwt_refresh_ttl_secs)
+        .await?;
 
     Ok(Json(TokenResponse {
         access_token: new_access,
@@ -124,9 +120,10 @@ pub async fn logout(
 
 pub async fn list(
     State(state): State<AppState>,
-    _ctx: AuthContext,
+    ctx: AuthContext,
     Query(filter): Query<StaffFilter>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::StaffList)?;
     let staff = StaffRepository::list(&state.db, &filter).await?;
     Ok(Json(staff))
 }
@@ -141,21 +138,24 @@ pub async fn me(
 
 pub async fn get(
     State(state): State<AppState>,
-    _ctx: AuthContext,
+    ctx: AuthContext,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::StaffRead)?;
     let profile = StaffRepository::find_by_id(&state.db, id).await?;
     Ok(Json(profile))
 }
 
 pub async fn create(
     State(state): State<AppState>,
-    RequireAdmin(_ctx): RequireAdmin,
+    ctx: AuthContext,
     Json(input): Json<CreateStaff>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::StaffCreate)?;
     input
         .validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
+    let input = input.sanitize();
 
     if StaffRepository::email_exists(&state.db, &input.email).await? {
         return Err(AppError::Conflict("Email already in use".into()));
@@ -167,13 +167,15 @@ pub async fn create(
 
 pub async fn update(
     State(state): State<AppState>,
-    RequireAdmin(_ctx): RequireAdmin,
+    ctx: AuthContext,
     Path(id): Path<Uuid>,
     Json(input): Json<UpdateStaff>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::StaffUpdate)?;
     input
         .validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
+    let input = input.sanitize();
 
     let profile = StaffRepository::update(&state.db, id, input).await?;
     Ok(Json(profile))
@@ -200,9 +202,10 @@ pub async fn change_password(
 
 pub async fn delete(
     State(state): State<AppState>,
-    RequireAdmin(_ctx): RequireAdmin,
+    ctx: AuthContext,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::StaffDelete)?;
     StaffRepository::delete(&state.db, id).await?;
     Ok(StatusCode::NO_CONTENT)
 }

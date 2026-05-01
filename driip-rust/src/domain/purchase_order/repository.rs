@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::errors::AppError;
 
 use super::model::{
-    PoFilter, PurchaseOrder, PurchaseOrderDetail, PurchaseOrderItem, CreatePurchaseOrder,
+    CreatePurchaseOrder, PoFilter, PurchaseOrder, PurchaseOrderDetail, PurchaseOrderItem,
     ReceivePurchaseOrder, UpdatePurchaseOrder,
 };
 use crate::domain::notification::model::CreateNotification;
@@ -35,14 +35,13 @@ impl PurchaseOrderRepository {
     }
 
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<PurchaseOrderDetail, AppError> {
-        let order = sqlx::query_as::<_, PurchaseOrder>(
-            "SELECT * FROM purchase_orders WHERE id = $1",
-        )
-        .bind(id)
-        .fetch_optional(pool)
-        .await
-        .map_err(AppError::Database)?
-        .ok_or_else(|| AppError::NotFound("Purchase order not found".into()))?;
+        let order =
+            sqlx::query_as::<_, PurchaseOrder>("SELECT * FROM purchase_orders WHERE id = $1")
+                .bind(id)
+                .fetch_optional(pool)
+                .await
+                .map_err(AppError::Database)?
+                .ok_or_else(|| AppError::NotFound("Purchase order not found".into()))?;
 
         let items = sqlx::query_as::<_, PurchaseOrderItem>(
             "SELECT * FROM purchase_order_items WHERE purchase_order_id = $1 ORDER BY id",
@@ -107,14 +106,13 @@ impl PurchaseOrderRepository {
         id: Uuid,
         input: UpdatePurchaseOrder,
     ) -> Result<PurchaseOrder, AppError> {
-        let current = sqlx::query_as::<_, PurchaseOrder>(
-            "SELECT * FROM purchase_orders WHERE id = $1",
-        )
-        .bind(id)
-        .fetch_optional(pool)
-        .await
-        .map_err(AppError::Database)?
-        .ok_or_else(|| AppError::NotFound("Purchase order not found".into()))?;
+        let current =
+            sqlx::query_as::<_, PurchaseOrder>("SELECT * FROM purchase_orders WHERE id = $1")
+                .bind(id)
+                .fetch_optional(pool)
+                .await
+                .map_err(AppError::Database)?
+                .ok_or_else(|| AppError::NotFound("Purchase order not found".into()))?;
 
         if current.status != "draft" {
             return Err(AppError::Validation(
@@ -149,14 +147,13 @@ impl PurchaseOrderRepository {
         po_id: Uuid,
         input: ReceivePurchaseOrder,
     ) -> Result<PurchaseOrderDetail, AppError> {
-        let current = sqlx::query_as::<_, PurchaseOrder>(
-            "SELECT * FROM purchase_orders WHERE id = $1",
-        )
-        .bind(po_id)
-        .fetch_optional(pool)
-        .await
-        .map_err(AppError::Database)?
-        .ok_or_else(|| AppError::NotFound("Purchase order not found".into()))?;
+        let current =
+            sqlx::query_as::<_, PurchaseOrder>("SELECT * FROM purchase_orders WHERE id = $1")
+                .bind(po_id)
+                .fetch_optional(pool)
+                .await
+                .map_err(AppError::Database)?
+                .ok_or_else(|| AppError::NotFound("Purchase order not found".into()))?;
 
         if matches!(current.status.as_str(), "received" | "cancelled") {
             return Err(AppError::Validation(
@@ -225,14 +222,12 @@ impl PurchaseOrderRepository {
         let full = status_row.fully_received.unwrap_or(0);
         let new_status = if full == total { "received" } else { "partial" };
 
-        sqlx::query(
-            "UPDATE purchase_orders SET status = $2, updated_at = NOW() WHERE id = $1",
-        )
-        .bind(po_id)
-        .bind(new_status)
-        .execute(&mut *tx)
-        .await
-        .map_err(AppError::Database)?;
+        sqlx::query("UPDATE purchase_orders SET status = $2, updated_at = NOW() WHERE id = $1")
+            .bind(po_id)
+            .bind(new_status)
+            .execute(&mut *tx)
+            .await
+            .map_err(AppError::Database)?;
 
         tx.commit().await.map_err(AppError::Database)?;
 
@@ -240,7 +235,6 @@ impl PurchaseOrderRepository {
         NotificationRepository::broadcast(
             pool,
             CreateNotification {
-                staff_id: None,
                 kind: "po_received",
                 title: format!("Stock received: PO from {}", current.supplier_name),
                 body: Some(format!("{} items received", input.items.len())),

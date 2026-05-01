@@ -30,13 +30,6 @@ pub enum GhtkDeliverOption {
     None,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct GhtkFeeResponse {
-    pub success: bool,
-    pub message: String,
-    pub fee: Option<GhtkFeeData>,
-}
-
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct GhtkFeeData {
     pub name: String,
@@ -92,13 +85,6 @@ pub struct GhtkOrderPayload {
 pub struct GhtkTag {
     pub id: i32,
     pub weight: f64,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct GhtkOrderResponse {
-    pub success: bool,
-    pub message: String,
-    pub order: Option<GhtkOrderData>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

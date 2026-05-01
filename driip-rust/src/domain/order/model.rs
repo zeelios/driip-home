@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
+use crate::middleware::sanitize::{sanitize_opt, sanitize_str, Sanitize};
+
 #[derive(Debug, Serialize, sqlx::FromRow)]
 pub struct Order {
     pub id: Uuid,
@@ -52,6 +54,21 @@ pub struct UpdateOrder {
     pub status: Option<String>,
     #[validate(length(max = 1000))]
     pub notes: Option<String>,
+}
+
+impl Sanitize for CreateOrder {
+    fn sanitize(mut self) -> Self {
+        self.notes = sanitize_opt(self.notes.as_deref(), 1000);
+        self
+    }
+}
+
+impl Sanitize for UpdateOrder {
+    fn sanitize(mut self) -> Self {
+        self.status = self.status.as_deref().and_then(|s| sanitize_str(s, 50));
+        self.notes = sanitize_opt(self.notes.as_deref(), 1000);
+        self
+    }
 }
 
 #[derive(Debug, Deserialize, Validate)]

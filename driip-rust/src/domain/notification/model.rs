@@ -23,7 +23,6 @@ pub struct NotificationFilter {
 /// Internal helper for creating a notification — not exposed via API.
 #[derive(Debug)]
 pub struct CreateNotification {
-    pub staff_id: Option<Uuid>,
     pub kind: &'static str,
     pub title: String,
     pub body: Option<String>,

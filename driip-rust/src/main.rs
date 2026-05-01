@@ -8,7 +8,6 @@ use tower_http::{
 };
 
 mod auth;
-mod cache;
 mod config;
 mod db;
 mod domain;
@@ -75,8 +74,6 @@ async fn main() {
             std::process::exit(1);
         });
 
-    let app_cache = cache::AppCache::new(cfg.upstash_url.clone(), cfg.upstash_token.clone());
-
     let ghtk_client = cfg.ghtk_token.as_ref().map(|token| {
         tracing::info!("GHTK client initialized (sandbox={})", cfg.ghtk_sandbox);
         std::sync::Arc::new(integrations::ghtk::GhtkClient::new(
@@ -88,7 +85,6 @@ async fn main() {
 
     let state = state::AppState {
         db: pool,
-        cache: app_cache,
         jwt_secret: cfg.jwt_secret.clone(),
         jwt_access_ttl_secs: cfg.jwt_access_ttl_secs,
         jwt_refresh_ttl_secs: cfg.jwt_refresh_ttl_secs,
@@ -136,6 +132,22 @@ fn build_router(state: state::AppState) -> Router {
             middleware::rate_limit::auth_rate_limit,
         ));
 
+    // ── Public customer auth routes with stricter rate limit ─────────────
+    let public_auth_router = axum::Router::new()
+        .nest("/api/v1/public", domain::public_auth_router())
+        .layer(axum_middleware::from_fn_with_state(
+            state.clone(),
+            middleware::rate_limit::public_auth_rate_limit,
+        ));
+
+    // ── Public customer routes with storefront rate limit ─────────────────
+    let public_router = axum::Router::new()
+        .nest("/api/v1/public", domain::public_router())
+        .layer(axum_middleware::from_fn_with_state(
+            state.clone(),
+            middleware::rate_limit::public_rate_limit,
+        ));
+
     // ── All other routes with global rate limit ───────────────────────────
     let api_router = axum::Router::new().nest("/api/v1", domain::router()).layer(
         axum_middleware::from_fn_with_state(
@@ -146,6 +158,8 @@ fn build_router(state: state::AppState) -> Router {
 
     Router::new()
         .merge(auth_router)
+        .merge(public_auth_router)
+        .merge(public_router)
         .merge(api_router)
         // Security response headers on every response
         .layer(axum_middleware::from_fn(

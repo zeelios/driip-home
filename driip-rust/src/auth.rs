@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use axum::{
     extract::{FromRef, FromRequestParts},
     http::{request::Parts, HeaderMap},
@@ -25,6 +27,240 @@ pub struct Claims {
 pub enum TokenKind {
     Access,
     Refresh,
+}
+
+// ── Permissions ────────────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Permission {
+    // Staff
+    StaffList,
+    StaffRead,
+    StaffCreate,
+    StaffUpdate,
+    StaffDelete,
+    // Order
+    OrderList,
+    OrderRead,
+    OrderCreate,
+    OrderUpdate,
+    OrderDelete,
+    OrderConfirm,
+    OrderCancel,
+    OrderSetPriority,
+    OrderReallocate,
+    // Product
+    ProductList,
+    ProductRead,
+    ProductCreate,
+    ProductUpdate,
+    ProductDelete,
+    // Customer
+    CustomerList,
+    CustomerRead,
+    CustomerCreate,
+    CustomerUpdate,
+    CustomerDelete,
+    // Inventory
+    InventoryList,
+    InventoryRead,
+    InventoryCreate,
+    InventoryUpdate,
+    InventoryDelete,
+    InventoryReserve,
+    // Warehouse
+    WarehouseList,
+    WarehouseRead,
+    WarehouseCreate,
+    WarehouseUpdate,
+    WarehouseDelete,
+    // Fulfillment
+    FulfillmentRead,
+    FulfillmentBook,
+    FulfillmentCancel,
+    FulfillmentManageCatalog,
+    FulfillmentManageFees,
+    // Purchase Order
+    PurchaseOrderList,
+    PurchaseOrderRead,
+    PurchaseOrderCreate,
+    PurchaseOrderUpdate,
+    PurchaseOrderDelete,
+    PurchaseOrderReceive,
+    // Notification
+    NotificationList,
+    NotificationMarkRead,
+}
+
+/// Return the set of permissions granted to a given role.
+pub fn permissions_for_role(role: &str) -> HashSet<Permission> {
+    let mut perms = HashSet::new();
+    match role {
+        "admin" => {
+            use Permission::*;
+            perms.extend([
+                StaffList,
+                StaffRead,
+                StaffCreate,
+                StaffUpdate,
+                StaffDelete,
+                OrderList,
+                OrderRead,
+                OrderCreate,
+                OrderUpdate,
+                OrderDelete,
+                OrderConfirm,
+                OrderCancel,
+                OrderSetPriority,
+                OrderReallocate,
+                ProductList,
+                ProductRead,
+                ProductCreate,
+                ProductUpdate,
+                ProductDelete,
+                CustomerList,
+                CustomerRead,
+                CustomerCreate,
+                CustomerUpdate,
+                CustomerDelete,
+                InventoryList,
+                InventoryRead,
+                InventoryCreate,
+                InventoryUpdate,
+                InventoryDelete,
+                InventoryReserve,
+                WarehouseList,
+                WarehouseRead,
+                WarehouseCreate,
+                WarehouseUpdate,
+                WarehouseDelete,
+                FulfillmentRead,
+                FulfillmentBook,
+                FulfillmentCancel,
+                FulfillmentManageCatalog,
+                FulfillmentManageFees,
+                PurchaseOrderList,
+                PurchaseOrderRead,
+                PurchaseOrderCreate,
+                PurchaseOrderUpdate,
+                PurchaseOrderDelete,
+                PurchaseOrderReceive,
+                NotificationList,
+                NotificationMarkRead,
+            ]);
+        }
+        "manager" => {
+            use Permission::*;
+            perms.extend([
+                StaffList,
+                StaffRead,
+                OrderList,
+                OrderRead,
+                OrderCreate,
+                OrderUpdate,
+                OrderDelete,
+                OrderConfirm,
+                OrderCancel,
+                OrderSetPriority,
+                OrderReallocate,
+                ProductList,
+                ProductRead,
+                ProductCreate,
+                ProductUpdate,
+                ProductDelete,
+                CustomerList,
+                CustomerRead,
+                CustomerCreate,
+                CustomerUpdate,
+                CustomerDelete,
+                InventoryList,
+                InventoryRead,
+                InventoryCreate,
+                InventoryUpdate,
+                InventoryDelete,
+                InventoryReserve,
+                WarehouseList,
+                WarehouseRead,
+                WarehouseCreate,
+                WarehouseUpdate,
+                WarehouseDelete,
+                FulfillmentRead,
+                FulfillmentBook,
+                FulfillmentCancel,
+                FulfillmentManageCatalog,
+                FulfillmentManageFees,
+                PurchaseOrderList,
+                PurchaseOrderRead,
+                PurchaseOrderCreate,
+                PurchaseOrderUpdate,
+                PurchaseOrderDelete,
+                PurchaseOrderReceive,
+                NotificationList,
+                NotificationMarkRead,
+            ]);
+        }
+        "staff" => {
+            use Permission::*;
+            perms.extend([
+                OrderList,
+                OrderRead,
+                OrderCreate,
+                OrderUpdate,
+                OrderConfirm,
+                OrderCancel,
+                CustomerList,
+                CustomerRead,
+                CustomerCreate,
+                CustomerUpdate,
+                ProductList,
+                ProductRead,
+                InventoryList,
+                InventoryRead,
+                InventoryReserve,
+                FulfillmentRead,
+                FulfillmentBook,
+                FulfillmentCancel,
+                PurchaseOrderList,
+                PurchaseOrderRead,
+                PurchaseOrderCreate,
+                NotificationList,
+                NotificationMarkRead,
+            ]);
+        }
+        "readonly" => {
+            use Permission::*;
+            perms.extend([
+                StaffList,
+                StaffRead,
+                OrderList,
+                OrderRead,
+                ProductList,
+                ProductRead,
+                CustomerList,
+                CustomerRead,
+                InventoryList,
+                InventoryRead,
+                WarehouseList,
+                WarehouseRead,
+                FulfillmentRead,
+                PurchaseOrderList,
+                PurchaseOrderRead,
+                NotificationList,
+            ]);
+        }
+        _ => {}
+    }
+    perms
+}
+
+/// Verify that the authenticated context has the required permission.
+pub fn check_permission(ctx: &AuthContext, perm: Permission) -> Result<(), AppError> {
+    let perms = permissions_for_role(&ctx.role);
+    if perms.contains(&perm) {
+        Ok(())
+    } else {
+        Err(AppError::Forbidden)
+    }
 }
 
 // ── Token generation ────────────────────────────────────────────────────────
@@ -124,31 +360,76 @@ fn extract_bearer(headers: &HeaderMap) -> Result<&str, AppError> {
         .ok_or_else(|| AppError::Unauthorized("Missing or malformed Authorization header".into()))
 }
 
-// ── Role guards ─────────────────────────────────────────────────────────────
+// Role-based extractors removed; use `check_permission` instead.
 
-/// Extractor that requires the `admin` role.
-pub struct RequireAdmin(pub AuthContext);
+// ── Customer JWT ────────────────────────────────────────────────────────────
 
-impl<S> FromRequestParts<S> for RequireAdmin
-where
-    AppState: axum::extract::FromRef<S>,
-    S: Send + Sync,
-{
-    type Rejection = AppError;
-
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let ctx = AuthContext::from_request_parts(parts, state).await?;
-        if ctx.role != "admin" {
-            return Err(AppError::Forbidden);
-        }
-        Ok(Self(ctx))
-    }
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CustomerClaims {
+    pub sub: Uuid, // customer_id
+    pub exp: i64,
+    pub iat: i64,
+    pub kind: TokenKind, // access | refresh
 }
 
-/// Extractor that requires `admin` or `manager` role.
-pub struct RequireManager(pub AuthContext);
+pub fn create_customer_access_token(
+    customer_id: Uuid,
+    secret: &str,
+    ttl_secs: u64,
+) -> Result<String, AppError> {
+    let now = Utc::now();
+    let claims = CustomerClaims {
+        sub: customer_id,
+        exp: (now + Duration::seconds(ttl_secs as i64)).timestamp(),
+        iat: now.timestamp(),
+        kind: TokenKind::Access,
+    };
+    encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(secret.as_bytes()),
+    )
+    .map_err(|e| AppError::Internal(format!("JWT encode error: {e}")))
+}
 
-impl<S> FromRequestParts<S> for RequireManager
+pub fn create_customer_refresh_token(
+    customer_id: Uuid,
+    secret: &str,
+    ttl_secs: u64,
+) -> Result<String, AppError> {
+    let now = Utc::now();
+    let claims = CustomerClaims {
+        sub: customer_id,
+        exp: (now + Duration::seconds(ttl_secs as i64)).timestamp(),
+        iat: now.timestamp(),
+        kind: TokenKind::Refresh,
+    };
+    encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(secret.as_bytes()),
+    )
+    .map_err(|e| AppError::Internal(format!("JWT encode error: {e}")))
+}
+
+pub fn verify_customer_token(token: &str, secret: &str) -> Result<CustomerClaims, AppError> {
+    decode::<CustomerClaims>(
+        token,
+        &DecodingKey::from_secret(secret.as_bytes()),
+        &Validation::default(),
+    )
+    .map(|data| data.claims)
+    .map_err(|e| AppError::Unauthorized(format!("Invalid token: {e}")))
+}
+
+// ── CustomerAuth extractor ─────────────────────────────────────────────────
+
+#[derive(Debug, Clone)]
+pub struct CustomerAuth {
+    pub customer_id: Uuid,
+}
+
+impl<S> FromRequestParts<S> for CustomerAuth
 where
     AppState: axum::extract::FromRef<S>,
     S: Send + Sync,
@@ -156,10 +437,16 @@ where
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let ctx = AuthContext::from_request_parts(parts, state).await?;
-        if !matches!(ctx.role.as_str(), "admin" | "manager") {
-            return Err(AppError::Forbidden);
+        let app_state = AppState::from_ref(state);
+        let token = extract_bearer(&parts.headers)?;
+        let claims = verify_customer_token(token, &app_state.jwt_secret)?;
+
+        if claims.kind != TokenKind::Access {
+            return Err(AppError::Unauthorized("Expected access token".to_string()));
         }
-        Ok(Self(ctx))
+
+        Ok(CustomerAuth {
+            customer_id: claims.sub,
+        })
     }
 }

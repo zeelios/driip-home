@@ -100,6 +100,32 @@ pub async fn auth_rate_limit(State(state): State<AppState>, req: Request, next: 
     next.run(req).await
 }
 
+/// Public auth limiter: 10 requests per minute per IP.
+pub async fn public_auth_rate_limit(
+    State(state): State<AppState>,
+    req: Request,
+    next: Next,
+) -> Response {
+    let ip = client_ip(&req);
+    if !state.rate_limiter.check("public_auth", &ip, 10, 60).await {
+        return rate_limited_response(&ip, "public_auth");
+    }
+    next.run(req).await
+}
+
+/// Public storefront limiter: 120 requests per minute per IP.
+pub async fn public_rate_limit(
+    State(state): State<AppState>,
+    req: Request,
+    next: Next,
+) -> Response {
+    let ip = client_ip(&req);
+    if !state.rate_limiter.check("public", &ip, 120, 60).await {
+        return rate_limited_response(&ip, "public");
+    }
+    next.run(req).await
+}
+
 /// Global limiter: 300 requests per minute per IP.
 pub async fn global_rate_limit(
     State(state): State<AppState>,

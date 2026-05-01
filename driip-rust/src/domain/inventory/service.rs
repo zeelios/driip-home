@@ -94,39 +94,6 @@ impl InventoryService {
         Ok(())
     }
 
-    /// Release reservations inside an existing transaction (used during reallocate).
-    pub async fn release_for_order_tx(
-        tx: &mut Transaction<'_, Postgres>,
-        order_id: Uuid,
-    ) -> Result<(), AppError> {
-        sqlx::query_unchecked!(
-            r#"
-            UPDATE inventory i
-            SET reserved_quantity = GREATEST(0, i.reserved_quantity - oi.reserved_qty),
-                updated_at = NOW()
-            FROM order_items oi
-            WHERE oi.order_id    = $1
-              AND oi.inventory_id = i.id
-              AND oi.reserved_qty > 0
-            "#,
-            order_id,
-        )
-        .execute(&mut **tx)
-        .await
-        .map_err(AppError::Database)?;
-
-        // Zero-out the order_items reservation tracking
-        sqlx::query_unchecked!(
-            "UPDATE order_items SET reserved_qty = 0, inventory_id = NULL WHERE order_id = $1",
-            order_id,
-        )
-        .execute(&mut **tx)
-        .await
-        .map_err(AppError::Database)?;
-
-        Ok(())
-    }
-
     /// Compute the `inventory_status` for an order based on its items' reserved_qty.
     ///
     /// Returns: "ready" | "partial" | "unavailable"

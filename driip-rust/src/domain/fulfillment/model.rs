@@ -2,7 +2,10 @@ use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::integrations::ghtk::models::{GhtkDeliverOption, GhtkTransport};
+use crate::{
+    integrations::ghtk::models::{GhtkDeliverOption, GhtkTransport},
+    middleware::sanitize::{sanitize_opt, sanitize_str, Sanitize},
+};
 
 // ── Shipment ──────────────────────────────────────────────────────────────────
 
@@ -102,8 +105,6 @@ pub struct AddOrderFeeLine {
 pub struct BookShipmentRequest {
     /// Grams — defaults to 500 if not provided
     pub weight_grams: Option<i32>,
-    /// Date GHTK should pick up (None = today)
-    pub pick_date: Option<NaiveDate>,
     /// Road (default) or fly
     pub transport: Option<GhtkTransport>,
     /// Deliver option (default: None)
@@ -118,6 +119,43 @@ pub struct BookShipmentRequest {
 #[derive(Debug, Deserialize)]
 pub struct CancelShipmentRequest {
     pub reason: Option<String>,
+}
+
+impl Sanitize for CreateFeeCatalog {
+    fn sanitize(mut self) -> Self {
+        self.name = sanitize_str(&self.name, 100).unwrap_or(self.name);
+        self.description = sanitize_opt(self.description.as_deref(), 500);
+        self
+    }
+}
+
+impl Sanitize for UpdateFeeCatalog {
+    fn sanitize(mut self) -> Self {
+        self.name = self.name.as_deref().and_then(|s| sanitize_str(s, 100));
+        self.description = sanitize_opt(self.description.as_deref(), 500);
+        self
+    }
+}
+
+impl Sanitize for BookShipmentRequest {
+    fn sanitize(mut self) -> Self {
+        self.note = sanitize_opt(self.note.as_deref(), 500);
+        self
+    }
+}
+
+impl Sanitize for CancelShipmentRequest {
+    fn sanitize(mut self) -> Self {
+        self.reason = sanitize_opt(self.reason.as_deref(), 500);
+        self
+    }
+}
+
+impl Sanitize for AddOrderFeeLine {
+    fn sanitize(mut self) -> Self {
+        self.label = sanitize_opt(self.label.as_deref(), 200);
+        self
+    }
 }
 
 /// Response for fee estimation endpoint

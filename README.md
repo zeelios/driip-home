@@ -11,6 +11,7 @@ This repository is organized into three separate apps:
 - `home/` contains the current storefront code.
 - `panel/` is reserved for staff operations and administration.
 - `backend/` will hold the Laravel 12 system of record.
+- `driip-rust/` This is the backend, but coded with Rust, faster, but unfinished.
 
 ## Local development
 

@@ -30,8 +30,3 @@ pub fn staff_router() -> Router<AppState> {
                 .delete(handler::delete),
         )
 }
-
-/// Combined router (backwards-compat for use in router() without rate-limit splitting).
-pub fn router() -> Router<AppState> {
-    Router::new().merge(auth_router()).merge(staff_router())
-}

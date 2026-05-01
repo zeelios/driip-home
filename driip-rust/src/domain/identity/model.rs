@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
+use crate::middleware::sanitize::{sanitize_email, sanitize_str, Sanitize};
+
 // ── Aggregates ──────────────────────────────────────────────────────────────
 
 #[derive(Debug, Serialize, sqlx::FromRow)]
@@ -28,16 +30,6 @@ pub struct StaffProfile {
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-}
-
-#[derive(Debug, sqlx::FromRow)]
-pub struct RefreshToken {
-    pub id: Uuid,
-    pub staff_id: Uuid,
-    pub token_hash: String,
-    pub expires_at: DateTime<Utc>,
-    pub revoked_at: Option<DateTime<Utc>>,
-    pub created_at: DateTime<Utc>,
 }
 
 // ── Commands ────────────────────────────────────────────────────────────────
@@ -108,6 +100,26 @@ pub enum StaffRole {
     Staff,
     #[serde(rename = "readonly")]
     Readonly,
+}
+
+impl Sanitize for CreateStaff {
+    fn sanitize(mut self) -> Self {
+        self.name = sanitize_str(&self.name, 100).unwrap_or(self.name);
+        self.email = sanitize_email(&self.email).unwrap_or(self.email);
+        self
+    }
+}
+
+impl Sanitize for UpdateStaff {
+    fn sanitize(mut self) -> Self {
+        if let Some(ref name) = self.name {
+            self.name = sanitize_str(name, 100).or(self.name);
+        }
+        if let Some(ref email) = self.email {
+            self.email = sanitize_email(email).or(self.email);
+        }
+        self
+    }
 }
 
 impl StaffRole {

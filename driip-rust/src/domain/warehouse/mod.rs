@@ -11,6 +11,8 @@ pub fn router() -> Router<AppState> {
         .route("/", get(handler::list).post(handler::create))
         .route(
             "/{id}",
-            get(handler::get).put(handler::update).delete(handler::delete),
+            get(handler::get)
+                .put(handler::update)
+                .delete(handler::delete),
         )
 }

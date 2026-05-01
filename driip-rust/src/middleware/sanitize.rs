@@ -61,24 +61,6 @@ pub fn sanitize_phone(phone: &str) -> Option<String> {
     }
 }
 
-/// Sanitize a price/amount integer. Rejects negative values.
-pub fn sanitize_amount_cents(v: i64) -> Option<i64> {
-    if v >= 0 {
-        Some(v)
-    } else {
-        None
-    }
-}
-
-/// Sanitize a quantity integer. Rejects values <= 0.
-pub fn sanitize_quantity(v: i32) -> Option<i32> {
-    if v > 0 {
-        Some(v)
-    } else {
-        None
-    }
-}
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 fn is_control_char(c: char) -> bool {
@@ -100,7 +82,7 @@ fn truncate_chars(s: String, max_len: usize) -> String {
     s[..end].to_string()
 }
 
-// ── Sanitize traits — implemented on all input DTOs ──────────────────────────
+// ── DTO Sanitize trait ─────────────────────────────────────────────────────
 
 /// Any input DTO that can sanitize itself in place.
 pub trait Sanitize {

@@ -3,12 +3,12 @@ use argon2::{
     Argon2,
 };
 use chrono::{Duration, Utc};
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
 use crate::errors::AppError;
 
-use super::model::{CreateStaff, RefreshToken, Staff, StaffFilter, StaffProfile, UpdateStaff};
+use super::model::{CreateStaff, Staff, StaffFilter, StaffProfile, UpdateStaff};
 
 pub struct StaffRepository;
 
@@ -197,22 +197,15 @@ impl RefreshTokenRepository {
         Ok(())
     }
 
-    pub async fn find_valid(
-        pool: &PgPool,
-        token_hash: &str,
-    ) -> Result<Option<RefreshToken>, AppError> {
-        sqlx::query_as::<_, RefreshToken>(
-            r#"
-            SELECT * FROM refresh_tokens
-            WHERE token_hash = $1
-              AND revoked_at IS NULL
-              AND expires_at > NOW()
-            "#,
+    pub async fn find_valid(pool: &PgPool, token_hash: &str) -> Result<Option<Uuid>, AppError> {
+        let row = sqlx::query(
+            "SELECT staff_id FROM refresh_tokens WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > NOW()",
         )
         .bind(token_hash)
         .fetch_optional(pool)
         .await
-        .map_err(AppError::Database)
+        .map_err(AppError::Database)?;
+        Ok(row.map(|r| r.get("staff_id")))
     }
 
     pub async fn revoke(pool: &PgPool, token_hash: &str) -> Result<(), AppError> {

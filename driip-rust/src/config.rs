@@ -8,9 +8,6 @@ pub struct Config {
     pub jwt_secret: String,
     pub jwt_access_ttl_secs: u64,
     pub jwt_refresh_ttl_secs: u64,
-    // ── Cache (Upstash) ──────────────────────────────────────────────────────
-    pub upstash_url: Option<String>,
-    pub upstash_token: Option<String>,
     // ── GHTK Courier ────────────────────────────────────────────────────────
     pub ghtk_token: Option<String>,
     pub ghtk_sandbox: bool,
@@ -39,8 +36,6 @@ impl Config {
             .unwrap_or_else(|_| "604800".into())
             .parse::<u64>()
             .map_err(|_| "JWT_REFRESH_TTL_SECS must be a valid u64".to_string())?;
-        let upstash_url = env::var("UPSTASH_REDIS_URL").ok();
-        let upstash_token = env::var("UPSTASH_REDIS_TOKEN").ok();
 
         // GHTK — all optional so app boots without courier credentials
         let ghtk_token = env::var("GHTK_TOKEN").ok();
@@ -61,8 +56,6 @@ impl Config {
             jwt_secret,
             jwt_access_ttl_secs,
             jwt_refresh_ttl_secs,
-            upstash_url,
-            upstash_token,
             ghtk_token,
             ghtk_sandbox,
             ghtk_webhook_secret,

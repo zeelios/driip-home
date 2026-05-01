@@ -42,24 +42,6 @@ impl ShipmentRepository {
         Ok(ShipmentDetail { shipment, events })
     }
 
-    pub async fn find_by_order_id(
-        pool: &PgPool,
-        order_id: Uuid,
-    ) -> Result<Vec<Shipment>, AppError> {
-        let rows = sqlx::query_as!(
-            Shipment,
-            r#"SELECT id, order_id, ghtk_order_id, ghtk_tracking_id, status,
-                      customer_paid_shipping_cents, ghtk_charged_cents, shipping_diff_cents,
-                      weight_grams, pick_date, raw_ghtk_response,
-                      booked_by, cancelled_by, cancel_reason, created_at, updated_at
-               FROM shipments WHERE order_id = $1 ORDER BY created_at DESC"#,
-            order_id
-        )
-        .fetch_all(pool)
-        .await?;
-        Ok(rows)
-    }
-
     pub async fn create(
         pool: &PgPool,
         order_id: Uuid,
@@ -119,11 +101,7 @@ impl ShipmentRepository {
         Ok(row)
     }
 
-    pub async fn update_status(
-        pool: &PgPool,
-        id: Uuid,
-        status: &str,
-    ) -> Result<(), AppError> {
+    pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), AppError> {
         sqlx::query!(
             "UPDATE shipments SET status = $2, updated_at = NOW() WHERE id = $1",
             id,
@@ -312,9 +290,9 @@ impl FeeLineRepository {
             let label = input
                 .label
                 .ok_or_else(|| AppError::Validation("label is required for ad-hoc fees".into()))?;
-            let amount = input
-                .amount_cents
-                .ok_or_else(|| AppError::Validation("amount_cents is required for ad-hoc fees".into()))?;
+            let amount = input.amount_cents.ok_or_else(|| {
+                AppError::Validation("amount_cents is required for ad-hoc fees".into())
+            })?;
             (label, amount)
         };
 
@@ -348,11 +326,7 @@ impl FeeLineRepository {
         Ok(row)
     }
 
-    pub async fn remove(
-        pool: &PgPool,
-        order_id: Uuid,
-        fee_line_id: Uuid,
-    ) -> Result<(), AppError> {
+    pub async fn remove(pool: &PgPool, order_id: Uuid, fee_line_id: Uuid) -> Result<(), AppError> {
         let mut tx = pool.begin().await?;
 
         let deleted = sqlx::query!(

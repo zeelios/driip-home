@@ -267,7 +267,6 @@ impl OrderService {
             let _ = NotificationRepository::broadcast(
                 pool,
                 CreateNotification {
-                    staff_id: None,
                     kind: "order_reallocated",
                     title: format!("Stock reallocated from order {}", donor_order_id),
                     body: Some(format!(

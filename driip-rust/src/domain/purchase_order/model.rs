@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
+use crate::middleware::sanitize::{sanitize_opt, sanitize_str, Sanitize};
+
 // ── Purchase Order ────────────────────────────────────────────────────────────
 
 #[derive(Debug, Serialize, sqlx::FromRow)]
@@ -78,6 +80,25 @@ pub struct ReceiveItem {
 pub struct ReceivePurchaseOrder {
     #[validate(length(min = 1), nested)]
     pub items: Vec<ReceiveItem>,
+}
+
+impl Sanitize for CreatePurchaseOrder {
+    fn sanitize(mut self) -> Self {
+        self.supplier_name = sanitize_str(&self.supplier_name, 300).unwrap_or(self.supplier_name);
+        self.notes = sanitize_opt(self.notes.as_deref(), 1000);
+        self
+    }
+}
+
+impl Sanitize for UpdatePurchaseOrder {
+    fn sanitize(mut self) -> Self {
+        self.supplier_name = self
+            .supplier_name
+            .as_deref()
+            .and_then(|s| sanitize_str(s, 300));
+        self.notes = sanitize_opt(self.notes.as_deref(), 1000);
+        self
+    }
 }
 
 #[derive(Debug, Deserialize)]

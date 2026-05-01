@@ -9,20 +9,26 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
-    auth::{AuthContext, RequireAdmin, RequireManager},
+    auth::{check_permission, AuthContext, Permission},
     errors::AppError,
+    middleware::sanitize::{sanitize_opt, sanitize_phone, sanitize_str, Sanitize},
     state::AppState,
 };
 
 use super::{
-    model::{AddOrderFeeLine, BookShipmentRequest, CancelShipmentRequest, CreateFeeCatalog, UpdateFeeCatalog},
+    model::{
+        AddOrderFeeLine, BookShipmentRequest, CancelShipmentRequest, CreateFeeCatalog,
+        UpdateFeeCatalog,
+    },
     repository::{FeeCatalogRepository, FeeLineRepository, ShipmentRepository},
     service::{GhtkFulfillmentService, PickupConfig},
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-fn require_ghtk(state: &AppState) -> Result<&std::sync::Arc<crate::integrations::ghtk::GhtkClient>, AppError> {
+fn require_ghtk(
+    state: &AppState,
+) -> Result<&std::sync::Arc<crate::integrations::ghtk::GhtkClient>, AppError> {
     state
         .ghtk
         .as_ref()
@@ -31,7 +37,10 @@ fn require_ghtk(state: &AppState) -> Result<&std::sync::Arc<crate::integrations:
 
 fn pickup_config(state: &AppState) -> PickupConfig {
     PickupConfig {
-        name: state.ghtk_pick_name.clone().unwrap_or_else(|| "Kho Driip".into()),
+        name: state
+            .ghtk_pick_name
+            .clone()
+            .unwrap_or_else(|| "Kho Driip".into()),
         address: state.ghtk_pick_address.clone().unwrap_or_default(),
         province: state.ghtk_pick_province.clone().unwrap_or_default(),
         district: state.ghtk_pick_district.clone().unwrap_or_default(),
@@ -52,11 +61,15 @@ pub struct FeeEstimateQuery {
 }
 
 pub async fn estimate_fee(
-    _ctx: AuthContext,
+    ctx: AuthContext,
     State(state): State<AppState>,
     Path(order_id): Path<Uuid>,
     Query(q): Query<FeeEstimateQuery>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentRead)?;
+    let address = sanitize_str(&q.address, 500).unwrap_or(q.address);
+    let province = sanitize_str(&q.province, 100).unwrap_or(q.province);
+    let district = sanitize_str(&q.district, 100).unwrap_or(q.district);
     let client = require_ghtk(&state)?;
     let pickup = pickup_config(&state);
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
@@ -69,9 +82,9 @@ pub async fn estimate_fee(
 
     let resp = svc
         .estimate_fee(
-            q.address,
-            q.province,
-            q.district,
+            address,
+            province,
+            district,
             q.weight_grams.unwrap_or(500),
             q.insurance_value.unwrap_or(0),
             transport,
@@ -102,14 +115,27 @@ pub struct BookShipmentBody {
 
 pub async fn book_shipment(
     ctx: AuthContext,
-    RequireManager(_): RequireManager,
     State(state): State<AppState>,
     Path(order_id): Path<Uuid>,
-    Json(body): Json<BookShipmentBody>,
+    Json(mut body): Json<BookShipmentBody>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentBook)?;
     let client = require_ghtk(&state)?;
     let pickup = pickup_config(&state);
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
+
+    body.public_order_id = sanitize_str(&body.public_order_id, 50).unwrap_or(body.public_order_id);
+    body.recipient_name = sanitize_str(&body.recipient_name, 200).unwrap_or(body.recipient_name);
+    body.recipient_phone = sanitize_phone(&body.recipient_phone).unwrap_or(body.recipient_phone);
+    body.recipient_address =
+        sanitize_str(&body.recipient_address, 500).unwrap_or(body.recipient_address);
+    body.recipient_province =
+        sanitize_str(&body.recipient_province, 100).unwrap_or(body.recipient_province);
+    body.recipient_district =
+        sanitize_str(&body.recipient_district, 100).unwrap_or(body.recipient_district);
+    body.recipient_email = sanitize_opt(body.recipient_email.as_deref(), 254);
+    body.product_name = sanitize_str(&body.product_name, 300).unwrap_or(body.product_name);
+    body.options = body.options.sanitize();
 
     let shipment = svc
         .book_shipment(
@@ -134,10 +160,11 @@ pub async fn book_shipment(
 // ── Shipment Detail ───────────────────────────────────────────────────────────
 
 pub async fn get_shipment(
-    _ctx: AuthContext,
+    ctx: AuthContext,
     State(state): State<AppState>,
     Path(shipment_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentRead)?;
     let detail = ShipmentRepository::find_by_id(&state.db, shipment_id).await?;
     Ok(Json(detail))
 }
@@ -146,11 +173,12 @@ pub async fn get_shipment(
 
 pub async fn cancel_shipment(
     ctx: AuthContext,
-    RequireManager(_): RequireManager,
     State(state): State<AppState>,
     Path(shipment_id): Path<Uuid>,
     Json(body): Json<CancelShipmentRequest>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentCancel)?;
+    let body = body.sanitize();
     let client = require_ghtk(&state)?;
     let pickup = pickup_config(&state);
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
@@ -180,14 +208,27 @@ pub struct RebookBody {
 
 pub async fn rebook_shipment(
     ctx: AuthContext,
-    RequireManager(_): RequireManager,
     State(state): State<AppState>,
     Path(shipment_id): Path<Uuid>,
-    Json(body): Json<RebookBody>,
+    Json(mut body): Json<RebookBody>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentBook)?;
     let client = require_ghtk(&state)?;
     let pickup = pickup_config(&state);
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
+
+    body.public_order_id = sanitize_str(&body.public_order_id, 50).unwrap_or(body.public_order_id);
+    body.recipient_name = sanitize_str(&body.recipient_name, 200).unwrap_or(body.recipient_name);
+    body.recipient_phone = sanitize_phone(&body.recipient_phone).unwrap_or(body.recipient_phone);
+    body.recipient_address =
+        sanitize_str(&body.recipient_address, 500).unwrap_or(body.recipient_address);
+    body.recipient_province =
+        sanitize_str(&body.recipient_province, 100).unwrap_or(body.recipient_province);
+    body.recipient_district =
+        sanitize_str(&body.recipient_district, 100).unwrap_or(body.recipient_district);
+    body.recipient_email = sanitize_opt(body.recipient_email.as_deref(), 254);
+    body.product_name = sanitize_str(&body.product_name, 300).unwrap_or(body.product_name);
+    body.options = body.options.sanitize();
 
     let new_shipment = svc
         .rebook_shipment(
@@ -216,31 +257,34 @@ pub struct FeeCatalogQuery {
 }
 
 pub async fn list_fee_catalog(
-    _ctx: AuthContext,
+    ctx: AuthContext,
     State(state): State<AppState>,
     Query(q): Query<FeeCatalogQuery>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentRead)?;
     let rows = FeeCatalogRepository::list(&state.db, q.active_only.unwrap_or(true)).await?;
     Ok(Json(rows))
 }
 
 pub async fn create_fee_catalog(
     ctx: AuthContext,
-    RequireAdmin(_): RequireAdmin,
     State(state): State<AppState>,
     Json(body): Json<CreateFeeCatalog>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentManageCatalog)?;
+    let body = body.sanitize();
     let row = FeeCatalogRepository::create(&state.db, body, ctx.staff_id).await?;
     Ok((StatusCode::CREATED, Json(row)))
 }
 
 pub async fn update_fee_catalog(
-    _ctx: AuthContext,
-    RequireAdmin(_): RequireAdmin,
+    ctx: AuthContext,
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
     Json(body): Json<UpdateFeeCatalog>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentManageCatalog)?;
+    let body = body.sanitize();
     let row = FeeCatalogRepository::update(&state.db, id, body).await?;
     Ok(Json(row))
 }
@@ -248,10 +292,11 @@ pub async fn update_fee_catalog(
 // ── Order Fee Lines ───────────────────────────────────────────────────────────
 
 pub async fn list_order_fee_lines(
-    _ctx: AuthContext,
+    ctx: AuthContext,
     State(state): State<AppState>,
     Path(order_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentRead)?;
     let rows = FeeLineRepository::list_for_order(&state.db, order_id).await?;
     Ok(Json(rows))
 }
@@ -262,16 +307,18 @@ pub async fn add_order_fee_line(
     Path(order_id): Path<Uuid>,
     Json(body): Json<AddOrderFeeLine>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentManageFees)?;
+    let body = body.sanitize();
     let row = FeeLineRepository::add(&state.db, order_id, body, ctx.staff_id).await?;
     Ok((StatusCode::CREATED, Json(row)))
 }
 
 pub async fn remove_order_fee_line(
-    _ctx: AuthContext,
-    RequireManager(_): RequireManager,
+    ctx: AuthContext,
     State(state): State<AppState>,
     Path((order_id, fee_line_id)): Path<(Uuid, Uuid)>,
 ) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::FulfillmentManageFees)?;
     FeeLineRepository::remove(&state.db, order_id, fee_line_id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
