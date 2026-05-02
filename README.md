@@ -5,6 +5,7 @@ This repository is organized into three separate apps:
 - `home/` — public storefront built with Nuxt
 - `panel/` — internal staff/admin app
 - `backend/` — Laravel 12 backend for orders, tracking, permissions, and staff workflows
+- `driip-rust/` - Beta backend , serverless, AWS.
 
 ## Structure
 
@@ -18,5 +19,6 @@ This repository is organized into three separate apps:
 - Run the storefront from `home/`.
 - Run the admin panel from `panel/`.
 - Run the backend from `backend/`.
+- Run the driip-rust from `driip-rust/`.
 
 The repository root acts as a workspace shell and shared documentation layer.

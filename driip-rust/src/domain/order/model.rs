@@ -22,6 +22,26 @@ pub struct Order {
     pub updated_at: DateTime<Utc>,
 }
 
+/// Public-facing order with guest tracking fields.
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct OrderWithToken {
+    pub id: Uuid,
+    pub customer_id: Uuid,
+    pub status: String,
+    pub priority: String,
+    pub inventory_status: String,
+    pub total_cents: i64,
+    pub shipping_fee_cents: i64,
+    pub operational_fee_cents: i64,
+    pub grand_total_cents: Option<i64>,
+    pub notes: Option<String>,
+    pub shipping_address_id: Option<Uuid>,
+    pub public_order_token: Option<Uuid>,
+    pub is_guest: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct OrderItem {
     pub id: Uuid,
@@ -107,4 +127,34 @@ pub struct OrderFilter {
     pub per_page: Option<i64>,
     pub customer_id: Option<Uuid>,
     pub status: Option<String>,
+}
+
+// ── Guest Checkout ────────────────────────────────────────────────────────────
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct GuestOrderItem {
+    pub product_id: Uuid,
+    #[validate(range(min = 1, max = 10000))]
+    pub quantity: i32,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+pub struct GuestOrderRequest {
+    #[validate(length(min = 1, max = 200))]
+    pub name: String,
+    #[validate(email, length(max = 254))]
+    pub email: String,
+    #[validate(length(max = 30))]
+    pub phone: String,
+    pub shipping_address_id: Uuid,
+    #[validate(length(max = 1000))]
+    pub notes: Option<String>,
+    #[validate(length(min = 1, max = 500), nested)]
+    pub items: Vec<GuestOrderItem>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GuestOrderResponse {
+    pub order: OrderWithToken,
+    pub public_token: Uuid,
 }

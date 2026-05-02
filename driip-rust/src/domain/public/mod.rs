@@ -19,6 +19,12 @@ pub fn auth_router() -> Router<AppState> {
         .route("/auth/register", post(auth_handler::register))
         .route("/auth/login", post(auth_handler::login))
         .route("/auth/refresh", post(auth_handler::refresh))
+        .route("/auth/forgot-password", post(auth_handler::forgot_password))
+        .route("/auth/reset-password", post(auth_handler::reset_password))
+        .route("/orders/guest", post(order_handler::create_guest))
+        .route("/orders/track", get(order_handler::track))
+        .route("/products", get(order_handler::list_products))
+        .route("/support", post(super::support::handler::create))
 }
 
 /// Public customer-facing API router for authenticated home storefront actions.

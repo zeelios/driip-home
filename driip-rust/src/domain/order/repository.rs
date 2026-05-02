@@ -190,4 +190,119 @@ impl OrderRepository {
         }
         Ok(())
     }
+
+    // ── Guest checkout ─────────────────────────────────────────────────────────
+
+    /// Create a guest order. Auto-creates a customer record with no password.
+    /// Returns the order and a public tracking token.
+    pub async fn create_guest(
+        pool: &PgPool,
+        name: &str,
+        email: &str,
+        phone: Option<&str>,
+        shipping_address_id: Uuid,
+        notes: Option<&str>,
+        items: &[(Uuid, i32, i64)], // (product_id, quantity, unit_price_cents)
+    ) -> Result<(super::model::OrderWithToken, Uuid), AppError> {
+        let mut tx = pool.begin().await.map_err(AppError::Database)?;
+
+        // Upsert guest customer: create if email not exists, otherwise reuse.
+        let customer_id: Uuid = sqlx::query_scalar(
+            "INSERT INTO customers (id, name, email, phone, created_at, updated_at)
+             VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW())
+             ON CONFLICT (email) DO UPDATE SET updated_at = NOW()
+             RETURNING id",
+        )
+        .bind(name)
+        .bind(email)
+        .bind(phone)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(AppError::Database)?;
+
+        let order_id = Uuid::new_v4();
+        let public_token = Uuid::new_v4();
+        let total_cents: i64 = items
+            .iter()
+            .map(|(_, qty, price)| (*qty as i64) * price)
+            .sum();
+
+        sqlx::query(
+            "INSERT INTO orders (id, customer_id, shipping_address_id, status, priority, inventory_status, total_cents, notes, public_order_token, is_guest, created_at, updated_at)
+             VALUES ($1, $2, $3, 'pending', 'normal', 'unavailable', $4, $5, $6, true, NOW(), NOW())",
+        )
+        .bind(order_id)
+        .bind(customer_id)
+        .bind(shipping_address_id)
+        .bind(total_cents)
+        .bind(notes)
+        .bind(public_token)
+        .execute(&mut *tx)
+        .await
+        .map_err(AppError::Database)?;
+
+        for (product_id, quantity, unit_price) in items {
+            let item_id = Uuid::new_v4();
+            let (inv_id, reserved) =
+                InventoryService::reserve(&mut tx, *product_id, *quantity).await?;
+
+            sqlx::query_unchecked!(
+                "INSERT INTO order_items (id, order_id, product_id, quantity, unit_price_cents, reserved_qty, inventory_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                item_id,
+                order_id,
+                product_id,
+                quantity,
+                unit_price,
+                reserved,
+                inv_id,
+            )
+            .execute(&mut *tx)
+            .await
+            .map_err(AppError::Database)?;
+        }
+
+        let inv_status =
+            InventoryService::compute_order_inventory_status(&mut tx, order_id).await?;
+
+        sqlx::query_unchecked!(
+            "UPDATE orders SET inventory_status = $2, updated_at = NOW() WHERE id = $1",
+            order_id,
+            inv_status,
+        )
+        .execute(&mut *tx)
+        .await
+        .map_err(AppError::Database)?;
+
+        let order = sqlx::query_as::<_, super::model::OrderWithToken>(
+            "SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, public_order_token, is_guest, created_at, updated_at
+             FROM orders WHERE id = $1",
+        )
+        .bind(order_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(AppError::Database)?;
+
+        tx.commit().await.map_err(AppError::Database)?;
+        Ok((order, public_token))
+    }
+
+    /// Find an order by its public tracking token (no auth required).
+    pub async fn find_by_public_token(
+        pool: &PgPool,
+        token: Uuid,
+    ) -> Result<Option<super::model::OrderWithToken>, AppError> {
+        sqlx::query_as::<_, super::model::OrderWithToken>(
+            "SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, public_order_token, is_guest, created_at, updated_at
+             FROM orders WHERE public_order_token = $1",
+        )
+        .bind(token)
+        .fetch_optional(pool)
+        .await
+        .map_err(AppError::Database)
+    }
 }

@@ -12,6 +12,7 @@ mod config;
 mod db;
 mod domain;
 mod errors;
+mod health;
 mod integrations;
 mod middleware;
 mod state;
@@ -155,12 +156,15 @@ fn build_router(state: state::AppState) -> Router {
             middleware::rate_limit::global_rate_limit,
         ),
     );
+    let health_router =
+        axum::Router::new().route("/health", axum::routing::get(health::health_check));
 
     Router::new()
         .merge(auth_router)
         .merge(public_auth_router)
         .merge(public_router)
         .merge(api_router)
+        .merge(health_router)
         // Security response headers on every response
         .layer(axum_middleware::from_fn(
             middleware::security_headers::set_security_headers,

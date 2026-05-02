@@ -75,14 +75,14 @@ impl CustomerRepository {
         .map_err(AppError::Database)
     }
 
+    #[allow(dead_code)]
     pub async fn email_exists(pool: &PgPool, email: &str) -> Result<bool, AppError> {
-        let row: (bool,) =
-            sqlx::query_as("SELECT EXISTS(SELECT 1 FROM customers WHERE email = $1)")
-                .bind(email)
-                .fetch_one(pool)
-                .await
-                .map_err(AppError::Database)?;
-        Ok(row.0)
+        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM customers WHERE email = $1")
+            .bind(email)
+            .fetch_one(pool)
+            .await
+            .map_err(AppError::Database)?;
+        Ok(count > 0)
     }
 
     /// Staff-facing: creates a customer with a random temporary password.
@@ -201,6 +201,67 @@ impl CustomerRepository {
         if result.rows_affected() == 0 {
             return Err(AppError::NotFound("Record not found".into()));
         }
+        Ok(())
+    }
+
+    pub async fn set_password(
+        pool: &PgPool,
+        id: Uuid,
+        password_hash: &str,
+    ) -> Result<(), AppError> {
+        sqlx::query("UPDATE customers SET password_hash = $1, updated_at = NOW() WHERE id = $2")
+            .bind(password_hash)
+            .bind(id)
+            .execute(pool)
+            .await
+            .map_err(AppError::Database)?;
+        Ok(())
+    }
+}
+
+pub struct CustomerPasswordResetTokenRepository;
+
+impl CustomerPasswordResetTokenRepository {
+    pub async fn create(
+        pool: &PgPool,
+        customer_id: Uuid,
+        token_hash: &str,
+        ttl_secs: i64,
+    ) -> Result<(), AppError> {
+        sqlx::query(
+            "INSERT INTO customer_password_reset_tokens (customer_id, token_hash, expires_at, created_at)
+             VALUES ($1, $2, NOW() + INTERVAL '1 second' * $3, NOW())",
+        )
+        .bind(customer_id)
+        .bind(token_hash)
+        .bind(ttl_secs)
+        .execute(pool)
+        .await
+        .map_err(AppError::Database)?;
+        Ok(())
+    }
+
+    pub async fn find_valid(
+        pool: &PgPool,
+        token_hash: &str,
+    ) -> Result<Option<(Uuid, Uuid)>, AppError> {
+        let row = sqlx::query_as::<_, (Uuid, Uuid)>(
+            "SELECT id, customer_id FROM customer_password_reset_tokens
+             WHERE token_hash = $1 AND used_at IS NULL AND expires_at > NOW()",
+        )
+        .bind(token_hash)
+        .fetch_optional(pool)
+        .await
+        .map_err(AppError::Database)?;
+        Ok(row)
+    }
+
+    pub async fn mark_used(pool: &PgPool, id: Uuid) -> Result<(), AppError> {
+        sqlx::query("UPDATE customer_password_reset_tokens SET used_at = NOW() WHERE id = $1")
+            .bind(id)
+            .execute(pool)
+            .await
+            .map_err(AppError::Database)?;
         Ok(())
     }
 }

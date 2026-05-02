@@ -14,6 +14,9 @@ pub mod purchase_order;
 // ── Address domain ──────────────────────────────────────────────────────────
 pub mod address;
 
+// ── Support domain ──────────────────────────────────────────────────────────
+pub mod support;
+
 // ── Legacy domains (to be refactored in Phase 2+) ───────────────────────────
 pub mod customer;
 pub mod inventory;

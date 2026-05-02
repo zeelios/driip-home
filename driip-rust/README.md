@@ -12,9 +12,10 @@ Rust + Axum backend for the Driip platform. Runs as a **regular HTTP server loca
 4. [Why Use This Architecture?](#4-why-use-this-architecture)
 5. [What You Need to Do to Deploy](#5-what-you-need-to-do-to-deploy)
 6. [Infrastructure Overview](#6-infrastructure-overview)
-7. [Environment Variables Reference](#7-environment-variables-reference)
-8. [Testing the API](#8-testing-the-api)
-9. [Common Questions](#9-common-questions)
+7. [Domain Architecture](#7-domain-architecture)
+8. [Environment Variables Reference](#8-environment-variables-reference)
+9. [Testing the API](#9-testing-the-api)
+10. [Common Questions](#10-common-questions)
 
 ---
 
@@ -255,7 +256,55 @@ cargo lambda build --release --arm64 && cargo lambda deploy driip-rust
 
 ---
 
-## 7. Environment Variables Reference
+## 7. Domain Architecture
+
+The backend follows **Domain-Driven Design (DDD)** — each business concept lives in its own folder under `src/domain/`:
+
+```
+src/domain/
+├── address/          # Centralized address book + fraud blocking
+├── customer/         # Customer profiles (address moved to address domain)
+├── fulfillment/      # GHTK courier integration, fee catalog, shipments
+├── identity/         # Staff auth (login, refresh, JWT)
+├── inventory/        # Stock tracking across warehouses
+├── notification/     # Internal alert system
+├── order/            # Orders with shipping_address_id
+├── product/          # Product catalog
+├── purchase_order/   # Supplier restock orders
+├── public/           # Customer-facing API (orders, addresses, auth)
+└── warehouse/        # Warehouses linked to address records
+```
+
+Each domain contains:
+
+- **`model.rs`** — structs, DTOs, validation rules
+- **`repository.rs`** — SQLx queries (the only place that touches the DB directly)
+- **`service.rs`** — business logic (e.g. fraud scoring, fee calculation)
+- **`handler.rs`** — Axum HTTP handlers
+- **`mod.rs`** — exports and route wiring
+
+### Address model (new)
+
+Addresses are now **centralized** — not inlined into customers or warehouses:
+
+- `addresses` table — one record per unique address
+- `customer_addresses` junction — many-to-many, with `is_default` flag
+- `warehouses.address_id` — one-to-one
+- `orders.shipping_address_id` — every order records which address was used
+
+Fraud prevention:
+
+- `strike_count` auto-increments when an order is cancelled
+- `status` can be `active`, `flagged`, or `blocked`
+- Staff can manually block/unblock addresses
+
+### GHTK pickup address
+
+The fulfillment service now reads the pickup address from the **first active warehouse's linked address record**. The `GHTK_PICK_*` env vars are only used as a fallback.
+
+---
+
+## 8. Environment Variables Reference
 
 ```env
 # Database
@@ -278,7 +327,9 @@ GHTK_TOKEN=your-ghtk-api-token
 GHTK_SANDBOX=false             # true = test mode, false = live
 GHTK_WEBHOOK_SECRET=your-hmac-secret
 
-# GHTK Pickup address (your warehouse)
+# GHTK Pickup address — OPTIONAL fallback
+# If set, used when no active warehouse has a linked address.
+# If omitted, the app reads the address from the first active warehouse.
 GHTK_PICK_NAME=Driip Warehouse
 GHTK_PICK_ADDRESS=123 Nguyen Van Linh
 GHTK_PICK_PROVINCE=TP. Ho Chi Minh
@@ -286,9 +337,22 @@ GHTK_PICK_DISTRICT=Quan 7
 GHTK_PICK_TEL=0909000000
 ```
 
+### Health check
+
+```bash
+curl http://localhost:8000/health
+# → {"status":"ok"}
+```
+
 ---
 
-## 8. Testing the API
+## 9. Testing the API
+
+### Run cargo check (fast, no DB needed)
+
+```bash
+SQLX_OFFLINE=true cargo check
+```
 
 ### Run the full test suite (requires server running locally)
 
@@ -303,7 +367,7 @@ The script:
 3. Tests every endpoint with correct auth, payloads, and edge cases
 4. Reports pass/fail count
 
-Last result: **46/46 passed**
+> **Note:** `test-api.sh` is currently being updated for the new address flow. After the address refactor, customers and warehouses no longer accept inline address fields — addresses must be created via the address endpoints first. The script will be updated to match.
 
 ### Manual login
 
@@ -315,7 +379,7 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 
 ---
 
-## 9. Common Questions
+## 10. Common Questions
 
 **Q: Do I need to restart the server when I change env vars?**
 Locally: yes, restart `cargo run`. On Lambda: run `cargo lambda deploy` with the new `--env-var` flags, or update them in the AWS Console → Lambda → Configuration → Environment variables.
