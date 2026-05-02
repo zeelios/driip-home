@@ -65,6 +65,24 @@
         "ergonomic": "Form đúc theo khuôn chân"
       }
     },
+    "quality": {
+      "label": "CÔNG NGHỆ & CHẤT LƯỢNG",
+      "title": "TỪNG CHI TIẾT.\nĐỀU ĐƯỢC TÍNH TOÁN.",
+      "cards": {
+        "eva": {
+          "title": "Bọt EVA Cao Cấp",
+          "desc": "Siêu nhẹ. Siêu bền. Chống thấm hoàn toàn."
+        },
+        "antislip": {
+          "title": "Đế Chống Trượt",
+          "desc": "Rãnh sâu, bám đường tối đa — bất chấp mọi địa hình."
+        },
+        "easyClean": {
+          "title": "Dễ Vệ Sinh",
+          "desc": "Chống bám bẩn, chỉ cần xả nước hoặc lau nhẹ — sạch tinh trong vài giây."
+        }
+      }
+    },
     "gallery": {
       "label": "LOOKBOOK",
       "title": "DRIIP SLIDE",

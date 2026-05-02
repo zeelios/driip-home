@@ -6,6 +6,7 @@
       @size-guide="sizeGuideOpen = true"
       @go-to-cart="scrollToSection('checkout')"
     />
+    <SlideQualitySection @scroll-to="scrollToSection" />
     <SlideGallerySection ref="galleryRef" @scroll-to="scrollToSection" />
     <SlideCheckoutSection @scroll-to="scrollToSection" />
     <SharedSiteFooter />
