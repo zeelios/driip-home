@@ -24,7 +24,7 @@ impl Config {
     pub fn from_env() -> Result<Self, String> {
         let database_url = require_env("DATABASE_URL")?;
         let port = env::var("PORT")
-            .unwrap_or_else(|_| "3000".into())
+            .unwrap_or_else(|_| "8000".into())
             .parse::<u16>()
             .map_err(|_| "PORT must be a valid u16".to_string())?;
         let jwt_secret = require_env("JWT_SECRET")?;

@@ -1,10 +1,11 @@
 use axum::{
-    routing::{get, post},
+    routing::{delete, get, post},
     Router,
 };
 
 use crate::state::AppState;
 
+pub mod address_handler;
 pub mod auth_handler;
 pub mod customer_handler;
 pub mod order_handler;
@@ -35,4 +36,13 @@ pub fn router() -> Router<AppState> {
             get(order_handler::list).post(order_handler::create),
         )
         .route("/orders/{id}", get(order_handler::get))
+        .route(
+            "/customer/addresses",
+            get(address_handler::list).post(address_handler::create),
+        )
+        .route(
+            "/customer/addresses/{id}/default",
+            post(address_handler::set_default),
+        )
+        .route("/customer/addresses/{id}", delete(address_handler::delete))
 }

@@ -17,6 +17,7 @@ pub struct Order {
     pub operational_fee_cents: i64,
     pub grand_total_cents: Option<i64>,
     pub notes: Option<String>,
+    pub shipping_address_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -42,6 +43,7 @@ pub struct CreateOrderItem {
 #[derive(Debug, Deserialize, Validate)]
 pub struct CreateOrder {
     pub customer_id: Uuid,
+    pub shipping_address_id: Uuid,
     #[validate(length(max = 1000))]
     pub notes: Option<String>,
     #[validate(length(min = 1, max = 500), nested)]
@@ -93,6 +95,7 @@ pub struct QueuedOrder {
     pub inventory_status: String,
     pub total_cents: i64,
     pub notes: Option<String>,
+    pub shipping_address_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub priority_score: i32,

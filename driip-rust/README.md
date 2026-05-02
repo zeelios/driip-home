@@ -36,7 +36,7 @@ SQLX_OFFLINE=true DATABASE_URL=postgres://driip:driip_dev@localhost:5432/driip \
 
 # 4. Start the server (hot-reload)
 SQLX_OFFLINE=true cargo run
-# → listening on http://localhost:3000
+# → listening on http://localhost:8000
 ```
 
 Or use the Makefile shortcuts:
@@ -262,7 +262,7 @@ cargo lambda build --release --arm64 && cargo lambda deploy driip-rust
 DATABASE_URL=postgres://user:pass@host/db
 
 # Server (ignored on Lambda, Lambda does not use a port)
-PORT=3000
+PORT=8000
 
 # Auth
 JWT_SECRET=change-this-in-production-min-32-chars
@@ -308,7 +308,7 @@ Last result: **46/46 passed**
 ### Manual login
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/auth/login \
+curl -X POST http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@driip.vn","password":"yourpassword"}'
 ```

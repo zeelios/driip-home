@@ -58,8 +58,6 @@ pub async fn create(
         email: sanitize_email(&input.email)
             .ok_or_else(|| AppError::Validation("invalid email".into()))?,
         phone: input.phone.as_deref().and_then(sanitize_phone),
-        address: sanitize_opt(input.address.as_deref(), 500),
-        province: sanitize_opt(input.province.as_deref(), 100),
         dob: sanitize_opt(input.dob.as_deref(), 20),
         gender: sanitize_opt(input.gender.as_deref(), 10),
         referral: sanitize_opt(input.referral.as_deref(), 500),
@@ -84,8 +82,6 @@ pub async fn update(
         name: input.name.as_deref().and_then(|s| sanitize_str(s, 200)),
         email: input.email.as_deref().and_then(sanitize_email),
         phone: input.phone.as_deref().and_then(sanitize_phone),
-        address: sanitize_opt(input.address.as_deref(), 500),
-        province: sanitize_opt(input.province.as_deref(), 100),
         dob: sanitize_opt(input.dob.as_deref(), 20),
         gender: sanitize_opt(input.gender.as_deref(), 10),
     };

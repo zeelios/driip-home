@@ -49,7 +49,7 @@ impl CustomerRepository {
     pub async fn find_profile_by_id(pool: &PgPool, id: Uuid) -> Result<CustomerProfile, AppError> {
         sqlx::query_as::<_, CustomerProfile>(
             r#"
-            SELECT id, name, email, phone, address, province, dob, gender,
+            SELECT id, name, email, phone, dob, gender,
                    referral, created_at, updated_at
             FROM customers WHERE id = $1
             "#,
@@ -91,10 +91,10 @@ impl CustomerRepository {
         sqlx::query_as::<_, CustomerProfile>(
             r#"
             INSERT INTO customers
-                (id, name, email, phone, address, province, dob, gender, referral,
+                (id, name, email, phone, dob, gender, referral,
                  is_blocked, password_hash, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false, $10, NOW(), NOW())
-            RETURNING id, name, email, phone, address, province, dob, gender,
+            VALUES ($1, $2, $3, $4, $5, $6, $7, false, $8, NOW(), NOW())
+            RETURNING id, name, email, phone, dob, gender,
                       referral, created_at, updated_at
             "#,
         )
@@ -102,8 +102,6 @@ impl CustomerRepository {
         .bind(&input.name)
         .bind(&input.email)
         .bind(&input.phone)
-        .bind(&input.address)
-        .bind(&input.province)
         .bind(&input.dob)
         .bind(&input.gender)
         .bind(&input.referral)
@@ -128,10 +126,10 @@ impl CustomerRepository {
         sqlx::query_as::<_, CustomerProfile>(
             r#"
             INSERT INTO customers
-                (id, name, email, phone, address, province, dob, gender, referral,
+                (id, name, email, phone, dob, gender, referral,
                  is_blocked, password_hash, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false, $10, NOW(), NOW())
-            RETURNING id, name, email, phone, address, province, dob, gender,
+            VALUES ($1, $2, $3, $4, $5, $6, $7, false, $8, NOW(), NOW())
+            RETURNING id, name, email, phone, dob, gender,
                       referral, created_at, updated_at
             "#,
         )
@@ -139,8 +137,6 @@ impl CustomerRepository {
         .bind(&input.name)
         .bind(&input.email)
         .bind(&input.phone)
-        .bind(&input.address)
-        .bind(&input.province)
         .bind(&input.dob)
         .bind(&input.gender)
         .bind(&input.referral)
@@ -168,13 +164,11 @@ impl CustomerRepository {
             SET name       = COALESCE($2, name),
                 email      = COALESCE($3, email),
                 phone      = COALESCE($4, phone),
-                address    = COALESCE($5, address),
-                province   = COALESCE($6, province),
-                dob        = COALESCE($7, dob),
-                gender     = COALESCE($8, gender),
+                dob        = COALESCE($5, dob),
+                gender     = COALESCE($6, gender),
                 updated_at = NOW()
             WHERE id = $1
-            RETURNING id, name, email, phone, address, province, dob, gender,
+            RETURNING id, name, email, phone, dob, gender,
                       referral, created_at, updated_at
             "#,
         )
@@ -182,8 +176,6 @@ impl CustomerRepository {
         .bind(input.name.as_deref())
         .bind(input.email.as_deref())
         .bind(input.phone.as_deref())
-        .bind(input.address.as_deref())
-        .bind(input.province.as_deref())
         .bind(input.dob.as_deref())
         .bind(input.gender.as_deref())
         .fetch_one(pool)

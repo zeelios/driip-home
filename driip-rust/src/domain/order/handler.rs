@@ -9,6 +9,7 @@ use validator::Validate;
 
 use crate::{
     auth::{check_permission, AuthContext, Permission},
+    domain::address::service::AddressService,
     errors::AppError,
     middleware::sanitize::Sanitize,
     state::AppState,
@@ -51,6 +52,9 @@ pub async fn create(
         .validate()
         .map_err(|e| AppError::Validation(e.to_string()))?;
     let input = input.sanitize();
+
+    // Validate shipping address is not blocked
+    AddressService::validate_not_blocked(&state.db, input.shipping_address_id).await?;
 
     let order = OrderRepository::create(&state.db, input).await?;
     Ok((StatusCode::CREATED, Json(order)))

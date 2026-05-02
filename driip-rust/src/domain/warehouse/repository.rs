@@ -1,6 +1,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::domain::address::repository::AddressRepository;
 use crate::errors::AppError;
 
 use super::model::{CreateWarehouse, UpdateWarehouse, Warehouse, WarehouseFilter};
@@ -14,10 +15,13 @@ impl WarehouseRepository {
         let offset = (page - 1) * per_page;
 
         sqlx::query_as::<_, Warehouse>(
-            "SELECT * FROM warehouses
-             WHERE ($1::bool IS NULL OR is_active = $1)
-             ORDER BY created_at DESC
-             LIMIT $2 OFFSET $3",
+            r#"
+            SELECT id, name, address_id, is_active, created_at, updated_at
+            FROM warehouses
+            WHERE ($1::bool IS NULL OR is_active = $1)
+            ORDER BY created_at DESC
+            LIMIT $2 OFFSET $3
+            "#,
         )
         .bind(filter.is_active)
         .bind(per_page)
@@ -28,27 +32,36 @@ impl WarehouseRepository {
     }
 
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Warehouse, AppError> {
-        sqlx::query_as::<_, Warehouse>("SELECT * FROM warehouses WHERE id = $1")
-            .bind(id)
-            .fetch_optional(pool)
-            .await
-            .map_err(AppError::Database)?
-            .ok_or_else(|| AppError::NotFound("Record not found".into()))
+        sqlx::query_as::<_, Warehouse>(
+            "SELECT id, name, address_id, is_active, created_at, updated_at FROM warehouses WHERE id = $1"
+        )
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+        .map_err(AppError::Database)?
+        .ok_or_else(|| AppError::NotFound("Record not found".into()))
     }
 
     pub async fn create(pool: &PgPool, input: CreateWarehouse) -> Result<Warehouse, AppError> {
-        sqlx::query_as::<_, Warehouse>(
-            "INSERT INTO warehouses (id, name, address, city, is_active, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, true, NOW(), NOW())
-             RETURNING *",
+        // Create the address first, then the warehouse.
+        // NOTE: not in a single tx because AddressRepository::create takes &PgPool.
+        let address = AddressRepository::create(pool, input.address).await?;
+
+        let warehouse = sqlx::query_as::<_, Warehouse>(
+            r#"
+            INSERT INTO warehouses (id, name, address_id, is_active, created_at, updated_at)
+            VALUES ($1, $2, $3, true, NOW(), NOW())
+            RETURNING id, name, address_id, is_active, created_at, updated_at
+            "#,
         )
         .bind(Uuid::new_v4())
         .bind(input.name)
-        .bind(input.address)
-        .bind(input.city)
+        .bind(address.id)
         .fetch_one(pool)
         .await
-        .map_err(AppError::Database)
+        .map_err(AppError::Database)?;
+
+        Ok(warehouse)
     }
 
     pub async fn update(
@@ -56,18 +69,21 @@ impl WarehouseRepository {
         id: Uuid,
         input: UpdateWarehouse,
     ) -> Result<Warehouse, AppError> {
-        let current = Self::find_by_id(pool, id).await?;
         sqlx::query_as::<_, Warehouse>(
-            "UPDATE warehouses
-             SET name = $2, address = $3, city = $4, is_active = $5, updated_at = NOW()
-             WHERE id = $1
-             RETURNING *",
+            r#"
+            UPDATE warehouses
+            SET name       = COALESCE($2, name),
+                address_id = COALESCE($3, address_id),
+                is_active  = COALESCE($4, is_active),
+                updated_at = NOW()
+            WHERE id = $1
+            RETURNING id, name, address_id, is_active, created_at, updated_at
+            "#,
         )
         .bind(id)
-        .bind(input.name.unwrap_or(current.name))
-        .bind(input.address.unwrap_or(current.address))
-        .bind(input.city.or(current.city))
-        .bind(input.is_active.unwrap_or(current.is_active))
+        .bind(input.name.as_ref())
+        .bind(input.address_id.as_ref())
+        .bind(input.is_active.as_ref())
         .fetch_one(pool)
         .await
         .map_err(AppError::Database)

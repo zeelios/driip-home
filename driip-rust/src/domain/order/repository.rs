@@ -14,11 +14,14 @@ impl OrderRepository {
         let offset = (page - 1) * per_page;
 
         sqlx::query_as::<_, Order>(
-            "SELECT * FROM orders
+            r#"SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, created_at, updated_at
+             FROM orders
              WHERE ($1::uuid IS NULL OR customer_id = $1)
                AND ($2::text IS NULL OR status = $2)
              ORDER BY created_at DESC
-             LIMIT $3 OFFSET $4",
+             LIMIT $3 OFFSET $4"#,
         )
         .bind(filter.customer_id)
         .bind(&filter.status)
@@ -30,12 +33,17 @@ impl OrderRepository {
     }
 
     pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Order, AppError> {
-        sqlx::query_as::<_, Order>("SELECT * FROM orders WHERE id = $1")
-            .bind(id)
-            .fetch_optional(pool)
-            .await
-            .map_err(AppError::Database)?
-            .ok_or_else(|| AppError::NotFound("Record not found".into()))
+        sqlx::query_as::<_, Order>(
+            r#"SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, created_at, updated_at
+             FROM orders WHERE id = $1"#,
+        )
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+        .map_err(AppError::Database)?
+        .ok_or_else(|| AppError::NotFound("Record not found".into()))
     }
 
     pub async fn find_items(pool: &PgPool, order_id: Uuid) -> Result<Vec<OrderItem>, AppError> {
@@ -56,14 +64,15 @@ impl OrderRepository {
             .sum();
         let order_id = Uuid::new_v4();
 
-        sqlx::query_unchecked!(
-            "INSERT INTO orders (id, customer_id, status, priority, inventory_status, total_cents, notes, created_at, updated_at)
-             VALUES ($1, $2, 'pending', 'normal', 'unavailable', $3, $4, NOW(), NOW())",
-            order_id,
-            input.customer_id,
-            total_cents,
-            &input.notes,
+        sqlx::query(
+            "INSERT INTO orders (id, customer_id, shipping_address_id, status, priority, inventory_status, total_cents, notes, created_at, updated_at)
+             VALUES ($1, $2, $3, 'pending', 'normal', 'unavailable', $4, $5, NOW(), NOW())",
         )
+        .bind(order_id)
+        .bind(input.customer_id)
+        .bind(input.shipping_address_id)
+        .bind(total_cents)
+        .bind(&input.notes)
         .execute(&mut *tx)
         .await
         .map_err(AppError::Database)?;
@@ -106,11 +115,16 @@ impl OrderRepository {
         .map_err(AppError::Database)?;
 
         // Re-fetch to get updated inventory_status
-        let order =
-            sqlx::query_as_unchecked!(Order, "SELECT * FROM orders WHERE id = $1", order_id)
-                .fetch_one(&mut *tx)
-                .await
-                .map_err(AppError::Database)?;
+        let order = sqlx::query_as::<_, Order>(
+            "SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, created_at, updated_at
+             FROM orders WHERE id = $1",
+        )
+        .bind(order_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(AppError::Database)?;
 
         tx.commit().await.map_err(AppError::Database)?;
         Ok(order)
@@ -124,7 +138,7 @@ impl OrderRepository {
             r#"
             SELECT
                 id, customer_id, status, priority, inventory_status,
-                total_cents, notes, created_at, updated_at,
+                total_cents, notes, shipping_address_id, created_at, updated_at,
                 CASE priority
                     WHEN 'urgent' THEN 1000
                     WHEN 'high'   THEN 500
@@ -150,10 +164,12 @@ impl OrderRepository {
     pub async fn update(pool: &PgPool, id: Uuid, input: UpdateOrder) -> Result<Order, AppError> {
         let current = Self::find_by_id(pool, id).await?;
         sqlx::query_as::<_, Order>(
-            "UPDATE orders
+            r#"UPDATE orders
              SET status = $2, notes = $3, updated_at = NOW()
              WHERE id = $1
-             RETURNING *",
+             RETURNING id, customer_id, status, priority, inventory_status, total_cents,
+                       shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                       notes, shipping_address_id, created_at, updated_at"#,
         )
         .bind(id)
         .bind(input.status.unwrap_or(current.status))

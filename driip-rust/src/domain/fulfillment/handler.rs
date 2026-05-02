@@ -10,6 +10,9 @@ use uuid::Uuid;
 
 use crate::{
     auth::{check_permission, AuthContext, Permission},
+    domain::address::repository::AddressRepository,
+    domain::warehouse::model::WarehouseFilter,
+    domain::warehouse::repository::WarehouseRepository,
     errors::AppError,
     middleware::sanitize::{sanitize_opt, sanitize_phone, sanitize_str, Sanitize},
     state::AppState,
@@ -35,8 +38,29 @@ fn require_ghtk(
         .ok_or_else(|| AppError::Internal("GHTK not configured (missing GHTK_TOKEN)".into()))
 }
 
-fn pickup_config(state: &AppState) -> PickupConfig {
-    PickupConfig {
+async fn pickup_config(state: &AppState) -> Result<PickupConfig, AppError> {
+    // Try to load from first active warehouse's linked address
+    let filter = WarehouseFilter {
+        is_active: Some(true),
+        page: Some(1),
+        per_page: Some(1),
+    };
+    if let Ok(warehouses) = WarehouseRepository::list(&state.db, &filter).await {
+        if let Some(wh) = warehouses.first() {
+            if let Ok(Some(addr)) = AddressRepository::find_by_warehouse(&state.db, wh.id).await {
+                return Ok(PickupConfig {
+                    name: addr.recipient_name,
+                    address: addr.street,
+                    province: addr.province.unwrap_or_default(),
+                    district: addr.district.unwrap_or_default(),
+                    tel: addr.phone.unwrap_or_default(),
+                });
+            }
+        }
+    }
+
+    // Fallback to env vars
+    Ok(PickupConfig {
         name: state
             .ghtk_pick_name
             .clone()
@@ -45,7 +69,7 @@ fn pickup_config(state: &AppState) -> PickupConfig {
         province: state.ghtk_pick_province.clone().unwrap_or_default(),
         district: state.ghtk_pick_district.clone().unwrap_or_default(),
         tel: state.ghtk_pick_tel.clone().unwrap_or_default(),
-    }
+    })
 }
 
 // ── Fee Estimation ────────────────────────────────────────────────────────────
@@ -71,7 +95,7 @@ pub async fn estimate_fee(
     let province = sanitize_str(&q.province, 100).unwrap_or(q.province);
     let district = sanitize_str(&q.district, 100).unwrap_or(q.district);
     let client = require_ghtk(&state)?;
-    let pickup = pickup_config(&state);
+    let pickup = pickup_config(&state).await?;
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
 
     let transport = if q.transport.as_deref() == Some("fly") {
@@ -121,7 +145,7 @@ pub async fn book_shipment(
 ) -> Result<impl IntoResponse, AppError> {
     check_permission(&ctx, Permission::FulfillmentBook)?;
     let client = require_ghtk(&state)?;
-    let pickup = pickup_config(&state);
+    let pickup = pickup_config(&state).await?;
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
 
     body.public_order_id = sanitize_str(&body.public_order_id, 50).unwrap_or(body.public_order_id);
@@ -180,7 +204,7 @@ pub async fn cancel_shipment(
     check_permission(&ctx, Permission::FulfillmentCancel)?;
     let body = body.sanitize();
     let client = require_ghtk(&state)?;
-    let pickup = pickup_config(&state);
+    let pickup = pickup_config(&state).await?;
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
 
     let cancelled = svc
@@ -214,7 +238,7 @@ pub async fn rebook_shipment(
 ) -> Result<impl IntoResponse, AppError> {
     check_permission(&ctx, Permission::FulfillmentBook)?;
     let client = require_ghtk(&state)?;
-    let pickup = pickup_config(&state);
+    let pickup = pickup_config(&state).await?;
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
 
     body.public_order_id = sanitize_str(&body.public_order_id, 50).unwrap_or(body.public_order_id);
@@ -331,7 +355,7 @@ pub async fn ghtk_webhook(
     body: Bytes,
 ) -> Result<impl IntoResponse, AppError> {
     let client = require_ghtk(&state)?;
-    let pickup = pickup_config(&state);
+    let pickup = pickup_config(&state).await?;
     let svc = GhtkFulfillmentService::new(client, &state.db, &pickup);
 
     let signature = headers

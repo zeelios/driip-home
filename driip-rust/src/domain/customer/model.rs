@@ -13,10 +13,6 @@ pub struct Customer {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub phone: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub address: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub province: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub dob: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub gender: Option<String>,
@@ -38,8 +34,6 @@ pub struct CustomerProfile {
     pub name: String,
     pub email: String,
     pub phone: Option<String>,
-    pub address: Option<String>,
-    pub province: Option<String>,
     pub dob: Option<String>,
     pub gender: Option<String>,
     pub referral: Option<String>,
@@ -57,10 +51,6 @@ pub struct CreateCustomer {
     pub email: String,
     #[validate(length(max = 30))]
     pub phone: Option<String>,
-    #[validate(length(max = 500))]
-    pub address: Option<String>,
-    #[validate(length(max = 100))]
-    pub province: Option<String>,
     #[validate(length(max = 20))]
     pub dob: Option<String>,
     #[validate(length(max = 10))]
@@ -77,10 +67,6 @@ pub struct UpdateCustomer {
     pub email: Option<String>,
     #[validate(length(max = 30))]
     pub phone: Option<String>,
-    #[validate(length(max = 500))]
-    pub address: Option<String>,
-    #[validate(length(max = 100))]
-    pub province: Option<String>,
     #[validate(length(max = 20))]
     pub dob: Option<String>,
     #[validate(length(max = 10))]
@@ -97,10 +83,6 @@ pub struct RegisterCustomer {
     pub email: String,
     #[validate(length(max = 30))]
     pub phone: Option<String>,
-    #[validate(length(max = 500))]
-    pub address: Option<String>,
-    #[validate(length(max = 100))]
-    pub province: Option<String>,
     #[validate(length(max = 20))]
     pub dob: Option<String>,
     #[validate(length(max = 10))]
@@ -138,6 +120,7 @@ pub struct CustomerTokenResponse {
 
 // ── Refresh Token ────────────────────────────────────────────────────────────
 
+#[allow(dead_code)]
 #[derive(Debug, sqlx::FromRow)]
 pub struct CustomerRefreshToken {
     pub id: Uuid,

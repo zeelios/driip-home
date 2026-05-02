@@ -90,6 +90,13 @@ pub enum Permission {
     // Notification
     NotificationList,
     NotificationMarkRead,
+    // Address
+    AddressList,
+    AddressRead,
+    AddressCreate,
+    AddressUpdate,
+    AddressDelete,
+    AddressBlock,
 }
 
 /// Return the set of permissions granted to a given role.
@@ -147,6 +154,12 @@ pub fn permissions_for_role(role: &str) -> HashSet<Permission> {
                 PurchaseOrderReceive,
                 NotificationList,
                 NotificationMarkRead,
+                AddressList,
+                AddressRead,
+                AddressCreate,
+                AddressUpdate,
+                AddressDelete,
+                AddressBlock,
             ]);
         }
         "manager" => {
@@ -197,6 +210,12 @@ pub fn permissions_for_role(role: &str) -> HashSet<Permission> {
                 PurchaseOrderReceive,
                 NotificationList,
                 NotificationMarkRead,
+                AddressList,
+                AddressRead,
+                AddressCreate,
+                AddressUpdate,
+                AddressDelete,
+                AddressBlock,
             ]);
         }
         "staff" => {
@@ -225,6 +244,8 @@ pub fn permissions_for_role(role: &str) -> HashSet<Permission> {
                 PurchaseOrderCreate,
                 NotificationList,
                 NotificationMarkRead,
+                AddressList,
+                AddressRead,
             ]);
         }
         "readonly" => {
@@ -246,6 +267,8 @@ pub fn permissions_for_role(role: &str) -> HashSet<Permission> {
                 PurchaseOrderList,
                 PurchaseOrderRead,
                 NotificationList,
+                AddressList,
+                AddressRead,
             ]);
         }
         _ => {}

@@ -9,7 +9,9 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
-    auth::CustomerAuth, errors::AppError, middleware::sanitize::sanitize_opt, state::AppState,
+    auth::CustomerAuth, domain::address::repository::AddressRepository,
+    domain::address::service::AddressService, errors::AppError, middleware::sanitize::sanitize_opt,
+    state::AppState,
 };
 
 use super::super::order::model::{CreateOrder, CreateOrderItem, OrderFilter};
@@ -24,6 +26,7 @@ pub struct PublicCreateOrderItem {
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct PublicCreateOrder {
+    pub shipping_address_id: Uuid,
     #[validate(length(max = 1000))]
     pub notes: Option<String>,
     #[validate(length(min = 1, max = 500), nested)]
@@ -87,8 +90,21 @@ pub async fn create(
         });
     }
 
+    // Validate address belongs to customer and is not blocked
+    let customer_addrs = AddressRepository::find_by_customer(&state.db, ctx.customer_id).await?;
+    if !customer_addrs
+        .iter()
+        .any(|a| a.id == input.shipping_address_id)
+    {
+        return Err(AppError::Validation(
+            "Selected address does not belong to this customer".into(),
+        ));
+    }
+    AddressService::validate_not_blocked(&state.db, input.shipping_address_id).await?;
+
     let order_input = CreateOrder {
         customer_id: ctx.customer_id,
+        shipping_address_id: input.shipping_address_id,
         notes: sanitize_opt(input.notes.as_deref(), 1000),
         items,
     };

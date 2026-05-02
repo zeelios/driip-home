@@ -5,6 +5,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::domain::address::service::AddressService;
 use crate::domain::inventory::service::InventoryService;
 use crate::domain::notification::model::CreateNotification;
 use crate::domain::notification::repository::NotificationRepository;
@@ -18,12 +19,17 @@ impl OrderService {
     /// Confirm an order. If inventory_status = ready, proceeds. If partial/unavailable
     /// and force = true, proceeds anyway (for dropship lines). Returns updated order.
     pub async fn confirm(pool: &PgPool, order_id: Uuid, force: bool) -> Result<Order, AppError> {
-        let order = sqlx::query_as::<_, Order>("SELECT * FROM orders WHERE id = $1")
-            .bind(order_id)
-            .fetch_optional(pool)
-            .await
-            .map_err(AppError::Database)?
-            .ok_or_else(|| AppError::NotFound("Order not found".into()))?;
+        let order = sqlx::query_as::<_, Order>(
+            r#"SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, created_at, updated_at
+             FROM orders WHERE id = $1"#,
+        )
+        .bind(order_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(AppError::Database)?
+        .ok_or_else(|| AppError::NotFound("Order not found".into()))?;
 
         if order.status != "pending" {
             return Err(AppError::Validation(
@@ -52,13 +58,19 @@ impl OrderService {
     }
 
     /// Cancel an order and release all inventory reservations.
+    /// Also increments the strike count on the shipping address for fraud tracking.
     pub async fn cancel(pool: &PgPool, order_id: Uuid) -> Result<Order, AppError> {
-        let order = sqlx::query_as::<_, Order>("SELECT * FROM orders WHERE id = $1")
-            .bind(order_id)
-            .fetch_optional(pool)
-            .await
-            .map_err(AppError::Database)?
-            .ok_or_else(|| AppError::NotFound("Order not found".into()))?;
+        let order = sqlx::query_as::<_, Order>(
+            r#"SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, created_at, updated_at
+             FROM orders WHERE id = $1"#,
+        )
+        .bind(order_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(AppError::Database)?
+        .ok_or_else(|| AppError::NotFound("Order not found".into()))?;
 
         if matches!(order.status.as_str(), "cancelled" | "delivered") {
             return Err(AppError::Validation(
@@ -70,12 +82,18 @@ impl OrderService {
         InventoryService::release_for_order(pool, order_id).await?;
 
         let updated = sqlx::query_as::<_, Order>(
-            "UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1 RETURNING *",
+            r#"UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1
+             RETURNING id, customer_id, status, priority, inventory_status, total_cents,
+                       shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                       notes, shipping_address_id, created_at, updated_at"#,
         )
         .bind(order_id)
         .fetch_one(pool)
         .await
         .map_err(AppError::Database)?;
+
+        // Auto-flag address for fraud tracking
+        let _ = AddressService::auto_flag_on_cancel(pool, order_id).await;
 
         Ok(updated)
     }
@@ -115,12 +133,17 @@ impl OrderService {
     /// 3. Update inventory_status on both orders.
     /// 4. Fire notifications for affected orders.
     pub async fn reallocate(pool: &PgPool, target_order_id: Uuid) -> Result<Order, AppError> {
-        let target = sqlx::query_as::<_, Order>("SELECT * FROM orders WHERE id = $1")
-            .bind(target_order_id)
-            .fetch_optional(pool)
-            .await
-            .map_err(AppError::Database)?
-            .ok_or_else(|| AppError::NotFound("Order not found".into()))?;
+        let target = sqlx::query_as::<_, Order>(
+            r#"SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, created_at, updated_at
+             FROM orders WHERE id = $1"#,
+        )
+        .bind(target_order_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(AppError::Database)?
+        .ok_or_else(|| AppError::NotFound("Order not found".into()))?;
 
         if target.status != "pending" {
             return Err(AppError::Validation(
@@ -254,11 +277,16 @@ impl OrderService {
             .map_err(AppError::Database)?;
         }
 
-        let updated = sqlx::query_as::<_, Order>("SELECT * FROM orders WHERE id = $1")
-            .bind(target_order_id)
-            .fetch_one(&mut *tx)
-            .await
-            .map_err(AppError::Database)?;
+        let updated = sqlx::query_as::<_, Order>(
+            r#"SELECT id, customer_id, status, priority, inventory_status, total_cents,
+                    shipping_fee_cents, operational_fee_cents, grand_total_cents,
+                    notes, shipping_address_id, created_at, updated_at
+             FROM orders WHERE id = $1"#,
+        )
+        .bind(target_order_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(AppError::Database)?;
 
         tx.commit().await.map_err(AppError::Database)?;
 

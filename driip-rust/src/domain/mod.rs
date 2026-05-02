@@ -11,6 +11,9 @@ pub mod notification;
 pub mod public;
 pub mod purchase_order;
 
+// ── Address domain ──────────────────────────────────────────────────────────
+pub mod address;
+
 // ── Legacy domains (to be refactored in Phase 2+) ───────────────────────────
 pub mod customer;
 pub mod inventory;
@@ -49,5 +52,6 @@ pub fn router() -> Router<AppState> {
         .nest("/inventory", inventory::router())
         .nest("/warehouses", warehouse::router())
         .nest("/purchase-orders", purchase_order::router())
+        .nest("/addresses", address::router())
         .nest("/notifications", notification::router())
 }

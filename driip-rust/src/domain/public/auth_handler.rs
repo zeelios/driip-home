@@ -39,8 +39,6 @@ pub async fn register(
         email: sanitize_email(&input.email)
             .ok_or_else(|| AppError::Validation("invalid email".into()))?,
         phone: input.phone.as_deref().and_then(sanitize_phone),
-        address: sanitize_opt(input.address.as_deref(), 500),
-        province: sanitize_opt(input.province.as_deref(), 100),
         dob: sanitize_opt(input.dob.as_deref(), 20),
         gender: sanitize_opt(input.gender.as_deref(), 10),
         referral: sanitize_opt(input.referral.as_deref(), 500),
