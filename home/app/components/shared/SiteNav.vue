@@ -29,6 +29,15 @@
         </template>
       </div>
 
+      <!-- Mobile active section indicator -->
+      <span
+        v-if="activeSectionLabel"
+        class="snav-mobile-section"
+        aria-hidden="true"
+      >
+        {{ activeSectionLabel }}
+      </span>
+
       <!-- Center: optional section links -->
       <div v-if="navStore.links.length > 0" class="snav-center">
         <button
@@ -73,6 +82,12 @@ const navStore = useSiteNavStore();
 const showBack = computed(() => {
   const p = route.path;
   return p !== "/" && p !== "/en" && p !== "/en/";
+});
+
+const activeSectionLabel = computed(() => {
+  if (!navStore.activeSection) return "";
+  const link = navStore.links.find((l) => l.id === navStore.activeSection);
+  return link?.label ?? "";
 });
 
 function switchLang(): void {
@@ -297,6 +312,11 @@ function switchLang(): void {
   background: var(--grey-100);
 }
 
+/* Mobile section indicator — hidden by default, shown only on mobile */
+.snav-mobile-section {
+  display: none;
+}
+
 /* ── MOBILE (≤639px) ────────────────────────────────────────────── */
 @media (max-width: 639px) {
   .snav {
@@ -304,21 +324,52 @@ function switchLang(): void {
   }
 
   .snav-inner {
-    justify-content: flex-end;
     padding-left: calc(12px + env(safe-area-inset-left, 0px));
     padding-right: calc(12px + env(safe-area-inset-right, 0px));
-    gap: 0;
+    gap: 8px;
   }
 
-  .snav-left,
+  /* Show back + mobile section, hide desktop center + policy + CTA */
   .snav-center,
   .snav-policy,
   .snav-cta {
     display: none;
   }
 
+  /* Compact left: back button only; hide logo / sep / page title */
+  .snav-left {
+    gap: 0;
+  }
+  .snav-logo-link,
+  .snav-sep,
+  .snav-drop {
+    display: none;
+  }
+
+  .snav-back {
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+  }
+
+  /* Mobile section indicator — centered, truncated */
+  .snav-mobile-section {
+    display: block;
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
   .snav-right {
-    margin-left: auto;
+    flex-shrink: 0;
   }
 
   .snav-lang {

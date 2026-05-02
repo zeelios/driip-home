@@ -41,7 +41,7 @@ SQLX_OFFLINE=true cargo run
 
 Or use the Makefile shortcuts:
 
-```bashx
+```bash
 make db-up       # start Docker services
 make migrate     # run migrations
 make dev         # cargo run with SQLX_OFFLINE=true
