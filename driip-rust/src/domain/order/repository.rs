@@ -3,7 +3,9 @@ use uuid::Uuid;
 
 use crate::{domain::inventory::service::InventoryService, errors::AppError};
 
-use super::model::{CreateOrder, Order, OrderFilter, OrderItem, QueuedOrder, UpdateOrder};
+use super::model::{
+    CreateOrder, Order, OrderFilter, OrderItem, OrderStats, QueuedOrder, UpdateOrder,
+};
 
 pub struct OrderRepository;
 
@@ -290,6 +292,20 @@ impl OrderRepository {
     }
 
     /// Find an order by its public tracking token (no auth required).
+    pub async fn stats(pool: &PgPool) -> Result<OrderStats, AppError> {
+        sqlx::query_as::<_, OrderStats>(
+            r#"SELECT
+                COUNT(*) FILTER (WHERE created_at::date = CURRENT_DATE)                         AS orders_today,
+                COUNT(*) FILTER (WHERE status = 'pending')                                      AS orders_pending,
+                COUNT(*)                                                                         AS orders_total,
+                COALESCE(SUM(grand_total_cents) FILTER (WHERE created_at::date = CURRENT_DATE), 0) AS revenue_today_cents
+             FROM orders"#,
+        )
+        .fetch_one(pool)
+        .await
+        .map_err(AppError::Database)
+    }
+
     pub async fn find_by_public_token(
         pool: &PgPool,
         token: Uuid,

@@ -77,7 +77,7 @@ async fn ensure_stripe_customer(state: &AppState, customer_id: Uuid) -> Result<S
     // 3. Create Stripe customer
     let stripe_cust = stripe(state)?
         .create_customer(&CreateCustomerRequest {
-            email: cust.email.clone(),
+            email: Some(cust.email.clone()),
             name: Some(cust.name.clone()),
             phone: cust.phone.clone(),
             metadata: Some({

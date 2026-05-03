@@ -3,6 +3,7 @@ use std::sync::Arc;
 use sqlx::PgPool;
 
 use crate::{
+    domain::media::service::B2Client,
     integrations::{
         ghtk::GhtkClient,
         stripe::{StripeClient, StripeWebhookVerifier},
@@ -30,6 +31,9 @@ pub struct AppState {
     pub ghtk_pick_province: Option<String>,
     pub ghtk_pick_district: Option<String>,
     pub ghtk_pick_tel: Option<String>,
+    // ── Backblaze B2 ──────────────────────────────────────────────────────
+    /// None if B2 credentials not configured
+    pub b2: Option<Arc<B2Client>>,
     // ── Security ──────────────────────────────────────────────────────────
     pub rate_limiter: RateLimiter,
 }

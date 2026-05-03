@@ -2,21 +2,12 @@
 #![deny(clippy::all)]
 
 use axum::{middleware as axum_middleware, Router};
+use driip_rust::{config, db, domain, health, integrations, middleware, state};
 use std::sync::Arc;
 use std::time::Duration;
 use tower_http::{
     cors::CorsLayer, limit::RequestBodyLimitLayer, timeout::TimeoutLayer, trace::TraceLayer,
 };
-
-mod auth;
-mod config;
-mod db;
-mod domain;
-mod errors;
-mod health;
-mod integrations;
-mod middleware;
-mod state;
 
 #[tokio::main]
 async fn main() {
@@ -87,7 +78,9 @@ async fn main() {
 
     let stripe_webhook_verifier = cfg.stripe_webhook_secret.as_ref().map(|secret| {
         tracing::info!("Stripe webhook verifier initialized");
-        Arc::new(integrations::stripe::StripeWebhookVerifier::new(secret.clone()))
+        Arc::new(integrations::stripe::StripeWebhookVerifier::new(
+            secret.clone(),
+        ))
     });
 
     if stripe_client.is_none() {
@@ -103,9 +96,19 @@ async fn main() {
         Arc::new(integrations::ghtk::GhtkClient::new(
             token.clone(),
             cfg.ghtk_sandbox,
+            cfg.ghtk_partner_code.clone(),
             cfg.ghtk_webhook_secret.clone(),
         ))
     });
+
+    // ── Backblaze B2 ─────────────────────────────────────────────────────
+    let b2_client = domain::media::service::B2Client::from_config(&cfg).map(|client| {
+        tracing::info!("Backblaze B2 client initialized");
+        Arc::new(client)
+    });
+    if b2_client.is_none() {
+        tracing::warn!("B2 credentials not set — media uploads disabled");
+    }
 
     let state = state::AppState {
         db: pool,
@@ -120,6 +123,7 @@ async fn main() {
         ghtk_pick_province: cfg.ghtk_pick_province.clone(),
         ghtk_pick_district: cfg.ghtk_pick_district.clone(),
         ghtk_pick_tel: cfg.ghtk_pick_tel.clone(),
+        b2: b2_client,
         rate_limiter: middleware::rate_limit::RateLimiter::new(),
     };
 
@@ -178,12 +182,12 @@ fn build_router(state: state::AppState) -> Router {
     // ── All other routes (global rate limit) ─────────────────────────────
     // Includes staff-only: payments list, refunds, subscriptions CRUD
     // Includes webhooks: /api/v1/webhooks/stripe + /ghtk (no JWT, verified internally)
-    let api_router = axum::Router::new()
-        .nest("/api/v1", domain::router())
-        .layer(axum_middleware::from_fn_with_state(
+    let api_router = axum::Router::new().nest("/api/v1", domain::router()).layer(
+        axum_middleware::from_fn_with_state(
             state.clone(),
             middleware::rate_limit::global_rate_limit,
-        ));
+        ),
+    );
 
     let health_router =
         axum::Router::new().route("/health", axum::routing::get(health::health_check));

@@ -14,6 +14,7 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(handler::list).post(handler::create))
         // Static routes MUST come before /{id} to avoid UUID parse conflicts
+        .route("/stats", get(handler::stats))
         .route("/queue", get(handler::queue))
         .route(
             "/{id}",

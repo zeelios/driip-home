@@ -1,0 +1,224 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'driip-rust/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  CARGO_TERM_COLOR: always
+  AWS_REGION: ap-southeast-1
+  SQLX_OFFLINE: true
+
+jobs:
+  # ── Phase 1: Validate & Build ──────────────────────────────────────────────
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./driip-rust
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-musl
+
+      - name: Install cargo-lambda
+        run: cargo install cargo-lambda
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "driip-rust"
+
+      - name: Check sqlx offline cache exists
+        run: |
+          if [ ! -d ".sqlx" ]; then
+            echo "::error::Missing .sqlx/ offline query cache. Run 'make prepare' locally and commit the results."
+            exit 1
+          fi
+          echo "✓ Found $(find .sqlx -name '*.json' | wc -l) cached queries"
+
+      - name: Build Lambda binary
+        run: cargo lambda build --release --target aarch64-unknown-linux-musl
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-bootstrap
+          path: driip-rust/target/lambda/driip-rust/bootstrap
+          retention-days: 1
+
+  # ── Phase 2: Database Migrations ───────────────────────────────────────────
+  migrate:
+    name: Database Migrations
+    runs-on: ubuntu-latest
+    needs: build
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --no-default-features --features postgres
+
+      - name: Backup database before migration
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          backup_name="pre_deploy_$(date +%Y%m%d_%H%M%S).sql"
+          pg_dump "$DATABASE_URL" --no-owner --no-acl > "/tmp/$backup_name"
+          echo "✓ Backup created: $backup_name ($(du -h "/tmp/$backup_name" | cut -f1))"
+
+      - name: Check pending migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        working-directory: ./driip-rust
+        run: |
+          echo "Migration status:"
+          sqlx migrate info --source ./migrations
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        working-directory: ./driip-rust
+        run: |
+          echo "Running migrations..."
+          sqlx migrate run --source ./migrations
+          echo "✓ Migrations complete"
+
+  # ── Phase 3: Deploy to Lambda ───────────────────────────────────────────────
+  deploy:
+    name: Deploy to AWS Lambda
+    runs-on: ubuntu-latest
+    needs: [build, migrate]
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-bootstrap
+          path: ./bootstrap
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package Lambda function
+        run: |
+          cd bootstrap
+          zip -j ../bootstrap.zip bootstrap
+          cd ..
+          ls -lh bootstrap.zip
+
+      - name: Deploy to Lambda
+        run: |
+          FUNCTION_NAME="${{ vars.FUNCTION_NAME || 'driip-api' }}"
+          
+          echo "Deploying to $FUNCTION_NAME..."
+          aws lambda update-function-code \
+            --function-name "$FUNCTION_NAME" \
+            --zip-file fileb://bootstrap.zip \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "Waiting for update..."
+          aws lambda wait function-updated \
+            --function-name "$FUNCTION_NAME" \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "✓ Deployment complete"
+
+      - name: Update environment variables
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          GHTK_TOKEN: ${{ secrets.GHTK_TOKEN }}
+        run: |
+          FUNCTION_NAME="${{ vars.FUNCTION_NAME || 'driip-api' }}"
+          
+          # Build environment variables JSON
+          ENV_JSON=$(jq -n \
+            --arg db "$DATABASE_URL" \
+            --arg jwt "$JWT_SECRET" \
+            --arg stripe "${STRIPE_SECRET_KEY:-}" \
+            --arg stripe_wh "${STRIPE_WEBHOOK_SECRET:-}" \
+            --arg ghtk "${GHTK_TOKEN:-}" \
+            '{
+              Variables: {
+                DATABASE_URL: $db,
+                JWT_SECRET: $jwt,
+                RUST_LOG: "info",
+                JWT_ACCESS_TTL_SECS: "900",
+                JWT_REFRESH_TTL_SECS: "604800",
+                STRIPE_SECRET_KEY: $stripe,
+                STRIPE_WEBHOOK_SECRET: $stripe_wh,
+                GHTK_TOKEN: $ghtk
+              }
+            }')
+          
+          aws lambda update-function-configuration \
+            --function-name "$FUNCTION_NAME" \
+            --environment "$ENV_JSON" \
+            --region ${{ env.AWS_REGION }}
+          
+          echo "✓ Environment updated"
+
+      - name: Health check
+        run: |
+          FUNCTION_NAME="${{ vars.FUNCTION_NAME || 'driip-api' }}"
+          FUNCTION_URL=$(aws lambda get-function-url-config \
+            --function-name "$FUNCTION_NAME" \
+            --query 'FunctionUrl' --output text \
+            --region ${{ env.AWS_REGION }} 2>/dev/null || echo "")
+          
+          if [ -n "$FUNCTION_URL" ]; then
+            echo "Checking health endpoint..."
+            sleep 10  # Wait for propagation
+            
+            for i in {1..5}; do
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FUNCTION_URL/health" || echo "000")
+              if [ "$STATUS" = "200" ]; then
+                echo "✓ Health check passed (HTTP 200)"
+                exit 0
+              fi
+              echo "Attempt $i: HTTP $STATUS, retrying..."
+              sleep 5
+            done
+            
+            echo "::warning::Health check failed after 5 attempts"
+          else
+            echo "No function URL configured, skipping health check"
+          fi
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Deployment Status: ${{ job.status }}"
+          echo "  Commit: ${{ github.sha }}"
+          echo "  Branch: ${{ github.ref_name }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

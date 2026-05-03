@@ -101,6 +101,22 @@ impl ShipmentRepository {
         Ok(row)
     }
 
+    /// List all shipments for an order (for handling multiple shipments/partial fulfillment)
+    pub async fn list_by_order(pool: &PgPool, order_id: Uuid) -> Result<Vec<Shipment>, AppError> {
+        let rows = sqlx::query_as!(
+            Shipment,
+            r#"SELECT id, order_id, ghtk_order_id, ghtk_tracking_id, status,
+                      customer_paid_shipping_cents, ghtk_charged_cents, shipping_diff_cents,
+                      weight_grams, pick_date, raw_ghtk_response,
+                      booked_by, cancelled_by, cancel_reason, created_at, updated_at
+               FROM shipments WHERE order_id = $1 ORDER BY created_at"#,
+            order_id
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows)
+    }
+
     pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), AppError> {
         sqlx::query!(
             "UPDATE shipments SET status = $2, updated_at = NOW() WHERE id = $1",

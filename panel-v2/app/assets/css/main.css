@@ -1,60 +1,61 @@
 @import "tailwindcss";
 
 /* ── Theme tokens ───────────────────────────────────────────────────── */
-:root, html.dark {
-  --bg:           #050505;
-  --bg-raised:    #0d0d0f;
-  --bg-card:      rgba(18, 18, 22, 0.80);
-  --bg-hover:     rgba(39, 39, 44, 0.60);
+:root,
+html.dark {
+  --bg: #050505;
+  --bg-raised: #0d0d0f;
+  --bg-card: rgba(18, 18, 22, 0.8);
+  --bg-hover: rgba(39, 39, 44, 0.6);
 
-  --border:       rgba(39,  39,  44,  0.75);
-  --border-hi:    rgba(63,  63,  70,  0.90);
+  --border: rgba(39, 39, 44, 0.75);
+  --border-hi: rgba(63, 63, 70, 0.9);
   --border-focus: rgba(161, 161, 170, 0.75);
 
-  --text:         #f4f4f5;
-  --text-sub:     #a1a1aa;
-  --text-mute:    #52525b;
+  --text: #f4f4f5;
+  --text-sub: #a1a1aa;
+  --text-mute: #52525b;
 
-  --accent:       #ffffff;
-  --accent-fg:    #050505;
+  --accent: #ffffff;
+  --accent-fg: #050505;
 
-  --sidebar-w:    220px;
+  --sidebar-w: 220px;
 
-  --skeleton-from: rgba(39, 39, 44, 0.70);
-  --skeleton-to:   rgba(63, 63, 70,  0.50);
+  --skeleton-from: rgba(39, 39, 44, 0.7);
+  --skeleton-to: rgba(63, 63, 70, 0.5);
 
   /* Status colours */
-  --status-pending:   rgba(245, 158, 11, 0.15);
+  --status-pending: rgba(245, 158, 11, 0.15);
   --status-pending-t: #f59e0b;
-  --status-ok:        rgba(34, 197, 94, 0.12);
-  --status-ok-t:      #22c55e;
-  --status-danger:    rgba(239, 68, 68, 0.12);
-  --status-danger-t:  #ef4444;
-  --status-info:      rgba(59, 130, 246, 0.12);
-  --status-info-t:    #3b82f6;
-  --status-muted:     rgba(82, 82, 91, 0.25);
-  --status-muted-t:   #a1a1aa;
+  --status-ok: rgba(34, 197, 94, 0.12);
+  --status-ok-t: #22c55e;
+  --status-danger: rgba(239, 68, 68, 0.12);
+  --status-danger-t: #ef4444;
+  --status-info: rgba(59, 130, 246, 0.12);
+  --status-info-t: #3b82f6;
+  --status-muted: rgba(82, 82, 91, 0.25);
+  --status-muted-t: #a1a1aa;
 }
 
 html.light {
-  --bg:           #f3f3f4;
-  --bg-raised:    #ffffff;
-  --bg-card:      rgba(255, 255, 255, 0.90);
-  --bg-hover:     rgba(240, 240, 244, 0.80);
+  --bg: #f3f3f4;
+  --bg-raised: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-hover: rgba(240, 240, 244, 0.8);
 
-  --border:       rgba(200, 200, 207, 0.85);
-  --border-hi:    rgba(160, 160, 170, 0.95);
-  --border-focus: rgba(82,  82,  91,  0.75);
+  --border: rgba(200, 200, 207, 0.85);
+  --border-hi: rgba(160, 160, 170, 0.95);
+  --border-focus: rgba(82, 82, 91, 0.75);
 
-  --text:         #0a0a0c;
-  --text-sub:     #4a4a55;
-  --text-mute:    #9898a6;
+  --text: #0a0a0c;
+  --text-sub: #4a4a55;
+  --text-mute: #9898a6;
 
-  --accent:       #0a0a0c;
-  --accent-fg:    #f3f3f4;
+  --accent: #0a0a0c;
+  --accent-fg: #f3f3f4;
 
   --skeleton-from: rgba(210, 210, 215, 0.65);
-  --skeleton-to:   rgba(240, 240, 244, 0.45);
+  --skeleton-to: rgba(240, 240, 244, 0.45);
 }
 
 /* ── Base ───────────────────────────────────────────────────────────── */
@@ -68,16 +69,39 @@ html {
   scrollbar-color: var(--border-hi) transparent;
 }
 
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove 300ms tap delay on mobile for all interactive elements */
+a,
+button,
+[role="button"],
+input,
+select,
+textarea,
+label {
+  touch-action: manipulation;
+}
 
 /* ── Skeleton shimmer ───────────────────────────────────────────────── */
 @keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 .skeleton {
-  background: linear-gradient(90deg,
-    var(--skeleton-from) 25%, var(--skeleton-to) 50%, var(--skeleton-from) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-from) 25%,
+    var(--skeleton-to) 50%,
+    var(--skeleton-from) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 0.375rem;

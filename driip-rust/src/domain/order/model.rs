@@ -158,3 +158,11 @@ pub struct GuestOrderResponse {
     pub order: OrderWithToken,
     pub public_token: Uuid,
 }
+
+#[derive(Debug, Serialize, sqlx::FromRow)]
+pub struct OrderStats {
+    pub orders_today: i64,
+    pub orders_pending: i64,
+    pub orders_total: i64,
+    pub revenue_today_cents: i64,
+}

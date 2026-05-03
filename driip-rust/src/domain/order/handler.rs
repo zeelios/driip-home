@@ -21,6 +21,15 @@ use super::{
     service::OrderService,
 };
 
+pub async fn stats(
+    State(state): State<AppState>,
+    ctx: AuthContext,
+) -> Result<impl IntoResponse, AppError> {
+    check_permission(&ctx, Permission::OrderList)?;
+    let s = OrderRepository::stats(&state.db).await?;
+    Ok(Json(s))
+}
+
 pub async fn list(
     State(state): State<AppState>,
     ctx: AuthContext,

@@ -51,6 +51,14 @@ pub struct ProductFilter {
     pub per_page: Option<i64>,
 }
 
+/// Product with thumbnail URL (for listing)
+#[derive(Debug, Serialize)]
+pub struct ProductWithThumbnail {
+    #[serde(flatten)]
+    pub product: Product,
+    pub thumbnail_url: Option<String>,
+}
+
 impl Sanitize for CreateProduct {
     fn sanitize(mut self) -> Self {
         self.name = sanitize_str(&self.name, 300).unwrap_or(self.name);

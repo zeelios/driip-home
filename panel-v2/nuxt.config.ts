@@ -1,33 +1,36 @@
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
-  srcDir: 'app',
-  compatibilityDate: 'latest',
+  srcDir: "app",
+  compatibilityDate: "latest",
   ssr: true,
 
   vite: {
     plugins: [tailwindcss()],
   },
 
-  modules: ['@pinia/nuxt'],
-  css: ['~/assets/css/main.css'],
+  modules: ["@pinia/nuxt"],
+  css: ["~/assets/css/main.css"],
 
   app: {
     head: {
-      htmlAttrs: { lang: 'vi' },
+      htmlAttrs: { lang: "vi" },
       meta: [
-        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1' },
-        { name: 'theme-color', content: '#050505' },
-        { name: 'robots', content: 'noindex, nofollow' },
+        {
+          name: "viewport",
+          content: "width=device-width, initial-scale=1, maximum-scale=1",
+        },
+        { name: "theme-color", content: "#050505" },
+        { name: "robots", content: "noindex, nofollow" },
       ],
-      title: 'driip- Panel',
+      title: "driip- Panel",
     },
-    rootId: '__panel',
+    rootId: "__panel",
   },
 
   runtimeConfig: {
     public: {
-      apiUrl:''
+      apiUrl: process.env.NUXT_PUBLIC_API_URL ?? "http://localhost:8000",
     },
   },
-})
+});

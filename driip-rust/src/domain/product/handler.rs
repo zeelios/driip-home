@@ -15,9 +15,10 @@ use crate::{
 };
 
 use super::{
-    model::{CreateProduct, ProductFilter, UpdateProduct},
+    model::{CreateProduct, ProductFilter, ProductWithThumbnail, UpdateProduct},
     repository::ProductRepository,
 };
+use crate::domain::media::repository::MediaRepository;
 
 pub async fn list(
     State(state): State<AppState>,
@@ -28,7 +29,36 @@ pub async fn list(
     let page = filter.page.unwrap_or(1).max(1);
     let per_page = filter.per_page.unwrap_or(20).min(100);
     let products = ProductRepository::list(&state.db, page, per_page).await?;
-    Ok(Json(products))
+
+    // Fetch thumbnails for products (if B2 is configured)
+    let b2 = state.b2.clone();
+    let products_with_thumbs: Vec<ProductWithThumbnail> = if let Some(client) = b2 {
+        let mut result = Vec::with_capacity(products.len());
+        for product in products {
+            let thumb = MediaRepository::get_primary_for_product(&state.db, product.id)
+                .await
+                .ok()
+                .flatten();
+            let thumb_url = thumb
+                .and_then(|m| m.thumbnail_path)
+                .map(|p| client.get_url(&p));
+            result.push(ProductWithThumbnail {
+                product,
+                thumbnail_url: thumb_url,
+            });
+        }
+        result
+    } else {
+        products
+            .into_iter()
+            .map(|p| ProductWithThumbnail {
+                product: p,
+                thumbnail_url: None,
+            })
+            .collect()
+    };
+
+    Ok(Json(products_with_thumbs))
 }
 
 pub async fn get(

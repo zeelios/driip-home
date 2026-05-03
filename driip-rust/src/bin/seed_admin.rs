@@ -20,11 +20,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         env::var("DATABASE_URL").unwrap_or_else(|_| "postgres://localhost/driip".to_string());
 
     // Admin user configuration (can be overridden via env vars)
-    let admin_name = env::var("SEED_ADMIN_NAME").unwrap_or_else(|_| "Admin".to_string());
-    let admin_email =
-        env::var("SEED_ADMIN_EMAIL").unwrap_or_else(|_| "admin@driip.com".to_string());
-    let admin_password = env::var("SEED_ADMIN_PASSWORD").unwrap_or_else(|_| "admin123".to_string());
-    let admin_role = env::var("SEED_ADMIN_ROLE").unwrap_or_else(|_| "admin".to_string());
+    let admin_name = "Admin";
+    let admin_email = "admin@driip.io";
+    let admin_password = "password";
+    let admin_role = "admin";
 
     println!("Connecting to database...");
     let pool = PgPool::connect(&database_url).await?;

@@ -116,6 +116,18 @@ impl<'a> GhtkFulfillmentService<'a> {
         let pick_money = req.pick_money.unwrap_or(0);
         let insurance_value = req.insurance_value.unwrap_or(0);
 
+        // Check for existing shipments to generate unique GHTK partner ID
+        // This handles partial fulfillment (e.g., order has 2 items, sending 1 now, 1 later)
+        let existing_shipments = ShipmentRepository::list_by_order(self.pool, order_id).await?;
+        let shipment_number = existing_shipments.len() + 1;
+
+        // Generate unique partner ID for GHTK: "order_id#1", "order_id#2", etc.
+        let ghtk_partner_id = if shipment_number > 1 {
+            format!("{}#{}", public_order_id, shipment_number)
+        } else {
+            public_order_id.clone()
+        };
+
         // Create pending shipment row first (so we have an ID)
         let shipment = ShipmentRepository::create(
             self.pool,
@@ -126,33 +138,54 @@ impl<'a> GhtkFulfillmentService<'a> {
         )
         .await?;
 
+        // Build note indicating this is a partial shipment if applicable
+        let note = if shipment_number > 1 {
+            let base_note = req.note.unwrap_or_default();
+            let partial_note = format!(
+                "Partial shipment {}/{} | {}",
+                shipment_number,
+                shipment_number, // Current count, will increase with each shipment
+                base_note
+            );
+            Some(partial_note)
+        } else {
+            req.note
+        };
+
         let ghtk_req = GhtkOrderRequest {
             products: vec![GhtkProduct {
                 name: product_name.clone(),
                 weight: weight_grams as f64 / 1000.0,
                 quantity: 1,
                 product_code: public_order_id.clone(),
+                barcode: None,
+                cod_money: None,
             }],
             order: GhtkOrderPayload {
-                id: public_order_id.clone(),
+                id: ghtk_partner_id.clone(), // Use unique partner ID for GHTK
                 pick_name: self.pickup.name.clone(),
                 pick_address: self.pickup.address.clone(),
                 pick_province: self.pickup.province.clone(),
                 pick_district: self.pickup.district.clone(),
+                pick_ward: None, // Optional: pickup ward/commune
                 pick_tel: self.pickup.tel.clone(),
                 name: recipient_name,
                 address: recipient_address,
                 province: recipient_province,
                 district: recipient_district,
+                ward: None, // Optional: recipient ward/commune
                 tel: recipient_phone,
                 email: recipient_email,
                 hamlet: "Khác".into(),
                 is_freeship: if pick_money == 0 { 1 } else { 0 },
                 pick_money,
+                pick_option: None,        // Optional: "cod" or "post"
+                pick_session: None,       // Optional: 1=morning, 2=afternoon, 3=evening
+                pick_date: req.pick_date, // Optional: YYYY-MM-DD
                 value: insurance_value,
                 transport: format!("{:?}", transport).to_lowercase(),
                 deliver_option: format!("{:?}", deliver_option).to_lowercase(),
-                note: req.note,
+                note,
                 tags: vec![GhtkTag {
                     id: 1,
                     weight: weight_grams as f64 / 1000.0,

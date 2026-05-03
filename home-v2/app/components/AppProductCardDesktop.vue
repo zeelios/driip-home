@@ -66,8 +66,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Product } from '~/data/products'
-
 const props = defineProps<{
   product: {
     slug: string

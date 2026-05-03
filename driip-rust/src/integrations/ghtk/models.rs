@@ -55,6 +55,10 @@ pub struct GhtkProduct {
     pub weight: f64, // kg
     pub quantity: i32,
     pub product_code: String,
+    /// Optional barcode for the product (new in GHTK API)
+    pub barcode: Option<String>,
+    /// COD money for this specific product (if partial COD)
+    pub cod_money: Option<i64>,
 }
 
 #[derive(Debug, Serialize)]
@@ -64,16 +68,26 @@ pub struct GhtkOrderPayload {
     pub pick_address: String,
     pub pick_province: String,
     pub pick_district: String,
+    /// Pickup ward/commune (new in GHTK API, e.g., "Phường 1")
+    pub pick_ward: Option<String>,
     pub pick_tel: String,
     pub name: String, // recipient name
     pub address: String,
     pub province: String,
     pub district: String,
+    /// Recipient ward/commune (new in GHTK API, e.g., "Phường Bến Nghé")
+    pub ward: Option<String>,
     pub tel: String,
     pub email: Option<String>,
-    pub hamlet: String,         // "Khác" for misc
-    pub is_freeship: i32,       // 1 = free ship (customer pre-paid), 0 = COD collects shipping
-    pub pick_money: i64,        // COD amount (0 if already paid)
+    pub hamlet: String,   // "Khác" for misc
+    pub is_freeship: i32, // 1 = free ship (customer pre-paid), 0 = COD collects shipping
+    pub pick_money: i64,  // COD amount (0 if already paid)
+    /// Pickup option: "cod" or "post" (new in GHTK API)
+    pub pick_option: Option<String>,
+    /// Pickup session: 1 (morning), 2 (afternoon), 3 (evening) (new in GHTK API)
+    pub pick_session: Option<i32>,
+    /// Pickup date: YYYY-MM-DD format (new in GHTK API)
+    pub pick_date: Option<String>,
     pub value: i64,             // declared insurance value
     pub transport: String,      // "road" | "fly"
     pub deliver_option: String, // "xteam" | "none"
@@ -90,7 +104,11 @@ pub struct GhtkTag {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GhtkOrderData {
     pub label_id: String, // GHTK's order ID — store as ghtk_order_id
+    /// Partner's order ID echoed back
+    pub partner_id: Option<String>,
     pub tracking_id: Option<String>,
+    /// GHTK area code (e.g., "1", "2") — new in API
+    pub area: Option<String>,
     pub estimated_pick_time: Option<String>,
     pub estimated_deliver_time: Option<String>,
     pub status_id: Option<i32>,
@@ -104,6 +122,27 @@ pub struct GhtkOrderData {
 pub struct GhtkCancelResponse {
     pub success: bool,
     pub message: String,
+}
+
+// ── Duplicate Order Error (new error format) ───────────────────────────────────
+/// Error details when GHTK reports ORDER_ID_EXIST (kept for future error handling)
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
+pub struct GhtkDuplicateError {
+    pub code: String,
+    pub partner_id: String,
+    pub ghtk_label: String,
+    pub created: String,
+    pub status: i32,
+}
+
+/// Full GHTK error response with optional error object
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
+pub struct GhtkErrorResponse {
+    pub success: bool,
+    pub message: String,
+    pub error: Option<GhtkDuplicateError>,
 }
 
 // ── Webhook payload ───────────────────────────────────────────────────────────

@@ -1,0 +1,13 @@
+{
+  "name": "driip-rust-api-tests",
+  "version": "1.0.0",
+  "description": "API integration tests for driip-rust backend",
+  "scripts": {
+    "test": "bun test api_integration.test.ts",
+    "test:watch": "bun test --watch api_integration.test.ts",
+    "test:local": "API_URL=http://localhost:8000 bun test api_integration.test.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

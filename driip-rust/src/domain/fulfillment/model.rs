@@ -113,6 +113,8 @@ pub struct BookShipmentRequest {
     pub pick_money: Option<i64>,
     /// Declared value for insurance
     pub insurance_value: Option<i64>,
+    /// Pickup date: YYYY-MM-DD format (optional)
+    pub pick_date: Option<String>,
     pub note: Option<String>,
 }
 

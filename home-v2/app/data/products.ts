@@ -25,6 +25,8 @@ export interface ProductPack {
 export interface Product {
   id: string
   slug: string
+  /** Default display name (Vietnamese). Cards use this; detail pages use locale.vi/en. */
+  name: string
   badge?: string
   priceCents: number
   originalPriceCents: number
@@ -43,6 +45,7 @@ const PRODUCTS: Product[] = [
   {
     id: 'REPLACE_WITH_PRODUCT_UUID_1',
     slug: 'ck-cotton-boxer-brief',
+    name: 'Cotton Stretch Boxer Brief',
     badge: 'Bán chạy',
     priceCents:         37900_00,
     originalPriceCents: 45000_00,
@@ -102,6 +105,7 @@ const PRODUCTS: Product[] = [
   {
     id: 'REPLACE_WITH_PRODUCT_UUID_2',
     slug: 'ck-cotton-stretch-boxer',
+    name: 'Cotton Stretch Boxer',
     badge: null,
     priceCents:         35900_00,
     originalPriceCents: 43000_00,
@@ -166,6 +170,7 @@ const PRODUCTS: Product[] = [
   {
     id: 'REPLACE_WITH_PRODUCT_UUID_3',
     slug: 'ck-cotton-low-rise-brief',
+    name: 'Cotton Low Rise Brief',
     badge: 'Mới',
     priceCents:         33900_00,
     originalPriceCents: 41000_00,
@@ -218,6 +223,7 @@ const PRODUCTS: Product[] = [
   {
     id: 'REPLACE_WITH_PRODUCT_UUID_4',
     slug: 'ck-cotton-trunk',
+    name: 'Cotton Stretch Trunk',
     badge: null,
     priceCents:         36900_00,
     originalPriceCents: 44000_00,

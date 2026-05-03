@@ -15,7 +15,7 @@ use super::{
 };
 
 const PROD_BASE: &str = "https://services.giaohangtietkiem.vn";
-const SANDBOX_BASE: &str = "https://dev.ghtk.vn";
+const SANDBOX_BASE: &str = "https://services-staging.ghtklab.com";
 
 /// Shared GHTK HTTP client. Initialize once and store in `AppState`.
 #[derive(Clone, Debug)]
@@ -23,11 +23,17 @@ pub struct GhtkClient {
     inner: Client,
     base_url: String,
     token: String,
+    partner_code: Option<String>,
     webhook_secret: Option<String>,
 }
 
 impl GhtkClient {
-    pub fn new(token: String, sandbox: bool, webhook_secret: Option<String>) -> Self {
+    pub fn new(
+        token: String,
+        sandbox: bool,
+        partner_code: Option<String>,
+        webhook_secret: Option<String>,
+    ) -> Self {
         let inner = Client::builder()
             .timeout(Duration::from_secs(10))
             .build()
@@ -41,8 +47,21 @@ impl GhtkClient {
                 PROD_BASE.into()
             },
             token,
+            partner_code,
             webhook_secret,
         }
+    }
+
+    /// Build request with required headers
+    fn build_request(&self, method: reqwest::Method, url: &str) -> reqwest::RequestBuilder {
+        let mut req = self.inner.request(method, url).header("Token", &self.token);
+
+        // Add X-Client-Source header if partner code is configured (required by new API)
+        if let Some(ref partner) = self.partner_code {
+            req = req.header("X-Client-Source", partner);
+        }
+
+        req
     }
 
     // ── Fee Estimation ──────────────────────────────────────────────────────
@@ -104,9 +123,7 @@ impl GhtkClient {
             self.base_url, ghtk_order_id
         );
         let resp: GhtkCancelResponse = self
-            .inner
-            .post(&url)
-            .header("Token", &self.token)
+            .build_request(reqwest::Method::POST, &url)
             .send()
             .await
             .map_err(GhtkError::Http)?
@@ -152,9 +169,7 @@ impl GhtkClient {
 
     async fn get_json(&self, url: &str) -> Result<Value, GhtkError> {
         let resp = self
-            .inner
-            .get(url)
-            .header("Token", &self.token)
+            .build_request(reqwest::Method::GET, url)
             .send()
             .await
             .map_err(GhtkError::Http)?;
@@ -168,9 +183,7 @@ impl GhtkClient {
         body: &T,
     ) -> Result<Value, GhtkError> {
         let resp = self
-            .inner
-            .post(url)
-            .header("Token", &self.token)
+            .build_request(reqwest::Method::POST, url)
             .json(body)
             .send()
             .await

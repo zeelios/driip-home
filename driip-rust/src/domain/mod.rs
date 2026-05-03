@@ -15,6 +15,9 @@ pub mod purchase_order;
 // ── Address domain ──────────────────────────────────────────────────────────
 pub mod address;
 
+// ── Media/Storage domain ──────────────────────────────────────────────────
+pub mod media;
+
 // ── Support domain ──────────────────────────────────────────────────────────
 pub mod support;
 
@@ -38,8 +41,7 @@ pub fn public_auth_router() -> Router<AppState> {
 /// Public customer API routes (storefront rate limit).
 /// Includes payment config + payment intents + payment methods.
 pub fn public_router() -> Router<AppState> {
-    public::router()
-        .merge(payment::public_router())
+    public::router().merge(payment::public_router())
 }
 
 /// All non-auth API routes (staff, products, orders, fulfillment, webhooks, payments…).
@@ -49,11 +51,15 @@ pub fn router() -> Router<AppState> {
         .merge(identity::staff_router())
         // Payments + subscriptions (staff)
         .merge(payment::router())
+        // Media uploads & file management (B2)
+        .nest("/media", media::router())
         // Fulfillment (GHTK courier, fee management)
         .nest("/fulfillment", fulfillment::router())
         // Webhooks — no JWT; each verified internally (GHTK via HMAC, Stripe via sig header)
-        .nest("/webhooks", fulfillment::webhook_router()
-            .merge(payment::webhook_router()))
+        .nest(
+            "/webhooks",
+            fulfillment::webhook_router().merge(payment::webhook_router()),
+        )
         // Legacy domain routes
         .nest("/products", product::router())
         .nest("/orders", order::router())

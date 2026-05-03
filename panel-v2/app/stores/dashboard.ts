@@ -1,53 +1,55 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 
 export interface DashStats {
-  orders_today:    number
-  orders_pending:  number
-  orders_total:    number
-  revenue_today_cents: number
-  low_stock_count: number
+  orders_today: number;
+  orders_pending: number;
+  orders_total: number;
+  revenue_today_cents: number;
+  low_stock_count: number;
 }
 
-export const useDashboardStore = defineStore('dashboard', {
+export const useDashboardStore = defineStore("dashboard", {
   state: () => ({
-    stats:      null as DashStats | null,
+    stats: null as DashStats | null,
     recentOrders: [] as any[],
     lowStockItems: [] as any[],
-    loading:    false,
+    loading: false,
   }),
 
   actions: {
-    async fetch () {
-      this.loading = true
-      const { get } = useApi()
+    async fetch() {
+      this.loading = true;
+      const { get } = useApi();
       try {
-        // Fetch in parallel: orders (for stats), low-stock
-        const [orders, lowStock] = await Promise.allSettled([
-          get<any[]>('/orders', { page: 1, per_page: 20 }),
-          get<{ items: any[] }>('/inventory/low-stock'),
-        ])
+        const [statsRes, ordersRes, lowStockRes] = await Promise.allSettled([
+          get<DashStats>("/orders/stats"),
+          get<any[]>("/orders", { page: 1, per_page: 10 }),
+          get<{ items: any[] }>("/inventory/low-stock"),
+        ]);
 
-        const orderList = orders.status === 'fulfilled' ? (Array.isArray(orders.value) ? orders.value : (orders.value as any)?.data ?? []) : []
-        this.recentOrders = orderList.slice(0, 8)
-
-        // Derive quick stats from what we have
-        const today = new Date().toDateString()
-        this.stats = {
-          orders_today:    orderList.filter((o: any) => new Date(o.created_at).toDateString() === today).length,
-          orders_pending:  orderList.filter((o: any) => o.status === 'pending').length,
-          orders_total:    orderList.length,
-          revenue_today_cents: orderList
-            .filter((o: any) => new Date(o.created_at).toDateString() === today)
-            .reduce((s: number, o: any) => s + (o.grand_total_cents ?? 0), 0),
-          low_stock_count: lowStock.status === 'fulfilled' ? (lowStock.value?.items?.length ?? 0) : 0,
+        if (statsRes.status === "fulfilled") {
+          this.stats = { ...statsRes.value, low_stock_count: 0 };
         }
 
-        this.lowStockItems = lowStock.status === 'fulfilled' ? (lowStock.value?.items ?? []).slice(0, 5) : []
+        const orderList =
+          ordersRes.status === "fulfilled"
+            ? Array.isArray(ordersRes.value)
+              ? ordersRes.value
+              : (ordersRes.value as any)?.data ?? []
+            : [];
+        this.recentOrders = orderList.slice(0, 8);
+
+        const lowItems =
+          lowStockRes.status === "fulfilled"
+            ? lowStockRes.value?.items ?? []
+            : [];
+        this.lowStockItems = lowItems.slice(0, 5);
+        if (this.stats) this.stats.low_stock_count = lowItems.length;
       } catch (e) {
-        console.error('dashboard fetch error', e)
+        console.error("dashboard fetch error", e);
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
   },
-})
+});

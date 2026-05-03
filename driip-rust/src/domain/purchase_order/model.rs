@@ -55,7 +55,8 @@ pub struct CreatePurchaseOrder {
     pub expected_date: Option<NaiveDate>,
     #[validate(length(max = 1000))]
     pub notes: Option<String>,
-    #[validate(length(min = 1, max = 200), nested)]
+    #[validate(length(max = 200), nested)]
+    #[serde(default)]
     pub items: Vec<CreatePoItem>,
 }
 
