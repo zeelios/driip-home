@@ -56,7 +56,8 @@ pub struct Subscription {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, sqlx::FromRow)]
+#[allow(dead_code)]
 pub struct StripeCustomerRow {
     pub id: Uuid,
     pub customer_id: Uuid,

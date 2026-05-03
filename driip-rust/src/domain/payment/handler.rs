@@ -9,14 +9,14 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::{
-    auth::CustomerClaims,
+    auth::CustomerAuth,
     errors::AppError,
     integrations::stripe::{
         client::StripeError,
         models::{
             CreateCustomerRequest, CreatePaymentIntentRequest, CreateRefundRequest,
-            CreateSubscriptionRequest, SubscriptionItemSpec, UpdateSubscriptionRequest,
-            SubscriptionItemUpdate,
+            CreateSubscriptionRequest, SubscriptionItemSpec, SubscriptionItemUpdate,
+            UpdateSubscriptionRequest,
         },
     },
     state::AppState,
@@ -26,8 +26,13 @@ use super::model::*;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-fn stripe(state: &AppState) -> Result<&std::sync::Arc<crate::integrations::stripe::StripeClient>, AppError> {
-    state.stripe.as_ref().ok_or_else(|| AppError::Internal("Stripe is not configured".into()))
+fn stripe(
+    state: &AppState,
+) -> Result<&std::sync::Arc<crate::integrations::stripe::StripeClient>, AppError> {
+    state
+        .stripe
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Stripe is not configured".into()))
 }
 
 fn map_stripe(e: StripeError) -> AppError {
@@ -45,10 +50,7 @@ fn map_stripe(e: StripeError) -> AppError {
 }
 
 /// Get or create the Stripe Customer ID for one of our customers.
-async fn ensure_stripe_customer(
-    state: &AppState,
-    customer_id: Uuid,
-) -> Result<String, AppError> {
+async fn ensure_stripe_customer(state: &AppState, customer_id: Uuid) -> Result<String, AppError> {
     // 1. Check local DB first
     let row: Option<StripeCustomerRow> = sqlx::query_as!(
         StripeCustomerRow,
@@ -75,7 +77,7 @@ async fn ensure_stripe_customer(
     // 3. Create Stripe customer
     let stripe_cust = stripe(state)?
         .create_customer(&CreateCustomerRequest {
-            email: Some(cust.email.clone()),
+            email: cust.email.clone(),
             name: Some(cust.name.clone()),
             phone: cust.phone.clone(),
             metadata: Some({
@@ -94,7 +96,7 @@ async fn ensure_stripe_customer(
          ON CONFLICT (customer_id) DO UPDATE SET stripe_customer_id = EXCLUDED.stripe_customer_id",
         customer_id,
         stripe_cust.id,
-        cust.email,
+        cust.email.clone(),
     )
     .execute(&state.db)
     .await?;
@@ -108,10 +110,14 @@ async fn ensure_stripe_customer(
 /// Returns the publishable key so the frontend can initialise Stripe.js
 pub async fn get_payment_config(State(state): State<AppState>) -> Json<PaymentConfig> {
     let enabled = state.stripe.is_some();
-    let publishable_key = state.stripe
+    let publishable_key = state
+        .stripe
         .as_ref()
         .and_then(|s| s.publishable_key.clone());
-    Json(PaymentConfig { publishable_key, enabled })
+    Json(PaymentConfig {
+        publishable_key,
+        enabled,
+    })
 }
 
 // ── Payment Intent (customer-facing) ─────────────────────────────────────────
@@ -119,22 +125,23 @@ pub async fn get_payment_config(State(state): State<AppState>) -> Json<PaymentCo
 /// POST /public/payments/intents
 pub async fn create_payment_intent(
     State(state): State<AppState>,
-    claims: CustomerClaims,
+    claims: CustomerAuth,
     Json(body): Json<CreatePaymentIntentBody>,
 ) -> Result<(StatusCode, Json<PaymentResponse>), AppError> {
-    let customer_id = Uuid::parse_str(&claims.sub)
-        .map_err(|_| AppError::Unauthorized("Invalid customer ID".into()))?;
+    let customer_id = claims.customer_id;
 
     // Resolve amount
     let amount_cents = if let Some(order_id) = body.order_id {
         let order = sqlx::query!(
             "SELECT grand_total_cents FROM orders WHERE id = $1 AND customer_id = $2",
-            order_id, customer_id
+            order_id,
+            customer_id
         )
         .fetch_optional(&state.db)
         .await?
         .ok_or_else(|| AppError::NotFound("Order not found".into()))?;
-        order.grand_total_cents
+        order
+            .grand_total_cents
             .ok_or_else(|| AppError::Validation("Order has no total".into()))?
     } else {
         body.amount_cents
@@ -154,20 +161,28 @@ pub async fn create_payment_intent(
         meta.insert("driip_order_id".into(), oid.to_string());
     }
 
-    let pi = s.create_payment_intent(&CreatePaymentIntentRequest {
-        amount: amount_cents,
-        currency: "vnd".into(),
-        customer: Some(stripe_customer_id.clone()),
-        payment_method: None,
-        description: body.description.clone(),
-        payment_method_types: Some(body.payment_method_types.unwrap_or_else(|| vec!["card".into()])),
-        confirm: Some(false),
-        capture_method: if body.manual_capture == Some(true) { Some("manual".into()) } else { Some("automatic".into()) },
-        return_url: body.return_url.clone(),
-        metadata: Some(meta),
-    })
-    .await
-    .map_err(map_stripe)?;
+    let pi = s
+        .create_payment_intent(&CreatePaymentIntentRequest {
+            amount: amount_cents,
+            currency: "vnd".into(),
+            customer: Some(stripe_customer_id.clone()),
+            payment_method: None,
+            description: body.description.clone(),
+            payment_method_types: Some(
+                body.payment_method_types
+                    .unwrap_or_else(|| vec!["card".into()]),
+            ),
+            confirm: Some(false),
+            capture_method: if body.manual_capture == Some(true) {
+                Some("manual".into())
+            } else {
+                Some("automatic".into())
+            },
+            return_url: body.return_url.clone(),
+            metadata: Some(meta),
+        })
+        .await
+        .map_err(map_stripe)?;
 
     // Persist in DB
     let payment = sqlx::query_as!(
@@ -203,16 +218,16 @@ pub async fn create_payment_intent(
 /// GET /public/payments/intents/:id
 pub async fn get_payment_intent_status(
     State(state): State<AppState>,
-    claims: CustomerClaims,
+    claims: CustomerAuth,
     Path(payment_id): Path<Uuid>,
 ) -> Result<Json<Payment>, AppError> {
-    let customer_id = Uuid::parse_str(&claims.sub)
-        .map_err(|_| AppError::Unauthorized("Invalid token".into()))?;
+    let customer_id = claims.customer_id;
 
     let payment = sqlx::query_as!(
         Payment,
         "SELECT * FROM payments WHERE id = $1 AND customer_id = $2",
-        payment_id, customer_id
+        payment_id,
+        customer_id
     )
     .fetch_optional(&state.db)
     .await?
@@ -224,7 +239,8 @@ pub async fn get_payment_intent_status(
             if let Ok(pi) = s.get_payment_intent(intent_id).await {
                 sqlx::query!(
                     "UPDATE payments SET status = $1, updated_at = NOW() WHERE id = $2",
-                    pi.status, payment.id
+                    pi.status,
+                    payment.id
                 )
                 .execute(&state.db)
                 .await
@@ -247,8 +263,12 @@ pub async fn list_payments(
     State(state): State<AppState>,
     axum::extract::Query(params): axum::extract::Query<std::collections::HashMap<String, String>>,
 ) -> Result<Json<Vec<Payment>>, AppError> {
-    let limit = params.get("per_page").and_then(|v| v.parse::<i64>().ok()).unwrap_or(20);
-    let offset = params.get("page")
+    let limit = params
+        .get("per_page")
+        .and_then(|v| v.parse::<i64>().ok())
+        .unwrap_or(20);
+    let offset = params
+        .get("page")
         .and_then(|v| v.parse::<i64>().ok())
         .map(|p| (p - 1) * limit)
         .unwrap_or(0);
@@ -256,7 +276,8 @@ pub async fn list_payments(
     let payments = sqlx::query_as!(
         Payment,
         "SELECT * FROM payments ORDER BY created_at DESC LIMIT $1 OFFSET $2",
-        limit, offset
+        limit,
+        offset
     )
     .fetch_all(&state.db)
     .await?;
@@ -276,7 +297,7 @@ pub async fn get_payment(
 
     let refunds = sqlx::query_as!(
         Refund,
-        "SELECT * FROM refunds WHERE payment_id = $1 ORDER BY created_at DESC",
+        "SELECT id, payment_id, stripe_refund_id, amount_cents, reason, status, failure_reason, stripe_metadata, created_at, updated_at FROM refunds WHERE payment_id = $1 ORDER BY created_at DESC",
         payment_id
     )
     .fetch_all(&state.db)
@@ -296,15 +317,21 @@ pub async fn capture_payment(
         .await?
         .ok_or_else(|| AppError::NotFound("Payment not found".into()))?;
 
-    let intent_id = payment.stripe_payment_intent_id.as_ref()
+    let intent_id = payment
+        .stripe_payment_intent_id
+        .as_ref()
         .ok_or_else(|| AppError::Validation("No PaymentIntent on this record".into()))?;
 
     let s = stripe(&state)?;
-    let pi = s.capture_payment_intent(intent_id, body.amount_cents).await.map_err(map_stripe)?;
+    let pi = s
+        .capture_payment_intent(intent_id, body.amount_cents)
+        .await
+        .map_err(map_stripe)?;
 
     sqlx::query!(
         "UPDATE payments SET status = $1, updated_at = NOW() WHERE id = $2",
-        pi.status, payment_id
+        pi.status,
+        payment_id
     )
     .execute(&state.db)
     .await?;
@@ -334,15 +361,16 @@ pub async fn create_refund(
     }
 
     let s = stripe(&state)?;
-    let stripe_refund = s.create_refund(&CreateRefundRequest {
-        payment_intent: payment.stripe_payment_intent_id.clone(),
-        charge: payment.stripe_charge_id.clone(),
-        amount: body.amount_cents,
-        reason: body.reason.clone(),
-        metadata: body.metadata,
-    })
-    .await
-    .map_err(map_stripe)?;
+    let stripe_refund = s
+        .create_refund(&CreateRefundRequest {
+            payment_intent: payment.stripe_payment_intent_id.clone(),
+            charge: payment.stripe_charge_id.clone(),
+            amount: body.amount_cents,
+            reason: body.reason.clone(),
+            metadata: body.metadata,
+        })
+        .await
+        .map_err(map_stripe)?;
 
     // Persist refund
     let refund = sqlx::query_as!(
@@ -350,11 +378,11 @@ pub async fn create_refund(
         r#"INSERT INTO refunds
            (payment_id, stripe_refund_id, amount_cents, reason, status, stripe_metadata)
            VALUES ($1, $2, $3, $4, $5, $6)
-           RETURNING *"#,
+           RETURNING id, payment_id, stripe_refund_id, amount_cents, reason, status, failure_reason, stripe_metadata, created_at, updated_at"#,
         payment_id,
         stripe_refund.id,
         stripe_refund.amount,
-        stripe_refund.reason,
+        body.reason,
         stripe_refund.status,
         serde_json::to_value(&stripe_refund).ok(),
     )
@@ -369,7 +397,8 @@ pub async fn create_refund(
     };
     sqlx::query!(
         "UPDATE payments SET status = $1, updated_at = NOW() WHERE id = $2",
-        new_status, payment_id
+        new_status,
+        payment_id
     )
     .execute(&state.db)
     .await?;
@@ -382,10 +411,9 @@ pub async fn create_refund(
 /// GET /public/payments/methods
 pub async fn list_payment_methods(
     State(state): State<AppState>,
-    claims: CustomerClaims,
+    claims: CustomerAuth,
 ) -> Result<Json<Value>, AppError> {
-    let customer_id = Uuid::parse_str(&claims.sub)
-        .map_err(|_| AppError::Unauthorized("Invalid token".into()))?;
+    let customer_id = claims.customer_id;
 
     let row: Option<StripeCustomerRow> = sqlx::query_as!(
         StripeCustomerRow,
@@ -412,11 +440,10 @@ pub async fn list_payment_methods(
 /// POST /public/payments/methods/attach
 pub async fn attach_payment_method(
     State(state): State<AppState>,
-    claims: CustomerClaims,
+    claims: CustomerAuth,
     Json(body): Json<AttachPaymentMethodBody>,
 ) -> Result<Json<Value>, AppError> {
-    let customer_id = Uuid::parse_str(&claims.sub)
-        .map_err(|_| AppError::Unauthorized("Invalid token".into()))?;
+    let customer_id = claims.customer_id;
 
     let stripe_customer_id = ensure_stripe_customer(&state, customer_id).await?;
     let s = stripe(&state)?;
@@ -438,7 +465,7 @@ pub async fn attach_payment_method(
 /// DELETE /public/payments/methods/:pm_id
 pub async fn detach_payment_method(
     State(state): State<AppState>,
-    _claims: CustomerClaims,
+    _claims: CustomerAuth,
     Path(pm_id): Path<String>,
 ) -> Result<Json<Value>, AppError> {
     let s = stripe(&state)?;
@@ -469,40 +496,53 @@ pub async fn create_subscription(
     let stripe_customer_id = ensure_stripe_customer(&state, body.customer_id).await?;
     let s = stripe(&state)?;
 
-    let items: Vec<SubscriptionItemSpec> = body.price_ids
+    let items: Vec<SubscriptionItemSpec> = body
+        .price_ids
         .iter()
-        .map(|price| SubscriptionItemSpec { price: price.clone(), quantity: Some(1) })
+        .map(|price| SubscriptionItemSpec {
+            price: price.clone(),
+            quantity: Some(1),
+        })
         .collect();
 
-    let stripe_sub = s.create_subscription(&CreateSubscriptionRequest {
-        customer: stripe_customer_id.clone(),
-        items,
-        payment_behavior: Some("default_incomplete".into()),
-        payment_settings: Some(serde_json::json!({
-            "payment_method_types": ["card"],
-            "save_default_payment_method": "on_subscription"
-        })),
-        expand: Some(vec!["latest_invoice.payment_intent".into()]),
-        trial_period_days: body.trial_period_days,
-        metadata: body.metadata,
-    })
-    .await
-    .map_err(map_stripe)?;
+    let stripe_sub = s
+        .create_subscription(&CreateSubscriptionRequest {
+            customer: stripe_customer_id.clone(),
+            items,
+            payment_behavior: Some("default_incomplete".into()),
+            payment_settings: Some(serde_json::json!({
+                "payment_method_types": ["card"],
+                "save_default_payment_method": "on_subscription"
+            })),
+            expand: Some(vec!["latest_invoice.payment_intent".into()]),
+            trial_period_days: body.trial_period_days,
+            metadata: body.metadata,
+        })
+        .await
+        .map_err(map_stripe)?;
 
-    let first_item = stripe_sub.items.as_ref()
-        .and_then(|l| l.data.first());
-    let price_id = first_item.and_then(|i| i.price.as_ref()).map(|p| p.id.clone());
-    let product_id = first_item.and_then(|i| i.price.as_ref()).and_then(|p| p.product.clone());
+    let first_item = stripe_sub.items.as_ref().and_then(|l| l.data.first());
+    let price_id = first_item
+        .and_then(|i| i.price.as_ref())
+        .map(|p| p.id.clone());
+    let product_id = first_item
+        .and_then(|i| i.price.as_ref())
+        .and_then(|p| p.product.clone());
 
-    let period_start = stripe_sub.current_period_start
+    let period_start = stripe_sub
+        .current_period_start
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
-    let period_end = stripe_sub.current_period_end
+    let period_end = stripe_sub
+        .current_period_end
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
-    let cancelled_at = stripe_sub.canceled_at
+    let cancelled_at = stripe_sub
+        .canceled_at
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
-    let trial_start = stripe_sub.trial_start
+    let trial_start = stripe_sub
+        .trial_start
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
-    let trial_end = stripe_sub.trial_end
+    let trial_end = stripe_sub
+        .trial_end
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
 
     let sub = sqlx::query_as!(
@@ -513,7 +553,7 @@ pub async fn create_subscription(
             current_period_start, current_period_end, cancel_at_period_end,
             cancelled_at, trial_start, trial_end, stripe_metadata)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-           RETURNING *"#,
+           RETURNING id, customer_id, stripe_subscription_id, stripe_customer_id, stripe_price_id, stripe_product_id, status, current_period_start, current_period_end, cancel_at_period_end, cancelled_at, trial_start, trial_end, stripe_metadata, created_at, updated_at"#,
         body.customer_id,
         stripe_sub.id,
         stripe_customer_id,
@@ -549,7 +589,10 @@ pub async fn cancel_subscription(
     .await?
     .ok_or_else(|| AppError::NotFound("Subscription not found".into()))?;
 
-    let at_period_end = params.get("at_period_end").map(|v| v == "true").unwrap_or(true);
+    let at_period_end = params
+        .get("at_period_end")
+        .map(|v| v == "true")
+        .unwrap_or(true);
 
     let s = stripe(&state)?;
     let stripe_sub = s
@@ -557,13 +600,14 @@ pub async fn cancel_subscription(
         .await
         .map_err(map_stripe)?;
 
-    let cancelled_at = stripe_sub.canceled_at
+    let cancelled_at = stripe_sub
+        .canceled_at
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
 
     let updated = sqlx::query_as!(
         Subscription,
         "UPDATE subscriptions SET status = $1, cancel_at_period_end = $2,
-         cancelled_at = $3, updated_at = NOW() WHERE id = $4 RETURNING *",
+         cancelled_at = $3, updated_at = NOW() WHERE id = $4 RETURNING id, customer_id, stripe_subscription_id, stripe_customer_id, stripe_price_id, stripe_product_id, status, current_period_start, current_period_end, cancel_at_period_end, cancelled_at, trial_start, trial_end, stripe_metadata, created_at, updated_at",
         stripe_sub.status,
         stripe_sub.cancel_at_period_end,
         cancelled_at,
@@ -592,41 +636,51 @@ pub async fn update_subscription(
 
     let s = stripe(&state)?;
     // Get current subscription to find item ID
-    let stripe_sub = s.get_subscription(&sub.stripe_subscription_id).await.map_err(map_stripe)?;
-    let item_id = stripe_sub.items.as_ref()
+    let stripe_sub = s
+        .get_subscription(&sub.stripe_subscription_id)
+        .await
+        .map_err(map_stripe)?;
+    let item_id = stripe_sub
+        .items
+        .as_ref()
         .and_then(|l| l.data.first())
         .map(|i| i.id.clone());
 
     let items = body.new_price_id.as_ref().and_then(|price| {
-        item_id.map(|id| vec![SubscriptionItemUpdate {
-            id,
-            price: Some(price.clone()),
-            quantity: None,
-        }])
+        item_id.map(|id| {
+            vec![SubscriptionItemUpdate {
+                id,
+                price: Some(price.clone()),
+                quantity: None,
+            }]
+        })
     });
 
-    let updated_stripe = s.update_subscription(
-        &sub.stripe_subscription_id,
-        &UpdateSubscriptionRequest {
-            cancel_at_period_end: body.cancel_at_period_end,
-            items,
-            proration_behavior: body.proration_behavior,
-            metadata: body.metadata,
-        },
-    )
-    .await
-    .map_err(map_stripe)?;
+    let updated_stripe = s
+        .update_subscription(
+            &sub.stripe_subscription_id,
+            &UpdateSubscriptionRequest {
+                cancel_at_period_end: body.cancel_at_period_end,
+                items,
+                proration_behavior: body.proration_behavior,
+                metadata: body.metadata,
+            },
+        )
+        .await
+        .map_err(map_stripe)?;
 
-    let period_start = updated_stripe.current_period_start
+    let period_start = updated_stripe
+        .current_period_start
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
-    let period_end = updated_stripe.current_period_end
+    let period_end = updated_stripe
+        .current_period_end
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
 
     let updated = sqlx::query_as!(
         Subscription,
         "UPDATE subscriptions SET status=$1, cancel_at_period_end=$2,
          current_period_start=$3, current_period_end=$4, updated_at=NOW()
-         WHERE id=$5 RETURNING *",
+         WHERE id=$5 RETURNING id, customer_id, stripe_subscription_id, stripe_customer_id, stripe_price_id, stripe_product_id, status, current_period_start, current_period_end, cancel_at_period_end, cancelled_at, trial_start, trial_end, stripe_metadata, created_at, updated_at",
         updated_stripe.status,
         updated_stripe.cancel_at_period_end,
         period_start,
@@ -648,7 +702,9 @@ pub async fn stripe_webhook(
     headers: HeaderMap,
     body: Bytes,
 ) -> Result<StatusCode, AppError> {
-    let verifier = state.stripe_webhook_verifier.as_ref()
+    let verifier = state
+        .stripe_webhook_verifier
+        .as_ref()
         .ok_or_else(|| AppError::Internal("Stripe webhook secret not configured".into()))?;
 
     let sig_header = headers
@@ -701,13 +757,18 @@ async fn handle_webhook_event(
 
     match event.event_type.as_str() {
         "payment_intent.succeeded" => on_payment_intent_succeeded(state, &event.data.object).await,
-        "payment_intent.payment_failed" => on_payment_intent_failed(state, &event.data.object).await,
+        "payment_intent.payment_failed" => {
+            on_payment_intent_failed(state, &event.data.object).await
+        }
         "payment_intent.canceled" => on_payment_intent_canceled(state, &event.data.object).await,
         "charge.refunded" => on_charge_refunded(state, &event.data.object).await,
-        "customer.subscription.created"
-        | "customer.subscription.updated" => on_subscription_updated(state, &event.data.object).await,
+        "customer.subscription.created" | "customer.subscription.updated" => {
+            on_subscription_updated(state, &event.data.object).await
+        }
         "customer.subscription.deleted" => on_subscription_deleted(state, &event.data.object).await,
-        "invoice.payment_succeeded" => on_invoice_payment_succeeded(state, &event.data.object).await,
+        "invoice.payment_succeeded" => {
+            on_invoice_payment_succeeded(state, &event.data.object).await
+        }
         "invoice.payment_failed" => on_invoice_payment_failed(state, &event.data.object).await,
         _ => {
             tracing::debug!("Unhandled Stripe event type: {}", event.event_type);
@@ -716,11 +777,14 @@ async fn handle_webhook_event(
     }
 }
 
-async fn on_payment_intent_succeeded(state: &AppState, obj: &serde_json::Value) -> Result<(), AppError> {
+async fn on_payment_intent_succeeded(
+    state: &AppState,
+    obj: &serde_json::Value,
+) -> Result<(), AppError> {
     let intent_id = obj["id"].as_str().unwrap_or_default();
-    let charge_id = obj["latest_charge"].as_str().or_else(|| {
-        obj["charges"]["data"][0]["id"].as_str()
-    });
+    let charge_id = obj["latest_charge"]
+        .as_str()
+        .or_else(|| obj["charges"]["data"][0]["id"].as_str());
 
     sqlx::query!(
         "UPDATE payments
@@ -749,20 +813,29 @@ async fn on_payment_intent_succeeded(state: &AppState, obj: &serde_json::Value) 
     Ok(())
 }
 
-async fn on_payment_intent_failed(state: &AppState, obj: &serde_json::Value) -> Result<(), AppError> {
+async fn on_payment_intent_failed(
+    state: &AppState,
+    obj: &serde_json::Value,
+) -> Result<(), AppError> {
     let intent_id = obj["id"].as_str().unwrap_or_default();
-    let failure_msg = obj["last_payment_error"]["message"].as_str().unwrap_or("Payment failed");
+    let failure_msg = obj["last_payment_error"]["message"]
+        .as_str()
+        .unwrap_or("Payment failed");
     sqlx::query!(
         "UPDATE payments SET status = 'failed', failure_message = $2, updated_at = NOW()
          WHERE stripe_payment_intent_id = $1",
-        intent_id, failure_msg,
+        intent_id,
+        failure_msg,
     )
     .execute(&state.db)
     .await?;
     Ok(())
 }
 
-async fn on_payment_intent_canceled(state: &AppState, obj: &serde_json::Value) -> Result<(), AppError> {
+async fn on_payment_intent_canceled(
+    state: &AppState,
+    obj: &serde_json::Value,
+) -> Result<(), AppError> {
     let intent_id = obj["id"].as_str().unwrap_or_default();
     sqlx::query!(
         "UPDATE payments SET status = 'cancelled', updated_at = NOW()
@@ -777,24 +850,34 @@ async fn on_payment_intent_canceled(state: &AppState, obj: &serde_json::Value) -
 async fn on_charge_refunded(state: &AppState, obj: &serde_json::Value) -> Result<(), AppError> {
     let charge_id = obj["id"].as_str().unwrap_or_default();
     let fully_refunded = obj["refunded"].as_bool().unwrap_or(false);
-    let status = if fully_refunded { "refunded" } else { "partially_refunded" };
+    let status = if fully_refunded {
+        "refunded"
+    } else {
+        "partially_refunded"
+    };
     sqlx::query!(
         "UPDATE payments SET status = $1, updated_at = NOW()
          WHERE stripe_charge_id = $2",
-        status, charge_id,
+        status,
+        charge_id,
     )
     .execute(&state.db)
     .await?;
     Ok(())
 }
 
-async fn on_subscription_updated(state: &AppState, obj: &serde_json::Value) -> Result<(), AppError> {
+async fn on_subscription_updated(
+    state: &AppState,
+    obj: &serde_json::Value,
+) -> Result<(), AppError> {
     let sub_id = obj["id"].as_str().unwrap_or_default();
     let status = obj["status"].as_str().unwrap_or("unknown");
     let cap = obj["cancel_at_period_end"].as_bool().unwrap_or(false);
-    let period_start = obj["current_period_start"].as_i64()
+    let period_start = obj["current_period_start"]
+        .as_i64()
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
-    let period_end = obj["current_period_end"].as_i64()
+    let period_end = obj["current_period_end"]
+        .as_i64()
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
 
     sqlx::query!(
@@ -802,7 +885,10 @@ async fn on_subscription_updated(state: &AppState, obj: &serde_json::Value) -> R
          SET status=$1, cancel_at_period_end=$2, current_period_start=$3,
              current_period_end=$4, stripe_metadata=$5, updated_at=NOW()
          WHERE stripe_subscription_id=$6",
-        status, cap, period_start, period_end,
+        status,
+        cap,
+        period_start,
+        period_end,
         Some(obj.clone()),
         sub_id,
     )
@@ -811,21 +897,29 @@ async fn on_subscription_updated(state: &AppState, obj: &serde_json::Value) -> R
     Ok(())
 }
 
-async fn on_subscription_deleted(state: &AppState, obj: &serde_json::Value) -> Result<(), AppError> {
+async fn on_subscription_deleted(
+    state: &AppState,
+    obj: &serde_json::Value,
+) -> Result<(), AppError> {
     let sub_id = obj["id"].as_str().unwrap_or_default();
-    let cancelled_at: Option<DateTime<Utc>> = obj["canceled_at"].as_i64()
+    let cancelled_at: Option<DateTime<Utc>> = obj["canceled_at"]
+        .as_i64()
         .and_then(|ts| Utc.timestamp_opt(ts, 0).single());
     sqlx::query!(
         "UPDATE subscriptions SET status='cancelled', cancelled_at=$1, updated_at=NOW()
          WHERE stripe_subscription_id=$2",
-        cancelled_at, sub_id,
+        cancelled_at,
+        sub_id,
     )
     .execute(&state.db)
     .await?;
     Ok(())
 }
 
-async fn on_invoice_payment_succeeded(state: &AppState, obj: &serde_json::Value) -> Result<(), AppError> {
+async fn on_invoice_payment_succeeded(
+    state: &AppState,
+    obj: &serde_json::Value,
+) -> Result<(), AppError> {
     let sub_id = obj["subscription"].as_str().unwrap_or_default();
     sqlx::query!(
         "UPDATE subscriptions SET status='active', updated_at=NOW()
@@ -837,7 +931,10 @@ async fn on_invoice_payment_succeeded(state: &AppState, obj: &serde_json::Value)
     Ok(())
 }
 
-async fn on_invoice_payment_failed(state: &AppState, obj: &serde_json::Value) -> Result<(), AppError> {
+async fn on_invoice_payment_failed(
+    state: &AppState,
+    obj: &serde_json::Value,
+) -> Result<(), AppError> {
     let sub_id = obj["subscription"].as_str().unwrap_or_default();
     sqlx::query!(
         "UPDATE subscriptions SET status='past_due', updated_at=NOW()

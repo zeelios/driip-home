@@ -63,7 +63,8 @@ pub struct CreatePaymentIntentRequest {
     pub metadata: Option<std::collections::HashMap<String, String>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct UpdatePaymentIntentRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub amount: Option<i64>,

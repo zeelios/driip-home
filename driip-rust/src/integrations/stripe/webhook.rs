@@ -17,6 +17,7 @@ use sha2::Sha256;
 const TOLERANCE_SECS: u64 = 300; // 5 minutes
 
 #[derive(Debug, thiserror::Error)]
+#[allow(dead_code)]
 pub enum WebhookError {
     #[error("Missing Stripe-Signature header")]
     MissingHeader,
@@ -36,7 +37,9 @@ pub struct StripeWebhookVerifier {
 
 impl StripeWebhookVerifier {
     pub fn new(secret: impl Into<String>) -> Self {
-        Self { secret: secret.into() }
+        Self {
+            secret: secret.into(),
+        }
     }
 
     /// Verify the `Stripe-Signature` header against `raw_body`.
@@ -59,7 +62,11 @@ impl StripeWebhookVerifier {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_secs();
-        let diff = if now >= timestamp { now - timestamp } else { timestamp - now };
+        let diff = if now >= timestamp {
+            now - timestamp
+        } else {
+            timestamp - now
+        };
         if diff > TOLERANCE_SECS {
             return Err(WebhookError::TimestampOutOfTolerance);
         }

@@ -14,6 +14,7 @@ use super::models::*;
 const STRIPE_BASE: &str = "https://api.stripe.com/v1";
 
 #[derive(Debug, thiserror::Error)]
+#[allow(dead_code)]
 pub enum StripeError {
     #[error("Stripe API error: {0}")]
     Api(StripeApiError),
@@ -38,14 +39,20 @@ impl StripeClient {
             .timeout(Duration::from_secs(30))
             .build()
             .expect("Failed to build Stripe HTTP client");
-        Self { inner, secret_key, publishable_key }
+        Self {
+            inner,
+            secret_key,
+            publishable_key,
+        }
     }
 
     // ── Internal helpers ──────────────────────────────────────────────────
 
     async fn get<T: DeserializeOwned>(&self, path: &str) -> Result<T, StripeError> {
         let url = format!("{STRIPE_BASE}{path}");
-        let resp = self.inner.get(&url)
+        let resp = self
+            .inner
+            .get(&url)
             .basic_auth(&self.secret_key, Some(""))
             .send()
             .await?;
@@ -58,7 +65,9 @@ impl StripeClient {
         body: &[(&str, &str)],
     ) -> Result<T, StripeError> {
         let url = format!("{STRIPE_BASE}{path}");
-        let resp = self.inner.post(&url)
+        let resp = self
+            .inner
+            .post(&url)
             .basic_auth(&self.secret_key, Some(""))
             .form(body)
             .send()
@@ -68,6 +77,7 @@ impl StripeClient {
 
     /// POST with `application/x-www-form-urlencoded` from a serializable struct.
     /// Stripe uses form encoding (not JSON) for most write operations.
+    #[allow(dead_code)]
     async fn post_obj<T: DeserializeOwned, B: Serialize>(
         &self,
         path: &str,
@@ -75,9 +85,11 @@ impl StripeClient {
     ) -> Result<T, StripeError> {
         let url = format!("{STRIPE_BASE}{path}");
         // Serialize to form-compatible pairs
-        let encoded = serde_urlencoded::to_string(body)
-            .map_err(|e| StripeError::Parse(e.to_string()))?;
-        let resp = self.inner.post(&url)
+        let encoded =
+            serde_urlencoded::to_string(body).map_err(|e| StripeError::Parse(e.to_string()))?;
+        let resp = self
+            .inner
+            .post(&url)
             .basic_auth(&self.secret_key, Some(""))
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body(encoded)
@@ -88,7 +100,9 @@ impl StripeClient {
 
     async fn delete<T: DeserializeOwned>(&self, path: &str) -> Result<T, StripeError> {
         let url = format!("{STRIPE_BASE}{path}");
-        let resp = self.inner.delete(&url)
+        let resp = self
+            .inner
+            .delete(&url)
             .basic_auth(&self.secret_key, Some(""))
             .send()
             .await?;
@@ -102,8 +116,9 @@ impl StripeClient {
             serde_json::from_str(&text)
                 .map_err(|e| StripeError::Parse(format!("JSON parse error: {e} — body: {text}")))
         } else {
-            let api_err: StripeApiError = serde_json::from_str(&text)
-                .map_err(|e| StripeError::Parse(format!("Error parse error: {e} — body: {text}")))?;
+            let api_err: StripeApiError = serde_json::from_str(&text).map_err(|e| {
+                StripeError::Parse(format!("Error parse error: {e} — body: {text}"))
+            })?;
             Err(StripeError::Api(api_err))
         }
     }
@@ -118,10 +133,8 @@ impl StripeClient {
     ) -> Result<StripePaymentIntent, StripeError> {
         // Build flat form params (Stripe doesn't accept JSON for most endpoints)
         let amount_str = req.amount.to_string();
-        let mut params: Vec<(&str, &str)> = vec![
-            ("amount", &amount_str),
-            ("currency", &req.currency),
-        ];
+        let mut params: Vec<(&str, &str)> =
+            vec![("amount", &amount_str), ("currency", &req.currency)];
         if let Some(ref customer) = req.customer {
             params.push(("customer", customer));
         }
@@ -138,7 +151,9 @@ impl StripeClient {
             params.push(("return_url", ret_url));
         }
         if let Some(ref confirm) = req.confirm {
-            if *confirm { params.push(("confirm", "true")); }
+            if *confirm {
+                params.push(("confirm", "true"));
+            }
         }
         // payment_method_types[] serialisation
         let mut pm_types_strs: Vec<String> = Vec::new();
@@ -148,16 +163,24 @@ impl StripeClient {
         let params_owned: Vec<(String, String)> = params
             .into_iter()
             .map(|(k, v)| (k.to_string(), v.to_string()))
-            .chain(pm_types_strs.iter().map(|t| ("payment_method_types[]".to_string(), t.clone())))
             .chain(
-                req.metadata.as_ref().unwrap_or(&std::collections::HashMap::new())
+                pm_types_strs
                     .iter()
-                    .map(|(k, v)| (format!("metadata[{k}]"), v.clone()))
+                    .map(|t| ("payment_method_types[]".to_string(), t.clone())),
+            )
+            .chain(
+                req.metadata
+                    .as_ref()
+                    .unwrap_or(&std::collections::HashMap::new())
+                    .iter()
+                    .map(|(k, v)| (format!("metadata[{k}]"), v.clone())),
             )
             .collect();
 
         let url = format!("{STRIPE_BASE}/payment_intents");
-        let resp = self.inner.post(&url)
+        let resp = self
+            .inner
+            .post(&url)
             .basic_auth(&self.secret_key, Some(""))
             .form(&params_owned)
             .send()
@@ -169,9 +192,11 @@ impl StripeClient {
         &self,
         intent_id: &str,
     ) -> Result<StripePaymentIntent, StripeError> {
-        self.get(&format!("/payment_intents/{intent_id}?expand[]=charges")).await
+        self.get(&format!("/payment_intents/{intent_id}?expand[]=charges"))
+            .await
     }
 
+    #[allow(dead_code)]
     pub async fn cancel_payment_intent(
         &self,
         intent_id: &str,
@@ -181,7 +206,8 @@ impl StripeClient {
         if let Some(reason) = cancellation_reason {
             params.push(("cancellation_reason", reason));
         }
-        self.post_form(&format!("/payment_intents/{intent_id}/cancel"), &params).await
+        self.post_form(&format!("/payment_intents/{intent_id}/cancel"), &params)
+            .await
     }
 
     pub async fn capture_payment_intent(
@@ -195,9 +221,11 @@ impl StripeClient {
             amount_str = amt.to_string();
             params.push(("amount_to_capture", &amount_str));
         }
-        self.post_form(&format!("/payment_intents/{intent_id}/capture"), &params).await
+        self.post_form(&format!("/payment_intents/{intent_id}/capture"), &params)
+            .await
     }
 
+    #[allow(dead_code)]
     pub async fn confirm_payment_intent(
         &self,
         intent_id: &str,
@@ -211,14 +239,18 @@ impl StripeClient {
         if let Some(url) = return_url {
             params.push(("return_url", url));
         }
-        self.post_form(&format!("/payment_intents/{intent_id}/confirm"), &params).await
+        self.post_form(&format!("/payment_intents/{intent_id}/confirm"), &params)
+            .await
     }
 
     // ─────────────────────────────────────────────────────────────────────
     // Refunds
     // ─────────────────────────────────────────────────────────────────────
 
-    pub async fn create_refund(&self, req: &CreateRefundRequest) -> Result<StripeRefund, StripeError> {
+    pub async fn create_refund(
+        &self,
+        req: &CreateRefundRequest,
+    ) -> Result<StripeRefund, StripeError> {
         let amount_str;
         let mut params: Vec<(&str, &str)> = Vec::new();
         if let Some(ref pi) = req.payment_intent {
@@ -234,7 +266,9 @@ impl StripeClient {
         if let Some(ref reason) = req.reason {
             params.push(("reason", reason));
         }
-        let meta_params: Vec<(String, String)> = req.metadata.as_ref()
+        let meta_params: Vec<(String, String)> = req
+            .metadata
+            .as_ref()
             .unwrap_or(&std::collections::HashMap::new())
             .iter()
             .map(|(k, v)| (format!("metadata[{k}]"), v.clone()))
@@ -246,7 +280,9 @@ impl StripeClient {
             .collect();
 
         let url = format!("{STRIPE_BASE}/refunds");
-        let resp = self.inner.post(&url)
+        let resp = self
+            .inner
+            .post(&url)
             .basic_auth(&self.secret_key, Some(""))
             .form(&all_params)
             .send()
@@ -254,6 +290,7 @@ impl StripeClient {
         self.parse_response(resp).await
     }
 
+    #[allow(dead_code)]
     pub async fn get_refund(&self, refund_id: &str) -> Result<StripeRefund, StripeError> {
         self.get(&format!("/refunds/{refund_id}")).await
     }
@@ -277,13 +314,17 @@ impl StripeClient {
             params.push(("phone".into(), phone.clone()));
         }
         params.extend(
-            req.metadata.as_ref().unwrap_or(&std::collections::HashMap::new())
+            req.metadata
+                .as_ref()
+                .unwrap_or(&std::collections::HashMap::new())
                 .iter()
-                .map(|(k, v)| (format!("metadata[{k}]"), v.clone()))
+                .map(|(k, v)| (format!("metadata[{k}]"), v.clone())),
         );
 
         let url = format!("{STRIPE_BASE}/customers");
-        let resp = self.inner.post(&url)
+        let resp = self
+            .inner
+            .post(&url)
             .basic_auth(&self.secret_key, Some(""))
             .form(&params)
             .send()
@@ -291,11 +332,16 @@ impl StripeClient {
         self.parse_response(resp).await
     }
 
+    #[allow(dead_code)]
     pub async fn get_customer(&self, customer_id: &str) -> Result<StripeCustomer, StripeError> {
         self.get(&format!("/customers/{customer_id}")).await
     }
 
-    pub async fn delete_customer(&self, customer_id: &str) -> Result<serde_json::Value, StripeError> {
+    #[allow(dead_code)]
+    pub async fn delete_customer(
+        &self,
+        customer_id: &str,
+    ) -> Result<serde_json::Value, StripeError> {
         self.delete(&format!("/customers/{customer_id}")).await
     }
 
@@ -303,6 +349,7 @@ impl StripeClient {
     // Payment Methods
     // ─────────────────────────────────────────────────────────────────────
 
+    #[allow(dead_code)]
     pub async fn get_payment_method(
         &self,
         pm_id: &str,
@@ -317,7 +364,8 @@ impl StripeClient {
     ) -> Result<StripeList<StripePaymentMethod>, StripeError> {
         self.get(&format!(
             "/customers/{customer_id}/payment_methods?type={pm_type}&limit=20"
-        )).await
+        ))
+        .await
     }
 
     pub async fn attach_payment_method(
@@ -328,14 +376,16 @@ impl StripeClient {
         self.post_form(
             &format!("/payment_methods/{pm_id}/attach"),
             &[("customer", customer_id)],
-        ).await
+        )
+        .await
     }
 
     pub async fn detach_payment_method(
         &self,
         pm_id: &str,
     ) -> Result<StripePaymentMethod, StripeError> {
-        self.post_form(&format!("/payment_methods/{pm_id}/detach"), &[]).await
+        self.post_form(&format!("/payment_methods/{pm_id}/detach"), &[])
+            .await
     }
 
     pub async fn set_default_payment_method(
@@ -343,11 +393,14 @@ impl StripeClient {
         customer_id: &str,
         pm_id: &str,
     ) -> Result<StripeCustomer, StripeError> {
-        let params = vec![
-            ("invoice_settings[default_payment_method]".to_string(), pm_id.to_string()),
-        ];
+        let params = vec![(
+            "invoice_settings[default_payment_method]".to_string(),
+            pm_id.to_string(),
+        )];
         let url = format!("{STRIPE_BASE}/customers/{customer_id}");
-        let resp = self.inner.post(&url)
+        let resp = self
+            .inner
+            .post(&url)
             .basic_auth(&self.secret_key, Some(""))
             .form(&params)
             .send()
@@ -363,9 +416,7 @@ impl StripeClient {
         &self,
         req: &CreateSubscriptionRequest,
     ) -> Result<StripeSubscription, StripeError> {
-        let mut params: Vec<(String, String)> = vec![
-            ("customer".into(), req.customer.clone()),
-        ];
+        let mut params: Vec<(String, String)> = vec![("customer".into(), req.customer.clone())];
         for (i, item) in req.items.iter().enumerate() {
             params.push((format!("items[{i}][price]"), item.price.clone()));
             if let Some(qty) = item.quantity {
@@ -384,13 +435,17 @@ impl StripeClient {
             }
         }
         params.extend(
-            req.metadata.as_ref().unwrap_or(&std::collections::HashMap::new())
+            req.metadata
+                .as_ref()
+                .unwrap_or(&std::collections::HashMap::new())
                 .iter()
-                .map(|(k, v)| (format!("metadata[{k}]"), v.clone()))
+                .map(|(k, v)| (format!("metadata[{k}]"), v.clone())),
         );
 
         let url = format!("{STRIPE_BASE}/subscriptions");
-        let resp = self.inner.post(&url)
+        let resp = self
+            .inner
+            .post(&url)
             .basic_auth(&self.secret_key, Some(""))
             .form(&params)
             .send()
@@ -412,7 +467,8 @@ impl StripeClient {
             self.post_form(
                 &format!("/subscriptions/{sub_id}"),
                 &[("cancel_at_period_end", "true")],
-            ).await
+            )
+            .await
         } else {
             // Immediately cancel
             self.delete(&format!("/subscriptions/{sub_id}")).await
@@ -426,7 +482,10 @@ impl StripeClient {
     ) -> Result<StripeSubscription, StripeError> {
         let mut params: Vec<(String, String)> = Vec::new();
         if let Some(cap) = req.cancel_at_period_end {
-            params.push(("cancel_at_period_end".into(), if cap { "true" } else { "false" }.to_string()));
+            params.push((
+                "cancel_at_period_end".into(),
+                if cap { "true" } else { "false" }.to_string(),
+            ));
         }
         if let Some(ref proration) = req.proration_behavior {
             params.push(("proration_behavior".into(), proration.clone()));
@@ -443,13 +502,17 @@ impl StripeClient {
             }
         }
         params.extend(
-            req.metadata.as_ref().unwrap_or(&std::collections::HashMap::new())
+            req.metadata
+                .as_ref()
+                .unwrap_or(&std::collections::HashMap::new())
                 .iter()
-                .map(|(k, v)| (format!("metadata[{k}]"), v.clone()))
+                .map(|(k, v)| (format!("metadata[{k}]"), v.clone())),
         );
 
         let url = format!("{STRIPE_BASE}/subscriptions/{sub_id}");
-        let resp = self.inner.post(&url)
+        let resp = self
+            .inner
+            .post(&url)
             .basic_auth(&self.secret_key, Some(""))
             .form(&params)
             .send()
@@ -457,6 +520,7 @@ impl StripeClient {
         self.parse_response(resp).await
     }
 
+    #[allow(dead_code)]
     pub async fn list_subscriptions(
         &self,
         customer_id: Option<&str>,
@@ -465,8 +529,12 @@ impl StripeClient {
     ) -> Result<StripeList<StripeSubscription>, StripeError> {
         let mut q = String::from("/subscriptions?limit=");
         q.push_str(&limit.unwrap_or(20).to_string());
-        if let Some(c) = customer_id { q.push_str(&format!("&customer={c}")); }
-        if let Some(s) = status { q.push_str(&format!("&status={s}")); }
+        if let Some(c) = customer_id {
+            q.push_str(&format!("&customer={c}"));
+        }
+        if let Some(s) = status {
+            q.push_str(&format!("&status={s}"));
+        }
         self.get(&q).await
     }
 }
