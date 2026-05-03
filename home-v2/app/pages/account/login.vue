@@ -1,35 +1,147 @@
 <template>
-  <div class="max-w-sm mx-auto mt-12 p-6 border border-zinc-800 rounded-lg">
-    <h1 class="text-xl font-bold mb-4">{{ $t('login') }}</h1>
-    <form @submit.prevent="handleLogin">
-      <div class="mb-4">
-        <label class="block text-sm text-zinc-400 mb-1">{{ $t('email') }}</label>
-        <input v-model="email" type="email" required class="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded text-sm" />
-      </div>
-      <div class="mb-4">
-        <label class="block text-sm text-zinc-400 mb-1">{{ $t('password') }}</label>
-        <input v-model="password" type="password" required class="w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded text-sm" />
-      </div>
-      <p v-if="auth.error" class="text-red-400 text-sm mb-3">{{ auth.error }}</p>
-      <button type="submit" :disabled="auth.loading" class="w-full py-2 bg-white text-black rounded font-medium disabled:opacity-50">
-        {{ auth.loading ? '...' : $t('login') }}
-      </button>
-    </form>
-    <div class="mt-4 text-sm text-center">
-      <NuxtLink to="/account/register" class="text-zinc-400 hover:text-white">{{ $t('register') }}</NuxtLink>
+  <div>
+    <div class="auth-head">
+      <p class="auth-eyebrow">Tài khoản</p>
+      <h1 class="auth-title">Đăng nhập</h1>
     </div>
+
+    <form @submit.prevent="handleLogin" class="auth-form">
+      <ZInput
+        v-model="email"
+        type="email"
+        label="Email"
+        placeholder="hello@example.com"
+        autocomplete="email"
+        required />
+
+      <ZInput
+        v-model="password"
+        type="password"
+        label="Mật khẩu"
+        placeholder="••••••••"
+        autocomplete="current-password"
+        required>
+        <template #label>
+          <span>Mật khẩu</span>
+          <NuxtLink to="/account/forgot-password" class="auth-forgot">Quên mật khẩu?</NuxtLink>
+        </template>
+      </ZInput>
+
+      <Transition name="z-msg">
+        <p v-if="auth.error" class="auth-error">{{ auth.error }}</p>
+      </Transition>
+
+      <ZButton type="submit" :loading="auth.loading" block size="lg">Đăng nhập</ZButton>
+    </form>
+
+    <div class="auth-divider"><span>hoặc</span></div>
+
+    <p class="auth-switch">
+      Chưa có tài khoản?
+      <NuxtLink to="/account/register" class="auth-switch__link">Đăng ký</NuxtLink>
+    </p>
+    <p class="auth-track">
+      <NuxtLink to="/orders/track">Tra cứu đơn không cần tài khoản →</NuxtLink>
+    </p>
   </div>
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'auth' })
+
 const auth = useAuthStore()
 const email = ref('')
 const password = ref('')
 
+onMounted(() => { if (auth.isAuthenticated) navigateTo('/account') })
+
 async function handleLogin () {
   const ok = await auth.login(email.value, password.value)
-  if (ok) {
-    await navigateTo('/account')
-  }
+  if (ok) navigateTo('/account')
 }
 </script>
+
+<style scoped>
+.auth-head    { margin-bottom: 2rem; }
+.auth-eyebrow {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--text-mute); margin-bottom: 0.4rem;
+}
+.auth-title {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700; font-size: 2rem; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text);
+}
+
+.auth-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.auth-forgot {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-mute);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+.auth-forgot:hover { color: var(--text-sub); }
+
+.auth-error {
+  font-size: 0.75rem;
+  color: #ef4444;
+  padding: 0.5rem 0.75rem;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 0.5rem;
+  margin: 0;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  font-size: 0.75rem;
+  color: var(--text-mute);
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--border);
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-sub);
+}
+.auth-switch__link {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  margin-left: 0.25rem;
+  transition: color 0.15s ease;
+}
+.auth-switch__link:hover { color: var(--text-sub); }
+
+.auth-track {
+  text-align: center;
+  margin-top: 1rem;
+}
+.auth-track a {
+  font-size: 0.75rem;
+  color: var(--text-mute);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+.auth-track a:hover { color: var(--text-sub); }
+
+.z-msg-enter-active, .z-msg-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.z-msg-enter-from, .z-msg-leave-to { opacity: 0; transform: translateY(-4px); }
+</style>

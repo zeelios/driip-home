@@ -5,13 +5,17 @@
   "type": "module",
   "workspaces": [
     "home",
+    "home-v2",
     "panel",
+    "panel-v2",
     "backend"
   ],
   "scripts": {
-    "dev:home": "bun --cwd home dev",
-    "build:home": "bun --cwd home build",
-    "dev:panel": "bun --cwd panel dev",
-    "dev:backend": "php artisan serve --host=0.0.0.0 --port=8000 --working-dir=backend"
+    "dev:home":     "bun --cwd home dev",
+    "build:home":   "bun --cwd home build",
+    "dev:home-v2":  "bun --cwd home-v2 dev",
+    "dev:panel":    "bun --cwd panel dev",
+    "dev:panel-v2": "bun --cwd panel-v2 dev",
+    "dev:backend":  "php artisan serve --host=0.0.0.0 --port=8000 --working-dir=backend"
   }
 }

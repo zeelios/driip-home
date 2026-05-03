@@ -5,6 +5,7 @@ use crate::state::AppState;
 // ── New DDD domains ──────────────────────────────────────────────────────────
 pub mod fulfillment;
 pub mod identity;
+pub mod payment;
 
 // ── New inventory/order linking domains ─────────────────────────────────────
 pub mod notification;
@@ -34,20 +35,25 @@ pub fn public_auth_router() -> Router<AppState> {
     public::auth_router()
 }
 
-/// Public customer API routes exposed for separate rate-limiting in main.rs.
+/// Public customer API routes (storefront rate limit).
+/// Includes payment config + payment intents + payment methods.
 pub fn public_router() -> Router<AppState> {
     public::router()
+        .merge(payment::public_router())
 }
 
-/// All non-auth API routes (staff, products, orders, fulfillment, webhooks…).
+/// All non-auth API routes (staff, products, orders, fulfillment, webhooks, payments…).
 pub fn router() -> Router<AppState> {
     Router::new()
-        // Staff management (auth routes are registered separately via auth_router())
+        // Staff management
         .merge(identity::staff_router())
+        // Payments + subscriptions (staff)
+        .merge(payment::router())
         // Fulfillment (GHTK courier, fee management)
         .nest("/fulfillment", fulfillment::router())
-        // Webhooks (no JWT — verified internally via HMAC)
-        .nest("/webhooks", fulfillment::webhook_router())
+        // Webhooks — no JWT; each verified internally (GHTK via HMAC, Stripe via sig header)
+        .nest("/webhooks", fulfillment::webhook_router()
+            .merge(payment::webhook_router()))
         // Legacy domain routes
         .nest("/products", product::router())
         .nest("/orders", order::router())

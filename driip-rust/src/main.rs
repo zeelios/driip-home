@@ -2,6 +2,7 @@
 #![deny(clippy::all)]
 
 use axum::{middleware as axum_middleware, Router};
+use std::sync::Arc;
 use std::time::Duration;
 use tower_http::{
     cors::CorsLayer, limit::RequestBodyLimitLayer, timeout::TimeoutLayer, trace::TraceLayer,
@@ -75,9 +76,31 @@ async fn main() {
             std::process::exit(1);
         });
 
+    // ── Stripe ────────────────────────────────────────────────────────────
+    let stripe_client = cfg.stripe_secret_key.as_ref().map(|key| {
+        tracing::info!("Stripe client initialized");
+        Arc::new(integrations::stripe::StripeClient::new(
+            key.clone(),
+            cfg.stripe_publishable_key.clone(),
+        ))
+    });
+
+    let stripe_webhook_verifier = cfg.stripe_webhook_secret.as_ref().map(|secret| {
+        tracing::info!("Stripe webhook verifier initialized");
+        Arc::new(integrations::stripe::StripeWebhookVerifier::new(secret.clone()))
+    });
+
+    if stripe_client.is_none() {
+        tracing::warn!("STRIPE_SECRET_KEY not set — Stripe endpoints will return 500");
+    }
+    if stripe_webhook_verifier.is_none() {
+        tracing::warn!("STRIPE_WEBHOOK_SECRET not set — webhook endpoint will return 500");
+    }
+
+    // ── GHTK ─────────────────────────────────────────────────────────────
     let ghtk_client = cfg.ghtk_token.as_ref().map(|token| {
         tracing::info!("GHTK client initialized (sandbox={})", cfg.ghtk_sandbox);
-        std::sync::Arc::new(integrations::ghtk::GhtkClient::new(
+        Arc::new(integrations::ghtk::GhtkClient::new(
             token.clone(),
             cfg.ghtk_sandbox,
             cfg.ghtk_webhook_secret.clone(),
@@ -89,6 +112,8 @@ async fn main() {
         jwt_secret: cfg.jwt_secret.clone(),
         jwt_access_ttl_secs: cfg.jwt_access_ttl_secs,
         jwt_refresh_ttl_secs: cfg.jwt_refresh_ttl_secs,
+        stripe: stripe_client,
+        stripe_webhook_verifier,
         ghtk: ghtk_client,
         ghtk_pick_name: cfg.ghtk_pick_name.clone(),
         ghtk_pick_address: cfg.ghtk_pick_address.clone(),
@@ -141,7 +166,8 @@ fn build_router(state: state::AppState) -> Router {
             middleware::rate_limit::public_auth_rate_limit,
         ));
 
-    // ── Public customer routes with storefront rate limit ─────────────────
+    // ── Public customer routes (storefront rate limit) ────────────────────
+    // Includes payment config + intents + methods (no Stripe secret exposed)
     let public_router = axum::Router::new()
         .nest("/api/v1/public", domain::public_router())
         .layer(axum_middleware::from_fn_with_state(
@@ -149,13 +175,16 @@ fn build_router(state: state::AppState) -> Router {
             middleware::rate_limit::public_rate_limit,
         ));
 
-    // ── All other routes with global rate limit ───────────────────────────
-    let api_router = axum::Router::new().nest("/api/v1", domain::router()).layer(
-        axum_middleware::from_fn_with_state(
+    // ── All other routes (global rate limit) ─────────────────────────────
+    // Includes staff-only: payments list, refunds, subscriptions CRUD
+    // Includes webhooks: /api/v1/webhooks/stripe + /ghtk (no JWT, verified internally)
+    let api_router = axum::Router::new()
+        .nest("/api/v1", domain::router())
+        .layer(axum_middleware::from_fn_with_state(
             state.clone(),
             middleware::rate_limit::global_rate_limit,
-        ),
-    );
+        ));
+
     let health_router =
         axum::Router::new().route("/health", axum::routing::get(health::health_check));
 
@@ -165,13 +194,11 @@ fn build_router(state: state::AppState) -> Router {
         .merge(public_router)
         .merge(api_router)
         .merge(health_router)
-        // Security response headers on every response
         .layer(axum_middleware::from_fn(
             middleware::security_headers::set_security_headers,
         ))
-        // Hard cap: 1 MB request body
-        .layer(RequestBodyLimitLayer::new(1024 * 1024))
-        // Kill requests that take more than 30s — return 408 Request Timeout
+        // Hard cap: 2 MB (webhooks can have large payloads)
+        .layer(RequestBodyLimitLayer::new(2 * 1024 * 1024))
         .layer(TimeoutLayer::with_status_code(
             axum::http::StatusCode::REQUEST_TIMEOUT,
             Duration::from_secs(30),

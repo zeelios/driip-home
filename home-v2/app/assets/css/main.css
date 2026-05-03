@@ -1,1 +1,138 @@
 @import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────
+   Theme tokens
+   ───────────────────────────────────────────────────────────────────── */
+:root,
+html.dark {
+  --bg:            #050505;
+  --bg-raised:     #0d0d0d;
+  --bg-card:       rgba(18, 18, 20, 0.70);
+  --bg-skeleton:   rgba(39, 39, 42, 0.70);
+
+  --border:        rgba(39,  39,  42,  0.70);
+  --border-hi:     rgba(63,  63,  70,  0.90);
+  --border-focus:  rgba(161, 161, 170, 0.75);
+
+  --text:          #f4f4f5;
+  --text-sub:      #a1a1aa;
+  --text-mute:     #52525b;
+
+  --accent:        #ffffff;
+  --accent-fg:     #050505;
+  --accent-hover:  rgba(255, 255, 255, 0.88);
+
+  --input-bg:      rgba(18, 18, 20, 0.90);
+  --input-bg-focus:rgba(22, 22, 26, 1.00);
+
+  --overlay:       rgba(0, 0, 0, 0.72);
+
+  --skeleton-from: rgba(39, 39,  42, 0.70);
+  --skeleton-to:   rgba(63, 63,  70, 0.50);
+}
+
+html.light {
+  --bg:            #f5f5f5;
+  --bg-raised:     #ffffff;
+  --bg-card:       rgba(255, 255, 255, 0.80);
+  --bg-skeleton:   rgba(212, 212, 216, 0.65);
+
+  --border:        rgba(200, 200, 204, 0.85);
+  --border-hi:     rgba(160, 160, 168, 0.95);
+  --border-focus:  rgba(82,  82,  91,  0.75);
+
+  --text:          #0a0a0a;
+  --text-sub:      #4a4a52;
+  --text-mute:     #9898a4;
+
+  --accent:        #0a0a0a;
+  --accent-fg:     #f5f5f5;
+  --accent-hover:  rgba(10, 10, 10, 0.85);
+
+  --input-bg:      rgba(245, 245, 245, 0.95);
+  --input-bg-focus:rgba(255, 255, 255, 1.00);
+
+  --overlay:       rgba(0, 0, 0, 0.45);
+
+  --skeleton-from: rgba(210, 210, 215, 0.65);
+  --skeleton-to:   rgba(240, 240, 243, 0.45);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Base
+   ───────────────────────────────────────────────────────────────────── */
+html {
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Token utilities  (t-*)
+   ───────────────────────────────────────────────────────────────────── */
+.t-bg          { background-color: var(--bg); }
+.t-bg-raised   { background-color: var(--bg-raised); }
+.t-bg-card     { background-color: var(--bg-card); }
+.t-border      { border-color: var(--border); }
+.t-border-hi   { border-color: var(--border-hi); }
+.t-text        { color: var(--text); }
+.t-text-sub    { color: var(--text-sub); }
+.t-text-mute   { color: var(--text-mute); }
+.t-overlay     { background-color: var(--overlay); }
+
+.t-btn-primary { background-color: var(--accent); color: var(--accent-fg); }
+.t-btn-primary:hover:not(:disabled) { background-color: var(--accent-hover); }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Skeleton shimmer — flips with theme
+   ───────────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-from) 25%,
+    var(--skeleton-to)   50%,
+    var(--skeleton-from) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Edgy global typography helpers
+   Sharp, condensed, high-contrast — the driip- DNA
+   ───────────────────────────────────────────────────────────────────── */
+.display {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.92;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Scrollbar (dark theme) — subtle, stays out of the way
+   ───────────────────────────────────────────────────────────────────── */
+html.dark {
+  scrollbar-color: rgba(63, 63, 70, 0.5) transparent;
+  scrollbar-width: thin;
+}
+html.light {
+  scrollbar-color: rgba(160, 160, 168, 0.5) transparent;
+  scrollbar-width: thin;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Focus-visible ring — accessible, themed
+   ───────────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}

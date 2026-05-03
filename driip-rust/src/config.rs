@@ -8,6 +8,13 @@ pub struct Config {
     pub jwt_secret: String,
     pub jwt_access_ttl_secs: u64,
     pub jwt_refresh_ttl_secs: u64,
+    // ── Stripe ──────────────────────────────────────────────────────────────
+    /// sk_live_… or sk_test_… — None means Stripe is disabled
+    pub stripe_secret_key: Option<String>,
+    /// Signing secret from Stripe Dashboard webhook endpoint (whsec_…)
+    pub stripe_webhook_secret: Option<String>,
+    /// pk_live_… or pk_test_… — returned to frontend clients
+    pub stripe_publishable_key: Option<String>,
     // ── GHTK Courier ────────────────────────────────────────────────────────
     pub ghtk_token: Option<String>,
     pub ghtk_sandbox: bool,
@@ -37,6 +44,11 @@ impl Config {
             .parse::<u64>()
             .map_err(|_| "JWT_REFRESH_TTL_SECS must be a valid u64".to_string())?;
 
+        // Stripe — all optional; app boots fine without them
+        let stripe_secret_key = env::var("STRIPE_SECRET_KEY").ok();
+        let stripe_webhook_secret = env::var("STRIPE_WEBHOOK_SECRET").ok();
+        let stripe_publishable_key = env::var("STRIPE_PUBLISHABLE_KEY").ok();
+
         // GHTK — all optional so app boots without courier credentials
         let ghtk_token = env::var("GHTK_TOKEN").ok();
         let ghtk_sandbox = env::var("GHTK_SANDBOX")
@@ -56,6 +68,9 @@ impl Config {
             jwt_secret,
             jwt_access_ttl_secs,
             jwt_refresh_ttl_secs,
+            stripe_secret_key,
+            stripe_webhook_secret,
+            stripe_publishable_key,
             ghtk_token,
             ghtk_sandbox,
             ghtk_webhook_secret,

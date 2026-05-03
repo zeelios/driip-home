@@ -5,7 +5,7 @@
 export const SLIDE_NORMAL_PRICE_PER_PAIR = 480000; // regular / compare price
 export const SLIDE_DEAL_PRICE_ONE = 349000; // 1 pair price
 export const SLIDE_DEAL_PRICE_MULTI = 286000; // 2+ pairs price per pair
-export const SLIDE_SHIPPING_FEE = 35000; // shipping for 1 pair, free for 2+
+export const SLIDE_SHIPPING_FEE = 0; // free shipping for all orders
 
 export interface SlidePriceBreakdown {
   pairs: number;
@@ -19,12 +19,10 @@ export interface SlidePriceBreakdown {
 
 /**
  * Calculate shipping fee for Driip Slide
- * Free for 2+ pairs, 35,000đ for 1 pair
+ * Free shipping for all orders
  */
-export function getSlideShippingFee(totalPairs: number): number {
-  if (totalPairs <= 0) return 0;
-  if (totalPairs >= 2) return 0;
-  return SLIDE_SHIPPING_FEE;
+export function getSlideShippingFee(_totalPairs: number): number {
+  return 0;
 }
 
 /**
@@ -67,10 +65,7 @@ export function getSlidePriceBreakdown(
     grandTotal: subtotal + shippingFee,
     compareTotal,
     savings: compareTotal - subtotal,
-    shippingNote:
-      shippingFee === 0
-        ? "Freeship (đơn từ 2 đôi)"
-        : `+${formatVnd(shippingFee)} phí ship (miễn phí từ 2 đôi)`,
+    shippingNote: "Freeship toàn quốc",
   };
 }
 

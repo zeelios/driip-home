@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
   devtools: { enabled: true },
-  ssr: false,
+  // ssr: true,
 
   modules: ["@nuxt/image", "@nuxtjs/i18n", "@pinia/nuxt"],
 
